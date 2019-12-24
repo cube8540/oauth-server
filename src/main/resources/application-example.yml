@@ -1,0 +1,18 @@
+spring:
+  datasource:
+    hikari:
+      username: #your database username
+      password: #your database password
+      auto-commit: off
+      connection-test-query: #your connection test query
+      validation-timeout: #your validation timeout
+      minimum-idle: #your minimum idle
+      maximum-pool-size: #your maximum pool size
+      connection-timeout: #your connection timeout
+    driver-class-name: #your driver class name
+    url: #your database url
+    sql-script-encoding: UTF-8
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
