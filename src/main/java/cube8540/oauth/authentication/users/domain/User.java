@@ -27,7 +27,9 @@ public class User extends AbstractAggregateRoot<User> {
         this.email = new UserEmail(email);
         this.password = new UserRawPassword(password);
 
-        assertValidation();
+        Validator.of(this).registerRule(new UserEmailValidationRule())
+                .registerRule(new UserPasswordValidationRule())
+                .getResult().hasErrorThrows(UserInvalidException::new);
         encrypted(encoder);
         registerEvent(new UserCreatedEvent(this.email));
     }
@@ -41,21 +43,12 @@ public class User extends AbstractAggregateRoot<User> {
 
     private void changePassword(String changePassword, UserPasswordEncoder encoder) {
         this.password = new UserRawPassword(changePassword);
-        assertPassword();
+        Validator.of(this).registerRule(new UserPasswordValidationRule())
+                .getResult().hasErrorThrows(UserInvalidException::new);
         encrypted(encoder);
     }
 
     private void encrypted(UserPasswordEncoder encoder) {
         this.password = this.password.encrypted(encoder);
-    }
-
-    private void assertValidation() {
-        Validator.of(this).registerRule(new UserEmailValidationRule())
-                .registerRule(new UserPasswordValidationRule())
-                .getResult().hasErrorThrows(UserInvalidException::new);
-    }
-
-    private void assertPassword() {
-        Validator.of(this).registerRule(new UserPasswordValidationRule()).getResult().hasErrorThrows(UserInvalidException::new);
     }
 }
