@@ -1,5 +1,7 @@
 package cube8540.oauth.authentication.users.domain;
 
+import cube8540.oauth.authentication.credentials.authority.domain.AuthorityCode;
+import cube8540.oauth.authentication.users.domain.exception.UserAlreadyExistsException;
 import cube8540.oauth.authentication.users.domain.exception.UserExpiredException;
 import cube8540.oauth.authentication.users.domain.exception.UserInvalidException;
 import cube8540.oauth.authentication.users.domain.exception.UserNotMatchedException;
@@ -10,6 +12,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -306,6 +313,173 @@ class UserTest {
             void shouldPasswordCredentialsKeySetNull() {
                 user.resetPassword(matchedKey, RAW_CHANGE_PASSWORD, encoder);
                 assertNull(user.getPasswordCredentialsKey());
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("계정 인증키 할당")
+    class GeneratedCredentialsKey {
+
+        private User user;
+        private UserCredentialsKey key;
+
+        @BeforeEach
+        void setup() {
+            this.key = mock(UserCredentialsKey.class);
+            this.user = new User(RAW_EMAIL, RAW_PASSWORD, encoder);
+
+            when(keyGenerator.generateKey()).thenReturn(key);
+        }
+
+        @Nested
+        @DisplayName("인증받지 않은 계정일시")
+        class WhenNotCredentialsAccount {
+
+            @Test
+            @DisplayName("키 생성기에서 반환된 키를 저장해야 한다.")
+            void shouldSaveCreatedKeyByGivenGenerator() {
+                user.generateCredentialsKey(keyGenerator);
+                assertEquals(key, user.getCredentialsKey());
+            }
+        }
+
+        @Nested
+        @DisplayName("이미 인증 받은 계정일시")
+        class WhenAlreadyCertificationAccount {
+            private Collection<AuthorityCode> authorityCodes;
+
+            @BeforeEach
+            void setup() {
+                when(key.matches(any())).thenReturn(UserKeyMatchedResult.MATCHED);
+
+                this.authorityCodes = new HashSet<>(Arrays.asList(
+                        new AuthorityCode("CODE1"),
+                        new AuthorityCode("CODE2"),
+                        new AuthorityCode("CODE3")));
+                user.generateCredentialsKey(keyGenerator);
+                user.credentials("KEY", authorityCodes);
+            }
+
+            @Test
+            @DisplayName("UserAlreadyExistsException이 발생해야 한다.")
+            void shouldThrowsUserAlreadyExistsException() {
+                assertThrows(UserAlreadyExistsException.class, () -> user.generateCredentialsKey(keyGenerator));
+            }
+        }
+
+        @Nested
+        @DisplayName("이미 인증 받았지만 할당된 권한이 없을시")
+        class WhenAlreadyCertificationNotHaveAuthoritiesAccount {
+
+            @BeforeEach
+            void setup() {
+                when(key.matches(any())).thenReturn(UserKeyMatchedResult.MATCHED);
+
+                user.generateCredentialsKey(keyGenerator);
+                user.credentials("KEY", Collections.emptySet());
+            }
+
+            @Test
+            @DisplayName("키 생성기에서 반환된 키를 저장해야 한다.")
+            void shouldSaveCreatedKeyByGivenGenerator() {
+                user.generateCredentialsKey(keyGenerator);
+                assertEquals(key, user.getCredentialsKey());
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("계정 인증")
+    class CredentialsAccount {
+
+        private User user;
+        private UserCredentialsKey key;
+
+        @BeforeEach
+        void setup() {
+            this.key = mock(UserCredentialsKey.class);
+            this.user = new User(RAW_EMAIL, RAW_PASSWORD, encoder);
+        }
+
+        @Nested
+        @DisplayName("인증키가 할당되지 않았을시")
+        class WhenKeyNotGenerated {
+
+            @Test
+            @DisplayName("UserNotMatchedException이 발생해야 한다.")
+            void shouldThrowsUserNotMatchedException() {
+                assertThrows(UserNotMatchedException.class, () -> user.credentials("KEY", Collections.emptyList()));
+            }
+        }
+
+        @Nested
+        @DisplayName("인증키가 매칭되지 않을시")
+        class WhenKeyNotMatched {
+
+            @BeforeEach
+            void setup() {
+                when(key.matches(any())).thenReturn(UserKeyMatchedResult.NOT_MATCHED);
+                when(keyGenerator.generateKey()).thenReturn(key);
+                user.generateCredentialsKey(keyGenerator);
+            }
+
+            @Test
+            @DisplayName("UserNotMatchedException이 발생해야 한다.")
+            void shouldThrowsUserNotMatchedException() {
+                assertThrows(UserNotMatchedException.class, () -> user.credentials("KEY", Collections.emptyList()));
+            }
+        }
+
+        @Nested
+        @DisplayName("인증키가 만료되었을시")
+        class WhenKeyExpired {
+
+            @BeforeEach
+            void setup() {
+                when(key.matches(any())).thenReturn(UserKeyMatchedResult.EXPIRED);
+                when(keyGenerator.generateKey()).thenReturn(key);
+
+                user.generateCredentialsKey(keyGenerator);
+            }
+
+            @Test
+            @DisplayName("UserExpiredException이 발생해야 한다.")
+            void shouldThrowsUserExpiredException() {
+                assertThrows(UserExpiredException.class, () -> user.credentials("KEY", Collections.emptyList()));
+            }
+        }
+
+        @Nested
+        @DisplayName("인증키가 매칭될시")
+        class WhenKeyMatched {
+            private String matchedKey = "KEY";
+            private Collection<AuthorityCode> authorityCodes;
+
+            @BeforeEach
+            void setup() {
+                when(key.matches(matchedKey)).thenReturn(UserKeyMatchedResult.MATCHED);
+                when(keyGenerator.generateKey()).thenReturn(key);
+
+                this.authorityCodes = new HashSet<>(Arrays.asList(
+                        new AuthorityCode("CODE1"),
+                        new AuthorityCode("CODE2"),
+                        new AuthorityCode("CODE3")));
+                user.generateCredentialsKey(keyGenerator);
+            }
+
+            @Test
+            @DisplayName("인자로 받은 권한을 저장해야한다.")
+            void shouldSaveGivenAuthorities() {
+                user.credentials(matchedKey, authorityCodes);
+                assertEquals(authorityCodes, user.getAuthorities());
+            }
+
+            @Test
+            @DisplayName("인증키를 null로 설정해야 한다.")
+            void shouldCredentialsKeySetNull() {
+                user.credentials(matchedKey, authorityCodes);
+                assertNull(user.getCredentialsKey());
             }
         }
     }

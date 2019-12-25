@@ -1,7 +1,9 @@
 package cube8540.oauth.authentication.users.domain;
 
+import cube8540.oauth.authentication.credentials.authority.domain.AuthorityCode;
 import cube8540.oauth.authentication.users.domain.event.UserCreatedEvent;
 import cube8540.oauth.authentication.users.domain.event.UserGeneratedPasswordCredentialsKeyEvent;
+import cube8540.oauth.authentication.users.domain.exception.UserAlreadyExistsException;
 import cube8540.oauth.authentication.users.domain.exception.UserExpiredException;
 import cube8540.oauth.authentication.users.domain.exception.UserInvalidException;
 import cube8540.oauth.authentication.users.domain.exception.UserNotMatchedException;
@@ -15,7 +17,10 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.springframework.data.domain.AbstractAggregateRoot;
 
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 @Getter
 @ToString
@@ -26,6 +31,10 @@ public class User extends AbstractAggregateRoot<User> {
     private UserEmail email;
 
     private UserPassword password;
+
+    private UserCredentialsKey credentialsKey;
+
+    private Set<AuthorityCode> authorities;
 
     private UserCredentialsKey passwordCredentialsKey;
 
@@ -38,6 +47,22 @@ public class User extends AbstractAggregateRoot<User> {
                 .getResult().hasErrorThrows(UserInvalidException::new);
         encrypted(encoder);
         registerEvent(new UserCreatedEvent(this.email));
+    }
+
+    public void generateCredentialsKey(UserCredentialsKeyGenerator keyGenerator) {
+        if (this.authorities != null && !this.authorities.isEmpty()) {
+            throw new UserAlreadyExistsException("this account is already certification");
+        }
+        this.credentialsKey = keyGenerator.generateKey();
+    }
+
+    public void credentials(String credentialsKey, Collection<AuthorityCode> authorities) {
+        UserKeyMatchedResult matchedResult = Optional.ofNullable(this.credentialsKey)
+                .map(key -> key.matches(credentialsKey))
+                .orElseThrow(() -> new UserNotMatchedException("key is not matched"));
+        assertMatchedResult(matchedResult);
+        this.authorities = new HashSet<>(authorities);
+        this.credentialsKey = null;
     }
 
     public void changePassword(String existsPassword, String changePassword, UserPasswordEncoder encoder) {
@@ -56,11 +81,7 @@ public class User extends AbstractAggregateRoot<User> {
         UserKeyMatchedResult matchedResult = Optional.ofNullable(this.passwordCredentialsKey)
                 .map(key -> key.matches(passwordCredentialsKey))
                 .orElseThrow(() -> new UserNotMatchedException("key is not matched"));
-        if (matchedResult.equals(UserKeyMatchedResult.NOT_MATCHED)) {
-            throw new UserNotMatchedException("key is not matched");
-        } else if (matchedResult.equals(UserKeyMatchedResult.EXPIRED)) {
-            throw new UserExpiredException("key is expired");
-        }
+        assertMatchedResult(matchedResult);
         changePassword(changePassword, encoder);
         this.passwordCredentialsKey = null;
     }
@@ -74,5 +95,13 @@ public class User extends AbstractAggregateRoot<User> {
 
     private void encrypted(UserPasswordEncoder encoder) {
         this.password = this.password.encrypted(encoder);
+    }
+
+    private void assertMatchedResult(UserKeyMatchedResult matchedResult) {
+        if (matchedResult.equals(UserKeyMatchedResult.NOT_MATCHED)) {
+            throw new UserNotMatchedException("key is not matched");
+        } else if (matchedResult.equals(UserKeyMatchedResult.EXPIRED)) {
+            throw new UserExpiredException("key is expired");
+        }
     }
 }
