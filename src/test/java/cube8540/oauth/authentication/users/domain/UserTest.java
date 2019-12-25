@@ -151,7 +151,10 @@ class UserTest {
             @Test
             @DisplayName("UserNotMatchedException이 발생해야 한다.")
             void shouldThrowsUserNotMatchedException() {
-                assertThrows(UserNotMatchedException.class, () -> user.changePassword("NOT MATCHED PASSWORD", RAW_CHANGE_PASSWORD, encoder));
+                assertThrows(UserNotMatchedException.class,
+                        () -> user.changePassword("NOT MATCHED PASSWORD 1", RAW_CHANGE_PASSWORD, encoder));
+                assertThrows(UserNotMatchedException.class,
+                        () -> user.changePassword("NOT MATCHED PASSWORD 2", RAW_CHANGE_PASSWORD, encoder));
             }
         }
 
@@ -168,4 +171,28 @@ class UserTest {
         }
     }
 
+    @Nested
+    @DisplayName("패스워드 분실")
+    class ForgotPassword {
+
+        private User user;
+        private UserCredentialsKey key;
+        private UserCredentialsKeyGenerator keyGenerator;
+
+        @BeforeEach
+        void setup() {
+            this.key = mock(UserCredentialsKey.class);
+            this.keyGenerator = mock(UserCredentialsKeyGenerator.class);
+            this.user = new User(RAW_EMAIL, RAW_PASSWORD, encoder);
+
+            when(keyGenerator.generateKey()).thenReturn(key);
+        }
+
+        @Test
+        @DisplayName("키 생성기에서 반환된 키를 저장해야 한다.")
+        void shouldSaveCreatedKeyByGivenGenerator() {
+            user.forgotPassword(keyGenerator);
+            assertEquals(key, user.getPasswordCredentialsKey());
+        }
+    }
 }

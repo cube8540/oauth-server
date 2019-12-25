@@ -1,6 +1,7 @@
 package cube8540.oauth.authentication.users.domain;
 
 import cube8540.oauth.authentication.users.domain.event.UserCreatedEvent;
+import cube8540.oauth.authentication.users.domain.event.UserGeneratedPasswordCredentialsKeyEvent;
 import cube8540.oauth.authentication.users.domain.exception.UserInvalidException;
 import cube8540.oauth.authentication.users.domain.exception.UserNotMatchedException;
 import cube8540.oauth.authentication.users.domain.validator.UserEmailValidationRule;
@@ -22,6 +23,8 @@ public class User extends AbstractAggregateRoot<User> {
     private UserEmail email;
 
     private UserPassword password;
+
+    private UserCredentialsKey passwordCredentialsKey;
 
     public User(String email, String password, UserPasswordEncoder encoder) {
         this.email = new UserEmail(email);
@@ -50,5 +53,10 @@ public class User extends AbstractAggregateRoot<User> {
 
     private void encrypted(UserPasswordEncoder encoder) {
         this.password = this.password.encrypted(encoder);
+    }
+
+    public void forgotPassword(UserCredentialsKeyGenerator keyGenerator) {
+        this.passwordCredentialsKey = keyGenerator.generateKey();
+        registerEvent(new UserGeneratedPasswordCredentialsKeyEvent(email, passwordCredentialsKey));
     }
 }
