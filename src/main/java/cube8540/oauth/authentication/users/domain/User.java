@@ -2,6 +2,7 @@ package cube8540.oauth.authentication.users.domain;
 
 import cube8540.oauth.authentication.users.domain.event.UserCreatedEvent;
 import cube8540.oauth.authentication.users.domain.event.UserGeneratedPasswordCredentialsKeyEvent;
+import cube8540.oauth.authentication.users.domain.exception.UserExpiredException;
 import cube8540.oauth.authentication.users.domain.exception.UserInvalidException;
 import cube8540.oauth.authentication.users.domain.exception.UserNotMatchedException;
 import cube8540.oauth.authentication.users.domain.validator.UserEmailValidationRule;
@@ -13,6 +14,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.springframework.data.domain.AbstractAggregateRoot;
+
+import java.util.Optional;
 
 @Getter
 @ToString
@@ -44,6 +47,24 @@ public class User extends AbstractAggregateRoot<User> {
         changePassword(changePassword, encoder);
     }
 
+    public void forgotPassword(UserCredentialsKeyGenerator keyGenerator) {
+        this.passwordCredentialsKey = keyGenerator.generateKey();
+        registerEvent(new UserGeneratedPasswordCredentialsKeyEvent(email, passwordCredentialsKey));
+    }
+
+    public void resetPassword(String passwordCredentialsKey, String changePassword, UserPasswordEncoder encoder) {
+        UserKeyMatchedResult matchedResult = Optional.ofNullable(this.passwordCredentialsKey)
+                .map(key -> key.matches(passwordCredentialsKey))
+                .orElseThrow(() -> new UserNotMatchedException("key is not matched"));
+        if (matchedResult.equals(UserKeyMatchedResult.NOT_MATCHED)) {
+            throw new UserNotMatchedException("key is not matched");
+        } else if (matchedResult.equals(UserKeyMatchedResult.EXPIRED)) {
+            throw new UserExpiredException("key is expired");
+        }
+        changePassword(changePassword, encoder);
+        this.passwordCredentialsKey = null;
+    }
+
     private void changePassword(String changePassword, UserPasswordEncoder encoder) {
         this.password = new UserRawPassword(changePassword);
         Validator.of(this).registerRule(new UserPasswordValidationRule())
@@ -53,10 +74,5 @@ public class User extends AbstractAggregateRoot<User> {
 
     private void encrypted(UserPasswordEncoder encoder) {
         this.password = this.password.encrypted(encoder);
-    }
-
-    public void forgotPassword(UserCredentialsKeyGenerator keyGenerator) {
-        this.passwordCredentialsKey = keyGenerator.generateKey();
-        registerEvent(new UserGeneratedPasswordCredentialsKeyEvent(email, passwordCredentialsKey));
     }
 }

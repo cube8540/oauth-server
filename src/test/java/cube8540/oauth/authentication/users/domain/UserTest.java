@@ -1,5 +1,6 @@
 package cube8540.oauth.authentication.users.domain;
 
+import cube8540.oauth.authentication.users.domain.exception.UserExpiredException;
 import cube8540.oauth.authentication.users.domain.exception.UserInvalidException;
 import cube8540.oauth.authentication.users.domain.exception.UserNotMatchedException;
 import cube8540.oauth.authentication.users.domain.validator.UserEmailValidationRule;
@@ -11,8 +12,10 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -34,10 +37,12 @@ class UserTest {
     private static final UserPassword CHANGE_ENCRYPTED_PASSWORD =  new UserEncryptedPassword(RAW_CHANGE_ENCRYPTED_PASSWORD);
 
     private UserPasswordEncoder encoder;
+    private UserCredentialsKeyGenerator keyGenerator;
 
     @BeforeEach
     void setup() {
         this.encoder = mock(UserPasswordEncoder.class);
+        this.keyGenerator = mock(UserCredentialsKeyGenerator.class);
 
         when(encoder.encoding(RAW_PASSWORD)).thenReturn(RAW_ENCRYPTED_PASSWORD);
         when(encoder.matches(ENCRYPTED_PASSWORD, PASSWORD)).thenReturn(Boolean.TRUE);
@@ -177,12 +182,10 @@ class UserTest {
 
         private User user;
         private UserCredentialsKey key;
-        private UserCredentialsKeyGenerator keyGenerator;
 
         @BeforeEach
         void setup() {
             this.key = mock(UserCredentialsKey.class);
-            this.keyGenerator = mock(UserCredentialsKeyGenerator.class);
             this.user = new User(RAW_EMAIL, RAW_PASSWORD, encoder);
 
             when(keyGenerator.generateKey()).thenReturn(key);
@@ -193,6 +196,117 @@ class UserTest {
         void shouldSaveCreatedKeyByGivenGenerator() {
             user.forgotPassword(keyGenerator);
             assertEquals(key, user.getPasswordCredentialsKey());
+        }
+    }
+
+    @Nested
+    @DisplayName("패스워드 초기화")
+    class ResetPassword {
+
+        private User user;
+        private UserCredentialsKey key;
+
+        @BeforeEach
+        void setup() {
+            this.key = mock(UserCredentialsKey.class);
+            this.user = new User(RAW_EMAIL, RAW_PASSWORD, encoder);
+
+            when(keyGenerator.generateKey()).thenReturn(key);
+        }
+
+        @Nested
+        @DisplayName("패스워드 인증키가 할당되지 않았을시")
+        class WhenKeyNotGenerated {
+
+            @Test
+            @DisplayName("UserNotMatchedException이 발생해야 한다.")
+            void shouldThrowsUserNotMatchedException() {
+                assertThrows(UserNotMatchedException.class, () -> user.resetPassword("KEY", RAW_CHANGE_PASSWORD, encoder));
+            }
+        }
+
+        @Nested
+        @DisplayName("키가 매칭되지 않을시")
+        class WhenKeyNotMatched {
+
+            @BeforeEach
+            void setup() {
+                user.forgotPassword(keyGenerator);
+
+                when(key.matches(any())).thenReturn(UserKeyMatchedResult.NOT_MATCHED);
+            }
+
+            @Test
+            @DisplayName("UserNotMatchedException이 발생해야 한다.")
+            void shouldThrowsUserNotMatchedException() {
+                assertThrows(UserNotMatchedException.class, () -> user.resetPassword("KEY", RAW_CHANGE_PASSWORD, encoder));
+            }
+        }
+
+        @Nested
+        @DisplayName("키가 만료되었을시")
+        class WhenKeyExpired {
+
+            @BeforeEach
+            void setup() {
+                user.forgotPassword(keyGenerator);
+
+                when(key.matches(any())).thenReturn(UserKeyMatchedResult.EXPIRED);
+            }
+
+            @Test
+            @DisplayName("UserExpiredException이 발생해야 한다.")
+            void shouldThrowsUserExpiredException() {
+                assertThrows(UserExpiredException.class, () -> user.resetPassword("KEY", RAW_CHANGE_PASSWORD, encoder));
+            }
+        }
+
+        @Nested
+        @DisplayName("변경할 패스워드가 유효하지 않을시")
+        class WhenNotAllowedPassword {
+
+            private String matchedKey = "KEY";
+
+            @BeforeEach
+            void setup() {
+                user.forgotPassword(keyGenerator);
+
+                when(key.matches(matchedKey)).thenReturn(UserKeyMatchedResult.MATCHED);
+            }
+
+            @Test
+            @DisplayName("UserInvalidException이 발생해야 한다.")
+            void shouldThrowsUserInvalidException() {
+                assertThrows(UserInvalidException.class, () -> user.resetPassword(matchedKey, NOT_ALLOWED_RAW_PASSWORD, encoder));
+            }
+        }
+
+        @Nested
+        @DisplayName("키가 매칭되며 변경될 패스워드가 유효할시")
+        class WhenKeyMatchedAndAllowedPassword {
+
+            private String matchedKey = "KEY";
+
+            @BeforeEach
+            void setup() {
+                user.forgotPassword(keyGenerator);
+
+                when(key.matches(matchedKey)).thenReturn(UserKeyMatchedResult.MATCHED);
+            }
+
+            @Test
+            @DisplayName("인자로 받은 변경될 패스워드를 암호화 하여 저장하여야 한다.")
+            void shouldSaveGivenPasswordEncrypted() {
+                user.resetPassword(matchedKey, RAW_CHANGE_PASSWORD, encoder);
+                assertEquals(CHANGE_ENCRYPTED_PASSWORD, user.getPassword());
+            }
+
+            @Test
+            @DisplayName("패스워드 인증키를 null로 변경한다.")
+            void shouldPasswordCredentialsKeySetNull() {
+                user.resetPassword(matchedKey, RAW_CHANGE_PASSWORD, encoder);
+                assertNull(user.getPasswordCredentialsKey());
+            }
         }
     }
 }
