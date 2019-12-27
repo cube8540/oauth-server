@@ -87,7 +87,7 @@ class DefaultOAuth2ClientDetailsServiceTest {
 
             @BeforeEach
             void setup() {
-                when(repository.findById(any())).thenReturn(Optional.empty());
+                when(repository.findByClientId(any())).thenReturn(Optional.empty());
             }
 
             @Test
@@ -111,7 +111,7 @@ class DefaultOAuth2ClientDetailsServiceTest {
                 when(client.getScope()).thenReturn(SCOPE);
                 when(client.getAccessTokenValidity()).thenReturn(ACCESS_TOKEN_VALIDITY);
                 when(client.getRefreshTokenValidity()).thenReturn(REFRESH_TOKEN_VALIDITY);
-                when(repository.findById(CLIENT_ID)).thenReturn(Optional.of(client));
+                when(repository.findByClientId(CLIENT_ID)).thenReturn(Optional.of(client));
             }
 
             @Test
