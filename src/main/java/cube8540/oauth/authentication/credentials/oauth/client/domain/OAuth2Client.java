@@ -29,8 +29,6 @@ public class OAuth2Client {
 
     private Set<URI> redirectURI;
 
-    private Set<String> resourceId;
-
     private Set<OAuth2ClientGrantType> grantType;
 
     private Set<OAuth2Scope> scope;
@@ -57,18 +55,6 @@ public class OAuth2Client {
     public void removeRedirectURI(URI redirectURI) {
         Optional.ofNullable(this.redirectURI)
                 .ifPresent(uris -> uris.remove(redirectURI));
-    }
-
-    public void addResourceId(String resourceId) {
-        if (this.resourceId == null) {
-            this.resourceId = new HashSet<>();
-        }
-        this.resourceId.add(resourceId);
-    }
-
-    public void removeResourceId(String resourceId) {
-        Optional.ofNullable(this.resourceId)
-                .ifPresent(ids -> ids.remove(resourceId));
     }
 
     public void addGrantType(OAuth2ClientGrantType grantType) {
