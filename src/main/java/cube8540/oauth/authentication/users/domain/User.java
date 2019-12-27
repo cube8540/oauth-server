@@ -7,8 +7,24 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.Target;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.domain.AbstractAggregateRoot;
 
+import javax.persistence.AttributeOverride;
+import javax.persistence.AttributeOverrides;
+import javax.persistence.CollectionTable;
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
+import javax.persistence.Embedded;
+import javax.persistence.EmbeddedId;
+import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.Table;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Optional;
@@ -18,17 +34,48 @@ import java.util.Set;
 @ToString
 @EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Entity
+@Table(name = "user")
+@DynamicInsert
+@DynamicUpdate
 public class User extends AbstractAggregateRoot<User> {
 
+    @EmbeddedId
+    @AttributeOverride(name = "value", column = @Column(name = "email", length = 128))
     private UserEmail email;
 
+    @Embedded
+    @Target(value = UserEncryptedPassword.class)
+    @AttributeOverride(name = "password", column = @Column(name = "password", length = 64, nullable = false))
     private UserPassword password;
 
+    @Embedded
+    @AttributeOverrides(value = {
+            @AttributeOverride(name = "keyValue", column = @Column(name = "credentials_key", length = 32)),
+            @AttributeOverride(name = "expiryDateTime", column = @Column(name = "credentials_key_expiry_datetime"))
+    })
     private UserCredentialsKey credentialsKey;
 
+    @ElementCollection
+    @CollectionTable(name = "user_authority", joinColumns = @JoinColumn(name = "email", nullable = false))
+    @AttributeOverride(name = "value", column = @Column(name = "authority_code", length = 32, nullable = false))
     private Set<AuthorityCode> authorities;
 
+
+    @Embedded
+    @AttributeOverrides(value = {
+            @AttributeOverride(name = "keyValue", column = @Column(name = "password_credentials_key", length = 32)),
+            @AttributeOverride(name = "expiryDateTime", column = @Column(name = "password_credentials_key_expiry_datetime"))
+    })
     private UserCredentialsKey passwordCredentialsKey;
+
+    @CreationTimestamp
+    @Column(name = "registered_at", nullable = false)
+    private LocalDateTime registeredAt;
+
+    @UpdateTimestamp
+    @Column(name = "last_updated_at", nullable = false)
+    private LocalDateTime lastUpdatedAt;
 
     public User(String email, String password, UserPasswordEncoder encoder) {
         this.email = new UserEmail(email);
