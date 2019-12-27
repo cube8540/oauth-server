@@ -1,7 +1,5 @@
-package cube8540.oauth.authentication.users.domain.validator;
+package cube8540.oauth.authentication.users.domain;
 
-import cube8540.oauth.authentication.users.domain.User;
-import cube8540.oauth.authentication.users.domain.UserPassword;
 import cube8540.validator.core.ValidationError;
 import cube8540.validator.core.ValidationRule;
 
@@ -11,6 +9,8 @@ public class UserPasswordValidationRule implements ValidationRule<User> {
 
     public static final String PROPERTY = "password";
     public static final String MESSAGE = "password is invalid";
+
+    protected UserPasswordValidationRule() {}
 
     @Override
     public ValidationError error() {

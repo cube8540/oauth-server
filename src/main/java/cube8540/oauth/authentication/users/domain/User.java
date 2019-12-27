@@ -1,14 +1,6 @@
 package cube8540.oauth.authentication.users.domain;
 
 import cube8540.oauth.authentication.credentials.authority.domain.AuthorityCode;
-import cube8540.oauth.authentication.users.domain.event.UserCreatedEvent;
-import cube8540.oauth.authentication.users.domain.event.UserGeneratedPasswordCredentialsKeyEvent;
-import cube8540.oauth.authentication.users.domain.exception.UserAlreadyExistsException;
-import cube8540.oauth.authentication.users.domain.exception.UserExpiredException;
-import cube8540.oauth.authentication.users.domain.exception.UserInvalidException;
-import cube8540.oauth.authentication.users.domain.exception.UserNotMatchedException;
-import cube8540.oauth.authentication.users.domain.validator.UserEmailValidationRule;
-import cube8540.oauth.authentication.users.domain.validator.UserPasswordValidationRule;
 import cube8540.validator.core.Validator;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -51,7 +43,7 @@ public class User extends AbstractAggregateRoot<User> {
 
     public void generateCredentialsKey(UserCredentialsKeyGenerator keyGenerator) {
         if (this.authorities != null && !this.authorities.isEmpty()) {
-            throw new UserAlreadyExistsException("this account is already certification");
+            throw new UserAlreadyCertificationException("this account is already certification");
         }
         this.credentialsKey = keyGenerator.generateKey();
     }

@@ -1,7 +1,8 @@
-package cube8540.oauth.authentication.users.domain.validator;
+package cube8540.oauth.authentication.users.domain;
 
 import cube8540.oauth.authentication.users.domain.User;
-import cube8540.oauth.authentication.users.domain.UserPassword;
+import cube8540.oauth.authentication.users.domain.UserEmail;
+import cube8540.oauth.authentication.users.domain.UserEmailValidationRule;
 import cube8540.validator.core.ValidationError;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -14,15 +15,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@DisplayName("유저 패스워드 유효성 검사기 테스트")
-class UserPasswordValidationRuleTest {
+@DisplayName("유저 이메일 유효성 검사기 테스트")
+class UserEmailValidationRuleTest {
 
-    private UserPasswordValidationRule rule;
+    private UserEmailValidationRule rule;
     private User user;
 
     @BeforeEach
     void setup() {
-        this.rule = new UserPasswordValidationRule();
+        this.rule = new UserEmailValidationRule();
         this.user = mock(User.class);
     }
 
@@ -31,8 +32,8 @@ class UserPasswordValidationRuleTest {
     void message() {
         ValidationError error = rule.error();
 
-        assertEquals(UserPasswordValidationRule.PROPERTY, error.getProperty());
-        assertEquals(UserPasswordValidationRule.MESSAGE, error.getMessage());
+        assertEquals(UserEmailValidationRule.PROPERTY, error.getProperty());
+        assertEquals(UserEmailValidationRule.MESSAGE, error.getMessage());
     }
 
     @Nested
@@ -40,18 +41,18 @@ class UserPasswordValidationRuleTest {
     class Validation {
 
         @Nested
-        @DisplayName("패스워드가 유효하지 않을시")
+        @DisplayName("이메일이 유효하지 않을시")
         class WhenEmailInvalid {
 
             @BeforeEach
             void setup() {
-                UserPassword password = mock(UserPassword.class);
-                when(user.getPassword()).thenReturn(password);
-                when(password.isValid()).thenReturn(Boolean.FALSE);
+                UserEmail email = mock(UserEmail.class);
+                when(user.getEmail()).thenReturn(email);
+                when(email.isValid()).thenReturn(Boolean.FALSE);
             }
 
             @Test
-            @DisplayName("패스워드 유효성 검사시 false가 반환되어야 한다.")
+            @DisplayName("이메일 유효성 검사시 false가 반환되어야 한다.")
             void shouldValidReturnsFalse() {
                 boolean isValid = rule.isValid(user);
                 assertFalse(isValid);
@@ -59,11 +60,11 @@ class UserPasswordValidationRuleTest {
         }
 
         @Nested
-        @DisplayName("패스워드가 null 일시")
+        @DisplayName("이메일이 null 일시")
         class WhenEmailNull {
 
             @Test
-            @DisplayName("패스워드 유효성 검사시 false가 반환되어야 한다.")
+            @DisplayName("이메일 유효성 검사시 false가 반환되어야 한다.")
             void shouldValidReturnsFalse() {
                 boolean isValid = rule.isValid(user);
                 assertFalse(isValid);
@@ -83,23 +84,22 @@ class UserPasswordValidationRuleTest {
         }
 
         @Nested
-        @DisplayName("패스워드가 유효할시")
+        @DisplayName("이메일이 유효할시")
         class WhenEmailValid {
 
             @BeforeEach
             void setup() {
-                UserPassword password = mock(UserPassword.class);
-                when(user.getPassword()).thenReturn(password);
-                when(password.isValid()).thenReturn(Boolean.TRUE);
+                UserEmail email = mock(UserEmail.class);
+                when(user.getEmail()).thenReturn(email);
+                when(email.isValid()).thenReturn(Boolean.TRUE);
             }
 
             @Test
-            @DisplayName("패스워드 유효성 검사시 true가 반환되어야 한다.")
+            @DisplayName("이메일 유효성 검사시 true가 반환되어야 한다.")
             void shouldValidReturnsTrue() {
                 boolean isValid = rule.isValid(user);
                 assertTrue(isValid);
             }
         }
     }
-
 }

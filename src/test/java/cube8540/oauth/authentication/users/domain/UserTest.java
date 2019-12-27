@@ -1,12 +1,6 @@
 package cube8540.oauth.authentication.users.domain;
 
 import cube8540.oauth.authentication.credentials.authority.domain.AuthorityCode;
-import cube8540.oauth.authentication.users.domain.exception.UserAlreadyExistsException;
-import cube8540.oauth.authentication.users.domain.exception.UserExpiredException;
-import cube8540.oauth.authentication.users.domain.exception.UserInvalidException;
-import cube8540.oauth.authentication.users.domain.exception.UserNotMatchedException;
-import cube8540.oauth.authentication.users.domain.validator.UserEmailValidationRule;
-import cube8540.oauth.authentication.users.domain.validator.UserPasswordValidationRule;
 import cube8540.validator.core.ValidationError;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -362,9 +356,9 @@ class UserTest {
             }
 
             @Test
-            @DisplayName("UserAlreadyExistsException이 발생해야 한다.")
-            void shouldThrowsUserAlreadyExistsException() {
-                assertThrows(UserAlreadyExistsException.class, () -> user.generateCredentialsKey(keyGenerator));
+            @DisplayName("UserCertificationException이 발생해야 한다.")
+            void shouldThrowsUserCertificationException() {
+                assertThrows(UserAlreadyCertificationException.class, () -> user.generateCredentialsKey(keyGenerator));
             }
         }
 
