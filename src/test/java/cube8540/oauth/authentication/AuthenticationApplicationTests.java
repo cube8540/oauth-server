@@ -6,7 +6,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
-@ActiveProfiles("local")
+@ActiveProfiles("test")
 @DisplayName("스프링 컨테이너 테스트")
 class AuthenticationApplicationTests {
 
