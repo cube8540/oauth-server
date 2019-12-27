@@ -1,4 +1,4 @@
-package cube8540.oauth.authentication.credentials.oauth.converter;
+package cube8540.oauth.authentication.credentials.oauth.client.converter;
 
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientGrantType;
 

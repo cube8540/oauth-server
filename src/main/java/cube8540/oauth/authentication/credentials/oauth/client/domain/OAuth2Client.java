@@ -1,7 +1,7 @@
 package cube8540.oauth.authentication.credentials.oauth.client.domain;
 
-import cube8540.oauth.authentication.credentials.oauth.converter.OAuth2GrantTypeConverter;
-import cube8540.oauth.authentication.credentials.oauth.converter.URIPatternConverter;
+import cube8540.oauth.authentication.credentials.oauth.client.converter.OAuth2GrantTypeConverter;
+import cube8540.oauth.authentication.credentials.oauth.client.converter.OAuth2RedirectURIConverter;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -52,7 +52,7 @@ public class OAuth2Client extends AbstractAggregateRoot<OAuth2Client> {
     @ElementCollection
     @Column(name = "redirect_uri", length = 128, nullable = false)
     @CollectionTable(name = "oauth2_client_redirect_uri", joinColumns = @JoinColumn(name = "client_id", nullable = false))
-    @Convert(converter = URIPatternConverter.class)
+    @Convert(converter = OAuth2RedirectURIConverter.class)
     private Set<URI> redirectURI;
 
     @ElementCollection
