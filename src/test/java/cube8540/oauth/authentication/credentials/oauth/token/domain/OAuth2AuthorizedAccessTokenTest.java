@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+@DisplayName("OAuth2 액세스 토큰 도메인 테스트")
 class OAuth2AuthorizedAccessTokenTest {
 
     private static final String RAW_AUTHENTICATION_ID = "AUTHENTICATION-ID";
