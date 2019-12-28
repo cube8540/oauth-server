@@ -1,14 +1,13 @@
 package cube8540.oauth.authentication.credentials.oauth.client.application;
 
+import cube8540.oauth.authentication.credentials.oauth.OAuth2GrantType;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetailsService;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2Client;
-import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientGrantType;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientNotFoundException;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientRepository;
-import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2Scope;
-import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ScopeId;
+import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -40,17 +39,17 @@ class DefaultOAuth2ClientDetailsServiceTest {
     private static final Set<URI> REGISTERED_REDIRECT_URI = new HashSet<>(Arrays.asList(
             URI.create("http://localhost:80"), URI.create("http://localhost:81"), URI.create("http://localhost:82")));
 
-    private static final Set<OAuth2ClientGrantType> AUTHORIZED_GRANT_TYPE = new HashSet<>(Arrays.asList(
-            OAuth2ClientGrantType.AUTHORIZATION_CODE,
-            OAuth2ClientGrantType.CLIENT_CREDENTIALS,
-            OAuth2ClientGrantType.IMPLICIT,
-            OAuth2ClientGrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS,
-            OAuth2ClientGrantType.REFRESH_TOKEN));
+    private static final Set<OAuth2GrantType> AUTHORIZED_GRANT_TYPE = new HashSet<>(Arrays.asList(
+            OAuth2GrantType.AUTHORIZATION_CODE,
+            OAuth2GrantType.CLIENT_CREDENTIALS,
+            OAuth2GrantType.IMPLICIT,
+            OAuth2GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS,
+            OAuth2GrantType.REFRESH_TOKEN));
 
-    private static final Set<OAuth2Scope> SCOPE = new HashSet<>(Arrays.asList(
-            makeScope("SCOPE-1"),
-            makeScope("SCOPE-2"),
-            makeScope("SCOPE-3")));
+    private static final Set<OAuth2ScopeId> SCOPE = new HashSet<>(Arrays.asList(
+            new OAuth2ScopeId("SCOPE-1"),
+            new OAuth2ScopeId("SCOPE-2"),
+            new OAuth2ScopeId("SCOPE-3")));
 
     private static final Duration ACCESS_TOKEN_VALIDITY = Duration.ofMinutes(10);
 
@@ -60,15 +59,6 @@ class DefaultOAuth2ClientDetailsServiceTest {
 
     private OAuth2ClientRepository repository;
     private OAuth2ClientDetailsService service;
-
-    private static OAuth2Scope makeScope(String scopeId) {
-        OAuth2ScopeId id = new OAuth2ScopeId(scopeId);
-
-        OAuth2Scope scope = mock(OAuth2Scope.class);
-        when(scope.getId()).thenReturn(id);
-
-        return scope;
-    }
 
     @BeforeEach
     void setup() {
@@ -153,11 +143,11 @@ class DefaultOAuth2ClientDetailsServiceTest {
             void shouldReturnsClientGrantType() {
                 OAuth2ClientDetails result = service.loadClientDetailsByClientId(RAW_CLIENT_ID);
 
-                assertTrue(result.authorizedGrantType().contains(OAuth2ClientGrantType.AUTHORIZATION_CODE));
-                assertTrue(result.authorizedGrantType().contains(OAuth2ClientGrantType.CLIENT_CREDENTIALS));
-                assertTrue(result.authorizedGrantType().contains(OAuth2ClientGrantType.IMPLICIT));
-                assertTrue(result.authorizedGrantType().contains(OAuth2ClientGrantType.REFRESH_TOKEN));
-                assertTrue(result.authorizedGrantType().contains(OAuth2ClientGrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS));
+                assertTrue(result.authorizedGrantType().contains(OAuth2GrantType.AUTHORIZATION_CODE));
+                assertTrue(result.authorizedGrantType().contains(OAuth2GrantType.CLIENT_CREDENTIALS));
+                assertTrue(result.authorizedGrantType().contains(OAuth2GrantType.IMPLICIT));
+                assertTrue(result.authorizedGrantType().contains(OAuth2GrantType.REFRESH_TOKEN));
+                assertTrue(result.authorizedGrantType().contains(OAuth2GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS));
             }
 
             @Test

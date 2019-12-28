@@ -1,12 +1,14 @@
 package cube8540.oauth.authentication.credentials.oauth.token.domain;
 
-import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2Client;
+import cube8540.oauth.authentication.credentials.oauth.OAuth2GrantType;
+import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
 import cube8540.oauth.authentication.users.domain.UserEmail;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.ToString;
 import org.springframework.data.domain.AbstractAggregateRoot;
 
@@ -18,7 +20,9 @@ import java.util.Map;
 @Getter
 @ToString
 @EqualsAndHashCode(callSuper = false)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Builder
 public class OAuth2AuthorizedAccessToken extends AbstractAggregateRoot<OAuth2AuthorizedAccessToken> {
 
     private OAuth2AuthenticationId authenticationId;
@@ -27,23 +31,21 @@ public class OAuth2AuthorizedAccessToken extends AbstractAggregateRoot<OAuth2Aut
 
     private UserEmail email;
 
-    private OAuth2Client client;
+    private OAuth2ClientId client;
 
     private LocalDateTime expiration;
 
-    @Setter
+    private OAuth2GrantType tokenGrantType;
+
     private OAuth2AuthorizedRefreshToken refreshToken;
 
     private Map<String, Object> additionalInformation;
 
-    public OAuth2AuthorizedAccessToken(OAuth2AuthenticationIdGenerator authenticationIdGenerator,
-                                       OAuth2TokenIdGenerator tokenIdGenerator,
-                                       String email, OAuth2Client client, LocalDateTime expiration) {
-        this.authenticationId = authenticationIdGenerator.extractAuthenticationValue();
-        this.tokenId = tokenIdGenerator.extractTokenValue();
-        this.email = new UserEmail(email);
-        this.client = client;
-        this.expiration = expiration;
+    public static OAuth2AuthorizedAccessTokenBuilder builder(OAuth2AuthenticationIdGenerator authenticationIdGenerator,
+                                                             OAuth2TokenIdGenerator tokenIdGenerator) {
+        return new OAuth2AuthorizedAccessTokenBuilder()
+                .authenticationId(authenticationIdGenerator.extractAuthenticationValue())
+                .tokenId(tokenIdGenerator.extractTokenValue());
     }
 
     public boolean isExpired() {

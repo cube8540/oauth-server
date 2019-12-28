@@ -1,7 +1,9 @@
 package cube8540.oauth.authentication.credentials.oauth.client.domain;
 
-import cube8540.oauth.authentication.credentials.oauth.client.converter.OAuth2GrantTypeConverter;
-import cube8540.oauth.authentication.credentials.oauth.client.converter.OAuth2RedirectURIConverter;
+import cube8540.oauth.authentication.credentials.oauth.OAuth2GrantType;
+import cube8540.oauth.authentication.credentials.oauth.client.converter.OAuth2ClientGrantTypeConverter;
+import cube8540.oauth.authentication.credentials.oauth.client.converter.OAuth2ClientRedirectURIConverter;
+import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -10,17 +12,13 @@ import lombok.ToString;
 import org.springframework.data.domain.AbstractAggregateRoot;
 
 import javax.persistence.AttributeOverride;
-import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.ElementCollection;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import java.net.URI;
 import java.time.Duration;
@@ -52,18 +50,19 @@ public class OAuth2Client extends AbstractAggregateRoot<OAuth2Client> {
     @ElementCollection
     @Column(name = "redirect_uri", length = 128, nullable = false)
     @CollectionTable(name = "oauth2_client_redirect_uri", joinColumns = @JoinColumn(name = "client_id", nullable = false))
-    @Convert(converter = OAuth2RedirectURIConverter.class)
+    @Convert(converter = OAuth2ClientRedirectURIConverter.class)
     private Set<URI> redirectURI;
 
     @ElementCollection
     @Column(name = "grant_type", length = 32, nullable = false)
     @CollectionTable(name = "oauth2_client_grant_type", joinColumns = @JoinColumn(name = "client_id", nullable = false))
-    @Convert(converter = OAuth2GrantTypeConverter.class)
-    private Set<OAuth2ClientGrantType> grantType;
+    @Convert(converter = OAuth2ClientGrantTypeConverter.class)
+    private Set<OAuth2GrantType> grantType;
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinTable(name = "oauth2_client_scope", joinColumns = @JoinColumn(name = "client_id"), inverseJoinColumns = @JoinColumn(name = "scope_id"))
-    private Set<OAuth2Scope> scope;
+    @ElementCollection
+    @CollectionTable(name = "oauth2_client_scope", joinColumns = @JoinColumn(name = "client_id", nullable = false))
+    @AttributeOverride(name = "value", column = @Column(name = "scope_id", length = 32, nullable = false))
+    private Set<OAuth2ScopeId> scope;
 
     @Column(name = "access_token_validity", nullable = false)
     private Duration accessTokenValidity;
@@ -91,26 +90,26 @@ public class OAuth2Client extends AbstractAggregateRoot<OAuth2Client> {
                 .ifPresent(uris -> uris.remove(redirectURI));
     }
 
-    public void addGrantType(OAuth2ClientGrantType grantType) {
+    public void addGrantType(OAuth2GrantType grantType) {
         if (this.grantType == null) {
             this.grantType = new HashSet<>();
         }
         this.grantType.add(grantType);
     }
 
-    public void removeGrantType(OAuth2ClientGrantType grantType) {
+    public void removeGrantType(OAuth2GrantType grantType) {
         Optional.ofNullable(this.grantType)
                 .ifPresent(types -> types.remove(grantType));
     }
 
-    public void addScope(OAuth2Scope scope) {
+    public void addScope(OAuth2ScopeId scope) {
         if (this.scope == null) {
             this.scope = new HashSet<>();
         }
         this.scope.add(scope);
     }
 
-    public void removeScope(OAuth2Scope scope) {
+    public void removeScope(OAuth2ScopeId scope) {
         Optional.ofNullable(this.scope)
                 .ifPresent(scopes -> scopes.remove(scope));
     }

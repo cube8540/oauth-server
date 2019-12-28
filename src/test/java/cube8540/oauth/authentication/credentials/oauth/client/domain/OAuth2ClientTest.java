@@ -1,5 +1,7 @@
 package cube8540.oauth.authentication.credentials.oauth.client.domain;
 
+import cube8540.oauth.authentication.credentials.oauth.OAuth2GrantType;
+import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -11,7 +13,6 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
 
 @DisplayName("OAuth2 클라이언트 테스트")
 class OAuth2ClientTest {
@@ -174,11 +175,11 @@ class OAuth2ClientTest {
             @Test
             @DisplayName("인자로 받은 클라이언트 인증 방식을 저장해야함")
             void shouldSaveGiveGrantType() {
-                client.addGrantType(OAuth2ClientGrantType.AUTHORIZATION_CODE);
-                client.addGrantType(OAuth2ClientGrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
+                client.addGrantType(OAuth2GrantType.AUTHORIZATION_CODE);
+                client.addGrantType(OAuth2GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
 
-                assertTrue(client.getGrantType().contains(OAuth2ClientGrantType.AUTHORIZATION_CODE));
-                assertTrue(client.getGrantType().contains(OAuth2ClientGrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS));
+                assertTrue(client.getGrantType().contains(OAuth2GrantType.AUTHORIZATION_CODE));
+                assertTrue(client.getGrantType().contains(OAuth2GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS));
             }
         }
 
@@ -188,23 +189,23 @@ class OAuth2ClientTest {
 
             @BeforeEach
             void setup() {
-                client.addGrantType(OAuth2ClientGrantType.AUTHORIZATION_CODE);
+                client.addGrantType(OAuth2GrantType.AUTHORIZATION_CODE);
             }
 
             @Test
             @DisplayName("인자로 받은 인증 방식이 저장되어 있어야 한다.")
             void shouldStoredGiveGrantType() {
-                client.addGrantType(OAuth2ClientGrantType.AUTHORIZATION_CODE);
-                assertTrue(client.getGrantType().contains(OAuth2ClientGrantType.AUTHORIZATION_CODE));
+                client.addGrantType(OAuth2GrantType.AUTHORIZATION_CODE);
+                assertTrue(client.getGrantType().contains(OAuth2GrantType.AUTHORIZATION_CODE));
             }
 
             @Test
             @DisplayName("같은 인증 방식은 하나만 저장되어 있어야 한다.")
             void shouldStoredOnlyOneSameGrantType() {
-                client.addGrantType(OAuth2ClientGrantType.AUTHORIZATION_CODE);
+                client.addGrantType(OAuth2GrantType.AUTHORIZATION_CODE);
 
                 long size = client.getGrantType().stream()
-                        .filter(grantType -> grantType.equals(OAuth2ClientGrantType.AUTHORIZATION_CODE)).count();
+                        .filter(grantType -> grantType.equals(OAuth2GrantType.AUTHORIZATION_CODE)).count();
                 assertEquals(1, size);
             }
         }
@@ -227,7 +228,7 @@ class OAuth2ClientTest {
             @Test
             @DisplayName("해당 요청은 무시한다.")
             void shouldNothing() {
-                assertDoesNotThrow(() -> client.removeGrantType(OAuth2ClientGrantType.AUTHORIZATION_CODE));
+                assertDoesNotThrow(() -> client.removeGrantType(OAuth2GrantType.AUTHORIZATION_CODE));
             }
         }
 
@@ -237,14 +238,14 @@ class OAuth2ClientTest {
 
             @BeforeEach
             void setup() {
-                client.addGrantType(OAuth2ClientGrantType.AUTHORIZATION_CODE);
+                client.addGrantType(OAuth2GrantType.AUTHORIZATION_CODE);
             }
 
             @Test
             @DisplayName("인자로 받은 인증 방식을 삭제한다.")
             void shouldRemoveGivenGrantType() {
-                client.removeGrantType(OAuth2ClientGrantType.AUTHORIZATION_CODE);
-                assertFalse(client.getGrantType().contains(OAuth2ClientGrantType.AUTHORIZATION_CODE));
+                client.removeGrantType(OAuth2GrantType.AUTHORIZATION_CODE);
+                assertFalse(client.getGrantType().contains(OAuth2GrantType.AUTHORIZATION_CODE));
             }
         }
     }
@@ -252,23 +253,23 @@ class OAuth2ClientTest {
     @Nested
     @DisplayName("스코프 저장")
     class AddScope {
-        private OAuth2Scope newScope;
+        private OAuth2ScopeId newScope;
         private OAuth2Client client;
 
         @BeforeEach
         void setup(){
-            this.newScope = mock(OAuth2Scope.class);
+            this.newScope = new OAuth2ScopeId("SCOPE-1");
             this.client = new OAuth2Client(RAW_CLIENT_ID, SECRET, CLIENT_NAME);
         }
 
         @Nested
         @DisplayName("새 스코프를 저장할시")
         class WhenNewScope {
-            private OAuth2Scope newDifferentScope;
+            private OAuth2ScopeId newDifferentScope;
 
             @BeforeEach
             void setup() {
-                this.newDifferentScope = mock(OAuth2Scope.class);
+                this.newDifferentScope = new OAuth2ScopeId("SCOPE-2");
             }
 
             @Test
@@ -313,12 +314,12 @@ class OAuth2ClientTest {
     @Nested
     @DisplayName("스코프 삭제")
     class RemoveScope {
-        private OAuth2Scope scope;
+        private OAuth2ScopeId scope;
         private OAuth2Client client;
 
         @BeforeEach
         void setup() {
-            this.scope = mock(OAuth2Scope.class);
+            this.scope = new OAuth2ScopeId("SCOPE-1");
             this.client = new OAuth2Client(RAW_CLIENT_ID, SECRET, CLIENT_NAME);
         }
 

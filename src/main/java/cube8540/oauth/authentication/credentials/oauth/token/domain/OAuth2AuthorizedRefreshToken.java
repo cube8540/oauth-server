@@ -1,7 +1,6 @@
 package cube8540.oauth.authentication.credentials.oauth.token.domain;
 
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,7 +12,6 @@ import java.time.LocalDateTime;
 @Getter
 @ToString
 @EqualsAndHashCode(callSuper = false)
-@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class OAuth2AuthorizedRefreshToken extends AbstractAggregateRoot<OAuth2AuthorizedRefreshToken> {
 
@@ -21,4 +19,12 @@ public class OAuth2AuthorizedRefreshToken extends AbstractAggregateRoot<OAuth2Au
 
     private LocalDateTime expiration;
 
+    public OAuth2AuthorizedRefreshToken(OAuth2TokenIdGenerator tokenIdGenerator, LocalDateTime expiration) {
+        this.tokenId = tokenIdGenerator.extractTokenValue();
+        this.expiration = expiration;
+    }
+
+    public boolean isExpired() {
+        return this.expiration.isBefore(LocalDateTime.now());
+    }
 }

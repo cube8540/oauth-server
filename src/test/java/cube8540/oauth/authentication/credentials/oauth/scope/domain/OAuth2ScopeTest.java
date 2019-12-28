@@ -1,5 +1,7 @@
-package cube8540.oauth.authentication.credentials.oauth.client.domain;
+package cube8540.oauth.authentication.credentials.oauth.scope.domain;
 
+import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2Scope;
+import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
