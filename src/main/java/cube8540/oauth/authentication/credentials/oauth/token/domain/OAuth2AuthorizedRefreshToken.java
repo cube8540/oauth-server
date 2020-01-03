@@ -20,7 +20,7 @@ public class OAuth2AuthorizedRefreshToken extends AbstractAggregateRoot<OAuth2Au
     private LocalDateTime expiration;
 
     public OAuth2AuthorizedRefreshToken(OAuth2TokenIdGenerator tokenIdGenerator, LocalDateTime expiration) {
-        this.tokenId = tokenIdGenerator.extractTokenValue();
+        this.tokenId = tokenIdGenerator.generateTokenValue();
         this.expiration = expiration;
     }
 

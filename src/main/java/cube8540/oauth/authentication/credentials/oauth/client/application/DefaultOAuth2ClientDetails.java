@@ -1,11 +1,11 @@
 package cube8540.oauth.authentication.credentials.oauth.client.application;
 
-import cube8540.oauth.authentication.credentials.oauth.OAuth2GrantType;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2Client;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import org.springframework.security.oauth2.core.AuthorizationGrantType;
 
 import java.net.URI;
 import java.util.Collections;
@@ -19,7 +19,7 @@ public class DefaultOAuth2ClientDetails implements OAuth2ClientDetails {
     private String clientSecret;
     private String clientName;
     private Set<URI> registeredRedirectURI;
-    private Set<OAuth2GrantType> authorizedGrantType;
+    private Set<AuthorizationGrantType> authorizedGrantType;
     private Set<OAuth2ScopeId> scope;
     private Integer accessTokenValiditySeconds;
     private Integer refreshTokenValiditySeconds;
@@ -56,7 +56,7 @@ public class DefaultOAuth2ClientDetails implements OAuth2ClientDetails {
     }
 
     @Override
-    public Set<OAuth2GrantType> authorizedGrantType() {
+    public Set<AuthorizationGrantType> authorizedGrantType() {
         return authorizedGrantType;
     }
 

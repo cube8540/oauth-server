@@ -35,7 +35,7 @@ class OAuth2AuthorizedRefreshTokenTest {
 
         @BeforeEach
         void setup() {
-            when(tokenIdGenerator.extractTokenValue()).thenReturn(TOKEN_ID);
+            when(tokenIdGenerator.generateTokenValue()).thenReturn(TOKEN_ID);
             this.refreshToken = new OAuth2AuthorizedRefreshToken(tokenIdGenerator, NOT_EXPIRED_EXPIRATION);
         }
 
@@ -60,7 +60,7 @@ class OAuth2AuthorizedRefreshTokenTest {
 
         @BeforeEach
         void setup() {
-            when(tokenIdGenerator.extractTokenValue()).thenReturn(TOKEN_ID);
+            when(tokenIdGenerator.generateTokenValue()).thenReturn(TOKEN_ID);
         }
 
         @Nested

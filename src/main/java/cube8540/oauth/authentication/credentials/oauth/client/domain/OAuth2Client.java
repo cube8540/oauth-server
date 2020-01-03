@@ -1,6 +1,5 @@
 package cube8540.oauth.authentication.credentials.oauth.client.domain;
 
-import cube8540.oauth.authentication.credentials.oauth.OAuth2GrantType;
 import cube8540.oauth.authentication.credentials.oauth.client.converter.OAuth2ClientGrantTypeConverter;
 import cube8540.oauth.authentication.credentials.oauth.client.converter.OAuth2ClientRedirectURIConverter;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
@@ -10,6 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.springframework.data.domain.AbstractAggregateRoot;
+import org.springframework.security.oauth2.core.AuthorizationGrantType;
 
 import javax.persistence.AttributeOverride;
 import javax.persistence.CollectionTable;
@@ -57,7 +57,7 @@ public class OAuth2Client extends AbstractAggregateRoot<OAuth2Client> {
     @Column(name = "grant_type", length = 32, nullable = false)
     @CollectionTable(name = "oauth2_client_grant_type", joinColumns = @JoinColumn(name = "client_id", nullable = false))
     @Convert(converter = OAuth2ClientGrantTypeConverter.class)
-    private Set<OAuth2GrantType> grantType;
+    private Set<AuthorizationGrantType> grantType;
 
     @ElementCollection
     @CollectionTable(name = "oauth2_client_scope", joinColumns = @JoinColumn(name = "client_id", nullable = false))
@@ -90,14 +90,14 @@ public class OAuth2Client extends AbstractAggregateRoot<OAuth2Client> {
                 .ifPresent(uris -> uris.remove(redirectURI));
     }
 
-    public void addGrantType(OAuth2GrantType grantType) {
+    public void addGrantType(AuthorizationGrantType grantType) {
         if (this.grantType == null) {
             this.grantType = new HashSet<>();
         }
         this.grantType.add(grantType);
     }
 
-    public void removeGrantType(OAuth2GrantType grantType) {
+    public void removeGrantType(AuthorizationGrantType grantType) {
         Optional.ofNullable(this.grantType)
                 .ifPresent(types -> types.remove(grantType));
     }

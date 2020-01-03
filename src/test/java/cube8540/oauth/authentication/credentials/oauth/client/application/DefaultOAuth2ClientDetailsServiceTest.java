@@ -1,6 +1,5 @@
 package cube8540.oauth.authentication.credentials.oauth.client.application;
 
-import cube8540.oauth.authentication.credentials.oauth.OAuth2GrantType;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetailsService;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2Client;
@@ -12,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.oauth2.core.AuthorizationGrantType;
 
 import java.net.URI;
 import java.time.Duration;
@@ -39,12 +39,12 @@ class DefaultOAuth2ClientDetailsServiceTest {
     private static final Set<URI> REGISTERED_REDIRECT_URI = new HashSet<>(Arrays.asList(
             URI.create("http://localhost:80"), URI.create("http://localhost:81"), URI.create("http://localhost:82")));
 
-    private static final Set<OAuth2GrantType> AUTHORIZED_GRANT_TYPE = new HashSet<>(Arrays.asList(
-            OAuth2GrantType.AUTHORIZATION_CODE,
-            OAuth2GrantType.CLIENT_CREDENTIALS,
-            OAuth2GrantType.IMPLICIT,
-            OAuth2GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS,
-            OAuth2GrantType.REFRESH_TOKEN));
+    private static final Set<AuthorizationGrantType> AUTHORIZED_GRANT_TYPE = new HashSet<>(Arrays.asList(
+            AuthorizationGrantType.AUTHORIZATION_CODE,
+            AuthorizationGrantType.CLIENT_CREDENTIALS,
+            AuthorizationGrantType.IMPLICIT,
+            AuthorizationGrantType.PASSWORD,
+            AuthorizationGrantType.REFRESH_TOKEN));
 
     private static final Set<OAuth2ScopeId> SCOPE = new HashSet<>(Arrays.asList(
             new OAuth2ScopeId("SCOPE-1"),
@@ -143,11 +143,11 @@ class DefaultOAuth2ClientDetailsServiceTest {
             void shouldReturnsClientGrantType() {
                 OAuth2ClientDetails result = service.loadClientDetailsByClientId(RAW_CLIENT_ID);
 
-                assertTrue(result.authorizedGrantType().contains(OAuth2GrantType.AUTHORIZATION_CODE));
-                assertTrue(result.authorizedGrantType().contains(OAuth2GrantType.CLIENT_CREDENTIALS));
-                assertTrue(result.authorizedGrantType().contains(OAuth2GrantType.IMPLICIT));
-                assertTrue(result.authorizedGrantType().contains(OAuth2GrantType.REFRESH_TOKEN));
-                assertTrue(result.authorizedGrantType().contains(OAuth2GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS));
+                assertTrue(result.authorizedGrantType().contains(AuthorizationGrantType.AUTHORIZATION_CODE));
+                assertTrue(result.authorizedGrantType().contains(AuthorizationGrantType.CLIENT_CREDENTIALS));
+                assertTrue(result.authorizedGrantType().contains(AuthorizationGrantType.IMPLICIT));
+                assertTrue(result.authorizedGrantType().contains(AuthorizationGrantType.REFRESH_TOKEN));
+                assertTrue(result.authorizedGrantType().contains(AuthorizationGrantType.PASSWORD));
             }
 
             @Test

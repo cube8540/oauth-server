@@ -1,7 +1,7 @@
 package cube8540.oauth.authentication.credentials.oauth.client;
 
-import cube8540.oauth.authentication.credentials.oauth.OAuth2GrantType;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
+import org.springframework.security.oauth2.core.AuthorizationGrantType;
 
 import java.net.URI;
 import java.util.Set;
@@ -16,7 +16,7 @@ public interface OAuth2ClientDetails {
 
     Set<URI> registeredRedirectURI();
 
-    Set<OAuth2GrantType> authorizedGrantType();
+    Set<AuthorizationGrantType> authorizedGrantType();
 
     Set<OAuth2ScopeId> scope();
 
