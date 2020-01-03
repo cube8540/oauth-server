@@ -1,7 +1,7 @@
 package cube8540.oauth.authentication.credentials.oauth.client.domain;
 
-import cube8540.oauth.authentication.credentials.oauth.client.converter.OAuth2ClientGrantTypeConverter;
-import cube8540.oauth.authentication.credentials.oauth.client.converter.OAuth2ClientRedirectURIConverter;
+import cube8540.oauth.authentication.credentials.oauth.client.infra.converter.OAuth2ClientGrantTypeConverter;
+import cube8540.oauth.authentication.credentials.oauth.client.infra.converter.OAuth2ClientRedirectURIConverter;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;

@@ -1,4 +1,4 @@
-package cube8540.oauth.authentication.credentials.oauth.client.converter;
+package cube8540.oauth.authentication.credentials.oauth.client.infra.converter;
 
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 

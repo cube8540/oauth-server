@@ -1,4 +1,4 @@
-package cube8540.oauth.authentication.credentials.oauth.client.converter;
+package cube8540.oauth.authentication.credentials.oauth.client.infra.converter;
 
 import javax.persistence.AttributeConverter;
 import java.net.URI;
