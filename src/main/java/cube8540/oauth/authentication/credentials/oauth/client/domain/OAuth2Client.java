@@ -17,6 +17,7 @@ import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.ElementCollection;
+import javax.persistence.Embedded;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -42,6 +43,7 @@ public class OAuth2Client extends AbstractAggregateRoot<OAuth2Client> {
     @AttributeOverride(name = "value", column = @Column(name = "client_id", length = 32))
     private OAuth2ClientId clientId;
 
+    @Embedded
     @Target(OAuth2ClientDefaultSecret.class)
     @AttributeOverride(name = "secret", column = @Column(name = "client_secret", length = 64, nullable = false))
     private OAuth2ClientSecret secret;

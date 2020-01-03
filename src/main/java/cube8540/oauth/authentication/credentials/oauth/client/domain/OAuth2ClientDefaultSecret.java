@@ -3,13 +3,17 @@ package cube8540.oauth.authentication.credentials.oauth.client.domain;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
+import javax.persistence.Access;
+import javax.persistence.AccessType;
 import javax.persistence.Embeddable;
 import javax.persistence.Transient;
+import java.io.Serializable;
 
 @ToString
 @EqualsAndHashCode
 @Embeddable
-public class OAuth2ClientDefaultSecret implements OAuth2ClientSecret {
+@Access(AccessType.FIELD)
+public class OAuth2ClientDefaultSecret implements OAuth2ClientSecret, Serializable {
 
     private String secret;
 
