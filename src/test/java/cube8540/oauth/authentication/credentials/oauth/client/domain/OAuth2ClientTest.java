@@ -13,14 +13,27 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @DisplayName("OAuth2 클라이언트 테스트")
 class OAuth2ClientTest {
 
     private static final String RAW_CLIENT_ID = "CLIENT-ID";
     private static final OAuth2ClientId CLIENT_ID = new OAuth2ClientId(RAW_CLIENT_ID);
-    private static final String SECRET = "SECRET";
+
+    private static final String RAW_SECRET = "SECRET";
+    private static final String RAW_ENCODING_SECRET = "ENCODING-SECRET";
+
     private static final String CLIENT_NAME = "CLIENT_NAME";
+
+    private OAuth2ClientSecretEncoder encoder;
+
+    @BeforeEach
+    void setup() {
+        this.encoder = mock(OAuth2ClientSecretEncoder.class);
+        when(encoder.encoding(RAW_SECRET)).thenReturn(RAW_ENCODING_SECRET);
+    }
 
     @Nested
     @DisplayName("OAuth2 클라이언트 생성")
@@ -30,7 +43,7 @@ class OAuth2ClientTest {
 
         @BeforeEach
         void setup() {
-            this.client = new OAuth2Client(RAW_CLIENT_ID, SECRET, CLIENT_NAME);
+            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET, CLIENT_NAME, encoder);
         }
 
         @Test
@@ -40,9 +53,9 @@ class OAuth2ClientTest {
         }
 
         @Test
-        @DisplayName("인자로 받은 클라이언트 패스워드를 저장해야 한다.")
-        void shouldSaveGivenSecret() {
-            assertEquals(SECRET, client.getSecret());
+        @DisplayName("인자로 받은 클라이언트 패스워드를 암호화 하여 저장해야 한다.")
+        void shouldSaveEncryptedGivenSecret() {
+            assertEquals(RAW_ENCODING_SECRET, client.getSecret().getSecret());
         }
 
         @Test
@@ -72,7 +85,7 @@ class OAuth2ClientTest {
 
         @BeforeEach
         void setup() {
-            this.client = new OAuth2Client(RAW_CLIENT_ID, SECRET, CLIENT_NAME);
+            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET, CLIENT_NAME, encoder);
         }
 
         @Nested
@@ -126,7 +139,7 @@ class OAuth2ClientTest {
 
         @BeforeEach
         void setup() {
-            this.client = new OAuth2Client(RAW_CLIENT_ID, SECRET, CLIENT_NAME);
+            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET, CLIENT_NAME, encoder);
         }
 
         @Nested
@@ -165,7 +178,7 @@ class OAuth2ClientTest {
 
         @BeforeEach
         void setup() {
-            this.client = new OAuth2Client(RAW_CLIENT_ID, SECRET, CLIENT_NAME);
+            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET, CLIENT_NAME, encoder);
         }
 
         @Nested
@@ -218,7 +231,7 @@ class OAuth2ClientTest {
 
         @BeforeEach
         void setup() {
-            this.client = new OAuth2Client(RAW_CLIENT_ID, SECRET, CLIENT_NAME);
+            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET, CLIENT_NAME, encoder);
         }
 
         @Nested
@@ -259,7 +272,7 @@ class OAuth2ClientTest {
         @BeforeEach
         void setup(){
             this.newScope = new OAuth2ScopeId("SCOPE-1");
-            this.client = new OAuth2Client(RAW_CLIENT_ID, SECRET, CLIENT_NAME);
+            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET, CLIENT_NAME, encoder);
         }
 
         @Nested
@@ -320,7 +333,7 @@ class OAuth2ClientTest {
         @BeforeEach
         void setup() {
             this.scope = new OAuth2ScopeId("SCOPE-1");
-            this.client = new OAuth2Client(RAW_CLIENT_ID, SECRET, CLIENT_NAME);
+            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET, CLIENT_NAME, encoder);
         }
 
         @Nested

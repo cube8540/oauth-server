@@ -2,6 +2,7 @@ package cube8540.oauth.authentication.credentials.oauth.client.application;
 
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetailsService;
+import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientDefaultSecret;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2Client;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientNotFoundException;
@@ -33,7 +34,8 @@ class DefaultOAuth2ClientDetailsServiceTest {
     private static final String RAW_CLIENT_ID = "CLIENT-ID";
     private static final OAuth2ClientId CLIENT_ID = new OAuth2ClientId(RAW_CLIENT_ID);
 
-    private static final String SECRET = "CLIENT-SECRET";
+    private static final String RAW_SECRET = "SECRET";
+    private static final OAuth2ClientDefaultSecret SECRET = new OAuth2ClientDefaultSecret(RAW_SECRET);
     private static final String CLIENT_NAME = "CLIENT-NAME";
 
     private static final Set<URI> REGISTERED_REDIRECT_URI = new HashSet<>(Arrays.asList(
@@ -117,7 +119,7 @@ class DefaultOAuth2ClientDetailsServiceTest {
             void shouldReturnsSecret() {
                 OAuth2ClientDetails result = service.loadClientDetailsByClientId(RAW_CLIENT_ID);
 
-                assertEquals(SECRET, result.clientSecret());
+                assertEquals(RAW_SECRET, result.clientSecret());
             }
 
             @Test
