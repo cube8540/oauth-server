@@ -1,4 +1,4 @@
-package cube8540.oauth.authentication.credentials.oauth.client;
+package cube8540.oauth.authentication.credentials.oauth.client.provider;
 
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
