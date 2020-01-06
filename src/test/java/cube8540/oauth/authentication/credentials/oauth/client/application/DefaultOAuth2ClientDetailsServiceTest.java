@@ -2,17 +2,17 @@ package cube8540.oauth.authentication.credentials.oauth.client.application;
 
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetailsService;
+import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientDefaultSecret;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2Client;
-import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientGrantType;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientNotFoundException;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientRepository;
-import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2Scope;
-import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ScopeId;
+import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.oauth2.core.AuthorizationGrantType;
 
 import java.net.URI;
 import java.time.Duration;
@@ -34,23 +34,24 @@ class DefaultOAuth2ClientDetailsServiceTest {
     private static final String RAW_CLIENT_ID = "CLIENT-ID";
     private static final OAuth2ClientId CLIENT_ID = new OAuth2ClientId(RAW_CLIENT_ID);
 
-    private static final String SECRET = "CLIENT-SECRET";
+    private static final String RAW_SECRET = "SECRET";
+    private static final OAuth2ClientDefaultSecret SECRET = new OAuth2ClientDefaultSecret(RAW_SECRET);
     private static final String CLIENT_NAME = "CLIENT-NAME";
 
     private static final Set<URI> REGISTERED_REDIRECT_URI = new HashSet<>(Arrays.asList(
             URI.create("http://localhost:80"), URI.create("http://localhost:81"), URI.create("http://localhost:82")));
 
-    private static final Set<OAuth2ClientGrantType> AUTHORIZED_GRANT_TYPE = new HashSet<>(Arrays.asList(
-            OAuth2ClientGrantType.AUTHORIZATION_CODE,
-            OAuth2ClientGrantType.CLIENT_CREDENTIALS,
-            OAuth2ClientGrantType.IMPLICIT,
-            OAuth2ClientGrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS,
-            OAuth2ClientGrantType.REFRESH_TOKEN));
+    private static final Set<AuthorizationGrantType> AUTHORIZED_GRANT_TYPE = new HashSet<>(Arrays.asList(
+            AuthorizationGrantType.AUTHORIZATION_CODE,
+            AuthorizationGrantType.CLIENT_CREDENTIALS,
+            AuthorizationGrantType.IMPLICIT,
+            AuthorizationGrantType.PASSWORD,
+            AuthorizationGrantType.REFRESH_TOKEN));
 
-    private static final Set<OAuth2Scope> SCOPE = new HashSet<>(Arrays.asList(
-            makeScope("SCOPE-1"),
-            makeScope("SCOPE-2"),
-            makeScope("SCOPE-3")));
+    private static final Set<OAuth2ScopeId> SCOPE = new HashSet<>(Arrays.asList(
+            new OAuth2ScopeId("SCOPE-1"),
+            new OAuth2ScopeId("SCOPE-2"),
+            new OAuth2ScopeId("SCOPE-3")));
 
     private static final Duration ACCESS_TOKEN_VALIDITY = Duration.ofMinutes(10);
 
@@ -60,15 +61,6 @@ class DefaultOAuth2ClientDetailsServiceTest {
 
     private OAuth2ClientRepository repository;
     private OAuth2ClientDetailsService service;
-
-    private static OAuth2Scope makeScope(String scopeId) {
-        OAuth2ScopeId id = new OAuth2ScopeId(scopeId);
-
-        OAuth2Scope scope = mock(OAuth2Scope.class);
-        when(scope.getId()).thenReturn(id);
-
-        return scope;
-    }
 
     @BeforeEach
     void setup() {
@@ -127,7 +119,7 @@ class DefaultOAuth2ClientDetailsServiceTest {
             void shouldReturnsSecret() {
                 OAuth2ClientDetails result = service.loadClientDetailsByClientId(RAW_CLIENT_ID);
 
-                assertEquals(SECRET, result.clientSecret());
+                assertEquals(RAW_SECRET, result.clientSecret());
             }
 
             @Test
@@ -153,11 +145,11 @@ class DefaultOAuth2ClientDetailsServiceTest {
             void shouldReturnsClientGrantType() {
                 OAuth2ClientDetails result = service.loadClientDetailsByClientId(RAW_CLIENT_ID);
 
-                assertTrue(result.authorizedGrantType().contains(OAuth2ClientGrantType.AUTHORIZATION_CODE));
-                assertTrue(result.authorizedGrantType().contains(OAuth2ClientGrantType.CLIENT_CREDENTIALS));
-                assertTrue(result.authorizedGrantType().contains(OAuth2ClientGrantType.IMPLICIT));
-                assertTrue(result.authorizedGrantType().contains(OAuth2ClientGrantType.REFRESH_TOKEN));
-                assertTrue(result.authorizedGrantType().contains(OAuth2ClientGrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS));
+                assertTrue(result.authorizedGrantType().contains(AuthorizationGrantType.AUTHORIZATION_CODE));
+                assertTrue(result.authorizedGrantType().contains(AuthorizationGrantType.CLIENT_CREDENTIALS));
+                assertTrue(result.authorizedGrantType().contains(AuthorizationGrantType.IMPLICIT));
+                assertTrue(result.authorizedGrantType().contains(AuthorizationGrantType.REFRESH_TOKEN));
+                assertTrue(result.authorizedGrantType().contains(AuthorizationGrantType.PASSWORD));
             }
 
             @Test
