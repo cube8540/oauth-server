@@ -1,6 +1,5 @@
 package cube8540.oauth.authentication.credentials.oauth.client.provider;
 
-import cube8540.oauth.authentication.credentials.oauth.client.provider.ClientCredentialsRequestMatcher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

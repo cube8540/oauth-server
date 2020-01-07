@@ -1,6 +1,5 @@
 package cube8540.oauth.authentication.credentials.oauth.error;
 
-import cube8540.oauth.authentication.credentials.oauth.AbstractOAuth2AuthenticationException;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;

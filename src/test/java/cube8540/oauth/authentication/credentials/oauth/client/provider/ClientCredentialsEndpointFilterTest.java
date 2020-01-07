@@ -133,6 +133,7 @@ class ClientCredentialsEndpointFilterTest {
                 Authentication result = filter.attemptAuthentication(request, response);
                 verify(authenticationManager, times(1)).authenticate(authenticationCaptor.capture());
                 assertEquals(authentication, result);
+                assertEquals(ClientCredentialsToken.class, authenticationCaptor.getValue().getClass());
                 assertEquals(CLIENT_ID, authenticationCaptor.getValue().getPrincipal());
                 assertEquals(CLIENT_SECRET, authenticationCaptor.getValue().getCredentials());
             }
@@ -200,6 +201,7 @@ class ClientCredentialsEndpointFilterTest {
                     Authentication result = filter.attemptAuthentication(request, response);
                     verify(authenticationManager, times(1)).authenticate(authenticationCaptor.capture());
                     assertEquals(authentication, result);
+                    assertEquals(ClientCredentialsToken.class, authenticationCaptor.getValue().getClass());
                     assertEquals(CLIENT_ID, authenticationCaptor.getValue().getPrincipal());
                     assertEquals(CLIENT_SECRET, authenticationCaptor.getValue().getCredentials());
                 }
