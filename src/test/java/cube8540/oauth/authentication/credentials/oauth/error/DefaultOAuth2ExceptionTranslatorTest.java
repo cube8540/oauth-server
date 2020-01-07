@@ -1,6 +1,5 @@
 package cube8540.oauth.authentication.credentials.oauth.error;
 
-import cube8540.oauth.authentication.credentials.oauth.AbstractOAuth2AuthenticationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

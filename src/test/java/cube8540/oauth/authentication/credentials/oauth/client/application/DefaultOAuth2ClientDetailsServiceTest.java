@@ -2,8 +2,8 @@ package cube8540.oauth.authentication.credentials.oauth.client.application;
 
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetailsService;
-import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientDefaultSecret;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2Client;
+import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientDefaultSecret;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientNotFoundException;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientRepository;

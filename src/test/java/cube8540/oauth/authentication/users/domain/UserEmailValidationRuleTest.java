@@ -1,8 +1,5 @@
 package cube8540.oauth.authentication.users.domain;
 
-import cube8540.oauth.authentication.users.domain.User;
-import cube8540.oauth.authentication.users.domain.UserEmail;
-import cube8540.oauth.authentication.users.domain.UserEmailValidationRule;
 import cube8540.validator.core.ValidationError;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

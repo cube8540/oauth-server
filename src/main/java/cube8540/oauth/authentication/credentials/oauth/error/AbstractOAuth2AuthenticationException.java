@@ -1,4 +1,4 @@
-package cube8540.oauth.authentication.credentials.oauth;
+package cube8540.oauth.authentication.credentials.oauth.error;
 
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;

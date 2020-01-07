@@ -1,6 +1,6 @@
 package cube8540.oauth.authentication.credentials.oauth.client.provider;
 
-import cube8540.oauth.authentication.credentials.oauth.OAuth2BadClientCredentialsException;
+import cube8540.oauth.authentication.credentials.oauth.error.OAuth2BadClientCredentialsException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
