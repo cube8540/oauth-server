@@ -43,7 +43,7 @@ public class ClientCredentialsEndpointFilter extends AbstractAuthenticationProce
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
             throws AuthenticationException, IOException, ServletException {
         if (onlyPost && !request.getMethod().equalsIgnoreCase("POST")) {
-            throw new HttpRequestMethodNotSupportedException(request.getMethod() + " method is not supported");
+            throw new HttpRequestMethodNotSupportedException(request.getMethod(), new String[] {"POST"});
         }
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
