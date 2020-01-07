@@ -5,6 +5,7 @@ import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2Clien
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import org.springframework.security.core.CredentialsContainer;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 
 import java.net.URI;
@@ -13,7 +14,7 @@ import java.util.Set;
 
 @ToString
 @EqualsAndHashCode
-public class DefaultOAuth2ClientDetails implements OAuth2ClientDetails {
+public class DefaultOAuth2ClientDetails implements OAuth2ClientDetails, CredentialsContainer {
 
     private String clientId;
     private String clientSecret;
@@ -73,5 +74,10 @@ public class DefaultOAuth2ClientDetails implements OAuth2ClientDetails {
     @Override
     public Integer refreshTokenValiditySeconds() {
         return refreshTokenValiditySeconds;
+    }
+
+    @Override
+    public void eraseCredentials() {
+        this.clientSecret = null;
     }
 }

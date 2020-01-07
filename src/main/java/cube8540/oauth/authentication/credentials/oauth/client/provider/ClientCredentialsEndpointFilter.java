@@ -2,7 +2,6 @@ package cube8540.oauth.authentication.credentials.oauth.client.provider;
 
 import cube8540.oauth.authentication.credentials.oauth.OAuth2BadClientCredentialsException;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -56,7 +55,7 @@ public class ClientCredentialsEndpointFilter extends AbstractAuthenticationProce
         if (clientId == null) {
             throw new BadCredentialsException("no client credentials presented");
         }
-        return getAuthenticationManager().authenticate(new UsernamePasswordAuthenticationToken(clientId, clientSecret));
+        return getAuthenticationManager().authenticate(new ClientCredentialsToken(clientId, clientSecret));
     }
 
     @Override
