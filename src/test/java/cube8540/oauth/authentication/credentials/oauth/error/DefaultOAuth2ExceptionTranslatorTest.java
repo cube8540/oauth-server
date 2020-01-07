@@ -41,9 +41,9 @@ class DefaultOAuth2ExceptionTranslatorTest {
             this.error0 = new OAuth2Error(OAuth2ErrorCodes.INVALID_CLIENT);
             this.error1 = new OAuth2Error(OAuth2ErrorCodes.UNSUPPORTED_GRANT_TYPE);
 
-            when(exception0.getCode()).thenReturn(401);
+            when(exception0.getStatusCode()).thenReturn(401);
             when(exception0.getError()).thenReturn(error0);
-            when(exception1.getCode()).thenReturn(400);
+            when(exception1.getStatusCode()).thenReturn(400);
             when(exception1.getError()).thenReturn(error1);
         }
 
