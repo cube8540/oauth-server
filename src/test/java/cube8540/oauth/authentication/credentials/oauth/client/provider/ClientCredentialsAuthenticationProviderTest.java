@@ -2,9 +2,7 @@ package cube8540.oauth.authentication.credentials.oauth.client.provider;
 
 import cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientDetailsService;
-import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientDefaultSecret;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientNotFoundException;
-import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientSecretEncoder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -12,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Collections;
 
@@ -31,14 +30,14 @@ class ClientCredentialsAuthenticationProviderTest {
     private static final String ENCODING_CLIENT_SECRET = "ENCODING_CLIENT_SECRET";
 
     private OAuth2ClientDetailsService service;
-    private OAuth2ClientSecretEncoder encoder;
+    private PasswordEncoder encoder;
 
     private ClientCredentialsAuthenticationProvider provider;
 
     @BeforeEach
     void setup() {
         this.service = mock(OAuth2ClientDetailsService.class);
-        this.encoder = mock(OAuth2ClientSecretEncoder.class);
+        this.encoder = mock(PasswordEncoder.class);
         this.provider = new ClientCredentialsAuthenticationProvider(service, encoder);
     }
 
@@ -115,8 +114,7 @@ class ClientCredentialsAuthenticationProviderTest {
             class WhenPasswordNotMatched {
                 @BeforeEach
                 void setup() {
-                    when(encoder.matches(new OAuth2ClientDefaultSecret(ENCODING_CLIENT_SECRET), new OAuth2ClientDefaultSecret(CLIENT_SECRET)))
-                            .thenReturn(false);
+                    when(encoder.matches(ENCODING_CLIENT_SECRET,CLIENT_SECRET)).thenReturn(false);
                 }
 
                 @Test
@@ -131,8 +129,7 @@ class ClientCredentialsAuthenticationProviderTest {
             class WhenPasswordMatched {
                 @BeforeEach
                 void setup() {
-                    when(encoder.matches(new OAuth2ClientDefaultSecret(ENCODING_CLIENT_SECRET), new OAuth2ClientDefaultSecret(CLIENT_SECRET)))
-                            .thenReturn(true);
+                    when(encoder.matches(ENCODING_CLIENT_SECRET, CLIENT_SECRET)).thenReturn(true);
                 }
 
                 @Test
