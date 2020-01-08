@@ -127,15 +127,31 @@ class ClientCredentialsEndpointFilterTest {
 
             @Test
             @DisplayName("매개변수에서 받은 클라이언트의 아이디와 비밀번호로 인증을 진행해야 한다.")
-            void shouldAuthenticationByClientIdAndPassword() throws Exception {
+            void shouldAuthenticationByClientIdAndSecret() throws Exception {
                 ArgumentCaptor<Authentication> authenticationCaptor = ArgumentCaptor.forClass(Authentication.class);
 
-                Authentication result = filter.attemptAuthentication(request, response);
+                filter.attemptAuthentication(request, response);
                 verify(authenticationManager, times(1)).authenticate(authenticationCaptor.capture());
-                assertEquals(authentication, result);
-                assertEquals(ClientCredentialsToken.class, authenticationCaptor.getValue().getClass());
                 assertEquals(CLIENT_ID, authenticationCaptor.getValue().getPrincipal());
                 assertEquals(CLIENT_SECRET, authenticationCaptor.getValue().getCredentials());
+            }
+
+            @Test
+            @DisplayName("인증에 사용된 객체의 타입은 ClientCredentialsToken 타입이어야 한다.")
+            void shouldAuthenticationObjectIsClientCredentialsToken() throws Exception {
+                ArgumentCaptor<Authentication> authenticationCaptor = ArgumentCaptor.forClass(Authentication.class);
+
+                filter.attemptAuthentication(request, response);
+                verify(authenticationManager, times(1)).authenticate(authenticationCaptor.capture());
+                assertEquals(ClientCredentialsToken.class, authenticationCaptor.getValue().getClass());
+            }
+
+            @Test
+            @DisplayName("인증이 완료된 인증정보를 반환해야 한다.")
+            void shouldReturnsAuthenticationObject() throws Exception {
+                Authentication result = filter.attemptAuthentication(request, response);
+
+                assertEquals(authentication, result);
             }
 
             @Nested
@@ -195,15 +211,31 @@ class ClientCredentialsEndpointFilterTest {
 
                 @Test
                 @DisplayName("매개변수에서 받은 클라이언트의 아이디와 비밀번호로 인증을 진행해야 한다.")
-                void shouldAuthenticationByClientIdAndPassword() throws Exception {
+                void shouldAuthenticationByClientIdAndSecret() throws Exception {
                     ArgumentCaptor<Authentication> authenticationCaptor = ArgumentCaptor.forClass(Authentication.class);
 
-                    Authentication result = filter.attemptAuthentication(request, response);
+                    filter.attemptAuthentication(request, response);
                     verify(authenticationManager, times(1)).authenticate(authenticationCaptor.capture());
-                    assertEquals(authentication, result);
-                    assertEquals(ClientCredentialsToken.class, authenticationCaptor.getValue().getClass());
                     assertEquals(CLIENT_ID, authenticationCaptor.getValue().getPrincipal());
                     assertEquals(CLIENT_SECRET, authenticationCaptor.getValue().getCredentials());
+                }
+
+                @Test
+                @DisplayName("인증에 사용된 객체의 타입은 ClientCredentialsToken 타입이어야 한다.")
+                void shouldAuthenticationObjectIsClientCredentialsToken() throws Exception {
+                    ArgumentCaptor<Authentication> authenticationCaptor = ArgumentCaptor.forClass(Authentication.class);
+
+                    filter.attemptAuthentication(request, response);
+                    verify(authenticationManager, times(1)).authenticate(authenticationCaptor.capture());
+                    assertEquals(ClientCredentialsToken.class, authenticationCaptor.getValue().getClass());
+                }
+
+                @Test
+                @DisplayName("인증이 완료된 인증정보를 반환해야 한다.")
+                void shouldReturnsAuthenticationObject() throws Exception {
+                    Authentication result = filter.attemptAuthentication(request, response);
+
+                    assertEquals(authentication, result);
                 }
 
                 @Nested
