@@ -1,6 +1,5 @@
-package cube8540.oauth.authentication.credentials.oauth;
+package cube8540.oauth.authentication.credentials.oauth.error;
 
-import cube8540.oauth.authentication.credentials.oauth.error.AbstractOAuth2AuthenticationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -8,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DisplayName("OAuth2 인증 예외 추상 클래스 테스트")
 class AbstractOAuth2AuthenticationExceptionTest {

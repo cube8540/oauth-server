@@ -1,4 +1,4 @@
-package cube8540.oauth.authentication.credentials.oauth.token;
+package cube8540.oauth.authentication.credentials.oauth.token.application;
 
 import java.time.LocalDateTime;
 

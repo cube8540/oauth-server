@@ -1,4 +1,4 @@
-package cube8540.oauth.authentication.credentials.oauth.client;
+package cube8540.oauth.authentication.credentials.oauth.client.application;
 
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientRegistrationException;
 
