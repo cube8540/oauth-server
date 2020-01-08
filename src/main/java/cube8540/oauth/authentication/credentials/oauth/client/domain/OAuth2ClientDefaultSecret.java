@@ -48,6 +48,6 @@ public class OAuth2ClientDefaultSecret implements OAuth2ClientSecret, Serializab
 
     @Override
     public OAuth2ClientSecret encrypted(OAuth2ClientSecretEncoder encoder) {
-        return new OAuth2ClientDefaultSecret(encoder.encoding(secret), true);
+        return new OAuth2ClientDefaultSecret(encoder.encode(secret), true);
     }
 }

@@ -57,7 +57,7 @@ class OAuth2ClientDefaultSecretTest {
         @BeforeEach
         void setup() {
             this.secret = new OAuth2ClientDefaultSecret(SECRET);
-            when(encoder.encoding(SECRET)).thenReturn(ENCODING_SECRET);
+            when(encoder.encode(SECRET)).thenReturn(ENCODING_SECRET);
         }
 
         @Test

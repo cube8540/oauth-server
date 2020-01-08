@@ -37,6 +37,6 @@ class UserEncryptedPassword implements UserPassword, Serializable {
 
     @Override
     public UserPassword encrypted(UserPasswordEncoder encoder) {
-        return new UserEncryptedPassword(encoder.encoding(password));
+        return new UserEncryptedPassword(encoder.encode(password));
     }
 }

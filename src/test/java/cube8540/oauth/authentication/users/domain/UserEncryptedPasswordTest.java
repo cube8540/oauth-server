@@ -62,7 +62,7 @@ class UserEncryptedPasswordTest {
         @BeforeEach
         void setup() {
             this.password = new UserEncryptedPassword(PASSWORD);
-            when(encoder.encoding(PASSWORD)).thenReturn(ENCRYPTED_PASSWORD);
+            when(encoder.encode(PASSWORD)).thenReturn(ENCRYPTED_PASSWORD);
         }
 
         @Test

@@ -1,8 +1,8 @@
 package cube8540.oauth.authentication.users.domain;
 
-public interface UserPasswordEncoder {
+import org.springframework.security.crypto.password.PasswordEncoder;
 
-    String encoding(String password);
+public interface UserPasswordEncoder extends PasswordEncoder {
 
     boolean matches(UserPassword encryptedPassword, UserPassword rawPassword);
 

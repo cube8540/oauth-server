@@ -32,7 +32,7 @@ class OAuth2ClientTest {
     @BeforeEach
     void setup() {
         this.encoder = mock(OAuth2ClientSecretEncoder.class);
-        when(encoder.encoding(RAW_SECRET)).thenReturn(RAW_ENCODING_SECRET);
+        when(encoder.encode(RAW_SECRET)).thenReturn(RAW_ENCODING_SECRET);
     }
 
     @Nested

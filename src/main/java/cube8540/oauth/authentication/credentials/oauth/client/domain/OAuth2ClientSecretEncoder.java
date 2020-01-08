@@ -1,8 +1,8 @@
 package cube8540.oauth.authentication.credentials.oauth.client.domain;
 
-public interface OAuth2ClientSecretEncoder {
+import org.springframework.security.crypto.password.PasswordEncoder;
 
-    String encoding(String secret);
+public interface OAuth2ClientSecretEncoder extends PasswordEncoder {
 
     boolean matches(OAuth2ClientSecret encryptedSecret, OAuth2ClientSecret rawSecret);
 

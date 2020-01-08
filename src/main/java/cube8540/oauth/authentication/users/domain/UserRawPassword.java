@@ -38,7 +38,7 @@ public class UserRawPassword implements UserPassword, Serializable {
 
     @Override
     public UserPassword encrypted(UserPasswordEncoder encoder) {
-        return new UserEncryptedPassword(encoder.encoding(password));
+        return new UserEncryptedPassword(encoder.encode(password));
     }
 
     private boolean matchesPattern(String pattern) {

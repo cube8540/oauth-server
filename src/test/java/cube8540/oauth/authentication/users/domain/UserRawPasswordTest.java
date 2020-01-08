@@ -210,7 +210,7 @@ class UserRawPasswordTest {
 
         @BeforeEach
         void setup() {
-            when(encoder.encoding(PASSWORD)).thenReturn(ENCRYPTED_PASSWORD);
+            when(encoder.encode(PASSWORD)).thenReturn(ENCRYPTED_PASSWORD);
 
             this.password = new UserRawPassword(PASSWORD);
         }

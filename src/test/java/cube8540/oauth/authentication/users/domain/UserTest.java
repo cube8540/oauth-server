@@ -45,9 +45,9 @@ class UserTest {
         this.encoder = mock(UserPasswordEncoder.class);
         this.keyGenerator = mock(UserCredentialsKeyGenerator.class);
 
-        when(encoder.encoding(RAW_PASSWORD)).thenReturn(RAW_ENCRYPTED_PASSWORD);
+        when(encoder.encode(RAW_PASSWORD)).thenReturn(RAW_ENCRYPTED_PASSWORD);
         when(encoder.matches(ENCRYPTED_PASSWORD, PASSWORD)).thenReturn(Boolean.TRUE);
-        when(encoder.encoding(RAW_CHANGE_PASSWORD)).thenReturn(RAW_CHANGE_ENCRYPTED_PASSWORD);
+        when(encoder.encode(RAW_CHANGE_PASSWORD)).thenReturn(RAW_CHANGE_ENCRYPTED_PASSWORD);
         when(encoder.matches(CHANGE_ENCRYPTED_PASSWORD, CHANGE_PASSWORD)).thenReturn(Boolean.TRUE);
     }
 
