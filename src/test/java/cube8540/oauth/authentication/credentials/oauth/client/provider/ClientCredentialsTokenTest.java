@@ -1,5 +1,6 @@
 package cube8540.oauth.authentication.credentials.oauth.client.provider;
 
+import cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientDetails;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -19,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @DisplayName("클라이언트 인증 토큰 테스트")
 class ClientCredentialsTokenTest {
@@ -168,6 +170,49 @@ class ClientCredentialsTokenTest {
             assertNull(token1.getCredentials());
             assertNotNull(token1.getPrincipal());
             assertNotNull(token1.getDetails());
+        }
+    }
+
+    @Nested
+    @DisplayName("인증 정보 이름 반환")
+    class GetPrincipalName {
+
+        @Nested
+        @DisplayName("인증 정보가 String일시")
+        class WhenPrincipalNameString {
+
+            private ClientCredentialsToken token;
+
+            @BeforeEach
+            void setup() {
+                this.token = new ClientCredentialsToken(CLIENT_ID, CLIENT_SECRET);
+            }
+
+            @Test
+            @DisplayName("저장된 인증 정보의 이름을 반환한다.")
+            void shouldReturnsPrincipalName() {
+                assertEquals(CLIENT_ID, token.getName());
+            }
+        }
+
+        @Nested
+        @DisplayName("인증 정보가 ClientDetails 일시")
+        class WhenPrincipalNameClientDetails {
+            private ClientCredentialsToken token;
+            private OAuth2ClientDetails clientDetails;
+
+            @BeforeEach
+            void setup() {
+                this.clientDetails = mock(OAuth2ClientDetails.class);
+                this.token = new ClientCredentialsToken(clientDetails, CLIENT_SECRET);
+                when(clientDetails.clientId()).thenReturn(CLIENT_ID);
+            }
+
+            @Test
+            @DisplayName("OAuth2ClientDetails에 저장된 클라이언트 아이디를 반환해야 한다.")
+            void shouldReturnsOAuth2ClientDetailsClientId() {
+                assertEquals(CLIENT_ID, token.getName());
+            }
         }
     }
 }

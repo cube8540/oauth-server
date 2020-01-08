@@ -1,5 +1,6 @@
 package cube8540.oauth.authentication.credentials.oauth.client.provider;
 
+import cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientDetails;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 
@@ -32,6 +33,17 @@ public class ClientCredentialsToken extends AbstractAuthenticationToken {
     @Override
     public Object getPrincipal() {
         return principal;
+    }
+
+    @Override
+    public String getName() {
+        if (principal instanceof String) {
+            return principal.toString();
+        } else if (principal instanceof OAuth2ClientDetails) {
+            return ((OAuth2ClientDetails) principal).clientId();
+        } else {
+            return super.getName();
+        }
     }
 
     @Override
