@@ -1,5 +1,6 @@
-package cube8540.oauth.authentication.credentials.oauth.error;
+package cube8540.oauth.authentication.credentials.oauth.code.domain;
 
+import cube8540.oauth.authentication.credentials.oauth.error.AbstractOAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 

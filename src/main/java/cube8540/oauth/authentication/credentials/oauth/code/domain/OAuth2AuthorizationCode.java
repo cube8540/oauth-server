@@ -1,9 +1,7 @@
-package cube8540.oauth.authentication.credentials.oauth.token.domain;
+package cube8540.oauth.authentication.credentials.oauth.code.domain;
 
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
-import cube8540.oauth.authentication.credentials.oauth.error.AuthorizationCodeExpiredException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidClientException;
-import cube8540.oauth.authentication.credentials.oauth.error.RedirectMismatchException;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import cube8540.oauth.authentication.users.domain.UserEmail;
 import lombok.AccessLevel;

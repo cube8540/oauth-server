@@ -1,7 +1,7 @@
 package cube8540.oauth.authentication.credentials.oauth.client.domain;
 
-import cube8540.oauth.authentication.credentials.oauth.client.infra.converter.OAuth2ClientGrantTypeConverter;
-import cube8540.oauth.authentication.credentials.oauth.client.infra.converter.OAuth2ClientRedirectURIConverter;
+import cube8540.oauth.authentication.credentials.oauth.converter.AuthorizationGrantTypeConverter;
+import cube8540.oauth.authentication.credentials.oauth.converter.RedirectUriConverter;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -54,13 +54,13 @@ public class OAuth2Client extends AbstractAggregateRoot<OAuth2Client> {
     @ElementCollection
     @Column(name = "redirect_uri", length = 128, nullable = false)
     @CollectionTable(name = "oauth2_client_redirect_uri", joinColumns = @JoinColumn(name = "client_id", nullable = false))
-    @Convert(converter = OAuth2ClientRedirectURIConverter.class)
+    @Convert(converter = RedirectUriConverter.class)
     private Set<URI> redirectURI;
 
     @ElementCollection
     @Column(name = "grant_type", length = 32, nullable = false)
     @CollectionTable(name = "oauth2_client_grant_type", joinColumns = @JoinColumn(name = "client_id", nullable = false))
-    @Convert(converter = OAuth2ClientGrantTypeConverter.class)
+    @Convert(converter = AuthorizationGrantTypeConverter.class)
     private Set<AuthorizationGrantType> grantType;
 
     @ElementCollection

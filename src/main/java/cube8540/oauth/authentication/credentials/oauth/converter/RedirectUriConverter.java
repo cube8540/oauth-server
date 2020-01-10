@@ -1,9 +1,9 @@
-package cube8540.oauth.authentication.credentials.oauth.client.infra.converter;
+package cube8540.oauth.authentication.credentials.oauth.converter;
 
 import javax.persistence.AttributeConverter;
 import java.net.URI;
 
-public class OAuth2ClientRedirectURIConverter implements AttributeConverter<URI, String> {
+public class RedirectUriConverter implements AttributeConverter<URI, String> {
     @Override
     public String convertToDatabaseColumn(URI attribute) {
         return attribute.toString();

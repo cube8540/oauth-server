@@ -1,10 +1,10 @@
-package cube8540.oauth.authentication.credentials.oauth.client.infra.converter;
+package cube8540.oauth.authentication.credentials.oauth.converter;
 
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 
 import javax.persistence.AttributeConverter;
 
-public class OAuth2ClientGrantTypeConverter implements AttributeConverter<AuthorizationGrantType, String> {
+public class AuthorizationGrantTypeConverter implements AttributeConverter<AuthorizationGrantType, String> {
     @Override
     public String convertToDatabaseColumn(AuthorizationGrantType attribute) {
         return attribute.getValue();
