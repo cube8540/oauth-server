@@ -27,6 +27,9 @@ class OAuth2AuthorizedAccessTokenTest {
     private static final String RAW_TOKEN_ID = "TOKEN-ID";
     private static final OAuth2TokenId TOKEN_ID = new OAuth2TokenId(RAW_TOKEN_ID);
 
+    private static final String RAW_REFRESH_TOKEN_ID = "REFRESH_TOKEN-ID";
+    private static final OAuth2TokenId REFRESH_TOKEN_ID = new OAuth2TokenId(RAW_REFRESH_TOKEN_ID);
+
     private static final String RAW_EMAIL = "email@email.com";
     private static final UserEmail EMAIL = new UserEmail(RAW_EMAIL);
 
@@ -45,12 +48,10 @@ class OAuth2AuthorizedAccessTokenTest {
     ));
 
     private OAuth2TokenIdGenerator tokenIdGenerator;
-    private OAuth2AuthorizedRefreshToken refreshToken;
 
     @BeforeEach
     void setup() {
         this.tokenIdGenerator = mock(OAuth2TokenIdGenerator.class);
-        this.refreshToken = mock(OAuth2AuthorizedRefreshToken.class);
 
         when(tokenIdGenerator.generateTokenValue()).thenReturn(TOKEN_ID);
     }
@@ -65,7 +66,7 @@ class OAuth2AuthorizedAccessTokenTest {
         void setup() {
             this.accessToken = OAuth2AuthorizedAccessToken.builder(tokenIdGenerator)
                     .email(EMAIL).client(CLIENT_ID).tokenGrantType(GRANT_TYPE).expiration(NOT_EXPIRED_EXPIRATION)
-                    .scope(SCOPE_ID).refreshToken(refreshToken).build();
+                    .scope(SCOPE_ID).build();
         }
 
         @Test
@@ -99,12 +100,6 @@ class OAuth2AuthorizedAccessTokenTest {
         }
 
         @Test
-        @DisplayName("인자로 받은 리플래쉬 토큰을 저장해야 한다.")
-        void shouldSaveGivenRefreshToken() {
-            assertEquals(refreshToken, accessToken.getRefreshToken());
-        }
-
-        @Test
         @DisplayName("인자로 받은 스코프를 저장해야 한다.")
         void shouldSaveGivenScope() {
             boolean isContains = accessToken.getScope().containsAll(SCOPE_ID);
@@ -124,8 +119,7 @@ class OAuth2AuthorizedAccessTokenTest {
             @BeforeEach
             void setup() {
                 this.accessToken = OAuth2AuthorizedAccessToken.builder(tokenIdGenerator)
-                        .email(EMAIL).client(CLIENT_ID).tokenGrantType(GRANT_TYPE).expiration(EXPIRED_EXPIRATION)
-                        .refreshToken(refreshToken).build();
+                        .email(EMAIL).client(CLIENT_ID).tokenGrantType(GRANT_TYPE).expiration(EXPIRED_EXPIRATION).build();
             }
 
             @Test
@@ -144,8 +138,7 @@ class OAuth2AuthorizedAccessTokenTest {
             @BeforeEach
             void setup() {
                 this.accessToken = OAuth2AuthorizedAccessToken.builder(tokenIdGenerator)
-                        .email(EMAIL).client(CLIENT_ID).tokenGrantType(GRANT_TYPE).expiration(NOT_EXPIRED_EXPIRATION)
-                        .refreshToken(refreshToken).build();
+                        .email(EMAIL).client(CLIENT_ID).tokenGrantType(GRANT_TYPE).expiration(NOT_EXPIRED_EXPIRATION).build();
             }
 
             @Test
@@ -169,8 +162,7 @@ class OAuth2AuthorizedAccessTokenTest {
             @BeforeEach
             void setup() {
                 this.accessToken = OAuth2AuthorizedAccessToken.builder(tokenIdGenerator)
-                        .email(EMAIL).client(CLIENT_ID).tokenGrantType(GRANT_TYPE).expiration(EXPIRED_EXPIRATION)
-                        .refreshToken(refreshToken).build();
+                        .email(EMAIL).client(CLIENT_ID).tokenGrantType(GRANT_TYPE).expiration(EXPIRED_EXPIRATION).build();
             }
 
             @Test
@@ -191,11 +183,9 @@ class OAuth2AuthorizedAccessTokenTest {
             @DisplayName("남은 시간이 초로 변환되어 반환되어야 한다.")
             void shouldReturnsSeconds() {
                 OAuth2AuthorizedAccessToken accessToken0 = OAuth2AuthorizedAccessToken.builder(tokenIdGenerator)
-                        .email(EMAIL).client(CLIENT_ID).tokenGrantType(GRANT_TYPE).expiration(expiredDateTime0)
-                        .refreshToken(refreshToken).build();
+                        .email(EMAIL).client(CLIENT_ID).tokenGrantType(GRANT_TYPE).expiration(expiredDateTime0).build();
                 OAuth2AuthorizedAccessToken accessToken1 = OAuth2AuthorizedAccessToken.builder(tokenIdGenerator)
-                        .email(EMAIL).client(CLIENT_ID).tokenGrantType(GRANT_TYPE).expiration(expiredDateTime1)
-                        .refreshToken(refreshToken).build();
+                        .email(EMAIL).client(CLIENT_ID).tokenGrantType(GRANT_TYPE).expiration(expiredDateTime1).build();
 
                 assertEquals(Duration.between(LocalDateTime.now(), expiredDateTime0).toSeconds(), accessToken0.expiresIn());
                 assertEquals(Duration.between(LocalDateTime.now(), expiredDateTime1).toSeconds(), accessToken1.expiresIn());
@@ -211,8 +201,7 @@ class OAuth2AuthorizedAccessTokenTest {
         @BeforeEach
         void setup() {
             this.accessToken = OAuth2AuthorizedAccessToken.builder(tokenIdGenerator)
-                    .email(EMAIL).client(CLIENT_ID).tokenGrantType(GRANT_TYPE).expiration(NOT_EXPIRED_EXPIRATION)
-                    .refreshToken(refreshToken).build();
+                    .email(EMAIL).client(CLIENT_ID).tokenGrantType(GRANT_TYPE).expiration(NOT_EXPIRED_EXPIRATION).build();
         }
 
         @Test
@@ -225,6 +214,42 @@ class OAuth2AuthorizedAccessTokenTest {
             assertTrue(accessToken.getAdditionalInformation().containsKey("KEY-1"));
             assertEquals("VALUE-0", accessToken.getAdditionalInformation().get("KEY-0"));
             assertEquals("VALUE-1", accessToken.getAdditionalInformation().get("KEY-1"));
+        }
+    }
+
+    @Nested
+    @DisplayName("리플래시 토큰 생성 및 저장")
+    class CreateAndSaveRefreshToken {
+        private OAuth2TokenIdGenerator refreshTokenIdGenerator;
+        private LocalDateTime expirationDateTime = LocalDateTime.now().plusMinutes(10);
+        private OAuth2AuthorizedAccessToken accessToken;
+
+        @BeforeEach
+        void setup() {
+            this.accessToken = OAuth2AuthorizedAccessToken.builder(tokenIdGenerator)
+                    .email(EMAIL).client(CLIENT_ID).tokenGrantType(GRANT_TYPE).expiration(NOT_EXPIRED_EXPIRATION).build();
+
+            this.refreshTokenIdGenerator = mock(OAuth2TokenIdGenerator.class);
+            when(refreshTokenIdGenerator.generateTokenValue()).thenReturn(REFRESH_TOKEN_ID);
+        }
+
+        @Test
+        @DisplayName("리플래시 토큰을 생성하여 저장한다.")
+        void shouldCreateAndSaveRefreshToken() {
+            this.accessToken.generateRefreshToken(refreshTokenIdGenerator, expirationDateTime);
+
+            OAuth2AuthorizedRefreshToken refreshToken = this.accessToken.getRefreshToken();
+            assertEquals(REFRESH_TOKEN_ID, refreshToken.getTokenId());
+            assertEquals(expirationDateTime, refreshToken.getExpiration());
+        }
+
+        @Test
+        @DisplayName("리플래시 토큰에 연관된 엑세스 토큰을 리플래스 토큰을 생성한 엑세스 토큰이어야 한다.")
+        void shouldRefreshTokenAssociationAccessTokenIsParentAccessToken() {
+            this.accessToken.generateRefreshToken(refreshTokenIdGenerator, expirationDateTime);
+
+            OAuth2AuthorizedRefreshToken refreshToken = this.accessToken.getRefreshToken();
+            assertEquals(accessToken, refreshToken.getAccessToken());
         }
     }
 }

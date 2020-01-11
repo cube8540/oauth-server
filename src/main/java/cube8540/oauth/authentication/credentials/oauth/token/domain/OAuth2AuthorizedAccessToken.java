@@ -67,4 +67,8 @@ public class OAuth2AuthorizedAccessToken extends AbstractAggregateRoot<OAuth2Aut
         }
         this.additionalInformation.put(key, value);
     }
+
+    public void generateRefreshToken(OAuth2TokenIdGenerator refreshTokenIdGenerator, LocalDateTime expirationDateTime) {
+        this.refreshToken = new OAuth2AuthorizedRefreshToken(refreshTokenIdGenerator, expirationDateTime, this);
+    }
 }
