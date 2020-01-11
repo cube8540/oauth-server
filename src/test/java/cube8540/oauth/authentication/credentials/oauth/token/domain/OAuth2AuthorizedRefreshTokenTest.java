@@ -22,11 +22,13 @@ class OAuth2AuthorizedRefreshTokenTest {
     private static final LocalDateTime NOT_EXPIRED_EXPIRATION = LocalDateTime.now().plusDays(1);
     private static final LocalDateTime EXPIRED_EXPIRATION = LocalDateTime.now().minusNanos(1);
 
+    private OAuth2AuthorizedAccessToken accessToken;
     private OAuth2TokenIdGenerator tokenIdGenerator;
 
     @BeforeEach
     void setup() {
         this.tokenIdGenerator = mock(OAuth2TokenIdGenerator.class);
+        this.accessToken = mock(OAuth2AuthorizedAccessToken.class);
     }
 
     @Nested
@@ -38,7 +40,7 @@ class OAuth2AuthorizedRefreshTokenTest {
         @BeforeEach
         void setup() {
             when(tokenIdGenerator.generateTokenValue()).thenReturn(TOKEN_ID);
-            this.refreshToken = new OAuth2AuthorizedRefreshToken(tokenIdGenerator, NOT_EXPIRED_EXPIRATION);
+            this.refreshToken = new OAuth2AuthorizedRefreshToken(tokenIdGenerator, NOT_EXPIRED_EXPIRATION, accessToken);
         }
 
         @Test
@@ -51,6 +53,12 @@ class OAuth2AuthorizedRefreshTokenTest {
         @DisplayName("인자로 받은 만료일을 저장해야 한다.")
         void shouldSaveGivenExpiration() {
             assertEquals(NOT_EXPIRED_EXPIRATION, refreshToken.getExpiration());
+        }
+
+        @Test
+        @DisplayName("인자로 받은 액세스 토큰을 저장해야 한다.")
+        void shouldSaveGivenAccessToken() {
+            assertEquals(accessToken, refreshToken.getAccessToken());
         }
     }
 
@@ -71,7 +79,7 @@ class OAuth2AuthorizedRefreshTokenTest {
 
             @BeforeEach
             void setup() {
-                refreshToken = new OAuth2AuthorizedRefreshToken(tokenIdGenerator, EXPIRED_EXPIRATION);
+                refreshToken = new OAuth2AuthorizedRefreshToken(tokenIdGenerator, EXPIRED_EXPIRATION, accessToken);
             }
 
             @Test
@@ -87,7 +95,7 @@ class OAuth2AuthorizedRefreshTokenTest {
 
             @BeforeEach
             void setup() {
-                refreshToken = new OAuth2AuthorizedRefreshToken(tokenIdGenerator, NOT_EXPIRED_EXPIRATION);
+                refreshToken = new OAuth2AuthorizedRefreshToken(tokenIdGenerator, NOT_EXPIRED_EXPIRATION, accessToken);
             }
 
             @Test
