@@ -1,6 +1,6 @@
 package cube8540.oauth.authentication.credentials.oauth.client.provider;
 
-import cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientDetails;
+import cube8540.oauth.authentication.credentials.oauth.OAuth2ClientDetails;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 

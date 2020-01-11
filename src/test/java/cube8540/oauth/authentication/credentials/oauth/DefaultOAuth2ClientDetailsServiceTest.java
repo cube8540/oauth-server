@@ -1,5 +1,6 @@
-package cube8540.oauth.authentication.credentials.oauth.client.application;
+package cube8540.oauth.authentication.credentials.oauth;
 
+import cube8540.oauth.authentication.credentials.oauth.client.application.DefaultOAuth2ClientDetailsService;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2Client;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientDefaultSecret;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
@@ -155,9 +156,9 @@ class DefaultOAuth2ClientDetailsServiceTest {
             void shouldReturnsClientScope() {
                 OAuth2ClientDetails result = service.loadClientDetailsByClientId(RAW_CLIENT_ID);
 
-                assertTrue(result.scope().contains(new OAuth2ScopeId("SCOPE-1")));
-                assertTrue(result.scope().contains(new OAuth2ScopeId("SCOPE-2")));
-                assertTrue(result.scope().contains(new OAuth2ScopeId("SCOPE-3")));
+                assertTrue(result.scope().contains("SCOPE-1"));
+                assertTrue(result.scope().contains("SCOPE-2"));
+                assertTrue(result.scope().contains("SCOPE-3"));
             }
 
             @Test

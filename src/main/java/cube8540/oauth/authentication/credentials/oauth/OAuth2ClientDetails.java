@@ -1,6 +1,5 @@
-package cube8540.oauth.authentication.credentials.oauth.client.application;
+package cube8540.oauth.authentication.credentials.oauth;
 
-import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 
 import java.net.URI;
@@ -18,7 +17,7 @@ public interface OAuth2ClientDetails {
 
     Set<AuthorizationGrantType> authorizedGrantType();
 
-    Set<OAuth2ScopeId> scope();
+    Set<String> scope();
 
     Integer accessTokenValiditySeconds();
 

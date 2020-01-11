@@ -1,5 +1,6 @@
 package cube8540.oauth.authentication.credentials.oauth.code.domain;
 
+import cube8540.oauth.authentication.credentials.oauth.AuthorizationRequest;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidClientException;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
@@ -15,6 +16,7 @@ import org.springframework.data.domain.AbstractAggregateRoot;
 import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Getter
 @ToString
@@ -43,11 +45,12 @@ public class OAuth2AuthorizationCode extends AbstractAggregateRoot<OAuth2Authori
     }
 
     public void setAuthorizationRequest(AuthorizationRequest request) {
-        this.clientId = request.clientId();
-        this.email = request.email();
+        this.clientId = new OAuth2ClientId(request.clientId());
+        this.email = new UserEmail(request.email());
         this.state = request.state();
         this.redirectURI = request.redirectURI();
-        this.approvedScopes = request.approvedScopes();
+        this.approvedScopes = request.approvedScopes().stream()
+                .map(OAuth2ScopeId::new).collect(Collectors.toSet());
     }
 
     public void validateWithAuthorizationRequest(AuthorizationRequest request) {
@@ -59,7 +62,7 @@ public class OAuth2AuthorizationCode extends AbstractAggregateRoot<OAuth2Authori
             throw new RedirectMismatchException("Redirect URI mismatched");
         }
 
-        if (!clientId.equals(request.clientId())) {
+        if (!clientId.equals(new OAuth2ClientId(request.clientId()))) {
             throw new InvalidClientException("client id mismatch");
         }
     }

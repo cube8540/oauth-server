@@ -1,5 +1,6 @@
 package cube8540.oauth.authentication.credentials.oauth.code.domain;
 
+import cube8540.oauth.authentication.credentials.oauth.AuthorizationRequest;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidClientException;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
@@ -14,6 +15,7 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -41,10 +43,7 @@ class OAuth2AuthorizationCodeTest {
     private static final LocalDateTime EXPIRED_DATETIME = LocalDateTime.now().minusNanos(1);
     private static final LocalDateTime NOT_EXPIRED_DATETIME = LocalDateTime.now().plusMinutes(1);
 
-    private static final Set<OAuth2ScopeId> SCOPES = new HashSet<>(Arrays.asList(
-            new OAuth2ScopeId("SCOPE-1"),
-            new OAuth2ScopeId("SCOPE-2"),
-            new OAuth2ScopeId("SCOPE-3")));
+    private static final Set<String> SCOPES = new HashSet<>(Arrays.asList("SCOPE-1", "SCOPE-2", "SCOPE-3"));
 
     private AuthorizationCodeGenerator codeGenerator;
 
@@ -63,8 +62,8 @@ class OAuth2AuthorizationCodeTest {
         void setup() {
             this.request = mock(AuthorizationRequest.class);
 
-            when(request.clientId()).thenReturn(CLIENT_ID);
-            when(request.email()).thenReturn(EMAIL);
+            when(request.clientId()).thenReturn(RAW_CLIENT_ID);
+            when(request.email()).thenReturn(RAW_EMAIL);
             when(request.state()).thenReturn(STATE);
             when(request.redirectURI()).thenReturn(REDIRECT_URI);
             when(request.approvedScopes()).thenReturn(SCOPES);
@@ -108,9 +107,10 @@ class OAuth2AuthorizationCodeTest {
         @Test
         @DisplayName("인자로 받은 스코프를 저장해야 한다.")
         void shouldSaveGivenScopes() {
-            this.code.setAuthorizationRequest(request);
+            Set<OAuth2ScopeId> expectedScopes = SCOPES.stream().map(OAuth2ScopeId::new).collect(Collectors.toSet());
 
-            assertEquals(SCOPES, this.code.getApprovedScopes());
+            this.code.setAuthorizationRequest(request);
+            assertEquals(expectedScopes, this.code.getApprovedScopes());
         }
     }
 
@@ -123,8 +123,8 @@ class OAuth2AuthorizationCodeTest {
         void setup() {
             this.savedRequest = mock(AuthorizationRequest.class);
 
-            when(savedRequest.clientId()).thenReturn(CLIENT_ID);
-            when(savedRequest.email()).thenReturn(EMAIL);
+            when(savedRequest.clientId()).thenReturn(RAW_CLIENT_ID);
+            when(savedRequest.email()).thenReturn(RAW_EMAIL);
             when(savedRequest.state()).thenReturn(STATE);
             when(savedRequest.redirectURI()).thenReturn(REDIRECT_URI);
             when(savedRequest.approvedScopes()).thenReturn(SCOPES);
@@ -183,7 +183,7 @@ class OAuth2AuthorizationCodeTest {
 
                 this.code.setAuthorizationRequest(savedRequest);
                 when(request.redirectURI()).thenReturn(REDIRECT_URI);
-                when(request.clientId()).thenReturn(new OAuth2ClientId("MISMATCH-CLIENT-ID"));
+                when(request.clientId()).thenReturn("MISMATCH-CLIENT-ID");
             }
 
             @Test
@@ -206,7 +206,7 @@ class OAuth2AuthorizationCodeTest {
 
                 this.code.setAuthorizationRequest(savedRequest);
                 when(request.redirectURI()).thenReturn(REDIRECT_URI);
-                when(request.clientId()).thenReturn(CLIENT_ID);
+                when(request.clientId()).thenReturn(RAW_CLIENT_ID);
             }
 
             @Test
