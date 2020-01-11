@@ -26,7 +26,7 @@ public class DefaultOauth2ExceptionResponseRenderer implements OAuth2ExceptionRe
         this.messageConverter = messageConverter;
         this.supportMediaType = supportMediaType;
 
-        if (!messageConverter.canWrite(Object.class, supportMediaType)) {
+        if (!messageConverter.canWrite(OAuth2Error.class, supportMediaType)) {
             throw new HttpMediaTypeNotSupportedException(supportMediaType + " is not supported");
         }
     }

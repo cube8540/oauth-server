@@ -16,7 +16,7 @@ public class OAuth2AuthenticationExceptionEntryPoint implements AuthenticationEn
     private final OAuth2ExceptionTranslator translator;
     private final OAuth2ExceptionResponseRenderer responseRenderer;
 
-    protected OAuth2AuthenticationExceptionEntryPoint(OAuth2ExceptionTranslator translator, OAuth2ExceptionResponseRenderer responseRenderer) {
+    public OAuth2AuthenticationExceptionEntryPoint(OAuth2ExceptionTranslator translator, OAuth2ExceptionResponseRenderer responseRenderer) {
         this.translator = translator;
         this.responseRenderer = responseRenderer;
     }
