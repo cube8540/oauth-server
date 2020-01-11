@@ -28,6 +28,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -189,6 +190,22 @@ class AuthorizationCodeFlowFactoryTest {
                 OAuth2AuthorizedAccessToken accessToken = granter.createAccessToken(clientDetails, tokenRequest);
 
                 assertEquals(TOKEN_ID, accessToken.getRefreshToken().getTokenId());
+            }
+
+            @Test
+            @DisplayName("토큰의 유효시간이 설정되어 있어야 한다.")
+            void shouldSetTokenValidity() {
+                OAuth2AuthorizedAccessToken accessToken = granter.createAccessToken(clientDetails, tokenRequest);
+
+                assertNotNull(accessToken.getExpiration());
+            }
+
+            @Test
+            @DisplayName("리플래시 토큰의 유효시간이 설정되어 있어야 한다.")
+            void shouldSetRefreshTokenValidity() {
+                OAuth2AuthorizedAccessToken accessToken = granter.createAccessToken(clientDetails, tokenRequest);
+
+                assertNotNull(accessToken.getRefreshToken().getExpiration());
             }
 
             @Nested
