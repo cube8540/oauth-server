@@ -1,4 +1,4 @@
-package cube8540.oauth.authentication.credentials.oauth;
+package cube8540.oauth.authentication.credentials.oauth.token;
 
 import java.net.URI;
 import java.util.Set;
