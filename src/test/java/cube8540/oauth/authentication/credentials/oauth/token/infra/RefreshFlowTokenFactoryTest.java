@@ -172,13 +172,11 @@ class RefreshFlowTokenFactoryTest {
             @Nested
             @DisplayName("리플레시 토큰을 할당 받은 클라이언트와 현재 요청을 한 클라이언트가 서로 다를시")
             class WhenRefreshTokenClientIsNotThisRequestingClient {
-                private OAuth2AuthorizedAccessToken accessToken;
-                private OAuth2AuthorizedRefreshToken refreshToken;
 
                 @BeforeEach
                 void setup() {
-                    this.accessToken = mock(OAuth2AuthorizedAccessToken.class);
-                    this.refreshToken = mock(OAuth2AuthorizedRefreshToken.class);
+                    OAuth2AuthorizedAccessToken accessToken = mock(OAuth2AuthorizedAccessToken.class);
+                    OAuth2AuthorizedRefreshToken refreshToken = mock(OAuth2AuthorizedRefreshToken.class);
 
                     when(refreshToken.isExpired()).thenReturn(false);
                     when(refreshToken.getAccessToken()).thenReturn(accessToken);
@@ -197,12 +195,11 @@ class RefreshFlowTokenFactoryTest {
             @Nested
             @DisplayName("리플레시 토큰이 유효할시")
             class WhenRefreshTokenIsValid {
-                private OAuth2AuthorizedAccessToken accessToken;
                 private OAuth2AuthorizedRefreshToken refreshToken;
 
                 @BeforeEach
                 void setup() {
-                    this.accessToken = mock(OAuth2AuthorizedAccessToken.class);
+                    OAuth2AuthorizedAccessToken accessToken = mock(OAuth2AuthorizedAccessToken.class);
                     this.refreshToken = mock(OAuth2AuthorizedRefreshToken.class);
 
                     when(refreshToken.getAccessToken()).thenReturn(accessToken);

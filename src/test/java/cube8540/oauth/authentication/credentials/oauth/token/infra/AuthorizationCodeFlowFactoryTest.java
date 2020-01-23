@@ -66,7 +66,7 @@ class AuthorizationCodeFlowFactoryTest {
     private OAuth2TokenIdGenerator tokenIdGenerator;
     private OAuth2TokenIdGenerator refreshTokenIdGenerator;
     private OAuth2AuthorizationCodeService authorizationCodeService;
-    private AuthorizationCodeFlowTokenFactory granter;
+    private AuthorizationCodeFlowTokenFactory tokenFactory;
 
     @BeforeEach
     void setup() {
@@ -74,7 +74,7 @@ class AuthorizationCodeFlowFactoryTest {
         this.refreshTokenIdGenerator = mock(OAuth2TokenIdGenerator.class);
         this.authorizationCodeService = mock(OAuth2AuthorizationCodeService.class);
 
-        this.granter = new AuthorizationCodeFlowTokenFactory(tokenIdGenerator, authorizationCodeService);
+        this.tokenFactory = new AuthorizationCodeFlowTokenFactory(tokenIdGenerator, authorizationCodeService);
     }
 
     @Nested
@@ -118,7 +118,7 @@ class AuthorizationCodeFlowFactoryTest {
             @Test
             @DisplayName("InvalidRequestException이 발생해야 한다.")
             void shouldThrowsInvalidRequestException() {
-                assertThrows(InvalidRequestException.class, () -> granter.createAccessToken(clientDetails, tokenRequest));
+                assertThrows(InvalidRequestException.class, () -> tokenFactory.createAccessToken(clientDetails, tokenRequest));
             }
         }
 
@@ -137,7 +137,7 @@ class AuthorizationCodeFlowFactoryTest {
             void shouldValidationTestViaAuthorizationCode() {
                 ArgumentCaptor<AuthorizationRequest> requestCaptor = ArgumentCaptor.forClass(AuthorizationRequest.class);
 
-                granter.createAccessToken(clientDetails, tokenRequest);
+                tokenFactory.createAccessToken(clientDetails, tokenRequest);
                 verify(authorizationCode, times(1)).validateWithAuthorizationRequest(requestCaptor.capture());
                 assertEquals(REDIRECT_URI, requestCaptor.getValue().redirectURI());
                 assertEquals(RAW_CLIENT_ID, requestCaptor.getValue().clientId());
@@ -147,7 +147,7 @@ class AuthorizationCodeFlowFactoryTest {
             @Test
             @DisplayName("토큰의 아이디는 토큰 아이디 생성기에서 생성된 토큰 아이디어야 한다.")
             void shouldTokenIdIsCreatedByTokenGenerator() {
-                OAuth2AuthorizedAccessToken accessToken = granter.createAccessToken(clientDetails, tokenRequest);
+                OAuth2AuthorizedAccessToken accessToken = tokenFactory.createAccessToken(clientDetails, tokenRequest);
 
                 assertEquals(TOKEN_ID, accessToken.getTokenId());
             }
@@ -155,7 +155,7 @@ class AuthorizationCodeFlowFactoryTest {
             @Test
             @DisplayName("토큰의 클라이언트 아이디는 인증 코드에 저장된 클라이언트 아이디어야 한다.")
             void shouldClientIdIsSavedClientIdInAuthorizationCode() {
-                OAuth2AuthorizedAccessToken accessToken = granter.createAccessToken(clientDetails, tokenRequest);
+                OAuth2AuthorizedAccessToken accessToken = tokenFactory.createAccessToken(clientDetails, tokenRequest);
 
                 assertEquals(CLIENT_ID, accessToken.getClient());
             }
@@ -163,7 +163,7 @@ class AuthorizationCodeFlowFactoryTest {
             @Test
             @DisplayName("토큰에 저장된 유저 아이디는 인증 코드에 저장된 유저어야 한다.")
             void shouldUserEmailIsSavedUserEmailInAuthorizationCode() {
-                OAuth2AuthorizedAccessToken accessToken = granter.createAccessToken(clientDetails, tokenRequest);
+                OAuth2AuthorizedAccessToken accessToken = tokenFactory.createAccessToken(clientDetails, tokenRequest);
 
                 assertEquals(STORED_EMAIL, accessToken.getEmail());
             }
@@ -171,7 +171,7 @@ class AuthorizationCodeFlowFactoryTest {
             @Test
             @DisplayName("토큰에 저장된 스코프는 인증 코드에 저장된 스코프어야 한다.")
             void shouldScopeIsSavedScopeInAuthorizationCode() {
-                OAuth2AuthorizedAccessToken accessToken = granter.createAccessToken(clientDetails, tokenRequest);
+                OAuth2AuthorizedAccessToken accessToken = tokenFactory.createAccessToken(clientDetails, tokenRequest);
 
                 assertEquals(STORED_SCOPES, accessToken.getScope());
             }
@@ -179,7 +179,7 @@ class AuthorizationCodeFlowFactoryTest {
             @Test
             @DisplayName("토큰의 인증 타입은 AuthorizationCode 타입이어야 한다.")
             void shouldTokenGrantTypeIsAuthorizationCode() {
-                OAuth2AuthorizedAccessToken accessToken = granter.createAccessToken(clientDetails, tokenRequest);
+                OAuth2AuthorizedAccessToken accessToken = tokenFactory.createAccessToken(clientDetails, tokenRequest);
 
                 assertEquals(AuthorizationGrantType.AUTHORIZATION_CODE, accessToken.getTokenGrantType());
             }
@@ -187,7 +187,7 @@ class AuthorizationCodeFlowFactoryTest {
             @Test
             @DisplayName("리플래시 토큰 아이디는 토큰 아이디 생성기에서 생성된 아이디어야 한다.")
             void shouldRefreshTokenIdIsCreatedByTokenIdGenerator() {
-                OAuth2AuthorizedAccessToken accessToken = granter.createAccessToken(clientDetails, tokenRequest);
+                OAuth2AuthorizedAccessToken accessToken = tokenFactory.createAccessToken(clientDetails, tokenRequest);
 
                 assertEquals(TOKEN_ID, accessToken.getRefreshToken().getTokenId());
             }
@@ -195,7 +195,7 @@ class AuthorizationCodeFlowFactoryTest {
             @Test
             @DisplayName("토큰의 유효시간이 설정되어 있어야 한다.")
             void shouldSetTokenValidity() {
-                OAuth2AuthorizedAccessToken accessToken = granter.createAccessToken(clientDetails, tokenRequest);
+                OAuth2AuthorizedAccessToken accessToken = tokenFactory.createAccessToken(clientDetails, tokenRequest);
 
                 assertNotNull(accessToken.getExpiration());
             }
@@ -203,7 +203,7 @@ class AuthorizationCodeFlowFactoryTest {
             @Test
             @DisplayName("리플래시 토큰의 유효시간이 설정되어 있어야 한다.")
             void shouldSetRefreshTokenValidity() {
-                OAuth2AuthorizedAccessToken accessToken = granter.createAccessToken(clientDetails, tokenRequest);
+                OAuth2AuthorizedAccessToken accessToken = tokenFactory.createAccessToken(clientDetails, tokenRequest);
 
                 assertNotNull(accessToken.getRefreshToken().getExpiration());
             }
@@ -214,7 +214,7 @@ class AuthorizationCodeFlowFactoryTest {
 
                 @BeforeEach
                 void setup() {
-                    granter.setRefreshTokenIdGenerator(refreshTokenIdGenerator);
+                    tokenFactory.setRefreshTokenIdGenerator(refreshTokenIdGenerator);
 
                     when(refreshTokenIdGenerator.generateTokenValue()).thenReturn(REFRESH_TOKEN_ID);
                 }
@@ -222,14 +222,14 @@ class AuthorizationCodeFlowFactoryTest {
                 @Test
                 @DisplayName("리플래스 토큰의 아이디는 리플래시 토큰 아이디 생성자가 생성한 아이디어야 한다.")
                 void shouldRefreshTokenIdIsCreatedByRefreshTokenIdGenerator() {
-                    OAuth2AuthorizedAccessToken accessToken = granter.createAccessToken(clientDetails, tokenRequest);
+                    OAuth2AuthorizedAccessToken accessToken = tokenFactory.createAccessToken(clientDetails, tokenRequest);
 
                     assertEquals(REFRESH_TOKEN_ID, accessToken.getRefreshToken().getTokenId());
                 }
 
                 @AfterEach
                 void after() {
-                    granter.setRefreshTokenIdGenerator(null);
+                    tokenFactory.setRefreshTokenIdGenerator(null);
                 }
             }
         }

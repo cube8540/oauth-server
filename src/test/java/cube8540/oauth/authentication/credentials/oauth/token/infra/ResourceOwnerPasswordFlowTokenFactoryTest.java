@@ -259,17 +259,17 @@ class ResourceOwnerPasswordFlowTokenFactoryTest {
             @Test
             @DisplayName("리플레시 토큰 아이디는 토큰 아이디 생성기에서 생성된 아이디어야 한다.")
             void shouldRefreshTokenIdIsCreatedByTokenIdGenerator() {
-                OAuth2AuthorizedAccessToken result = tokenFactory.createAccessToken(clientDetails, tokenRequest);
+                OAuth2AuthorizedAccessToken accessToken = tokenFactory.createAccessToken(clientDetails, tokenRequest);
 
-                assertEquals(TOKEN_ID, result.getRefreshToken().getTokenId());
+                assertEquals(TOKEN_ID, accessToken.getRefreshToken().getTokenId());
             }
 
             @Test
             @DisplayName("토큰의 유효시간이 설정되어 있어야 한다.")
             void shouldSetTokenValidity() {
-                OAuth2AuthorizedAccessToken result = tokenFactory.createAccessToken(clientDetails, tokenRequest);
+                OAuth2AuthorizedAccessToken accessToken = tokenFactory.createAccessToken(clientDetails, tokenRequest);
 
-                assertNotNull(result.getExpiration());
+                assertNotNull(accessToken.getExpiration());
             }
 
             @Test
