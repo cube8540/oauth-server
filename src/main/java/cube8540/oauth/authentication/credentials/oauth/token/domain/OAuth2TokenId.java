@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import javax.persistence.Embeddable;
 import java.io.Serializable;
 
 @Getter
@@ -14,6 +15,7 @@ import java.io.Serializable;
 @EqualsAndHashCode
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Embeddable
 public class OAuth2TokenId implements Serializable {
 
     private String value;

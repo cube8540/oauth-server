@@ -6,6 +6,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -18,6 +19,7 @@ import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Arrays;
+import java.util.Base64;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -125,6 +127,36 @@ class ClientCredentialsEndpointFilterTest {
                 when(request.getParameter("client_secret")).thenReturn(CLIENT_SECRET);
             }
 
+            @Nested
+            @DisplayName("헤더에 Authentication 옵션이 존재할시")
+            class WhenHeaderHasAuthenticationOption {
+
+                private final String headerUsername = "HEADER_USERNAME";
+                private final String headerPassword = "HEADER_PASSWORD";
+                private String headerOption;
+
+                @BeforeEach
+                void setup() {
+                    String basicAuthentication = headerUsername + ":" + headerPassword;
+                    this.headerOption = "Basic" + " " +
+                            Base64.getEncoder().encodeToString(basicAuthentication.getBytes());
+
+                    when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn(headerOption);
+                    when(request.getParameter(any())).thenReturn(null);
+                }
+
+                @Test
+                @DisplayName("헤더에 있는 클라이언트의 아이디와 비밀번호로 인증을 진행해야 한다.")
+                void shouldAuthenticationByClientIdAndSecret() throws Exception {
+                    ArgumentCaptor<Authentication> authenticationCaptor = ArgumentCaptor.forClass(Authentication.class);
+
+                    filter.attemptAuthentication(request, response);
+                    verify(authenticationManager, times(1)).authenticate(authenticationCaptor.capture());
+                    assertEquals(headerUsername, authenticationCaptor.getValue().getPrincipal());
+                    assertEquals(headerPassword, authenticationCaptor.getValue().getCredentials());
+                }
+            }
+
             @Test
             @DisplayName("매개변수에서 받은 클라이언트의 아이디와 비밀번호로 인증을 진행해야 한다.")
             void shouldAuthenticationByClientIdAndSecret() throws Exception {
@@ -171,6 +203,7 @@ class ClientCredentialsEndpointFilterTest {
                 }
             }
         }
+
         @Nested
         @DisplayName("SecurityContext에 인증정보가 있을시")
         class WhenSecurityContextHasAuthentication {
@@ -207,6 +240,35 @@ class ClientCredentialsEndpointFilterTest {
                     when(authentication.isAuthenticated()).thenReturn(false);
                     when(request.getParameter("client_id")).thenReturn(CLIENT_ID);
                     when(request.getParameter("client_secret")).thenReturn(CLIENT_SECRET);
+                }
+
+                @Nested
+                @DisplayName("헤더에 Authentication 옵션이 존재할시")
+                class WhenHeaderHasAuthenticationOption {
+
+                    private final String headerUsername = "HEADER_USERNAME";
+                    private final String headerPassword = "HEADER_PASSWORD";
+
+                    @BeforeEach
+                    void setup() {
+                        String basicAuthentication = headerUsername + ":" + headerPassword;
+                        String headerOption = "Basic" + " " +
+                                Base64.getEncoder().encodeToString(basicAuthentication.getBytes());
+
+                        when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn(headerOption);
+                        when(request.getParameter(any())).thenReturn(null);
+                    }
+
+                    @Test
+                    @DisplayName("헤더에 있는 클라이언트의 아이디와 비밀번호로 인증을 진행해야 한다.")
+                    void shouldAuthenticationByClientIdAndSecret() throws Exception {
+                        ArgumentCaptor<Authentication> authenticationCaptor = ArgumentCaptor.forClass(Authentication.class);
+
+                        filter.attemptAuthentication(request, response);
+                        verify(authenticationManager, times(1)).authenticate(authenticationCaptor.capture());
+                        assertEquals(headerUsername, authenticationCaptor.getValue().getPrincipal());
+                        assertEquals(headerPassword, authenticationCaptor.getValue().getCredentials());
+                    }
                 }
 
                 @Test

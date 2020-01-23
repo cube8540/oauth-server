@@ -7,6 +7,8 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
+import org.springframework.security.web.authentication.AuthenticationConverter;
+import org.springframework.security.web.authentication.www.BasicAuthenticationConverter;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 
 import javax.servlet.FilterChain;
@@ -19,6 +21,8 @@ public class ClientCredentialsEndpointFilter extends AbstractAuthenticationProce
 
     private AuthenticationEntryPoint entryPoint;
     private boolean onlyPost = false;
+
+    private AuthenticationConverter converter = new BasicAuthenticationConverter();
 
     public ClientCredentialsEndpointFilter(String endpoint) {
         super(endpoint);
@@ -49,13 +53,7 @@ public class ClientCredentialsEndpointFilter extends AbstractAuthenticationProce
         if (authentication != null && authentication.isAuthenticated()) {
             return authentication;
         }
-        String clientId = request.getParameter("client_id");
-        String clientSecret = request.getParameter("client_secret");
-
-        if (clientId == null) {
-            throw new BadCredentialsException("no client credentials presented");
-        }
-        return getAuthenticationManager().authenticate(new ClientCredentialsToken(clientId, clientSecret));
+        return getAuthenticationManager().authenticate(extractClientAuthentication(request));
     }
 
     @Override
@@ -71,5 +69,20 @@ public class ClientCredentialsEndpointFilter extends AbstractAuthenticationProce
 
     public void setOnlyPost(boolean onlyPost) {
         this.onlyPost = onlyPost;
+    }
+
+    private ClientCredentialsToken extractClientAuthentication(HttpServletRequest request) {
+        Authentication basicAuthenticationToken = converter.convert(request);
+
+        String clientId = basicAuthenticationToken != null ? basicAuthenticationToken.getPrincipal().toString() :
+                request.getParameter("client_id");
+        String clientSecret = basicAuthenticationToken != null ? basicAuthenticationToken.getCredentials().toString() :
+                request.getParameter("client_secret");
+
+        if (clientId == null) {
+            throw new BadCredentialsException("no client credentials presented");
+        }
+
+        return new ClientCredentialsToken(clientId, clientSecret);
     }
 }
