@@ -36,7 +36,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @DisplayName("인증 코드를 통한 토큰 생성 테스트")
-class AuthorizationCodeFlowFactoryTest {
+class AuthorizationCodeFactoryTest {
     private static final String RAW_CODE = "CODE";
     private static final AuthorizationCode CODE = new AuthorizationCode(RAW_CODE);
 
@@ -66,7 +66,7 @@ class AuthorizationCodeFlowFactoryTest {
     private OAuth2TokenIdGenerator tokenIdGenerator;
     private OAuth2TokenIdGenerator refreshTokenIdGenerator;
     private OAuth2AuthorizationCodeService authorizationCodeService;
-    private AuthorizationCodeFlowTokenFactory tokenFactory;
+    private AuthorizationCodeTokenFactory tokenFactory;
 
     @BeforeEach
     void setup() {
@@ -74,7 +74,7 @@ class AuthorizationCodeFlowFactoryTest {
         this.refreshTokenIdGenerator = mock(OAuth2TokenIdGenerator.class);
         this.authorizationCodeService = mock(OAuth2AuthorizationCodeService.class);
 
-        this.tokenFactory = new AuthorizationCodeFlowTokenFactory(tokenIdGenerator, authorizationCodeService);
+        this.tokenFactory = new AuthorizationCodeTokenFactory(tokenIdGenerator, authorizationCodeService);
     }
 
     @Nested

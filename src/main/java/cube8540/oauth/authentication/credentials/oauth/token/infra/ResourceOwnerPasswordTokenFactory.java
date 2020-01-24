@@ -22,7 +22,7 @@ import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class ResourceOwnerPasswordFlowTokenFactory implements OAuth2TokenFactory {
+public class ResourceOwnerPasswordTokenFactory implements OAuth2TokenFactory {
 
     private final OAuth2TokenIdGenerator tokenIdGenerator;
     private final AuthenticationManager authenticationManager;
@@ -30,7 +30,7 @@ public class ResourceOwnerPasswordFlowTokenFactory implements OAuth2TokenFactory
     private OAuth2TokenIdGenerator refreshTokenIdGenerator;
     private OAuth2TokenRequestValidator validator = new DefaultOAuth2TokenRequestValidator();
 
-    public ResourceOwnerPasswordFlowTokenFactory(OAuth2TokenIdGenerator tokenIdGenerator, AuthenticationManager authenticationManager) {
+    public ResourceOwnerPasswordTokenFactory(OAuth2TokenIdGenerator tokenIdGenerator, AuthenticationManager authenticationManager) {
         this.tokenIdGenerator = tokenIdGenerator;
         this.authenticationManager = authenticationManager;
     }

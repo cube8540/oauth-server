@@ -40,7 +40,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @DisplayName("자원 소유자의 패스워드를 통한 토큰 생성 테스트")
-class ResourceOwnerPasswordFlowTokenFactoryTest {
+class ResourceOwnerPasswordTokenFactoryTest {
 
     private static final String RAW_REQUESTED_USERNAME = "email@email.com";
     private static final String RAW_REQUESTED_PASSWORD = "Password1234!@#$";
@@ -68,14 +68,14 @@ class ResourceOwnerPasswordFlowTokenFactoryTest {
     private OAuth2TokenIdGenerator tokenIdGenerator;
     private OAuth2TokenIdGenerator refreshTokenIdGenerator;
     private AuthenticationManager authenticationManager;
-    private ResourceOwnerPasswordFlowTokenFactory tokenFactory;
+    private ResourceOwnerPasswordTokenFactory tokenFactory;
 
     @BeforeEach
     void setup() {
         this.tokenIdGenerator = mock(OAuth2TokenIdGenerator.class);
         this.refreshTokenIdGenerator = mock(OAuth2TokenIdGenerator.class);
         this.authenticationManager = mock(AuthenticationManager.class);
-        this.tokenFactory = new ResourceOwnerPasswordFlowTokenFactory(tokenIdGenerator, authenticationManager);
+        this.tokenFactory = new ResourceOwnerPasswordTokenFactory(tokenIdGenerator, authenticationManager);
     }
 
     @Nested

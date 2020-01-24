@@ -35,7 +35,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @DisplayName("리플레시 토큰을 통한 토큰 생성 테스트")
-class RefreshFlowTokenFactoryTest {
+class RefreshTokenFactoryTest {
 
     private static final String RAW_TOKEN_ID = "TOKEN-ID";
     private static final OAuth2TokenId TOKEN_ID = new OAuth2TokenId(RAW_TOKEN_ID);
@@ -69,7 +69,7 @@ class RefreshFlowTokenFactoryTest {
     private OAuth2TokenIdGenerator tokenIdGenerator;
     private OAuth2TokenIdGenerator refreshTokenIdGenerator;
     private OAuth2RefreshTokenRepository refreshTokenRepository;
-    private RefreshFlowTokenFactory tokenFactory;
+    private RefreshTokenFactory tokenFactory;
 
     @BeforeEach
     void setup() {
@@ -77,7 +77,7 @@ class RefreshFlowTokenFactoryTest {
         this.refreshTokenIdGenerator = mock(OAuth2TokenIdGenerator.class);
 
         this.refreshTokenRepository = mock(OAuth2RefreshTokenRepository.class);
-        this.tokenFactory = new RefreshFlowTokenFactory(refreshTokenRepository, tokenIdGenerator);
+        this.tokenFactory = new RefreshTokenFactory(refreshTokenRepository, tokenIdGenerator);
     }
 
     @Nested

@@ -16,14 +16,14 @@ import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.Set;
 
-public class AuthorizationCodeFlowTokenFactory implements OAuth2TokenFactory {
+public class AuthorizationCodeTokenFactory implements OAuth2TokenFactory {
 
     private final OAuth2TokenIdGenerator tokenIdGenerator;
     private final OAuth2AuthorizationCodeService authorizationCodeService;
 
     private OAuth2TokenIdGenerator refreshTokenIdGenerator;
 
-    public AuthorizationCodeFlowTokenFactory(OAuth2TokenIdGenerator tokenIdGenerator, OAuth2AuthorizationCodeService authorizationCodeService) {
+    public AuthorizationCodeTokenFactory(OAuth2TokenIdGenerator tokenIdGenerator, OAuth2AuthorizationCodeService authorizationCodeService) {
         this.tokenIdGenerator = tokenIdGenerator;
         this.authorizationCodeService = authorizationCodeService;
     }

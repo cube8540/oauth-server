@@ -30,7 +30,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @DisplayName("클라이언트 인증을 통한 토큰 생성 테스트")
-class ClientCredentialsFlowTokenFactoryTest {
+class ClientCredentialsTokenFactoryTest {
 
     private static final String RAW_TOKEN_ID = "TOKEN-ID";
     private static final OAuth2TokenId TOKEN_ID = new OAuth2TokenId(RAW_TOKEN_ID);
@@ -49,13 +49,13 @@ class ClientCredentialsFlowTokenFactoryTest {
 
     private OAuth2TokenIdGenerator tokenIdGenerator;
     private OAuth2TokenIdGenerator refreshTokenIdGenerator;
-    private ClientCredentialsFlowTokenFactory tokenFactory;
+    private ClientCredentialsTokenFactory tokenFactory;
 
     @BeforeEach
     void setup() {
         this.tokenIdGenerator = mock(OAuth2TokenIdGenerator.class);
         this.refreshTokenIdGenerator = mock(OAuth2TokenIdGenerator.class);
-        this.tokenFactory = new ClientCredentialsFlowTokenFactory(tokenIdGenerator);
+        this.tokenFactory = new ClientCredentialsTokenFactory(tokenIdGenerator);
     }
 
     @Nested
