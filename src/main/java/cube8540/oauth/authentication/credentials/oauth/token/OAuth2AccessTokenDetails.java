@@ -18,6 +18,6 @@ public interface OAuth2AccessTokenDetails extends OAuth2TokenDetails {
 
     OAuth2RefreshTokenDetails refreshToken();
 
-    Map<String, Object> additionalInformation();
+    Map<String, String> additionalInformation();
 
 }
