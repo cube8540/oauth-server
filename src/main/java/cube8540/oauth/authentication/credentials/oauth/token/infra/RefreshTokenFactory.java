@@ -37,16 +37,14 @@ public class RefreshTokenFactory implements OAuth2TokenFactory {
         }
         OAuth2AuthorizedRefreshToken storedRefreshToken = refreshTokenRepository.findById(new OAuth2TokenId(tokenRequest.refreshToken()))
                 .orElseThrow(() -> new InvalidGrantException("invalid refresh token"));
-        if (storedRefreshToken.isExpired()) {
-            throw new InvalidGrantException("refresh token is expired");
-        }
-
         OAuth2AuthorizedAccessToken storedAccessToken = storedRefreshToken.getAccessToken();
         if (!storedAccessToken.getClient().equals(new OAuth2ClientId(clientDetails.clientId()))) {
             throw new InvalidGrantException("invalid refresh token");
         }
         refreshTokenRepository.delete(storedRefreshToken);
-
+        if (storedRefreshToken.isExpired()) {
+            throw new InvalidGrantException("refresh token is expired");
+        }
         OAuth2AuthorizedAccessToken accessToken = OAuth2AuthorizedAccessToken.builder(tokenIdGenerator)
                 .expiration(extractTokenExpirationDateTime(clientDetails))
                 .client(storedAccessToken.getClient())
@@ -55,7 +53,16 @@ public class RefreshTokenFactory implements OAuth2TokenFactory {
                 .tokenGrantType(storedAccessToken.getTokenGrantType())
                 .build();
         accessToken.generateRefreshToken(extractRefreshTokenIdGenerator(), extractRefreshTokenExpirationDateTime(clientDetails));
+
         return accessToken;
+    }
+
+    public void setValidator(OAuth2TokenRequestValidator validator) {
+        this.validator = validator;
+    }
+
+    public void setRefreshTokenIdGenerator(OAuth2TokenIdGenerator refreshTokenIdGenerator) {
+        this.refreshTokenIdGenerator = refreshTokenIdGenerator;
     }
 
     private OAuth2TokenIdGenerator extractRefreshTokenIdGenerator() {
@@ -73,13 +80,5 @@ public class RefreshTokenFactory implements OAuth2TokenFactory {
 
     private LocalDateTime extractRefreshTokenExpirationDateTime(OAuth2ClientDetails clientDetails) {
         return LocalDateTime.now().plusSeconds(clientDetails.refreshTokenValiditySeconds());
-    }
-
-    public void setValidator(OAuth2TokenRequestValidator validator) {
-        this.validator = validator;
-    }
-
-    public void setRefreshTokenIdGenerator(OAuth2TokenIdGenerator refreshTokenIdGenerator) {
-        this.refreshTokenIdGenerator = refreshTokenIdGenerator;
     }
 }

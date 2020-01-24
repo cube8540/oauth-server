@@ -29,7 +29,9 @@ import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -152,12 +154,15 @@ class RefreshTokenFactoryTest {
             @Nested
             @DisplayName("리플레시 토큰이 만료되었을시")
             class WhenRefreshTokenExpired {
+                OAuth2AuthorizedRefreshToken refreshToken = mock(OAuth2AuthorizedRefreshToken.class);
 
                 @BeforeEach
                 void setup() {
-                    OAuth2AuthorizedRefreshToken refreshToken = mock(OAuth2AuthorizedRefreshToken.class);
+                    OAuth2AuthorizedAccessToken accessToken = mock(OAuth2AuthorizedAccessToken.class);
 
                     when(refreshToken.isExpired()).thenReturn(true);
+                    when(refreshToken.getAccessToken()).thenReturn(accessToken);
+                    when(accessToken.getClient()).thenReturn(CLIENT_ID);
                     when(refreshTokenRepository.findById(REFRESH_TOKEN_ID)).thenReturn(Optional.of(refreshToken));
                 }
 
@@ -166,6 +171,14 @@ class RefreshTokenFactoryTest {
                 void shouldThrowsInvalidGrantException() {
                     InvalidGrantException e = assertThrows(InvalidGrantException.class, () -> tokenFactory.createAccessToken(clientDetails, tokenRequest));
                     assertEquals("refresh token is expired", e.getMessage());
+                }
+
+                @Test
+                @DisplayName("리플래시 토큰을 삭제해야 한다.")
+                void shouldRemoveRefreshToken() {
+                    assertThrows(InvalidGrantException.class, () -> tokenFactory.createAccessToken(clientDetails, tokenRequest));
+
+                    verify(refreshTokenRepository, times(1)).delete(refreshToken);
                 }
             }
 
@@ -189,6 +202,13 @@ class RefreshTokenFactoryTest {
                 void shouldThrowsInvalidGrantException() {
                     InvalidGrantException e = assertThrows(InvalidGrantException.class, () -> tokenFactory.createAccessToken(clientDetails, tokenRequest));
                     assertEquals("invalid refresh token", e.getMessage());
+                }
+
+                @Test
+                @DisplayName("검색된 리플레시 토큰을 삭제하지 않아야 한다.")
+                void shouldNotRemoveRefreshToken() {
+                    assertThrows(InvalidGrantException.class, () -> tokenFactory.createAccessToken(clientDetails, tokenRequest));
+                    verify(refreshTokenRepository, never()).delete(any());
                 }
             }
 

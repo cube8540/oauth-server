@@ -182,13 +182,15 @@ class OAuth2AuthorizedAccessTokenTest {
             @Test
             @DisplayName("남은 시간이 초로 변환되어 반환되어야 한다.")
             void shouldReturnsSeconds() {
+                long systemTime = System.nanoTime();
                 OAuth2AuthorizedAccessToken accessToken0 = OAuth2AuthorizedAccessToken.builder(tokenIdGenerator)
                         .email(EMAIL).client(CLIENT_ID).tokenGrantType(GRANT_TYPE).expiration(expiredDateTime0).build();
                 OAuth2AuthorizedAccessToken accessToken1 = OAuth2AuthorizedAccessToken.builder(tokenIdGenerator)
                         .email(EMAIL).client(CLIENT_ID).tokenGrantType(GRANT_TYPE).expiration(expiredDateTime1).build();
+                long delay = System.nanoTime() - systemTime;
 
-                assertEquals(Duration.between(LocalDateTime.now(), expiredDateTime0).toSeconds(), accessToken0.expiresIn());
-                assertEquals(Duration.between(LocalDateTime.now(), expiredDateTime1).toSeconds(), accessToken1.expiresIn());
+                assertEquals(Duration.between(LocalDateTime.now(), expiredDateTime0).minusNanos(delay).toSeconds(), accessToken0.expiresIn());
+                assertEquals(Duration.between(LocalDateTime.now(), expiredDateTime1).minusNanos(delay).toSeconds(), accessToken1.expiresIn());
             }
         }
     }
