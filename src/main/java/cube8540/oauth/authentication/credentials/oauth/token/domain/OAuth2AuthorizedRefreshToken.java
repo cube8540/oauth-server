@@ -14,6 +14,7 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import java.time.Duration;
 import java.time.LocalDateTime;
 
 @Getter
@@ -42,5 +43,12 @@ public class OAuth2AuthorizedRefreshToken extends AbstractAggregateRoot<OAuth2Au
 
     public boolean isExpired() {
         return this.expiration.isBefore(LocalDateTime.now());
+    }
+
+    public long expiresIn() {
+        if (isExpired()) {
+            return 0;
+        }
+        return Duration.between(LocalDateTime.now(), expiration).toSeconds();
     }
 }

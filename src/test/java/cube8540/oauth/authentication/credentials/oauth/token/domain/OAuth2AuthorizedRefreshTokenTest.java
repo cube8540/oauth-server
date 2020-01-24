@@ -5,6 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -102,6 +103,47 @@ class OAuth2AuthorizedRefreshTokenTest {
             @DisplayName("토큰 만료 검사시 false가 반환되어야 한다.")
             void shouldIsExpiredReturnsFalse() {
                 assertFalse(refreshToken.isExpired());
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("토큰 만료까지 남은 기간 검색")
+    class WhenExpiresIn {
+
+        @Nested
+        @DisplayName("현재 시간이 만료일을 초과했을시")
+        class WhenAccessTokenExpired {
+            private OAuth2AuthorizedRefreshToken refreshToken;
+
+            @BeforeEach
+            void setup() {
+                when(tokenIdGenerator.generateTokenValue()).thenReturn(TOKEN_ID);
+                this.refreshToken = new OAuth2AuthorizedRefreshToken(tokenIdGenerator, EXPIRED_EXPIRATION, accessToken);
+            }
+
+            @Test
+            @DisplayName("0 이 반환되어야 한다.")
+            void shouldReturns0() {
+                long expiresIn = refreshToken.expiresIn();
+                assertEquals(0, expiresIn);
+            }
+        }
+
+        @Nested
+        @DisplayName("현재 시간이 만료일을 초과하지 않았을시")
+        class WhenAccessTokenNotExpired {
+            private final LocalDateTime expiredDateTime0 = LocalDateTime.now().plusSeconds(10);
+            private final LocalDateTime expiredDateTime1 = LocalDateTime.now().plusSeconds(20);
+
+            @Test
+            @DisplayName("남은 시간이 초로 변환되어 반환되어야 한다.")
+            void shouldReturnsSeconds() {
+                OAuth2AuthorizedRefreshToken refreshToken0 = new OAuth2AuthorizedRefreshToken(tokenIdGenerator, expiredDateTime0, accessToken);
+                OAuth2AuthorizedRefreshToken refreshToken1 = new OAuth2AuthorizedRefreshToken(tokenIdGenerator, expiredDateTime1, accessToken);
+
+                assertEquals(Duration.between(LocalDateTime.now(), expiredDateTime0).toSeconds(), refreshToken0.expiresIn());
+                assertEquals(Duration.between(LocalDateTime.now(), expiredDateTime1).toSeconds(), refreshToken1.expiresIn());
             }
         }
     }
