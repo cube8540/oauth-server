@@ -32,6 +32,7 @@ import javax.persistence.JoinTable;
 import javax.persistence.MapKeyColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -45,7 +46,9 @@ import java.util.Set;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
 @Entity
-@Table(name = "oauth2_access_token")
+@Table(name = "oauth2_access_token", uniqueConstraints = {
+        @UniqueConstraint(name = "client_authentication_username", columnNames = {"client_id", "email"})
+})
 @DynamicInsert
 @DynamicUpdate
 public class OAuth2AuthorizedAccessToken extends AbstractAggregateRoot<OAuth2AuthorizedAccessToken> {
