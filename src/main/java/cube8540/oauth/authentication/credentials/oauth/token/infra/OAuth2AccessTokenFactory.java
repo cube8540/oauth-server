@@ -2,7 +2,7 @@ package cube8540.oauth.authentication.credentials.oauth.token.infra;
 
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidGrantException;
-import cube8540.oauth.authentication.credentials.oauth.token.OAuth2TokenRequest;
+import cube8540.oauth.authentication.credentials.oauth.OAuth2TokenRequest;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedAccessToken;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2TokenFactory;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;

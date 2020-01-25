@@ -1,11 +1,12 @@
 package cube8540.oauth.authentication.credentials.oauth.token.infra;
 
+import cube8540.oauth.authentication.credentials.oauth.DefaultOAuth2TokenRequestValidator;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidGrantException;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
-import cube8540.oauth.authentication.credentials.oauth.token.OAuth2TokenRequest;
-import cube8540.oauth.authentication.credentials.oauth.token.OAuth2TokenRequestValidator;
+import cube8540.oauth.authentication.credentials.oauth.OAuth2TokenRequest;
+import cube8540.oauth.authentication.credentials.oauth.OAuth2TokenRequestValidator;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedAccessToken;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedRefreshToken;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2RefreshTokenRepository;
@@ -32,7 +33,7 @@ public class RefreshTokenFactory implements OAuth2TokenFactory {
 
     @Override
     public OAuth2AuthorizedAccessToken createAccessToken(OAuth2ClientDetails clientDetails, OAuth2TokenRequest tokenRequest) {
-        if (!validator.validateScopes(clientDetails, tokenRequest)) {
+        if (!validator.validateScopes(clientDetails, tokenRequest.scopes())) {
             throw new InvalidGrantException("cannot grant scopes");
         }
         OAuth2AuthorizedRefreshToken storedRefreshToken = refreshTokenRepository.findById(new OAuth2TokenId(tokenRequest.refreshToken()))
