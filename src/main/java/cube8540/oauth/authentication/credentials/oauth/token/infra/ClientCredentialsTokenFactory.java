@@ -1,8 +1,9 @@
 package cube8540.oauth.authentication.credentials.oauth.token.infra;
 
+import cube8540.oauth.authentication.credentials.oauth.DefaultOAuth2TokenRequestValidator;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
-import cube8540.oauth.authentication.credentials.oauth.token.OAuth2TokenRequest;
-import cube8540.oauth.authentication.credentials.oauth.token.OAuth2TokenRequestValidator;
+import cube8540.oauth.authentication.credentials.oauth.OAuth2TokenRequest;
+import cube8540.oauth.authentication.credentials.oauth.OAuth2TokenRequestValidator;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidGrantException;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
@@ -30,7 +31,7 @@ public class ClientCredentialsTokenFactory implements OAuth2TokenFactory {
 
     @Override
     public OAuth2AuthorizedAccessToken createAccessToken(OAuth2ClientDetails clientDetails, OAuth2TokenRequest tokenRequest) {
-        if (!validator.validateScopes(clientDetails, tokenRequest)) {
+        if (!validator.validateScopes(clientDetails, tokenRequest.scopes())) {
             throw new InvalidGrantException("cannot grant scopes");
         }
 

@@ -1,7 +1,7 @@
 package cube8540.oauth.authentication.credentials.oauth.token.infra;
 
+import cube8540.oauth.authentication.credentials.oauth.DefaultOAuth2TokenRequestValidator;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
-import cube8540.oauth.authentication.credentials.oauth.token.OAuth2TokenRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -24,13 +24,11 @@ class DefaultOAuth2TokenRequestValidatorTest {
     private static final Set<String> INVALID_SCOPES = new HashSet<>(Arrays.asList("SCOPE-1", "SCOPE-2", "SCOPE-3", "SCOPE-4"));
 
     private OAuth2ClientDetails clientDetails;
-    private OAuth2TokenRequest tokenRequest;
     private DefaultOAuth2TokenRequestValidator validator = new DefaultOAuth2TokenRequestValidator();
 
     @BeforeEach
     void setup() {
         this.clientDetails = mock(OAuth2ClientDetails.class);
-        this.tokenRequest = mock(OAuth2TokenRequest.class);
     }
 
     @Nested
@@ -44,13 +42,12 @@ class DefaultOAuth2TokenRequestValidatorTest {
             @BeforeEach
             void setup() {
                 when(clientDetails.scope()).thenReturn(SCOPES);
-                when(tokenRequest.scopes()).thenReturn(INVALID_SCOPES);
             }
 
             @Test
             @DisplayName("유효성 검사시 false가 반환되어야 한다.")
             void shouldValidationReturnsFalse() {
-                boolean result = validator.validateScopes(clientDetails, tokenRequest);
+                boolean result = validator.validateScopes(clientDetails, INVALID_SCOPES);
 
                 assertFalse(result);
             }
@@ -63,13 +60,12 @@ class DefaultOAuth2TokenRequestValidatorTest {
             @BeforeEach
             void setup() {
                 when(clientDetails.scope()).thenReturn(SCOPES);
-                when(tokenRequest.scopes()).thenReturn(VALID_SCOPES);
             }
 
             @Test
             @DisplayName("유효성 검사시 true가 반환되어야 한다.")
             void shouldValidationReturnsTrue() {
-                boolean result = validator.validateScopes(clientDetails, tokenRequest);
+                boolean result = validator.validateScopes(clientDetails, VALID_SCOPES);
 
                 assertTrue(result);
             }
@@ -86,13 +82,12 @@ class DefaultOAuth2TokenRequestValidatorTest {
                 @BeforeEach
                 void setup() {
                     when(clientDetails.scope()).thenReturn(SCOPES);
-                    when(tokenRequest.scopes()).thenReturn(Collections.emptySet());
                 }
 
                 @Test
                 @DisplayName("유효성 검사시 true가 반환되어야 한다.")
                 void shouldValidationReturnsTrue() {
-                    boolean result = validator.validateScopes(clientDetails, tokenRequest);
+                    boolean result = validator.validateScopes(clientDetails, Collections.emptySet());
 
                     assertTrue(result);
                 }
@@ -105,13 +100,12 @@ class DefaultOAuth2TokenRequestValidatorTest {
                 @BeforeEach
                 void setup() {
                     when(clientDetails.scope()).thenReturn(SCOPES);
-                    when(tokenRequest.scopes()).thenReturn(null);
                 }
 
                 @Test
                 @DisplayName("유효성 검사시 true가 반환되어야 한다.")
                 void shouldValidationReturnsTrue() {
-                    boolean result = validator.validateScopes(clientDetails, tokenRequest);
+                    boolean result = validator.validateScopes(clientDetails, null);
 
                     assertTrue(result);
                 }

@@ -1,8 +1,8 @@
 package cube8540.oauth.authentication.credentials.oauth.token.infra;
 
-import cube8540.oauth.authentication.credentials.oauth.token.AuthorizationRequest;
+import cube8540.oauth.authentication.credentials.oauth.AuthorizationRequest;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
-import cube8540.oauth.authentication.credentials.oauth.token.OAuth2TokenRequest;
+import cube8540.oauth.authentication.credentials.oauth.OAuth2TokenRequest;
 import cube8540.oauth.authentication.credentials.oauth.code.application.OAuth2AuthorizationCodeService;
 import cube8540.oauth.authentication.credentials.oauth.code.domain.AuthorizationCode;
 import cube8540.oauth.authentication.credentials.oauth.code.domain.OAuth2AuthorizationCode;

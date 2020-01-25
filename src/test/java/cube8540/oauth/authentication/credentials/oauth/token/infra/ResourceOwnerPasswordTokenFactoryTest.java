@@ -1,12 +1,12 @@
 package cube8540.oauth.authentication.credentials.oauth.token.infra;
 
+import cube8540.oauth.authentication.credentials.oauth.OAuth2TokenRequest;
+import cube8540.oauth.authentication.credentials.oauth.OAuth2TokenRequestValidator;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidGrantException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidRequestException;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
-import cube8540.oauth.authentication.credentials.oauth.token.OAuth2TokenRequest;
-import cube8540.oauth.authentication.credentials.oauth.token.OAuth2TokenRequestValidator;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedAccessToken;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2TokenId;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2TokenIdGenerator;
@@ -143,7 +143,7 @@ class ResourceOwnerPasswordTokenFactoryTest {
 
             @BeforeEach
             void setup() {
-                when(validator.validateScopes(clientDetails, tokenRequest)).thenReturn(false);
+                when(validator.validateScopes(clientDetails, RAW_SCOPES)).thenReturn(false);
             }
 
             @Test
@@ -166,7 +166,7 @@ class ResourceOwnerPasswordTokenFactoryTest {
                         new UsernamePasswordAuthenticationToken(RAW_REQUESTED_USERNAME, RAW_REQUESTED_PASSWORD);
                 Authentication authentication = mock(Authentication.class);
 
-                when(validator.validateScopes(clientDetails, tokenRequest)).thenReturn(true);
+                when(validator.validateScopes(clientDetails, RAW_SCOPES)).thenReturn(true);
                 when(tokenIdGenerator.generateTokenValue()).thenReturn(TOKEN_ID);
                 when(authenticationManager.authenticate(usernamePasswordToken)).thenReturn(authentication);
                 when(authentication.getPrincipal()).thenReturn(rawAuthenticationUsername);
@@ -315,6 +315,7 @@ class ResourceOwnerPasswordTokenFactoryTest {
                     @BeforeEach
                     void setup() {
                         when(tokenRequest.scopes()).thenReturn(null);
+                        when(validator.validateScopes(clientDetails, null)).thenReturn(true);
                     }
 
                     @Test
@@ -333,6 +334,7 @@ class ResourceOwnerPasswordTokenFactoryTest {
                     @BeforeEach
                     void setup() {
                         when(tokenRequest.scopes()).thenReturn(Collections.emptySet());
+                        when(validator.validateScopes(clientDetails, Collections.emptySet())).thenReturn(true);
                     }
 
                     @Test
