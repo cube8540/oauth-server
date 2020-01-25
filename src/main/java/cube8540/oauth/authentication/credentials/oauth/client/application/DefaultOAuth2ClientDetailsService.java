@@ -6,11 +6,15 @@ import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2Clien
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientNotFoundException;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientRegistrationException;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+@Service
 public class DefaultOAuth2ClientDetailsService implements OAuth2ClientDetailsService {
 
     private final OAuth2ClientRepository repository;
 
+    @Autowired
     public DefaultOAuth2ClientDetailsService(OAuth2ClientRepository repository) {
         this.repository = repository;
     }
