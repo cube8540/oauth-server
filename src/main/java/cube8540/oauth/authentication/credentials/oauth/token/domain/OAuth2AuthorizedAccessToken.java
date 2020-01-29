@@ -1,5 +1,6 @@
 package cube8540.oauth.authentication.credentials.oauth.token.domain;
 
+import cube8540.oauth.authentication.AuthenticationApplication;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
 import cube8540.oauth.authentication.credentials.oauth.converter.AuthorizationGrantTypeConverter;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
@@ -10,6 +11,7 @@ import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.Singular;
 import lombok.ToString;
 import org.hibernate.annotations.DynamicInsert;
@@ -32,7 +34,9 @@ import javax.persistence.JoinTable;
 import javax.persistence.MapKeyColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
+import java.time.Clock;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -88,20 +92,24 @@ public class OAuth2AuthorizedAccessToken extends AbstractAggregateRoot<OAuth2Aut
     @Column(name = "info_value", length = 128)
     private Map<String, String> additionalInformation;
 
+    @Transient
+    @Setter(AccessLevel.PROTECTED)
+    private Clock clock = Clock.system(AuthenticationApplication.DEFAULT_TIME_ZONE.toZoneId());
+
     public static OAuth2AuthorizedAccessTokenBuilder builder(OAuth2TokenIdGenerator tokenIdGenerator) {
         return new OAuth2AuthorizedAccessTokenBuilder()
                 .tokenId(tokenIdGenerator.generateTokenValue());
     }
 
     public boolean isExpired() {
-        return expiration.isBefore(LocalDateTime.now());
+        return expiration.isBefore(LocalDateTime.now(clock));
     }
 
     public long expiresIn() {
         if (isExpired()) {
             return 0;
         }
-        return Duration.between(LocalDateTime.now(), expiration).toSeconds();
+        return Duration.between(LocalDateTime.now(clock), expiration).toSeconds();
     }
 
     public void putAdditionalInformation(String key, String value) {

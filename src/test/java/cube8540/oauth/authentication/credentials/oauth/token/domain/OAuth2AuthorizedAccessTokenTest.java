@@ -9,12 +9,14 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 
-import java.time.Duration;
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import static cube8540.oauth.authentication.AuthenticationApplication.DEFAULT_TIME_ZONE;
+import static cube8540.oauth.authentication.AuthenticationApplication.DEFAULT_ZONE_OFFSET;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -38,8 +40,7 @@ class OAuth2AuthorizedAccessTokenTest {
 
     private static final AuthorizationGrantType GRANT_TYPE = AuthorizationGrantType.AUTHORIZATION_CODE;
 
-    private static final LocalDateTime NOT_EXPIRED_EXPIRATION = LocalDateTime.now().plusDays(1);
-    private static final LocalDateTime EXPIRED_EXPIRATION = LocalDateTime.now().minusNanos(1);
+    private static final LocalDateTime EXPIRATION_DATETIME = LocalDateTime.of(2020, 1, 29, 22, 51);
 
     private static final Set<OAuth2ScopeId> SCOPE_ID = new HashSet<>(Arrays.asList(
             new OAuth2ScopeId("SCOPE-1"),
@@ -65,7 +66,7 @@ class OAuth2AuthorizedAccessTokenTest {
         @BeforeEach
         void setup() {
             this.accessToken = OAuth2AuthorizedAccessToken.builder(tokenIdGenerator)
-                    .email(EMAIL).client(CLIENT_ID).tokenGrantType(GRANT_TYPE).expiration(NOT_EXPIRED_EXPIRATION)
+                    .email(EMAIL).client(CLIENT_ID).tokenGrantType(GRANT_TYPE).expiration(EXPIRATION_DATETIME)
                     .scope(SCOPE_ID).build();
         }
 
@@ -96,7 +97,7 @@ class OAuth2AuthorizedAccessTokenTest {
         @Test
         @DisplayName("인자로 받은 만료일을 저장해야 한다.")
         void shouldSaveGivenExpiration() {
-            assertEquals(NOT_EXPIRED_EXPIRATION, accessToken.getExpiration());
+            assertEquals(EXPIRATION_DATETIME, accessToken.getExpiration());
         }
 
         @Test
@@ -119,7 +120,10 @@ class OAuth2AuthorizedAccessTokenTest {
             @BeforeEach
             void setup() {
                 this.accessToken = OAuth2AuthorizedAccessToken.builder(tokenIdGenerator)
-                        .email(EMAIL).client(CLIENT_ID).tokenGrantType(GRANT_TYPE).expiration(EXPIRED_EXPIRATION).build();
+                        .email(EMAIL).client(CLIENT_ID).tokenGrantType(GRANT_TYPE).expiration(EXPIRATION_DATETIME).build();
+
+                Clock clock = Clock.fixed(EXPIRATION_DATETIME.plusNanos(1).toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
+                this.accessToken.setClock(clock);
             }
 
             @Test
@@ -138,7 +142,10 @@ class OAuth2AuthorizedAccessTokenTest {
             @BeforeEach
             void setup() {
                 this.accessToken = OAuth2AuthorizedAccessToken.builder(tokenIdGenerator)
-                        .email(EMAIL).client(CLIENT_ID).tokenGrantType(GRANT_TYPE).expiration(NOT_EXPIRED_EXPIRATION).build();
+                        .email(EMAIL).client(CLIENT_ID).tokenGrantType(GRANT_TYPE).expiration(EXPIRATION_DATETIME).build();
+
+                Clock clock = Clock.fixed(EXPIRATION_DATETIME.minusNanos(1).toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
+                this.accessToken.setClock(clock);
             }
 
             @Test
@@ -162,7 +169,10 @@ class OAuth2AuthorizedAccessTokenTest {
             @BeforeEach
             void setup() {
                 this.accessToken = OAuth2AuthorizedAccessToken.builder(tokenIdGenerator)
-                        .email(EMAIL).client(CLIENT_ID).tokenGrantType(GRANT_TYPE).expiration(EXPIRED_EXPIRATION).build();
+                        .email(EMAIL).client(CLIENT_ID).tokenGrantType(GRANT_TYPE).expiration(EXPIRATION_DATETIME).build();
+
+                Clock clock = Clock.fixed(EXPIRATION_DATETIME.plusNanos(1).toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
+                this.accessToken.setClock(clock);
             }
 
             @Test
@@ -176,21 +186,23 @@ class OAuth2AuthorizedAccessTokenTest {
         @Nested
         @DisplayName("현재 시간이 만료일을 초과하지 않았을시")
         class WhenAccessTokenNotExpired {
-            private final LocalDateTime expiredDateTime0 = LocalDateTime.now().plusSeconds(10);
-            private final LocalDateTime expiredDateTime1 = LocalDateTime.now().plusSeconds(20);
+            private OAuth2AuthorizedAccessToken accessToken;
+            private long expiresIn = 10;
+
+            @BeforeEach
+            void setup() {
+                this.accessToken = OAuth2AuthorizedAccessToken.builder(tokenIdGenerator)
+                        .email(EMAIL).client(CLIENT_ID).tokenGrantType(GRANT_TYPE).expiration(EXPIRATION_DATETIME).build();
+
+                Clock clock = Clock.fixed(EXPIRATION_DATETIME.minusSeconds(expiresIn).toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
+                this.accessToken.setClock(clock);
+            }
+
 
             @Test
             @DisplayName("남은 시간이 초로 변환되어 반환되어야 한다.")
             void shouldReturnsSeconds() {
-                long systemTime = System.nanoTime();
-                OAuth2AuthorizedAccessToken accessToken0 = OAuth2AuthorizedAccessToken.builder(tokenIdGenerator)
-                        .email(EMAIL).client(CLIENT_ID).tokenGrantType(GRANT_TYPE).expiration(expiredDateTime0).build();
-                OAuth2AuthorizedAccessToken accessToken1 = OAuth2AuthorizedAccessToken.builder(tokenIdGenerator)
-                        .email(EMAIL).client(CLIENT_ID).tokenGrantType(GRANT_TYPE).expiration(expiredDateTime1).build();
-                long delay = System.nanoTime() - systemTime;
-
-                assertEquals(Duration.between(LocalDateTime.now(), expiredDateTime0).minusNanos(delay).toSeconds(), accessToken0.expiresIn());
-                assertEquals(Duration.between(LocalDateTime.now(), expiredDateTime1).minusNanos(delay).toSeconds(), accessToken1.expiresIn());
+                assertEquals(expiresIn, accessToken.expiresIn());
             }
         }
     }
@@ -203,7 +215,7 @@ class OAuth2AuthorizedAccessTokenTest {
         @BeforeEach
         void setup() {
             this.accessToken = OAuth2AuthorizedAccessToken.builder(tokenIdGenerator)
-                    .email(EMAIL).client(CLIENT_ID).tokenGrantType(GRANT_TYPE).expiration(NOT_EXPIRED_EXPIRATION).build();
+                    .email(EMAIL).client(CLIENT_ID).tokenGrantType(GRANT_TYPE).expiration(EXPIRATION_DATETIME).build();
         }
 
         @Test
@@ -223,13 +235,13 @@ class OAuth2AuthorizedAccessTokenTest {
     @DisplayName("리플래시 토큰 생성 및 저장")
     class CreateAndSaveRefreshToken {
         private OAuth2TokenIdGenerator refreshTokenIdGenerator;
-        private LocalDateTime expirationDateTime = LocalDateTime.now().plusMinutes(10);
+        private LocalDateTime expirationDateTime = LocalDateTime.of(2020, 1, 29, 11, 9);
         private OAuth2AuthorizedAccessToken accessToken;
 
         @BeforeEach
         void setup() {
             this.accessToken = OAuth2AuthorizedAccessToken.builder(tokenIdGenerator)
-                    .email(EMAIL).client(CLIENT_ID).tokenGrantType(GRANT_TYPE).expiration(NOT_EXPIRED_EXPIRATION).build();
+                    .email(EMAIL).client(CLIENT_ID).tokenGrantType(GRANT_TYPE).expiration(EXPIRATION_DATETIME).build();
 
             this.refreshTokenIdGenerator = mock(OAuth2TokenIdGenerator.class);
             when(refreshTokenIdGenerator.generateTokenValue()).thenReturn(REFRESH_TOKEN_ID);

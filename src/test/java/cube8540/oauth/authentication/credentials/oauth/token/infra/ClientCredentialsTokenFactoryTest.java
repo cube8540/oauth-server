@@ -1,8 +1,8 @@
 package cube8540.oauth.authentication.credentials.oauth.token.infra;
 
-import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2TokenRequest;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2TokenRequestValidator;
+import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidGrantException;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
@@ -16,14 +16,17 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 
+import java.time.Clock;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static cube8540.oauth.authentication.AuthenticationApplication.DEFAULT_TIME_ZONE;
+import static cube8540.oauth.authentication.AuthenticationApplication.DEFAULT_ZONE_OFFSET;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
@@ -40,6 +43,8 @@ class ClientCredentialsTokenFactoryTest {
 
     private static final String RAW_CLIENT_ID = "CLIENT-ID";
     private static final OAuth2ClientId CLIENT_ID = new OAuth2ClientId(RAW_CLIENT_ID);
+
+    private static final LocalDateTime TOKEN_CREATED_DATETIME = LocalDateTime.of(2020, 1, 29, 22, 57);
 
     private static final Integer ACCESS_TOKEN_VALIDITY_SECONDS = 600;
     private static final Integer REFRESH_TOKEN_VALIDITY_SECONDS = 6000;
@@ -80,6 +85,9 @@ class ClientCredentialsTokenFactoryTest {
             when(tokenRequest.scopes()).thenReturn(RAW_SCOPES);
 
             tokenFactory.setTokenRequestValidator(validator);
+
+            Clock clock = Clock.fixed(TOKEN_CREATED_DATETIME.toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
+            tokenFactory.setClock(clock);
         }
 
         @Nested
@@ -162,7 +170,7 @@ class ClientCredentialsTokenFactoryTest {
             void shouldSetTokenValidity() {
                 OAuth2AuthorizedAccessToken accessToken = tokenFactory.createAccessToken(clientDetails, tokenRequest);
 
-                assertNotNull(accessToken.getExpiration());
+                assertEquals(TOKEN_CREATED_DATETIME.plusSeconds(ACCESS_TOKEN_VALIDITY_SECONDS), accessToken.getExpiration());
             }
 
             @Nested
@@ -229,7 +237,7 @@ class ClientCredentialsTokenFactoryTest {
                 void shouldSetTokenValidity() {
                     OAuth2AuthorizedAccessToken accessToken = tokenFactory.createAccessToken(clientDetails, tokenRequest);
 
-                    assertNotNull(accessToken.getRefreshToken().getExpiration());
+                    assertEquals(TOKEN_CREATED_DATETIME.plusSeconds(REFRESH_TOKEN_VALIDITY_SECONDS), accessToken.getRefreshToken().getExpiration());
                 }
 
                 @Nested

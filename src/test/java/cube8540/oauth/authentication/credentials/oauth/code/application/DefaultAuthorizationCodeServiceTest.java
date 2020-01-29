@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import java.net.URI;
+import java.time.Clock;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -23,6 +24,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static cube8540.oauth.authentication.AuthenticationApplication.DEFAULT_TIME_ZONE;
+import static cube8540.oauth.authentication.AuthenticationApplication.DEFAULT_ZONE_OFFSET;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -36,6 +39,8 @@ class DefaultAuthorizationCodeServiceTest {
 
     private static final String RAW_CODE = "CODE";
     private static final AuthorizationCode CODE = new AuthorizationCode(RAW_CODE);
+
+    private static final LocalDateTime CREATED_DATETIME = LocalDateTime.of(2020, 1, 29, 22, 42);
 
     private static final Duration CODE_DURATION = Duration.ofSeconds(10);
 
@@ -142,6 +147,9 @@ class DefaultAuthorizationCodeServiceTest {
 
             codeService.setCodeGenerator(generator);
             codeService.setCodeDuration(CODE_DURATION);
+
+            Clock clock = Clock.fixed(CREATED_DATETIME.toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
+            codeService.setClock(clock);
         }
 
         @Test
@@ -159,13 +167,9 @@ class DefaultAuthorizationCodeServiceTest {
         void shouldCodeHaveValidTimeOfSetTime() {
             ArgumentCaptor<OAuth2AuthorizationCode> codeArgumentCaptor = ArgumentCaptor.forClass(OAuth2AuthorizationCode.class);
 
-            long systemDate = System.nanoTime();
             codeService.generateNewAuthorizationCode(authorizationRequest);
-            long runtime = System.nanoTime() - systemDate;
-
-            LocalDateTime expected = LocalDateTime.now().plus(CODE_DURATION).minusNanos(runtime).withNano(0);
             verify(codeRepository, times(1)).save(codeArgumentCaptor.capture());
-            assertEquals(expected, codeArgumentCaptor.getValue().getExpirationDateTime());
+            assertEquals(CREATED_DATETIME.plus(CODE_DURATION), codeArgumentCaptor.getValue().getExpirationDateTime());
         }
 
         @Test

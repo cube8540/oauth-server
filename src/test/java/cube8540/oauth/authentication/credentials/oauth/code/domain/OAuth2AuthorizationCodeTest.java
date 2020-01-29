@@ -11,12 +11,15 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.net.URI;
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static cube8540.oauth.authentication.AuthenticationApplication.DEFAULT_TIME_ZONE;
+import static cube8540.oauth.authentication.AuthenticationApplication.DEFAULT_ZONE_OFFSET;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -40,8 +43,7 @@ class OAuth2AuthorizationCodeTest {
     private static final String RAW_REDIRECT_URI = "http://localhost";
     private static final URI REDIRECT_URI = URI.create(RAW_REDIRECT_URI);
 
-    private static final LocalDateTime EXPIRED_DATETIME = LocalDateTime.now().minusNanos(1);
-    private static final LocalDateTime NOT_EXPIRED_DATETIME = LocalDateTime.now().plusMinutes(1);
+    private static final LocalDateTime EXPIRATION_DATETIME = LocalDateTime.of(2020, 1, 29, 22, 45);
 
     private static final Set<String> SCOPES = new HashSet<>(Arrays.asList("SCOPE-1", "SCOPE-2", "SCOPE-3"));
 
@@ -69,7 +71,7 @@ class OAuth2AuthorizationCodeTest {
             when(request.approvedScopes()).thenReturn(SCOPES);
             when(codeGenerator.generate()).thenReturn(CODE);
 
-            this.code = new OAuth2AuthorizationCode(codeGenerator, NOT_EXPIRED_DATETIME);
+            this.code = new OAuth2AuthorizationCode(codeGenerator, EXPIRATION_DATETIME);
         }
 
         @Test
@@ -138,7 +140,10 @@ class OAuth2AuthorizationCodeTest {
 
             @BeforeEach
             void setup() {
-                this.code = new OAuth2AuthorizationCode(codeGenerator, EXPIRED_DATETIME);
+                this.code = new OAuth2AuthorizationCode(codeGenerator, EXPIRATION_DATETIME);
+
+                Clock clock = Clock.fixed(EXPIRATION_DATETIME.plusNanos(1).toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
+                this.code.setClock(clock);
             }
 
             @Test
@@ -157,10 +162,13 @@ class OAuth2AuthorizationCodeTest {
             @BeforeEach
             void setup() {
                 this.request = mock(AuthorizationRequest.class);
-                this.code = new OAuth2AuthorizationCode(codeGenerator, NOT_EXPIRED_DATETIME);
+                this.code = new OAuth2AuthorizationCode(codeGenerator, EXPIRATION_DATETIME);
 
                 this.code.setAuthorizationRequest(savedRequest);
                 when(request.redirectURI()).thenReturn(URI.create("http://mismach-uri.info"));
+
+                Clock clock = Clock.fixed(EXPIRATION_DATETIME.minusNanos(1).toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
+                this.code.setClock(clock);
             }
 
             @Test
@@ -179,11 +187,14 @@ class OAuth2AuthorizationCodeTest {
             @BeforeEach
             void setup() {
                 this.request = mock(AuthorizationRequest.class);
-                this.code = new OAuth2AuthorizationCode(codeGenerator, NOT_EXPIRED_DATETIME);
+                this.code = new OAuth2AuthorizationCode(codeGenerator, EXPIRATION_DATETIME);
 
                 this.code.setAuthorizationRequest(savedRequest);
                 when(request.redirectURI()).thenReturn(REDIRECT_URI);
                 when(request.clientId()).thenReturn("MISMATCH-CLIENT-ID");
+
+                Clock clock = Clock.fixed(EXPIRATION_DATETIME.minusNanos(1).toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
+                this.code.setClock(clock);
             }
 
             @Test
@@ -202,11 +213,14 @@ class OAuth2AuthorizationCodeTest {
             @BeforeEach
             void setup() {
                 this.request = mock(AuthorizationRequest.class);
-                this.code = new OAuth2AuthorizationCode(codeGenerator, NOT_EXPIRED_DATETIME);
+                this.code = new OAuth2AuthorizationCode(codeGenerator, EXPIRATION_DATETIME);
 
                 this.code.setAuthorizationRequest(savedRequest);
                 when(request.redirectURI()).thenReturn(REDIRECT_URI);
                 when(request.clientId()).thenReturn(RAW_CLIENT_ID);
+
+                Clock clock = Clock.fixed(EXPIRATION_DATETIME.minusNanos(1).toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
+                this.code.setClock(clock);
             }
 
             @Test

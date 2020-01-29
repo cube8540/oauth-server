@@ -1,11 +1,11 @@
 package cube8540.oauth.authentication.credentials.oauth.token.infra;
 
+import cube8540.oauth.authentication.credentials.oauth.OAuth2TokenRequest;
+import cube8540.oauth.authentication.credentials.oauth.OAuth2TokenRequestValidator;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidGrantException;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
-import cube8540.oauth.authentication.credentials.oauth.OAuth2TokenRequest;
-import cube8540.oauth.authentication.credentials.oauth.OAuth2TokenRequestValidator;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedAccessToken;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedRefreshToken;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2RefreshTokenRepository;
@@ -19,6 +19,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 
+import java.time.Clock;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -26,8 +28,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static cube8540.oauth.authentication.AuthenticationApplication.DEFAULT_TIME_ZONE;
+import static cube8540.oauth.authentication.AuthenticationApplication.DEFAULT_ZONE_OFFSET;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -56,6 +59,8 @@ class RefreshTokenFactoryTest {
 
     private static final String RAW_EMAIL = "email@email.com";
     private static final UserEmail EMAIL = new UserEmail(RAW_EMAIL);
+
+    private static final LocalDateTime TOKEN_CREATED_DATETIME = LocalDateTime.of(2020, 1, 29, 22, 57);
 
     private static final Integer ACCESS_TOKEN_VALIDITY_SECONDS = 600;
     private static final Integer REFRESH_TOKEN_VALIDITY_SECONDS = 6000;
@@ -103,6 +108,9 @@ class RefreshTokenFactoryTest {
             when(tokenRequest.scopes()).thenReturn(RAW_SCOPES);
 
             tokenFactory.setTokenRequestValidator(validator);
+
+            Clock clock = Clock.fixed(TOKEN_CREATED_DATETIME.toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
+            tokenFactory.setClock(clock);
         }
 
         @Nested
@@ -286,9 +294,9 @@ class RefreshTokenFactoryTest {
                 @Test
                 @DisplayName("토큰의 유효시간이 설정되어 있어야 한다.")
                 void shouldSetTokenValidity() {
-                    OAuth2AuthorizedAccessToken result = tokenFactory.createAccessToken(clientDetails, tokenRequest);
+                    OAuth2AuthorizedAccessToken accessToken = tokenFactory.createAccessToken(clientDetails, tokenRequest);
 
-                    assertNotNull(result.getExpiration());
+                    assertEquals(TOKEN_CREATED_DATETIME.plusSeconds(ACCESS_TOKEN_VALIDITY_SECONDS), accessToken.getExpiration());
                 }
 
                 @Test
@@ -296,7 +304,7 @@ class RefreshTokenFactoryTest {
                 void shouldSetRefreshTokenValidity() {
                     OAuth2AuthorizedAccessToken accessToken = tokenFactory.createAccessToken(clientDetails, tokenRequest);
 
-                    assertNotNull(accessToken.getRefreshToken().getExpiration());
+                    assertEquals(TOKEN_CREATED_DATETIME.plusSeconds(REFRESH_TOKEN_VALIDITY_SECONDS), accessToken.getRefreshToken().getExpiration());
                 }
 
                 @Test

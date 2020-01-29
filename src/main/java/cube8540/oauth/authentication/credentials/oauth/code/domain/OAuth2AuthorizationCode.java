@@ -1,8 +1,9 @@
 package cube8540.oauth.authentication.credentials.oauth.code.domain;
 
-import cube8540.oauth.authentication.credentials.oauth.converter.RedirectUriConverter;
+import cube8540.oauth.authentication.AuthenticationApplication;
 import cube8540.oauth.authentication.credentials.oauth.AuthorizationRequest;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
+import cube8540.oauth.authentication.credentials.oauth.converter.RedirectUriConverter;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidClientException;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import cube8540.oauth.authentication.users.domain.UserEmail;
@@ -11,6 +12,7 @@ import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 import org.springframework.data.domain.AbstractAggregateRoot;
 
@@ -24,7 +26,9 @@ import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import java.net.URI;
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -65,6 +69,10 @@ public class OAuth2AuthorizationCode extends AbstractAggregateRoot<OAuth2Authori
     @AttributeOverride(name = "value", column = @Column(name = "scope_id", length = 32, nullable = false))
     private Set<OAuth2ScopeId> approvedScopes;
 
+    @Transient
+    @Setter(AccessLevel.PROTECTED)
+    private Clock clock = Clock.system(AuthenticationApplication.DEFAULT_TIME_ZONE.toZoneId());
+
     public OAuth2AuthorizationCode(AuthorizationCodeGenerator generator, LocalDateTime expirationDateTime) {
         this.code = generator.generate();
         this.expirationDateTime = expirationDateTime;
@@ -80,7 +88,7 @@ public class OAuth2AuthorizationCode extends AbstractAggregateRoot<OAuth2Authori
     }
 
     public void validateWithAuthorizationRequest(AuthorizationRequest request) {
-        if (expirationDateTime.isBefore(LocalDateTime.now())) {
+        if (expirationDateTime.isBefore(LocalDateTime.now(clock))) {
             throw new AuthorizationCodeExpiredException("authorization code is expired");
         }
 

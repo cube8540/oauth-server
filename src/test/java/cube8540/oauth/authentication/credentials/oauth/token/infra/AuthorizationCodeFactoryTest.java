@@ -24,6 +24,8 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 
 import java.net.URI;
+import java.time.Clock;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -31,8 +33,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static cube8540.oauth.authentication.AuthenticationApplication.DEFAULT_TIME_ZONE;
+import static cube8540.oauth.authentication.AuthenticationApplication.DEFAULT_ZONE_OFFSET;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -56,6 +59,8 @@ class AuthorizationCodeFactoryTest {
     private static final URI REDIRECT_URI = URI.create("http://localhost:8080");
 
     private static final UserEmail STORED_EMAIL = new UserEmail("email@email.com");
+
+    private static final LocalDateTime TOKEN_CREATED_DATETIME = LocalDateTime.of(2020, 1, 29, 22, 57);
 
     private static final Integer ACCESS_TOKEN_VALIDITY_SECONDS = 600;
     private static final Integer REFRESH_TOKEN_VALIDITY_SECONDS = 6000;
@@ -107,6 +112,9 @@ class AuthorizationCodeFactoryTest {
             when(authorizationCode.getClientId()).thenReturn(CLIENT_ID);
             when(authorizationCode.getEmail()).thenReturn(STORED_EMAIL);
             when(authorizationCode.getApprovedScopes()).thenReturn(STORED_SCOPES);
+
+            Clock clock = Clock.fixed(TOKEN_CREATED_DATETIME.toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
+            tokenFactory.setClock(clock);
         }
 
         @Nested
@@ -230,7 +238,7 @@ class AuthorizationCodeFactoryTest {
                 void shouldSetTokenValidity() {
                     OAuth2AuthorizedAccessToken accessToken = tokenFactory.createAccessToken(clientDetails, tokenRequest);
 
-                    assertNotNull(accessToken.getExpiration());
+                    assertEquals(TOKEN_CREATED_DATETIME.plusSeconds(ACCESS_TOKEN_VALIDITY_SECONDS), accessToken.getExpiration());
                 }
 
                 @Test
@@ -238,7 +246,7 @@ class AuthorizationCodeFactoryTest {
                 void shouldSetRefreshTokenValidity() {
                     OAuth2AuthorizedAccessToken accessToken = tokenFactory.createAccessToken(clientDetails, tokenRequest);
 
-                    assertNotNull(accessToken.getRefreshToken().getExpiration());
+                    assertEquals(TOKEN_CREATED_DATETIME.plusSeconds(REFRESH_TOKEN_VALIDITY_SECONDS), accessToken.getRefreshToken().getExpiration());
                 }
 
                 @Nested

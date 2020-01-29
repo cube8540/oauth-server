@@ -5,16 +5,18 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
 
+import static cube8540.oauth.authentication.AuthenticationApplication.DEFAULT_TIME_ZONE;
+import static cube8540.oauth.authentication.AuthenticationApplication.DEFAULT_ZONE_OFFSET;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DisplayName("인증키 테스트")
 class UserCredentialsKeyTest {
 
     private static final String KEY_VALUE = "KEY-VALUE";
-    private static final LocalDateTime NOT_EXPIRED_DATETIME = LocalDateTime.now().plusDays(1);
-    private static final LocalDateTime EXPIRED_DATETIME = LocalDateTime.now().minusNanos(1);
+    private static final LocalDateTime EXPIRATION_DATETIME = LocalDateTime.of(2020, 1, 29, 23, 4);
 
     @Nested
     @DisplayName("키 매칭")
@@ -27,7 +29,10 @@ class UserCredentialsKeyTest {
 
             @BeforeEach
             void setup() {
-                this.key = new UserCredentialsKey(KEY_VALUE, NOT_EXPIRED_DATETIME);
+                this.key = new UserCredentialsKey(KEY_VALUE, EXPIRATION_DATETIME);
+
+                Clock clock = Clock.fixed(EXPIRATION_DATETIME.minusNanos(1).toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
+                this.key.setClock(clock);
             }
 
             @Test
@@ -45,7 +50,10 @@ class UserCredentialsKeyTest {
 
             @BeforeEach
             void setup() {
-                this.key = new UserCredentialsKey(KEY_VALUE, EXPIRED_DATETIME);
+                this.key = new UserCredentialsKey(KEY_VALUE, EXPIRATION_DATETIME);
+
+                Clock clock = Clock.fixed(EXPIRATION_DATETIME.plusNanos(1).toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
+                this.key.setClock(clock);
             }
 
             @Test
@@ -63,7 +71,10 @@ class UserCredentialsKeyTest {
 
             @BeforeEach
             void setup() {
-                this.key = new UserCredentialsKey(KEY_VALUE, NOT_EXPIRED_DATETIME);
+                this.key = new UserCredentialsKey(KEY_VALUE, EXPIRATION_DATETIME);
+
+                Clock clock = Clock.fixed(EXPIRATION_DATETIME.minusNanos(1).toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
+                this.key.setClock(clock);
             }
 
             @Test

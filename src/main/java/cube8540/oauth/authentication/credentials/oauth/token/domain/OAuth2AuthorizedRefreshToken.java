@@ -1,9 +1,11 @@
 package cube8540.oauth.authentication.credentials.oauth.token.domain;
 
+import cube8540.oauth.authentication.AuthenticationApplication;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 import org.springframework.data.domain.AbstractAggregateRoot;
 
@@ -14,6 +16,8 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
+import java.time.Clock;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
@@ -35,6 +39,10 @@ public class OAuth2AuthorizedRefreshToken extends AbstractAggregateRoot<OAuth2Au
     @OneToOne(fetch = FetchType.EAGER)
     private OAuth2AuthorizedAccessToken accessToken;
 
+    @Transient
+    @Setter(AccessLevel.PROTECTED)
+    private Clock clock = Clock.system(AuthenticationApplication.DEFAULT_TIME_ZONE.toZoneId());
+
     public OAuth2AuthorizedRefreshToken(OAuth2TokenIdGenerator tokenIdGenerator, LocalDateTime expiration, OAuth2AuthorizedAccessToken accessToken) {
         this.tokenId = tokenIdGenerator.generateTokenValue();
         this.expiration = expiration;
@@ -42,13 +50,13 @@ public class OAuth2AuthorizedRefreshToken extends AbstractAggregateRoot<OAuth2Au
     }
 
     public boolean isExpired() {
-        return this.expiration.isBefore(LocalDateTime.now());
+        return this.expiration.isBefore(LocalDateTime.now(clock));
     }
 
     public long expiresIn() {
         if (isExpired()) {
             return 0;
         }
-        return Duration.between(LocalDateTime.now(), expiration).toSeconds();
+        return Duration.between(LocalDateTime.now(clock), expiration).toSeconds();
     }
 }

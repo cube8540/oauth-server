@@ -5,9 +5,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.time.Duration;
+import java.time.Clock;
 import java.time.LocalDateTime;
 
+import static cube8540.oauth.authentication.AuthenticationApplication.DEFAULT_TIME_ZONE;
+import static cube8540.oauth.authentication.AuthenticationApplication.DEFAULT_ZONE_OFFSET;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -20,8 +22,7 @@ class OAuth2AuthorizedRefreshTokenTest {
     private static final String RAW_TOKEN_ID = "TOKEN_ID";
     private static final OAuth2TokenId TOKEN_ID = new OAuth2TokenId(RAW_TOKEN_ID);
 
-    private static final LocalDateTime NOT_EXPIRED_EXPIRATION = LocalDateTime.now().plusDays(1);
-    private static final LocalDateTime EXPIRED_EXPIRATION = LocalDateTime.now().minusNanos(1);
+    private static final LocalDateTime EXPIRATION = LocalDateTime.of(2020, 1, 29, 22, 27);
 
     private OAuth2AuthorizedAccessToken accessToken;
     private OAuth2TokenIdGenerator tokenIdGenerator;
@@ -41,7 +42,7 @@ class OAuth2AuthorizedRefreshTokenTest {
         @BeforeEach
         void setup() {
             when(tokenIdGenerator.generateTokenValue()).thenReturn(TOKEN_ID);
-            this.refreshToken = new OAuth2AuthorizedRefreshToken(tokenIdGenerator, NOT_EXPIRED_EXPIRATION, accessToken);
+            this.refreshToken = new OAuth2AuthorizedRefreshToken(tokenIdGenerator, EXPIRATION, accessToken);
         }
 
         @Test
@@ -53,7 +54,7 @@ class OAuth2AuthorizedRefreshTokenTest {
         @Test
         @DisplayName("인자로 받은 만료일을 저장해야 한다.")
         void shouldSaveGivenExpiration() {
-            assertEquals(NOT_EXPIRED_EXPIRATION, refreshToken.getExpiration());
+            assertEquals(EXPIRATION, refreshToken.getExpiration());
         }
 
         @Test
@@ -80,7 +81,10 @@ class OAuth2AuthorizedRefreshTokenTest {
 
             @BeforeEach
             void setup() {
-                refreshToken = new OAuth2AuthorizedRefreshToken(tokenIdGenerator, EXPIRED_EXPIRATION, accessToken);
+                Clock clock = Clock.fixed(EXPIRATION.plusNanos(1).toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
+
+                refreshToken = new OAuth2AuthorizedRefreshToken(tokenIdGenerator, EXPIRATION, accessToken);
+                refreshToken.setClock(clock);
             }
 
             @Test
@@ -96,7 +100,10 @@ class OAuth2AuthorizedRefreshTokenTest {
 
             @BeforeEach
             void setup() {
-                refreshToken = new OAuth2AuthorizedRefreshToken(tokenIdGenerator, NOT_EXPIRED_EXPIRATION, accessToken);
+                Clock clock = Clock.fixed(EXPIRATION.minusNanos(1).toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
+
+                refreshToken = new OAuth2AuthorizedRefreshToken(tokenIdGenerator, EXPIRATION, accessToken);
+                refreshToken.setClock(clock);
             }
 
             @Test
@@ -119,7 +126,10 @@ class OAuth2AuthorizedRefreshTokenTest {
             @BeforeEach
             void setup() {
                 when(tokenIdGenerator.generateTokenValue()).thenReturn(TOKEN_ID);
-                this.refreshToken = new OAuth2AuthorizedRefreshToken(tokenIdGenerator, EXPIRED_EXPIRATION, accessToken);
+
+                Clock clock = Clock.fixed(EXPIRATION.plusNanos(1).toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
+                this.refreshToken = new OAuth2AuthorizedRefreshToken(tokenIdGenerator, EXPIRATION, accessToken);
+                this.refreshToken.setClock(clock);
             }
 
             @Test
@@ -133,17 +143,23 @@ class OAuth2AuthorizedRefreshTokenTest {
         @Nested
         @DisplayName("현재 시간이 만료일을 초과하지 않았을시")
         class WhenAccessTokenNotExpired {
-            private final LocalDateTime expiredDateTime0 = LocalDateTime.now().plusSeconds(10);
-            private final LocalDateTime expiredDateTime1 = LocalDateTime.now().plusSeconds(20);
+            private OAuth2AuthorizedRefreshToken refreshToken;
+            private long expiresIn = 10;
+
+            @BeforeEach
+            void setup() {
+                when(tokenIdGenerator.generateTokenValue()).thenReturn(TOKEN_ID);
+
+                Clock clock = Clock.fixed(EXPIRATION.minusSeconds(expiresIn).toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
+                this.refreshToken = new OAuth2AuthorizedRefreshToken(tokenIdGenerator, EXPIRATION, accessToken);
+                this.refreshToken.setClock(clock);
+            }
+
 
             @Test
             @DisplayName("남은 시간이 초로 변환되어 반환되어야 한다.")
             void shouldReturnsSeconds() {
-                OAuth2AuthorizedRefreshToken refreshToken0 = new OAuth2AuthorizedRefreshToken(tokenIdGenerator, expiredDateTime0, accessToken);
-                OAuth2AuthorizedRefreshToken refreshToken1 = new OAuth2AuthorizedRefreshToken(tokenIdGenerator, expiredDateTime1, accessToken);
-
-                assertEquals(Duration.between(LocalDateTime.now(), expiredDateTime0).toSeconds(), refreshToken0.expiresIn());
-                assertEquals(Duration.between(LocalDateTime.now(), expiredDateTime1).toSeconds(), refreshToken1.expiresIn());
+                assertEquals(expiresIn, refreshToken.expiresIn());
             }
         }
     }
