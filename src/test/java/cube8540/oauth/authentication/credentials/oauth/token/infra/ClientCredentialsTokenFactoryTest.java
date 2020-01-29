@@ -79,7 +79,7 @@ class ClientCredentialsTokenFactoryTest {
             when(clientDetails.refreshTokenValiditySeconds()).thenReturn(REFRESH_TOKEN_VALIDITY_SECONDS);
             when(tokenRequest.scopes()).thenReturn(RAW_SCOPES);
 
-            tokenFactory.setValidator(validator);
+            tokenFactory.setTokenRequestValidator(validator);
         }
 
         @Nested

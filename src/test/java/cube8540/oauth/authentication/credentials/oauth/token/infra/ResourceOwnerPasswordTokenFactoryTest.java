@@ -102,7 +102,7 @@ class ResourceOwnerPasswordTokenFactoryTest {
             when(tokenRequest.username()).thenReturn(RAW_REQUESTED_USERNAME);
             when(tokenRequest.password()).thenReturn(RAW_REQUESTED_PASSWORD);
 
-            tokenFactory.setValidator(this.validator);
+            tokenFactory.setTokenRequestValidator(this.validator);
         }
 
         @Nested

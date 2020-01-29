@@ -138,7 +138,7 @@ class AuthorizationCodeFactoryTest {
                 when(authorizationCodeService.consume(CODE)).thenReturn(Optional.of(authorizationCode));
                 when(tokenIdGenerator.generateTokenValue()).thenReturn(TOKEN_ID);
 
-                tokenFactory.setValidator(validator);
+                tokenFactory.setTokenRequestValidator(validator);
             }
 
             @Nested
