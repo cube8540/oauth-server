@@ -20,6 +20,7 @@ import cube8540.oauth.authentication.credentials.oauth.token.infra.DefaultTokenI
 import cube8540.oauth.authentication.credentials.oauth.token.infra.OAuth2AccessTokenFactory;
 import cube8540.oauth.authentication.credentials.oauth.token.infra.RefreshTokenFactory;
 import cube8540.oauth.authentication.credentials.oauth.token.infra.ResourceOwnerPasswordTokenFactory;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -39,9 +40,16 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 @EnableWebSecurity
 public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
+    @Setter(onMethod_ = {@Autowired, @Qualifier("defaultUserService")})
     private UserDetailsService userDetailsService;
+
+    @Setter(onMethod_ = @Autowired)
     private OAuth2ClientDetailsService clientDetailsService;
+
+    @Setter(onMethod_ = @Autowired)
     private OAuth2AuthorizationCodeService authorizationCodeService;
+
+    @Setter(onMethod_ = @Autowired)
     private OAuth2RefreshTokenRepository refreshTokenRepository;
 
     @Override
@@ -105,26 +113,5 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Bean
     public OAuth2TokenIdGenerator tokenIdGenerator() {
         return new DefaultTokenIdGenerator();
-    }
-
-    @Autowired
-    @Qualifier("defaultUserService")
-    public void setUserDetailsService(UserDetailsService userDetailsService) {
-        this.userDetailsService = userDetailsService;
-    }
-
-    @Autowired
-    public void setClientDetailsService(OAuth2ClientDetailsService clientDetailsService) {
-        this.clientDetailsService = clientDetailsService;
-    }
-
-    @Autowired
-    public void setAuthorizationCodeService(OAuth2AuthorizationCodeService authorizationCodeService) {
-        this.authorizationCodeService = authorizationCodeService;
-    }
-
-    @Autowired
-    public void setRefreshTokenRepository(OAuth2RefreshTokenRepository refreshTokenRepository) {
-        this.refreshTokenRepository = refreshTokenRepository;
     }
 }

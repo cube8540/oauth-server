@@ -1,6 +1,7 @@
 package cube8540.oauth.authentication.credentials.oauth.client.provider;
 
 import cube8540.oauth.authentication.credentials.oauth.error.BadClientCredentialsException;
+import lombok.Setter;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -19,7 +20,10 @@ import java.io.IOException;
 
 public class ClientCredentialsEndpointFilter extends AbstractAuthenticationProcessingFilter {
 
+    @Setter
     private AuthenticationEntryPoint entryPoint;
+
+    @Setter
     private boolean onlyPost = false;
 
     private AuthenticationConverter converter = new BasicAuthenticationConverter();
@@ -61,14 +65,6 @@ public class ClientCredentialsEndpointFilter extends AbstractAuthenticationProce
             throws IOException, ServletException {
         super.successfulAuthentication(request, response, chain, authResult);
         chain.doFilter(request, response);
-    }
-
-    public void setEntryPoint(AuthenticationEntryPoint entryPoint) {
-        this.entryPoint = entryPoint;
-    }
-
-    public void setOnlyPost(boolean onlyPost) {
-        this.onlyPost = onlyPost;
     }
 
     private ClientCredentialsToken extractClientAuthentication(HttpServletRequest request) {

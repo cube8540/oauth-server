@@ -6,6 +6,7 @@ import cube8540.oauth.authentication.credentials.oauth.code.domain.Authorization
 import cube8540.oauth.authentication.credentials.oauth.code.domain.AuthorizationCodeRepository;
 import cube8540.oauth.authentication.credentials.oauth.code.domain.OAuth2AuthorizationCode;
 import cube8540.oauth.authentication.credentials.oauth.code.infra.DefaultAuthorizationCodeGenerator;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +19,10 @@ public class DefaultAuthorizationCodeService implements OAuth2AuthorizationCodeS
 
     private final AuthorizationCodeRepository codeRepository;
 
+    @Setter
     private AuthorizationCodeGenerator codeGenerator = new DefaultAuthorizationCodeGenerator();
+
+    @Setter
     private Duration codeDuration = Duration.ofMinutes(1);
 
     @Autowired
@@ -43,13 +47,5 @@ public class DefaultAuthorizationCodeService implements OAuth2AuthorizationCodeS
         codeRepository.save(authorizationCode);
 
         return authorizationCode.getCode();
-    }
-
-    public void setCodeGenerator(AuthorizationCodeGenerator codeGenerator) {
-        this.codeGenerator = codeGenerator;
-    }
-
-    public void setCodeDuration(Duration codeDuration) {
-        this.codeDuration = codeDuration;
     }
 }

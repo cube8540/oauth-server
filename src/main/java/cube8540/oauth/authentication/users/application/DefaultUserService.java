@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @Service
 public class DefaultUserService implements UserDetailsService {
 
-    private UserRepository repository;
+    private final UserRepository repository;
 
     @Autowired
     public DefaultUserService(UserRepository repository) {
