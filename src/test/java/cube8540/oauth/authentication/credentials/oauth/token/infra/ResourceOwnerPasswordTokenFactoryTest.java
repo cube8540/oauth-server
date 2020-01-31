@@ -177,7 +177,7 @@ class ResourceOwnerPasswordTokenFactoryTest {
                 when(validator.validateScopes(clientDetails, RAW_SCOPES)).thenReturn(true);
                 when(tokenIdGenerator.generateTokenValue()).thenReturn(TOKEN_ID);
                 when(authenticationManager.authenticate(usernamePasswordToken)).thenReturn(authentication);
-                when(authentication.getPrincipal()).thenReturn(rawAuthenticationUsername);
+                when(authentication.getName()).thenReturn(rawAuthenticationUsername);
             }
 
             @Test

@@ -36,7 +36,7 @@ public class ResourceOwnerPasswordTokenFactory extends AbstractOAuth2TokenFactor
         OAuth2AuthorizedAccessToken accessToken = OAuth2AuthorizedAccessToken.builder(getTokenIdGenerator())
                 .expiration(extractTokenExpiration(clientDetails))
                 .client(new OAuth2ClientId(clientDetails.clientId()))
-                .email(new UserEmail(authentication.getPrincipal().toString()))
+                .email(new UserEmail(authentication.getName()))
                 .scope(extractGrantScope(clientDetails, tokenRequest))
                 .tokenGrantType(AuthorizationGrantType.PASSWORD)
                 .build();
