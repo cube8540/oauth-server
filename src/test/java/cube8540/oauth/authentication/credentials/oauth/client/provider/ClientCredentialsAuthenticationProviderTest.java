@@ -114,7 +114,7 @@ class ClientCredentialsAuthenticationProviderTest {
             class WhenPasswordNotMatched {
                 @BeforeEach
                 void setup() {
-                    when(encoder.matches(ENCODING_CLIENT_SECRET,CLIENT_SECRET)).thenReturn(false);
+                    when(encoder.matches(CLIENT_SECRET, ENCODING_CLIENT_SECRET)).thenReturn(false);
                 }
 
                 @Test
@@ -129,7 +129,7 @@ class ClientCredentialsAuthenticationProviderTest {
             class WhenPasswordMatched {
                 @BeforeEach
                 void setup() {
-                    when(encoder.matches(ENCODING_CLIENT_SECRET, CLIENT_SECRET)).thenReturn(true);
+                    when(encoder.matches(CLIENT_SECRET, ENCODING_CLIENT_SECRET)).thenReturn(true);
                 }
 
                 @Test

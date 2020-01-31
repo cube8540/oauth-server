@@ -28,7 +28,7 @@ public class ClientCredentialsAuthenticationProvider implements AuthenticationPr
             OAuth2ClientDetails client = service.loadClientDetailsByClientId(authentication.getPrincipal().toString());
 
             String givenSecret = authentication.getCredentials().toString();
-            if (!encoder.matches(client.clientSecret(), givenSecret)) {
+            if (!encoder.matches(givenSecret, client.clientSecret())) {
                 throw new BadCredentialsException("secret does not match stored value");
             }
 

@@ -30,14 +30,15 @@ public class DefaultAccessTokenDetails implements OAuth2AccessTokenDetails {
         this.tokenValue = accessToken.getTokenId().getValue();
         this.clientId = accessToken.getClient();
         this.scopeId = Collections.unmodifiableSet(accessToken.getScope());
-        this.username = accessToken.getEmail().getValue();
-        this.additionalInformation = Collections.unmodifiableMap(accessToken.getAdditionalInformation());
         this.expiration = accessToken.getExpiration();
         this.expiresIn = accessToken.expiresIn();
         this.isExpired = accessToken.isExpired();
+        this.tokenType = TOKEN_TYPE;
+        this.username = accessToken.getEmail() != null ? accessToken.getEmail().getValue() : null;
         this.refreshTokenDetails = accessToken.getRefreshToken() != null ?
                 new DefaultRefreshTokenDetails(accessToken.getRefreshToken()) : null;
-        this.tokenType = TOKEN_TYPE;
+        this.additionalInformation = accessToken.getAdditionalInformation() != null ?
+                Collections.unmodifiableMap(accessToken.getAdditionalInformation()) : null;
     }
 
     @Override

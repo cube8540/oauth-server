@@ -1,6 +1,7 @@
 package cube8540.oauth.authentication.credentials.oauth.token.infra;
 
 import cube8540.oauth.authentication.AuthenticationApplication;
+import cube8540.oauth.authentication.credentials.oauth.DefaultOAuth2TokenRequestValidator;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2TokenRequest;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2TokenRequestValidator;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
@@ -27,7 +28,7 @@ public abstract class AbstractOAuth2TokenFactory implements OAuth2TokenFactory {
 
     @Getter(AccessLevel.PROTECTED)
     @Setter(AccessLevel.PUBLIC)
-    private OAuth2TokenRequestValidator tokenRequestValidator;
+    private OAuth2TokenRequestValidator tokenRequestValidator = new DefaultOAuth2TokenRequestValidator();
 
     @Setter(AccessLevel.PROTECTED)
     private Clock clock = Clock.system(AuthenticationApplication.DEFAULT_TIME_ZONE.toZoneId());
