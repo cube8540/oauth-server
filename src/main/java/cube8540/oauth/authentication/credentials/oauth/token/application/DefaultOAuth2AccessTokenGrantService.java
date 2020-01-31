@@ -9,7 +9,10 @@ import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2Author
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2TokenEnhancer;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2TokenFactory;
 import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+@Service
 public class DefaultOAuth2AccessTokenGrantService implements OAuth2AccessTokenGrantService {
 
     private final OAuth2AccessTokenRepository tokenRepository;
@@ -18,6 +21,7 @@ public class DefaultOAuth2AccessTokenGrantService implements OAuth2AccessTokenGr
     @Setter
     private OAuth2TokenEnhancer enhancer = new NullOAuth2TokenEnhancer();
 
+    @Autowired
     public DefaultOAuth2AccessTokenGrantService(OAuth2AccessTokenRepository tokenRepository, OAuth2TokenFactory tokenFactory) {
         this.tokenRepository = tokenRepository;
         this.tokenFactory = tokenFactory;
