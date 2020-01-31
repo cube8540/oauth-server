@@ -11,12 +11,12 @@ import java.util.Set;
 public final class OAuth2Utils {
 
     @NoArgsConstructor(access = AccessLevel.PRIVATE)
-    public final class TokenRequestKey {
+    public static final class TokenRequestKey {
         public static final String GRANT_TYPE = "grant_type";
 
         public static final String USERNAME = "username";
 
-        public static final String PASSWORD = "PASSWORD";
+        public static final String PASSWORD = "password";
 
         public static final String CLIENT_ID = "client_id";
 

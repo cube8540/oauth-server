@@ -93,6 +93,7 @@ public class OAuth2AuthorizedAccessToken extends AbstractAggregateRoot<OAuth2Aut
     private Map<String, String> additionalInformation;
 
     @Transient
+    @Builder.Default
     @Setter(AccessLevel.PROTECTED)
     private Clock clock = Clock.system(AuthenticationApplication.DEFAULT_TIME_ZONE.toZoneId());
 
