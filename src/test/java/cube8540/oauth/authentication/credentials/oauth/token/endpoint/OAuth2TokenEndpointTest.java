@@ -6,8 +6,10 @@ import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetail
 import cube8540.oauth.authentication.credentials.oauth.client.provider.ClientCredentialsToken;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidGrantException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidRequestException;
+import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTranslator;
 import cube8540.oauth.authentication.credentials.oauth.token.OAuth2AccessTokenDetails;
 import cube8540.oauth.authentication.credentials.oauth.token.OAuth2AccessTokenGrantService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -20,6 +22,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.OAuth2Error;
 
 import java.net.URI;
 import java.util.Arrays;
@@ -302,6 +306,72 @@ class OAuth2TokenEndpointTest {
             ResponseEntity<OAuth2AccessTokenDetails> result = endpoint.grantNewAccessToken(clientCredentialsToken, requestMap);
 
             assertEquals(tokenDetails, result.getBody());
+        }
+    }
+
+    @Nested
+    @DisplayName("예외 처리")
+    class WhenHandleException {
+        private OAuth2ExceptionTranslator translator;
+        private ResponseEntity<OAuth2Error> responseEntity;
+
+        @BeforeEach
+        @SuppressWarnings("unchecked")
+        void setup() {
+            this.translator = mock(OAuth2ExceptionTranslator.class);
+            this.responseEntity = mock(ResponseEntity.class);
+
+            endpoint.setExceptionTranslator(translator);
+        }
+
+        @Nested
+        @DisplayName("OAuth2AuthenticationException 관련 에러 발생시")
+        class WhenThrowsOAuth2AuthenticationException {
+            private OAuth2AuthenticationException exception;
+
+            @BeforeEach
+            void setup() {
+                this.exception = mock(OAuth2AuthenticationException.class);
+
+                when(translator.translate(exception)).thenReturn(responseEntity);
+            }
+
+            @Test
+            @DisplayName("예외를 응답 메시지로 변환하여 반환해야 한다.")
+            void shouldReturnsConvertingException() {
+                ResponseEntity<OAuth2Error> response = endpoint.handleException(exception);
+                assertEquals(responseEntity, response);
+            }
+
+            @AfterEach
+            void after() {
+                when(translator.translate(any())).thenReturn(null);
+            }
+        }
+
+        @Nested
+        @DisplayName("예외 발생시")
+        class WhenThrowsException {
+            private Exception exception;
+
+            @BeforeEach
+            void setup() {
+                this.exception = mock(OAuth2AuthenticationException.class);
+
+                when(translator.translate(exception)).thenReturn(responseEntity);
+            }
+
+            @Test
+            @DisplayName("예외를 응답 메시지로 변환하여 반환해야 한다.")
+            void shouldReturnsConvertingException() {
+                ResponseEntity<OAuth2Error> response = endpoint.handleException(exception);
+                assertEquals(responseEntity, response);
+            }
+
+            @AfterEach
+            void after() {
+                when(translator.translate(any())).thenReturn(null);
+            }
         }
     }
 }
