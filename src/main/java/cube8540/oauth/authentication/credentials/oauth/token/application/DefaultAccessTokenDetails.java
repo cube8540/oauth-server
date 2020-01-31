@@ -31,13 +31,17 @@ public class DefaultAccessTokenDetails implements OAuth2AccessTokenDetails {
         this.clientId = accessToken.getClient();
         this.scopeId = Collections.unmodifiableSet(accessToken.getScope());
         this.username = accessToken.getEmail().getValue();
-        this.additionalInformation = Collections.unmodifiableMap(accessToken.getAdditionalInformation());
         this.expiration = accessToken.getExpiration();
         this.expiresIn = accessToken.expiresIn();
         this.isExpired = accessToken.isExpired();
         this.refreshTokenDetails = accessToken.getRefreshToken() != null ?
                 new DefaultRefreshTokenDetails(accessToken.getRefreshToken()) : null;
         this.tokenType = TOKEN_TYPE;
+        if (accessToken.getAdditionalInformation() != null) {
+            this.additionalInformation = Collections.unmodifiableMap(accessToken.getAdditionalInformation());
+        } else {
+            this.additionalInformation = null;
+        }
     }
 
     @Override

@@ -32,8 +32,11 @@ public class DefaultOAuth2TokenRequest implements OAuth2TokenRequest {
         this.clientId = requestMap.get(OAuth2Utils.TokenRequestKey.CLIENT_ID);
         this.refreshToken = requestMap.get(OAuth2Utils.TokenRequestKey.REFRESH_TOKEN);
         this.code = requestMap.get(OAuth2Utils.TokenRequestKey.CODE);
-        this.redirectURI = URI.create(requestMap.get(OAuth2Utils.TokenRequestKey.REDIRECT_URI));
         this.scopes = OAuth2Utils.extractScopes(requestMap.get(OAuth2Utils.TokenRequestKey.SCOPE));
+
+        if (requestMap.get(OAuth2Utils.TokenRequestKey.REDIRECT_URI) != null) {
+            this.redirectURI = URI.create(requestMap.get(OAuth2Utils.TokenRequestKey.REDIRECT_URI));
+        }
     }
 
     @Override
