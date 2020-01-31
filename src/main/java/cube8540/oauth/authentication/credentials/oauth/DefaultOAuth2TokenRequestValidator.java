@@ -1,6 +1,5 @@
 package cube8540.oauth.authentication.credentials.oauth;
 
-import cube8540.oauth.authentication.credentials.oauth.OAuth2TokenRequestValidator;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
 
 import java.util.Set;
