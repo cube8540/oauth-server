@@ -91,7 +91,7 @@ public class OAuth2EndpointSecurityConfiguration extends WebSecurityConfigurerAd
 
     @Bean
     public ClientCredentialsEndpointFilter tokenEndpointClientCredentialsFilter() throws Exception {
-        ClientCredentialsEndpointFilter filter = new ClientCredentialsEndpointFilter("/oauth/token");
+        ClientCredentialsEndpointFilter filter = new ClientCredentialsEndpointFilter("/oauth/token**");
         filter.setEntryPoint(oAuth2AuthenticationExceptionEntryPoint);
         filter.setAuthenticationManager(authenticationManagerBean());
         return filter;
