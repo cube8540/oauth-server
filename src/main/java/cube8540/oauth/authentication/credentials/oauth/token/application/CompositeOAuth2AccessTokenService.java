@@ -5,16 +5,19 @@ import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetail
 import cube8540.oauth.authentication.credentials.oauth.token.DefaultAccessTokenDetails;
 import cube8540.oauth.authentication.credentials.oauth.token.OAuth2AccessTokenDetails;
 import cube8540.oauth.authentication.credentials.oauth.token.OAuth2AccessTokenGrantService;
+import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenExpiredException;
+import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenNotFoundException;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenRepository;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedAccessToken;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2TokenEnhancer;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2TokenFactory;
+import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2TokenId;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class DefaultOAuth2AccessTokenGrantService implements OAuth2AccessTokenGrantService {
+public class CompositeOAuth2AccessTokenService implements OAuth2AccessTokenGrantService, OAuth2AccessTokenService {
 
     private final OAuth2AccessTokenRepository tokenRepository;
     private final OAuth2TokenFactory tokenFactory;
@@ -23,7 +26,7 @@ public class DefaultOAuth2AccessTokenGrantService implements OAuth2AccessTokenGr
     private OAuth2TokenEnhancer enhancer = new NullOAuth2TokenEnhancer();
 
     @Autowired
-    public DefaultOAuth2AccessTokenGrantService(OAuth2AccessTokenRepository tokenRepository, OAuth2TokenFactory tokenFactory) {
+    public CompositeOAuth2AccessTokenService(OAuth2AccessTokenRepository tokenRepository, OAuth2TokenFactory tokenFactory) {
         this.tokenRepository = tokenRepository;
         this.tokenFactory = tokenFactory;
     }
@@ -36,6 +39,17 @@ public class DefaultOAuth2AccessTokenGrantService implements OAuth2AccessTokenGr
         enhancer.enhance(accessToken);
         tokenRepository.save(accessToken);
         return new DefaultAccessTokenDetails(accessToken);
+    }
+
+    @Override
+    public OAuth2AuthorizedAccessToken readAccessToken(String tokenValue) {
+        OAuth2AuthorizedAccessToken accessToken = tokenRepository.findById(new OAuth2TokenId(tokenValue))
+                .orElseThrow(() -> new OAuth2AccessTokenNotFoundException("[" + tokenValue + "] token is not found"));
+
+        if (accessToken.isExpired()) {
+            throw new OAuth2AccessTokenExpiredException("[" + tokenValue + "] is expired");
+        }
+        return accessToken;
     }
 
     private static final class NullOAuth2TokenEnhancer implements OAuth2TokenEnhancer {
