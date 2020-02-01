@@ -42,6 +42,19 @@ public final class OAuth2Utils {
         public static final String SCOPE = "scope";
     }
 
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    public static final class AccessTokenIntrospectionKey {
+        public static final String ACTIVE = "active";
+
+        public static final String SCOPE = "scope";
+
+        public static final String CLIENT_ID = "client_id";
+
+        public static final String USERNAME = "username";
+
+        public static final String EXPIRATION = "exp";
+    }
+
     public static Set<String> extractScopes(String value) {
         Set<String> result = new HashSet<>();
         if (value != null && value.trim().length() > 0) {
