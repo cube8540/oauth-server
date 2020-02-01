@@ -5,6 +5,8 @@ import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2Clien
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import cube8540.oauth.authentication.credentials.oauth.token.OAuth2AccessTokenDetails;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2TokenRequest;
+import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenExpiredException;
+import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenNotFoundException;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenRepository;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedAccessToken;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedRefreshToken;
@@ -32,6 +34,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -39,7 +42,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @DisplayName("기본 토큰 부여 서비스 테스트")
-class DefaultOAuth2AccessTokenGrantServiceTest {
+class CompositeOAuth2AccessTokenServiceTest {
 
     private static final String RAW_TOKEN_ID = "TOKEN_ID";
     private static final OAuth2TokenId TOKEN_ID = new OAuth2TokenId(RAW_TOKEN_ID);
@@ -72,13 +75,13 @@ class DefaultOAuth2AccessTokenGrantServiceTest {
     private OAuth2AccessTokenRepository accessTokenRepository;
     private OAuth2TokenFactory tokenFactory;
 
-    private DefaultOAuth2AccessTokenGrantService grantService;
+    private CompositeOAuth2AccessTokenService service;
 
     @BeforeEach
     void setup() {
         this.accessTokenRepository = mock(OAuth2AccessTokenRepository.class);
         this.tokenFactory = mock(OAuth2TokenFactory.class);
-        this.grantService = new DefaultOAuth2AccessTokenGrantService(accessTokenRepository, tokenFactory);
+        this.service = new CompositeOAuth2AccessTokenService(accessTokenRepository, tokenFactory);
     }
 
     @Nested
@@ -110,7 +113,7 @@ class DefaultOAuth2AccessTokenGrantServiceTest {
         @Test
         @DisplayName("팩토리에서 생성된 엑세스 토큰을 저장해야 한다.")
         void shouldSaveAccessTokenCreatedByFactory() {
-            grantService.grant(clientDetails, tokenRequest);
+            service.grant(clientDetails, tokenRequest);
 
             verify(accessTokenRepository, times(1)).save(accessToken);
         }
@@ -131,7 +134,7 @@ class DefaultOAuth2AccessTokenGrantServiceTest {
             @Test
             @DisplayName("저장소에서 반환된 엑세스 토큰을 삭제해야 한다.")
             void shouldRemoveReturnsAccessToken() {
-                grantService.grant(clientDetails, tokenRequest);
+                service.grant(clientDetails, tokenRequest);
 
                 verify(accessTokenRepository, times(1)).delete(existsToken);
             }
@@ -145,7 +148,7 @@ class DefaultOAuth2AccessTokenGrantServiceTest {
         @Test
         @DisplayName("토큰의 아이디를 반환해야 한다.")
         void shouldReturnsTokenId() {
-            OAuth2AccessTokenDetails tokenDetails = grantService.grant(clientDetails, tokenRequest);
+            OAuth2AccessTokenDetails tokenDetails = service.grant(clientDetails, tokenRequest);
 
             assertEquals(RAW_TOKEN_ID, tokenDetails.tokenValue());
         }
@@ -153,7 +156,7 @@ class DefaultOAuth2AccessTokenGrantServiceTest {
         @Test
         @DisplayName("토큰의 유저 아이디를 반환해야 한다.")
         void shouldReturnsUsername() {
-            OAuth2AccessTokenDetails tokenDetails = grantService.grant(clientDetails, tokenRequest);
+            OAuth2AccessTokenDetails tokenDetails = service.grant(clientDetails, tokenRequest);
 
             assertEquals(RAW_EMAIL, tokenDetails.username());
         }
@@ -161,7 +164,7 @@ class DefaultOAuth2AccessTokenGrantServiceTest {
         @Test
         @DisplayName("토큰의 클라이언트 아이디를 반환해야 한다.")
         void shouldReturnsClientId() {
-            OAuth2AccessTokenDetails tokenDetails = grantService.grant(clientDetails, tokenRequest);
+            OAuth2AccessTokenDetails tokenDetails = service.grant(clientDetails, tokenRequest);
 
             assertEquals(CLIENT, tokenDetails.clientId());
         }
@@ -169,7 +172,7 @@ class DefaultOAuth2AccessTokenGrantServiceTest {
         @Test
         @DisplayName("토큰의 스코프를 반환해야 한다.")
         void shouldReturnsScope() {
-            OAuth2AccessTokenDetails tokenDetails = grantService.grant(clientDetails, tokenRequest);
+            OAuth2AccessTokenDetails tokenDetails = service.grant(clientDetails, tokenRequest);
 
             assertEquals(SCOPE, tokenDetails.scope());
         }
@@ -177,7 +180,7 @@ class DefaultOAuth2AccessTokenGrantServiceTest {
         @Test
         @DisplayName("토큰의 타입은 Bearer이어야 한다.")
         void shouldTokenTypeMustBearer() {
-            OAuth2AccessTokenDetails tokenDetails = grantService.grant(clientDetails, tokenRequest);
+            OAuth2AccessTokenDetails tokenDetails = service.grant(clientDetails, tokenRequest);
 
             assertEquals("Bearer", tokenDetails.tokenType());
         }
@@ -185,7 +188,7 @@ class DefaultOAuth2AccessTokenGrantServiceTest {
         @Test
         @DisplayName("토큰의 추가 정보를 반환해야 한다.")
         void shouldReturnsAdditionalInformation() {
-            OAuth2AccessTokenDetails tokenDetails = grantService.grant(clientDetails, tokenRequest);
+            OAuth2AccessTokenDetails tokenDetails = service.grant(clientDetails, tokenRequest);
 
             assertEquals(ADDITIONAL_INFO, tokenDetails.additionalInformation());
         }
@@ -193,7 +196,7 @@ class DefaultOAuth2AccessTokenGrantServiceTest {
         @Test
         @DisplayName("토큰의 유효 시간을 반환해야 한다.")
         void shouldReturnsExpiration() {
-            OAuth2AccessTokenDetails tokenDetails = grantService.grant(clientDetails, tokenRequest);
+            OAuth2AccessTokenDetails tokenDetails = service.grant(clientDetails, tokenRequest);
 
             assertEquals(EXPIRATION, tokenDetails.expiration());
         }
@@ -201,7 +204,7 @@ class DefaultOAuth2AccessTokenGrantServiceTest {
         @Test
         @DisplayName("토큰의 남은 유효 시간을 반환해야 한다.")
         void shouldReturnsExpirationIn() {
-            OAuth2AccessTokenDetails tokenDetails = grantService.grant(clientDetails, tokenRequest);
+            OAuth2AccessTokenDetails tokenDetails = service.grant(clientDetails, tokenRequest);
 
             assertEquals(EXPIRATION_IN, tokenDetails.expiresIn());
         }
@@ -209,7 +212,7 @@ class DefaultOAuth2AccessTokenGrantServiceTest {
         @Test
         @DisplayName("토큰의 만료 여부를 반환해야 한다.")
         void shouldReturnsWhetherExpiredOrNot() {
-            OAuth2AccessTokenDetails tokenDetails = grantService.grant(clientDetails, tokenRequest);
+            OAuth2AccessTokenDetails tokenDetails = service.grant(clientDetails, tokenRequest);
 
             assertEquals(IS_EXPIRED, tokenDetails.isExpired());
         }
@@ -221,7 +224,7 @@ class DefaultOAuth2AccessTokenGrantServiceTest {
             @Test
             @DisplayName("리플래시 토큰은 null로 반환해야 한다.")
             void shouldReturnsRefreshTokenNull() {
-                OAuth2AccessTokenDetails tokenDetails = grantService.grant(clientDetails, tokenRequest);
+                OAuth2AccessTokenDetails tokenDetails = service.grant(clientDetails, tokenRequest);
 
                 assertNull(tokenDetails.refreshToken());
             }
@@ -245,7 +248,7 @@ class DefaultOAuth2AccessTokenGrantServiceTest {
             @Test
             @DisplayName("리플래시 토큰의 아이디를 반환해야 한다.")
             void shouldReturnsRefreshTokenId() {
-                OAuth2AccessTokenDetails tokenDetails = grantService.grant(clientDetails, tokenRequest);
+                OAuth2AccessTokenDetails tokenDetails = service.grant(clientDetails, tokenRequest);
 
                 assertEquals(RAW_REFRESH_TOKEN_ID, tokenDetails.refreshToken().tokenValue());
             }
@@ -253,7 +256,7 @@ class DefaultOAuth2AccessTokenGrantServiceTest {
             @Test
             @DisplayName("리플래시 토큰의 만료일을 반환해야 한다.")
             void shouldReturnsRefreshTokenExpiration() {
-                OAuth2AccessTokenDetails tokenDetails = grantService.grant(clientDetails, tokenRequest);
+                OAuth2AccessTokenDetails tokenDetails = service.grant(clientDetails, tokenRequest);
 
                 assertEquals(REFRESH_TOKEN_EXPIRATION, tokenDetails.refreshToken().expiration());
             }
@@ -261,7 +264,7 @@ class DefaultOAuth2AccessTokenGrantServiceTest {
             @Test
             @DisplayName("리플래시 토큰의 만료 여부를 반환해야 한다.")
             void shouldRefreshTokenWhetherExpiredOrNot() {
-                OAuth2AccessTokenDetails tokenDetails = grantService.grant(clientDetails, tokenRequest);
+                OAuth2AccessTokenDetails tokenDetails = service.grant(clientDetails, tokenRequest);
 
                 assertEquals(IS_REFRESH_TOKEN_EXPIRED, tokenDetails.isExpired());
             }
@@ -269,7 +272,7 @@ class DefaultOAuth2AccessTokenGrantServiceTest {
             @Test
             @DisplayName("리플래시 토큰의 남은 시간을 반환해야 한다.")
             void shouldRefreshTokenExpiresIn() {
-                OAuth2AccessTokenDetails tokenDetails = grantService.grant(clientDetails, tokenRequest);
+                OAuth2AccessTokenDetails tokenDetails = service.grant(clientDetails, tokenRequest);
 
                 assertEquals(REFRESH_EXPIRATION_IN, tokenDetails.refreshToken().expiresIn());
             }
@@ -283,13 +286,13 @@ class DefaultOAuth2AccessTokenGrantServiceTest {
             @BeforeEach
             void setup() {
                 this.enhancer = mock(OAuth2TokenEnhancer.class);
-                grantService.setEnhancer(enhancer);
+                service.setEnhancer(enhancer);
             }
 
             @Test
             @DisplayName("설정된 Enhancer를 사용해야 한다.")
             void shouldUsingEnhancer() {
-                grantService.grant(clientDetails, tokenRequest);
+                service.grant(clientDetails, tokenRequest);
 
                 verify(enhancer, times(1)).enhance(accessToken);
             }
@@ -297,7 +300,7 @@ class DefaultOAuth2AccessTokenGrantServiceTest {
             @Test
             @DisplayName("설정된 Enhancer를 사용한 후 저장해야 한다.")
             void shouldSaveBeforeUsingEnhancer() {
-                grantService.grant(clientDetails, tokenRequest);
+                service.grant(clientDetails, tokenRequest);
 
                 InOrder inOrder = Mockito.inOrder(accessTokenRepository, enhancer);
                 inOrder.verify(enhancer, times(1)).enhance(accessToken);
@@ -306,4 +309,71 @@ class DefaultOAuth2AccessTokenGrantServiceTest {
         }
     }
 
+    @Nested
+    @DisplayName("엑세스 토큰 읽기")
+    class ReadAccessToken {
+        private OAuth2AuthorizedAccessToken accessToken;
+
+        @BeforeEach
+        void setup() {
+            this.accessToken = mock(OAuth2AuthorizedAccessToken.class);
+        }
+
+        @Nested
+        @DisplayName("저장소에서 엑세스 토큰을 찾을 수 없을시")
+        class WhenAccessTokenNotFound {
+
+            @BeforeEach
+            void setup() {
+                when(accessTokenRepository.findById(TOKEN_ID)).thenReturn(Optional.empty());
+            }
+
+            @Test
+            @DisplayName("OAuth2AccessTokenNotFoundException이 발생해야 한다.")
+            void shouldThrowsOAuth2AccessTokenNotFoundException() {
+                assertThrows(OAuth2AccessTokenNotFoundException.class, () -> service.readAccessToken(RAW_TOKEN_ID));
+            }
+        }
+
+        @Nested
+        @DisplayName("저장소에서 엑세스 토큰을 찾았을시")
+        class WhenAccessTokenFound {
+
+            @Nested
+            @DisplayName("엑세스 토큰이 만료되었을시")
+            class WhenAccessTokenIsExpired {
+
+                @BeforeEach
+                void setup() {
+                    when(accessToken.isExpired()).thenReturn(true);
+                    when(accessTokenRepository.findById(TOKEN_ID)).thenReturn(Optional.of(accessToken));
+                }
+
+                @Test
+                @DisplayName("OAuth2AccessTokenExpiredException이 발생해야 한다.")
+                void shouldThrowsOAuth2AccessTokenExpiredException() {
+                    assertThrows(OAuth2AccessTokenExpiredException.class, () -> service.readAccessToken(RAW_TOKEN_ID));
+                }
+            }
+
+            @Nested
+            @DisplayName("엑세스 토큰이 만료되지 않았을시")
+            class WhenAccessTokenIsNotExpired {
+
+                @BeforeEach
+                void setup() {
+                    when(accessToken.isExpired()).thenReturn(false);
+                    when(accessTokenRepository.findById(TOKEN_ID)).thenReturn(Optional.of(accessToken));
+                }
+
+                @Test
+                @DisplayName("저장소에서 반환된 엑세스 토큰을 반환해야 한다.")
+                void shouldReturnsAccessTokenFromRepository() {
+                    OAuth2AuthorizedAccessToken result = service.readAccessToken(RAW_TOKEN_ID);
+
+                    assertEquals(accessToken, result);
+                }
+            }
+        }
+    }
 }
