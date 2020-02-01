@@ -1,9 +1,8 @@
-package cube8540.oauth.authentication.credentials.oauth.token.application;
+package cube8540.oauth.authentication.credentials.oauth.token;
 
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
-import cube8540.oauth.authentication.credentials.oauth.token.OAuth2AccessTokenDetails;
-import cube8540.oauth.authentication.credentials.oauth.token.OAuth2RefreshTokenDetails;
+import cube8540.oauth.authentication.credentials.oauth.token.application.DefaultRefreshTokenDetails;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedAccessToken;
 
 import java.time.LocalDateTime;
