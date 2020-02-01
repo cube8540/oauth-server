@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
-public class DefaultAuthorizationCodeService implements OAuth2AuthorizationCodeService {
+public class CompositionAuthorizationCodeService implements OAuth2AuthorizationCodeConsumer, OAuth2AuthorizationCodeGenerator {
 
     private final AuthorizationCodeRepository codeRepository;
 
@@ -32,7 +32,7 @@ public class DefaultAuthorizationCodeService implements OAuth2AuthorizationCodeS
     private Clock clock = Clock.system(AuthenticationApplication.DEFAULT_TIME_ZONE.toZoneId());
 
     @Autowired
-    public DefaultAuthorizationCodeService(AuthorizationCodeRepository codeRepository) {
+    public CompositionAuthorizationCodeService(AuthorizationCodeRepository codeRepository) {
         this.codeRepository = codeRepository;
     }
 

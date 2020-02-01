@@ -3,7 +3,7 @@ package cube8540.oauth.authentication.credentials.oauth.token.infra;
 import cube8540.oauth.authentication.credentials.oauth.AuthorizationRequest;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2TokenRequest;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
-import cube8540.oauth.authentication.credentials.oauth.code.application.OAuth2AuthorizationCodeService;
+import cube8540.oauth.authentication.credentials.oauth.code.application.OAuth2AuthorizationCodeConsumer;
 import cube8540.oauth.authentication.credentials.oauth.code.domain.AuthorizationCode;
 import cube8540.oauth.authentication.credentials.oauth.code.domain.OAuth2AuthorizationCode;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidGrantException;
@@ -21,16 +21,16 @@ import java.util.stream.Collectors;
 
 public class AuthorizationCodeTokenFactory extends AbstractOAuth2TokenFactory {
 
-    private final OAuth2AuthorizationCodeService authorizationCodeService;
+    private final OAuth2AuthorizationCodeConsumer authorizationCodeConsumer;
 
-    public AuthorizationCodeTokenFactory(OAuth2TokenIdGenerator tokenIdGenerator, OAuth2AuthorizationCodeService authorizationCodeService) {
+    public AuthorizationCodeTokenFactory(OAuth2TokenIdGenerator tokenIdGenerator, OAuth2AuthorizationCodeConsumer authorizationCodeConsumer) {
         super(tokenIdGenerator);
-        this.authorizationCodeService = authorizationCodeService;
+        this.authorizationCodeConsumer = authorizationCodeConsumer;
     }
 
     @Override
     public OAuth2AuthorizedAccessToken createAccessToken(OAuth2ClientDetails clientDetails, OAuth2TokenRequest tokenRequest) {
-        OAuth2AuthorizationCode authorizationCode = authorizationCodeService.consume(new AuthorizationCode(tokenRequest.code()))
+        OAuth2AuthorizationCode authorizationCode = authorizationCodeConsumer.consume(new AuthorizationCode(tokenRequest.code()))
                 .orElseThrow(() -> new InvalidRequestException("authorization code not found"));
 
         Set<String> authorizationCodeScope = Optional.ofNullable(authorizationCode.getApprovedScopes())

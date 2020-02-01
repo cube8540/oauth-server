@@ -2,13 +2,8 @@ package cube8540.oauth.authentication.credentials.oauth.code.application;
 
 import cube8540.oauth.authentication.credentials.oauth.AuthorizationRequest;
 import cube8540.oauth.authentication.credentials.oauth.code.domain.AuthorizationCode;
-import cube8540.oauth.authentication.credentials.oauth.code.domain.OAuth2AuthorizationCode;
 
-import java.util.Optional;
-
-public interface OAuth2AuthorizationCodeService {
-
-    Optional<OAuth2AuthorizationCode> consume(AuthorizationCode code);
+public interface OAuth2AuthorizationCodeGenerator {
 
     AuthorizationCode generateNewAuthorizationCode(AuthorizationRequest request);
 

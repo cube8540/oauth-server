@@ -35,7 +35,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @DisplayName("기본 인증 코드 서비스 테스트")
-class DefaultAuthorizationCodeServiceTest {
+class CompositionAuthorizationCodeServiceTest {
 
     private static final String RAW_CODE = "CODE";
     private static final AuthorizationCode CODE = new AuthorizationCode(RAW_CODE);
@@ -58,12 +58,12 @@ class DefaultAuthorizationCodeServiceTest {
     private static final Set<OAuth2ScopeId> SCOPES = RAW_SCOPES.stream().map(OAuth2ScopeId::new).collect(Collectors.toSet());
 
     private AuthorizationCodeRepository codeRepository;
-    private DefaultAuthorizationCodeService codeService;
+    private CompositionAuthorizationCodeService codeService;
 
     @BeforeEach
     void setup() {
         this.codeRepository = mock(AuthorizationCodeRepository.class);
-        this.codeService = new DefaultAuthorizationCodeService(codeRepository);
+        this.codeService = new CompositionAuthorizationCodeService(codeRepository);
     }
 
     @Nested

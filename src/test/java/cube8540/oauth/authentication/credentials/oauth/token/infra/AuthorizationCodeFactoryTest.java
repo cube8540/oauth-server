@@ -5,7 +5,7 @@ import cube8540.oauth.authentication.credentials.oauth.OAuth2TokenRequest;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2TokenRequestValidator;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
-import cube8540.oauth.authentication.credentials.oauth.code.application.OAuth2AuthorizationCodeService;
+import cube8540.oauth.authentication.credentials.oauth.code.application.OAuth2AuthorizationCodeConsumer;
 import cube8540.oauth.authentication.credentials.oauth.code.domain.AuthorizationCode;
 import cube8540.oauth.authentication.credentials.oauth.code.domain.OAuth2AuthorizationCode;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidGrantException;
@@ -73,16 +73,16 @@ class AuthorizationCodeFactoryTest {
 
     private OAuth2TokenIdGenerator tokenIdGenerator;
     private OAuth2TokenIdGenerator refreshTokenIdGenerator;
-    private OAuth2AuthorizationCodeService authorizationCodeService;
+    private OAuth2AuthorizationCodeConsumer authorizationCodeConsumer;
     private AuthorizationCodeTokenFactory tokenFactory;
 
     @BeforeEach
     void setup() {
         this.tokenIdGenerator = mock(OAuth2TokenIdGenerator.class);
         this.refreshTokenIdGenerator = mock(OAuth2TokenIdGenerator.class);
-        this.authorizationCodeService = mock(OAuth2AuthorizationCodeService.class);
+        this.authorizationCodeConsumer = mock(OAuth2AuthorizationCodeConsumer.class);
 
-        this.tokenFactory = new AuthorizationCodeTokenFactory(tokenIdGenerator, authorizationCodeService);
+        this.tokenFactory = new AuthorizationCodeTokenFactory(tokenIdGenerator, authorizationCodeConsumer);
     }
 
     @Nested
@@ -123,7 +123,7 @@ class AuthorizationCodeFactoryTest {
 
             @BeforeEach
             void setup() {
-                when(authorizationCodeService.consume(CODE)).thenReturn(Optional.empty());
+                when(authorizationCodeConsumer.consume(CODE)).thenReturn(Optional.empty());
             }
 
             @Test
@@ -143,7 +143,7 @@ class AuthorizationCodeFactoryTest {
             void setup() {
                 this.validator = mock(OAuth2TokenRequestValidator.class);
 
-                when(authorizationCodeService.consume(CODE)).thenReturn(Optional.of(authorizationCode));
+                when(authorizationCodeConsumer.consume(CODE)).thenReturn(Optional.of(authorizationCode));
                 when(tokenIdGenerator.generateTokenValue()).thenReturn(TOKEN_ID);
 
                 tokenFactory.setTokenRequestValidator(validator);

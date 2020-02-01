@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetailsService;
 import cube8540.oauth.authentication.credentials.oauth.client.provider.ClientCredentialsAuthenticationProvider;
 import cube8540.oauth.authentication.credentials.oauth.client.provider.ClientCredentialsEndpointFilter;
-import cube8540.oauth.authentication.credentials.oauth.code.application.OAuth2AuthorizationCodeService;
+import cube8540.oauth.authentication.credentials.oauth.code.application.OAuth2AuthorizationCodeConsumer;
 import cube8540.oauth.authentication.credentials.oauth.error.DefaultOAuth2ExceptionTranslator;
 import cube8540.oauth.authentication.credentials.oauth.error.DefaultOauth2ExceptionResponseRenderer;
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2AuthenticationExceptionEntryPoint;
@@ -48,7 +48,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
     private OAuth2ClientDetailsService clientDetailsService;
 
     @Setter(onMethod_ = @Autowired)
-    private OAuth2AuthorizationCodeService authorizationCodeService;
+    private OAuth2AuthorizationCodeConsumer authorizationCodeConsumer;
 
     @Setter(onMethod_ = @Autowired)
     private OAuth2RefreshTokenRepository refreshTokenRepository;
@@ -98,7 +98,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
         OAuth2AccessTokenFactory tokenFactory = new OAuth2AccessTokenFactory();
 
         tokenFactory.putTokenFactoryMap(AuthorizationGrantType.AUTHORIZATION_CODE,
-                new AuthorizationCodeTokenFactory(tokenIdGenerator(), authorizationCodeService));
+                new AuthorizationCodeTokenFactory(tokenIdGenerator(), authorizationCodeConsumer));
         tokenFactory.putTokenFactoryMap(AuthorizationGrantType.REFRESH_TOKEN,
                 new RefreshTokenFactory(refreshTokenRepository, tokenIdGenerator()));
         tokenFactory.putTokenFactoryMap(AuthorizationGrantType.CLIENT_CREDENTIALS,
