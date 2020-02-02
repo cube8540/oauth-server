@@ -1,7 +1,7 @@
 package cube8540.oauth.authentication.credentials.oauth.token.infra;
 
 import cube8540.oauth.authentication.credentials.oauth.OAuth2TokenRequest;
-import cube8540.oauth.authentication.credentials.oauth.OAuth2TokenRequestValidator;
+import cube8540.oauth.authentication.credentials.oauth.OAuth2RequestValidator;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidGrantException;
@@ -70,13 +70,13 @@ class ClientCredentialsTokenFactoryTest {
         private OAuth2ClientDetails clientDetails;
         private OAuth2TokenRequest tokenRequest;
 
-        private OAuth2TokenRequestValidator validator;
+        private OAuth2RequestValidator validator;
 
         @BeforeEach
         void setup() {
             this.clientDetails = mock(OAuth2ClientDetails.class);
             this.tokenRequest = mock(OAuth2TokenRequest.class);
-            this.validator = mock(OAuth2TokenRequestValidator.class);
+            this.validator = mock(OAuth2RequestValidator.class);
 
             when(clientDetails.clientId()).thenReturn(RAW_CLIENT_ID);
             when(clientDetails.scope()).thenReturn(CLIENT_SCOPE);

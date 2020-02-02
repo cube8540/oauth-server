@@ -2,7 +2,7 @@ package cube8540.oauth.authentication.credentials.oauth.token.infra;
 
 import cube8540.oauth.authentication.credentials.oauth.AuthorizationRequest;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2TokenRequest;
-import cube8540.oauth.authentication.credentials.oauth.OAuth2TokenRequestValidator;
+import cube8540.oauth.authentication.credentials.oauth.OAuth2RequestValidator;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
 import cube8540.oauth.authentication.credentials.oauth.code.application.OAuth2AuthorizationCodeConsumer;
@@ -137,11 +137,11 @@ class AuthorizationCodeFactoryTest {
         @DisplayName("코드를 찾을 수 있을시")
         class WhenFoundAuthorizationCode {
 
-            private OAuth2TokenRequestValidator validator;
+            private OAuth2RequestValidator validator;
 
             @BeforeEach
             void setup() {
-                this.validator = mock(OAuth2TokenRequestValidator.class);
+                this.validator = mock(OAuth2RequestValidator.class);
 
                 when(authorizationCodeConsumer.consume(CODE)).thenReturn(Optional.of(authorizationCode));
                 when(tokenIdGenerator.generateTokenValue()).thenReturn(TOKEN_ID);

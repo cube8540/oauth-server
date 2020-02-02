@@ -1,9 +1,9 @@
 package cube8540.oauth.authentication.credentials.oauth.token.infra;
 
 import cube8540.oauth.authentication.AuthenticationApplication;
-import cube8540.oauth.authentication.credentials.oauth.DefaultOAuth2TokenRequestValidator;
+import cube8540.oauth.authentication.credentials.oauth.DefaultOAuth2RequestValidator;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2TokenRequest;
-import cube8540.oauth.authentication.credentials.oauth.OAuth2TokenRequestValidator;
+import cube8540.oauth.authentication.credentials.oauth.OAuth2RequestValidator;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2TokenFactory;
@@ -28,7 +28,7 @@ public abstract class AbstractOAuth2TokenFactory implements OAuth2TokenFactory {
 
     @Getter(AccessLevel.PROTECTED)
     @Setter(AccessLevel.PUBLIC)
-    private OAuth2TokenRequestValidator tokenRequestValidator = new DefaultOAuth2TokenRequestValidator();
+    private OAuth2RequestValidator tokenRequestValidator = new DefaultOAuth2RequestValidator();
 
     @Setter(AccessLevel.PROTECTED)
     private Clock clock = Clock.system(AuthenticationApplication.DEFAULT_TIME_ZONE.toZoneId());
