@@ -85,7 +85,7 @@ public class OAuth2AuthorizationCode extends AbstractAggregateRoot<OAuth2Authori
         this.email = new UserEmail(request.username());
         this.state = request.state();
         this.redirectURI = request.redirectURI();
-        this.approvedScopes = request.approvedScopes().stream()
+        this.approvedScopes = request.requestScopes().stream()
                 .map(OAuth2ScopeId::new).collect(Collectors.toSet());
     }
 

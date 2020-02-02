@@ -15,8 +15,12 @@ public interface AuthorizationRequest {
 
     URI redirectURI();
 
-    Set<String> approvedScopes();
+    Set<String> requestScopes();
 
     OAuth2AuthorizationResponseType responseType();
+
+    void setRedirectURI(URI redirectURI);
+
+    void setRequestScopes(Set<String> requestScope);
 
 }

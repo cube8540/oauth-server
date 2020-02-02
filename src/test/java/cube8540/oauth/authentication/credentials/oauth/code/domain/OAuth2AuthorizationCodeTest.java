@@ -70,7 +70,7 @@ class OAuth2AuthorizationCodeTest {
             when(request.username()).thenReturn(RAW_EMAIL);
             when(request.state()).thenReturn(STATE);
             when(request.redirectURI()).thenReturn(REDIRECT_URI);
-            when(request.approvedScopes()).thenReturn(SCOPES);
+            when(request.requestScopes()).thenReturn(SCOPES);
             when(codeGenerator.generate()).thenReturn(CODE);
 
             this.code = new OAuth2AuthorizationCode(codeGenerator, EXPIRATION_DATETIME);
@@ -131,7 +131,7 @@ class OAuth2AuthorizationCodeTest {
             when(savedRequest.username()).thenReturn(RAW_EMAIL);
             when(savedRequest.state()).thenReturn(STATE);
             when(savedRequest.redirectURI()).thenReturn(REDIRECT_URI);
-            when(savedRequest.approvedScopes()).thenReturn(SCOPES);
+            when(savedRequest.requestScopes()).thenReturn(SCOPES);
             when(codeGenerator.generate()).thenReturn(CODE);
         }
 
