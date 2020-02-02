@@ -4,7 +4,7 @@ import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetail
 
 import java.util.Set;
 
-public interface OAuth2TokenRequestValidator {
+public interface OAuth2RequestValidator {
 
     boolean validateScopes(OAuth2ClientDetails clientDetails, Set<String> scopes);
 

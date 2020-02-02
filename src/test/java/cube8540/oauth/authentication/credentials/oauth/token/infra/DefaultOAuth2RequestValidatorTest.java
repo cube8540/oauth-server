@@ -1,6 +1,6 @@
 package cube8540.oauth.authentication.credentials.oauth.token.infra;
 
-import cube8540.oauth.authentication.credentials.oauth.DefaultOAuth2TokenRequestValidator;
+import cube8540.oauth.authentication.credentials.oauth.DefaultOAuth2RequestValidator;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -17,14 +17,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class DefaultOAuth2TokenRequestValidatorTest {
+class DefaultOAuth2RequestValidatorTest {
 
     private static final Set<String> SCOPES = new HashSet<>(Arrays.asList("SCOPE-1", "SCOPE-2", "SCOPE-3"));
     private static final Set<String> VALID_SCOPES = new HashSet<>(Arrays.asList("SCOPE-1", "SCOPE-2"));
     private static final Set<String> INVALID_SCOPES = new HashSet<>(Arrays.asList("SCOPE-1", "SCOPE-2", "SCOPE-3", "SCOPE-4"));
 
     private OAuth2ClientDetails clientDetails;
-    private DefaultOAuth2TokenRequestValidator validator = new DefaultOAuth2TokenRequestValidator();
+    private DefaultOAuth2RequestValidator validator = new DefaultOAuth2RequestValidator();
 
     @BeforeEach
     void setup() {

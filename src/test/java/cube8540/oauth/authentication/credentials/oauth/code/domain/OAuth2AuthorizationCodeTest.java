@@ -2,7 +2,9 @@ package cube8540.oauth.authentication.credentials.oauth.code.domain;
 
 import cube8540.oauth.authentication.credentials.oauth.AuthorizationRequest;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
+import cube8540.oauth.authentication.credentials.oauth.error.AuthorizationCodeExpiredException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidClientException;
+import cube8540.oauth.authentication.credentials.oauth.error.RedirectMismatchException;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import cube8540.oauth.authentication.users.domain.UserEmail;
 import org.junit.jupiter.api.BeforeEach;
@@ -65,10 +67,10 @@ class OAuth2AuthorizationCodeTest {
             this.request = mock(AuthorizationRequest.class);
 
             when(request.clientId()).thenReturn(RAW_CLIENT_ID);
-            when(request.email()).thenReturn(RAW_EMAIL);
+            when(request.username()).thenReturn(RAW_EMAIL);
             when(request.state()).thenReturn(STATE);
             when(request.redirectURI()).thenReturn(REDIRECT_URI);
-            when(request.approvedScopes()).thenReturn(SCOPES);
+            when(request.requestScopes()).thenReturn(SCOPES);
             when(codeGenerator.generate()).thenReturn(CODE);
 
             this.code = new OAuth2AuthorizationCode(codeGenerator, EXPIRATION_DATETIME);
@@ -126,10 +128,10 @@ class OAuth2AuthorizationCodeTest {
             this.savedRequest = mock(AuthorizationRequest.class);
 
             when(savedRequest.clientId()).thenReturn(RAW_CLIENT_ID);
-            when(savedRequest.email()).thenReturn(RAW_EMAIL);
+            when(savedRequest.username()).thenReturn(RAW_EMAIL);
             when(savedRequest.state()).thenReturn(STATE);
             when(savedRequest.redirectURI()).thenReturn(REDIRECT_URI);
-            when(savedRequest.approvedScopes()).thenReturn(SCOPES);
+            when(savedRequest.requestScopes()).thenReturn(SCOPES);
             when(codeGenerator.generate()).thenReturn(CODE);
         }
 

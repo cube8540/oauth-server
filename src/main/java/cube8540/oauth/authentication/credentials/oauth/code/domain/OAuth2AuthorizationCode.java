@@ -4,7 +4,9 @@ import cube8540.oauth.authentication.AuthenticationApplication;
 import cube8540.oauth.authentication.credentials.oauth.AuthorizationRequest;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
 import cube8540.oauth.authentication.credentials.oauth.converter.RedirectUriConverter;
+import cube8540.oauth.authentication.credentials.oauth.error.AuthorizationCodeExpiredException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidClientException;
+import cube8540.oauth.authentication.credentials.oauth.error.RedirectMismatchException;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import cube8540.oauth.authentication.users.domain.UserEmail;
 import lombok.AccessLevel;
@@ -80,10 +82,10 @@ public class OAuth2AuthorizationCode extends AbstractAggregateRoot<OAuth2Authori
 
     public void setAuthorizationRequest(AuthorizationRequest request) {
         this.clientId = new OAuth2ClientId(request.clientId());
-        this.email = new UserEmail(request.email());
+        this.email = new UserEmail(request.username());
         this.state = request.state();
         this.redirectURI = request.redirectURI();
-        this.approvedScopes = request.approvedScopes().stream()
+        this.approvedScopes = request.requestScopes().stream()
                 .map(OAuth2ScopeId::new).collect(Collectors.toSet());
     }
 
