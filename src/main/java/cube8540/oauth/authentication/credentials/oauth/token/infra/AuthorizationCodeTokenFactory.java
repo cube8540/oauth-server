@@ -12,6 +12,7 @@ import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeI
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedAccessToken;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2TokenIdGenerator;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
+import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationResponseType;
 
 import java.net.URI;
 import java.util.Collections;
@@ -71,7 +72,7 @@ public class AuthorizationCodeTokenFactory extends AbstractOAuth2TokenFactory {
         }
 
         @Override
-        public String email() {
+        public String username() {
             return tokenRequest.username();
         }
 
@@ -88,6 +89,11 @@ public class AuthorizationCodeTokenFactory extends AbstractOAuth2TokenFactory {
         @Override
         public Set<String> approvedScopes() {
             return tokenRequest.scopes();
+        }
+
+        @Override
+        public OAuth2AuthorizationResponseType responseType() {
+            return OAuth2AuthorizationResponseType.CODE;
         }
     }
 }

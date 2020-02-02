@@ -67,7 +67,7 @@ class OAuth2AuthorizationCodeTest {
             this.request = mock(AuthorizationRequest.class);
 
             when(request.clientId()).thenReturn(RAW_CLIENT_ID);
-            when(request.email()).thenReturn(RAW_EMAIL);
+            when(request.username()).thenReturn(RAW_EMAIL);
             when(request.state()).thenReturn(STATE);
             when(request.redirectURI()).thenReturn(REDIRECT_URI);
             when(request.approvedScopes()).thenReturn(SCOPES);
@@ -128,7 +128,7 @@ class OAuth2AuthorizationCodeTest {
             this.savedRequest = mock(AuthorizationRequest.class);
 
             when(savedRequest.clientId()).thenReturn(RAW_CLIENT_ID);
-            when(savedRequest.email()).thenReturn(RAW_EMAIL);
+            when(savedRequest.username()).thenReturn(RAW_EMAIL);
             when(savedRequest.state()).thenReturn(STATE);
             when(savedRequest.redirectURI()).thenReturn(REDIRECT_URI);
             when(savedRequest.approvedScopes()).thenReturn(SCOPES);

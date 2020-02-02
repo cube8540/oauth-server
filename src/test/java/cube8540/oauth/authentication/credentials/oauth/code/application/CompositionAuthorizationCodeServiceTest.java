@@ -142,7 +142,7 @@ class CompositionAuthorizationCodeServiceTest {
             when(authorizationRequest.approvedScopes()).thenReturn(RAW_SCOPES);
             when(authorizationRequest.clientId()).thenReturn(RAW_CLIENT_ID);
             when(authorizationRequest.redirectURI()).thenReturn(REDIRECT_URI);
-            when(authorizationRequest.email()).thenReturn(RAW_EMAIL);
+            when(authorizationRequest.username()).thenReturn(RAW_EMAIL);
             when(authorizationRequest.state()).thenReturn(STATE);
 
             codeService.setCodeGenerator(generator);
