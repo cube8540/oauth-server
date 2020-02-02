@@ -1,8 +1,8 @@
 package cube8540.oauth.authentication.credentials.oauth.token.infra;
 
 import cube8540.oauth.authentication.credentials.oauth.AuthorizationRequest;
-import cube8540.oauth.authentication.credentials.oauth.OAuth2TokenRequest;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2RequestValidator;
+import cube8540.oauth.authentication.credentials.oauth.OAuth2TokenRequest;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
 import cube8540.oauth.authentication.credentials.oauth.code.application.OAuth2AuthorizationCodeConsumer;
@@ -260,11 +260,9 @@ class AuthorizationCodeFactoryTest {
                     }
 
                     @Test
-                    @DisplayName("인증 코드의 스코프는 ClientDetails의 스코프어야 한다.")
-                    void shouldScopeIsStoredInClientDetails() {
-                        OAuth2AuthorizedAccessToken accessToken = tokenFactory.createAccessToken(clientDetails, tokenRequest);
-
-                        assertEquals(CLIENT_SCOPES, accessToken.getScope());
+                    @DisplayName("InvalidGrantException이 발생해야 한다.")
+                    void shouldThrowsInvalidGrantException() {
+                        assertThrows(InvalidGrantException.class, () -> tokenFactory.createAccessToken(clientDetails, tokenRequest));
                     }
 
                     @AfterEach
@@ -284,11 +282,9 @@ class AuthorizationCodeFactoryTest {
                     }
 
                     @Test
-                    @DisplayName("인증 코드의 스코프는 ClientDetails의 스코프어야 한다.")
-                    void shouldScopeIsStoredInClientDetails() {
-                        OAuth2AuthorizedAccessToken accessToken = tokenFactory.createAccessToken(clientDetails, tokenRequest);
-
-                        assertEquals(CLIENT_SCOPES, accessToken.getScope());
+                    @DisplayName("InvalidGrantException이 발생해야 한다.")
+                    void shouldThrowsInvalidGrantException() {
+                        assertThrows(InvalidGrantException.class, () -> tokenFactory.createAccessToken(clientDetails, tokenRequest));
                     }
 
                     @AfterEach

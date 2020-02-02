@@ -36,6 +36,9 @@ public class AuthorizationCodeTokenFactory extends AbstractOAuth2TokenFactory {
 
         Set<String> authorizationCodeScope = Optional.ofNullable(authorizationCode.getApprovedScopes())
                 .orElse(Collections.emptySet()).stream().map(OAuth2ScopeId::getValue).collect(Collectors.toSet());
+        if (authorizationCodeScope.isEmpty()) {
+            throw new InvalidGrantException("scope cannot not be empty");
+        }
         if (!getTokenRequestValidator().validateScopes(clientDetails, authorizationCodeScope)) {
             throw new InvalidGrantException("cannot grant scopes");
         }
@@ -44,18 +47,11 @@ public class AuthorizationCodeTokenFactory extends AbstractOAuth2TokenFactory {
                 .expiration(extractTokenExpiration(clientDetails))
                 .client(authorizationCode.getClientId())
                 .email(authorizationCode.getEmail())
-                .scope(extractGrantScope(clientDetails, authorizationCode))
+                .scope(authorizationCode.getApprovedScopes())
                 .tokenGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .build();
         accessToken.generateRefreshToken(refreshTokenGenerator(), extractRefreshTokenExpiration(clientDetails));
         return accessToken;
-    }
-
-    private Set<OAuth2ScopeId> extractGrantScope(OAuth2ClientDetails clientDetails, OAuth2AuthorizationCode code) {
-        if (code.getApprovedScopes() == null || code.getApprovedScopes().isEmpty()) {
-            return clientDetails.scope().stream().map(OAuth2ScopeId::new).collect(Collectors.toSet());
-        }
-        return code.getApprovedScopes();
     }
 
     private static class AuthorizationCodeRequest implements AuthorizationRequest {
@@ -87,13 +83,23 @@ public class AuthorizationCodeTokenFactory extends AbstractOAuth2TokenFactory {
         }
 
         @Override
-        public Set<String> approvedScopes() {
+        public Set<String> requestScopes() {
             return tokenRequest.scopes();
         }
 
         @Override
         public OAuth2AuthorizationResponseType responseType() {
             return OAuth2AuthorizationResponseType.CODE;
+        }
+
+        @Override
+        public void setRedirectURI(URI redirectURI) {
+            throw new UnsupportedOperationException(getClass().getName() + "#setRedirectURI");
+        }
+
+        @Override
+        public void setRequestScopes(Set<String> requestScope) {
+            throw new UnsupportedOperationException(getClass().getName() + "#setRequestScopes");
         }
     }
 }
