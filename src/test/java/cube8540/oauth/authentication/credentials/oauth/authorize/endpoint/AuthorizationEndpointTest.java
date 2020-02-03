@@ -5,11 +5,11 @@ import cube8540.oauth.authentication.credentials.oauth.OAuth2RequestValidator;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2Utils;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetailsService;
-import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2AuthorizationCodeGenerator;
-import cube8540.oauth.authentication.credentials.oauth.token.domain.AuthorizationCode;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidGrantException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidRequestException;
 import cube8540.oauth.authentication.credentials.oauth.error.UnsupportedResponseTypeException;
+import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2AuthorizationCodeGenerator;
+import cube8540.oauth.authentication.credentials.oauth.token.domain.AuthorizationCode;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -108,7 +108,7 @@ class AuthorizationEndpointTest {
             @Test
             @DisplayName("InsufficientAuthenticationException이 발생해야 한다.")
             void shouldThrowsInsufficientAuthenticationException() {
-                assertThrows(InsufficientAuthenticationException.class, () -> endpoint.authorize(parameter, model, sessionStatus, principal));
+                assertThrows(InsufficientAuthenticationException.class, () -> endpoint.authorize(parameter, model, principal));
             }
         }
 
@@ -135,7 +135,7 @@ class AuthorizationEndpointTest {
             @Test
             @DisplayName("InsufficientAuthenticationException이 발생해야 한다.")
             void shouldThrowsInsufficientAuthenticationException() {
-                assertThrows(InsufficientAuthenticationException.class, () -> endpoint.authorize(parameter, model, sessionStatus, principal));
+                assertThrows(InsufficientAuthenticationException.class, () -> endpoint.authorize(parameter, model, principal));
             }
         }
 
@@ -173,7 +173,7 @@ class AuthorizationEndpointTest {
                 @Test
                 @DisplayName("UnsupportedResponseTypeException이 발생해야 한다.")
                 void shouldThrowsUnsupportedResponseTypeException() {
-                    assertThrows(UnsupportedResponseTypeException.class, () -> endpoint.authorize(parameter, model, sessionStatus, principal));
+                    assertThrows(UnsupportedResponseTypeException.class, () -> endpoint.authorize(parameter, model, principal));
                 }
 
             }
@@ -194,7 +194,7 @@ class AuthorizationEndpointTest {
                 @Test
                 @DisplayName("UnsupportedResponseTypeException이 발생해야 한다.")
                 void shouldThrowsSupportedResponseTypeException() {
-                    assertThrows(UnsupportedResponseTypeException.class, () -> endpoint.authorize(parameter, model, sessionStatus, principal));
+                    assertThrows(UnsupportedResponseTypeException.class, () -> endpoint.authorize(parameter, model, principal));
                 }
             }
 
@@ -242,7 +242,7 @@ class AuthorizationEndpointTest {
                     @Test
                     @DisplayName("InvalidGrantException이 발생해야 한다.")
                     void shouldThrowsInvalidGrantException() {
-                        assertThrows(InvalidGrantException.class, () -> endpoint.authorize(parameter, model, sessionStatus, principal));
+                        assertThrows(InvalidGrantException.class, () -> endpoint.authorize(parameter, model, principal));
                     }
 
                     @AfterEach
@@ -254,7 +254,7 @@ class AuthorizationEndpointTest {
                 @Test
                 @DisplayName("요청 받은 클라이언트 아이디를 세션에 저장해야 한다.")
                 void shouldSaveRequestingClientIdToSession() {
-                    endpoint.authorize(parameter, model, sessionStatus, principal);
+                    endpoint.authorize(parameter, model, principal);
 
                     AuthorizationRequest storedRequest = (AuthorizationRequest) model.get(AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE);
                     assertEquals(RAW_CLIENT_ID, storedRequest.clientId());
@@ -263,7 +263,7 @@ class AuthorizationEndpointTest {
                 @Test
                 @DisplayName("요청 받은 유저명을 세션에 저장해야 한다.")
                 void shouldSaveRequestingUsernameToSession() {
-                    endpoint.authorize(parameter, model, sessionStatus, principal);
+                    endpoint.authorize(parameter, model, principal);
 
                     AuthorizationRequest storedRequest = (AuthorizationRequest) model.get(AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE);
                     assertEquals(RAW_USERNAME, storedRequest.username());
@@ -272,7 +272,7 @@ class AuthorizationEndpointTest {
                 @Test
                 @DisplayName("요청 받은 STATE를 세션에 저장해야 한다.")
                 void shouldSaveRequestingStateToSession() {
-                    endpoint.authorize(parameter, model, sessionStatus, principal);
+                    endpoint.authorize(parameter, model, principal);
 
                     AuthorizationRequest storedRequest = (AuthorizationRequest) model.get(AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE);
                     assertEquals(STATE, storedRequest.state());
@@ -281,7 +281,7 @@ class AuthorizationEndpointTest {
                 @Test
                 @DisplayName("요청 받은 리다이렉트 주소를 세션에 저장해야 한다.")
                 void shouldSaveRequestingRedirectUriToSession() {
-                    endpoint.authorize(parameter, model, sessionStatus, principal);
+                    endpoint.authorize(parameter, model, principal);
 
                     AuthorizationRequest storedRequest = (AuthorizationRequest) model.get(AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE);
                     assertEquals(RESOLVED_REDIRECT_URI, storedRequest.redirectURI());
@@ -290,7 +290,7 @@ class AuthorizationEndpointTest {
                 @Test
                 @DisplayName("요청 받은 스코프를 세션에 저장해야 한다.")
                 void shouldSaveRequestingScopeToSession() {
-                    endpoint.authorize(parameter, model, sessionStatus, principal);
+                    endpoint.authorize(parameter, model, principal);
 
                     AuthorizationRequest storedRequest = (AuthorizationRequest) model.get(AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE);
                     assertEquals(SCOPE, storedRequest.requestScopes());
@@ -311,7 +311,7 @@ class AuthorizationEndpointTest {
                     @Test
                     @DisplayName("클라이언트에 저장된 스코프를 세션에 저장해야 한다.")
                     void shouldSaveClientScopeToSession() {
-                        endpoint.authorize(parameter, model, sessionStatus, principal);
+                        endpoint.authorize(parameter, model, principal);
 
                         AuthorizationRequest storedRequest = (AuthorizationRequest) model.get(AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE);
                         assertEquals(CLIENT_SCOPE, storedRequest.requestScopes());
@@ -320,7 +320,7 @@ class AuthorizationEndpointTest {
                     @Test
                     @DisplayName("클라이언트에 저장된 스코프를 ModelAndView에 저장해야 한다.")
                     void shouldSaveClientScopeToModelAndView() {
-                        ModelAndView modelAndView = endpoint.authorize(parameter, model, sessionStatus, principal);
+                        ModelAndView modelAndView = endpoint.authorize(parameter, model, principal);
 
                         assertEquals(CLIENT_SCOPE, modelAndView.getModel().get(AuthorizationEndpoint.AUTHORIZATION_REQUEST_SCOPES_NAME));
                     }
@@ -335,7 +335,7 @@ class AuthorizationEndpointTest {
                 @Test
                 @DisplayName("설정된 Approval 페이지로 포워딩 되어야한다.")
                 void shouldForwardingConfigApprovalPage() {
-                    ModelAndView modelAndView = endpoint.authorize(parameter, model, sessionStatus, principal);
+                    ModelAndView modelAndView = endpoint.authorize(parameter, model, principal);
 
                     assertEquals(FORWARD_PAGE, modelAndView.getViewName());
                 }
@@ -343,7 +343,7 @@ class AuthorizationEndpointTest {
                 @Test
                 @DisplayName("클라이언트명을 ModelAndView에 저장해야 한다.")
                 void shouldSaveClientNameToModeAndView() {
-                    ModelAndView modelAndView = endpoint.authorize(parameter, model, sessionStatus, principal);
+                    ModelAndView modelAndView = endpoint.authorize(parameter, model, principal);
 
                     assertEquals(CLIENT_NAME, modelAndView.getModel().get(AuthorizationEndpoint.AUTHORIZATION_REQUEST_CLIENT_NAME));
                 }
@@ -351,7 +351,7 @@ class AuthorizationEndpointTest {
                 @Test
                 @DisplayName("요청한 스코프를 ModelAndView에 저장해야 한다.")
                 void shouldSaveRequestingScopeToModelAndView() {
-                    ModelAndView modelAndView = endpoint.authorize(parameter, model, sessionStatus, principal);
+                    ModelAndView modelAndView = endpoint.authorize(parameter, model, principal);
 
                     assertEquals(SCOPE, modelAndView.getModel().get(AuthorizationEndpoint.AUTHORIZATION_REQUEST_SCOPES_NAME));
                 }
