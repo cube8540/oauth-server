@@ -1,10 +1,11 @@
-package cube8540.oauth.authentication.credentials.oauth.token.infra;
+package cube8540.oauth.authentication.credentials.oauth.token.application;
 
 import cube8540.oauth.authentication.credentials.oauth.OAuth2TokenRequest;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidGrantException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidRequestException;
+import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenRepository;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedAccessToken;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2TokenIdGenerator;
 import cube8540.oauth.authentication.users.domain.UserEmail;
@@ -15,12 +16,13 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 
-public class ResourceOwnerPasswordTokenFactory extends AbstractOAuth2TokenFactory {
+public class ResourceOwnerPasswordTokenGranter extends AbstractOAuth2TokenGranter {
 
     private final AuthenticationManager authenticationManager;
 
-    public ResourceOwnerPasswordTokenFactory(OAuth2TokenIdGenerator tokenIdGenerator, AuthenticationManager authenticationManager) {
-        super(tokenIdGenerator);
+    public ResourceOwnerPasswordTokenGranter(OAuth2TokenIdGenerator tokenIdGenerator, OAuth2AccessTokenRepository tokenRepository,
+                                             AuthenticationManager authenticationManager) {
+        super(tokenIdGenerator, tokenRepository);
         this.authenticationManager = authenticationManager;
     }
 

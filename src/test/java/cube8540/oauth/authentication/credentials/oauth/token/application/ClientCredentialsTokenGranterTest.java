@@ -1,11 +1,12 @@
-package cube8540.oauth.authentication.credentials.oauth.token.infra;
+package cube8540.oauth.authentication.credentials.oauth.token.application;
 
-import cube8540.oauth.authentication.credentials.oauth.OAuth2TokenRequest;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2RequestValidator;
+import cube8540.oauth.authentication.credentials.oauth.OAuth2TokenRequest;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidGrantException;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
+import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenRepository;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedAccessToken;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2TokenId;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2TokenIdGenerator;
@@ -32,8 +33,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@DisplayName("클라이언트 인증을 통한 토큰 생성 테스트")
-class ClientCredentialsTokenFactoryTest {
+@DisplayName("클라이언트 인증을 통한 토큰 부여 테스트")
+class ClientCredentialsTokenGranterTest {
 
     private static final String RAW_TOKEN_ID = "TOKEN-ID";
     private static final OAuth2TokenId TOKEN_ID = new OAuth2TokenId(RAW_TOKEN_ID);
@@ -54,13 +55,14 @@ class ClientCredentialsTokenFactoryTest {
 
     private OAuth2TokenIdGenerator tokenIdGenerator;
     private OAuth2TokenIdGenerator refreshTokenIdGenerator;
-    private ClientCredentialsTokenFactory tokenFactory;
+    private ClientCredentialsTokenGranter tokenGranter;
 
     @BeforeEach
     void setup() {
         this.tokenIdGenerator = mock(OAuth2TokenIdGenerator.class);
+        OAuth2AccessTokenRepository accessTokenRepository = mock(OAuth2AccessTokenRepository.class);
         this.refreshTokenIdGenerator = mock(OAuth2TokenIdGenerator.class);
-        this.tokenFactory = new ClientCredentialsTokenFactory(tokenIdGenerator);
+        this.tokenGranter = new ClientCredentialsTokenGranter(tokenIdGenerator, accessTokenRepository);
     }
 
     @Nested
@@ -84,10 +86,10 @@ class ClientCredentialsTokenFactoryTest {
             when(clientDetails.refreshTokenValiditySeconds()).thenReturn(REFRESH_TOKEN_VALIDITY_SECONDS);
             when(tokenRequest.scopes()).thenReturn(RAW_SCOPES);
 
-            tokenFactory.setTokenRequestValidator(validator);
+            tokenGranter.setTokenRequestValidator(validator);
 
             Clock clock = Clock.fixed(TOKEN_CREATED_DATETIME.toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
-            tokenFactory.setClock(clock);
+            tokenGranter.setClock(clock);
         }
 
         @Nested
@@ -102,7 +104,7 @@ class ClientCredentialsTokenFactoryTest {
             @Test
             @DisplayName("InvalidGrantException이 발생해야 한다.")
             void shouldThrowsInvalidGrantException() {
-                assertThrows(InvalidGrantException.class, () -> tokenFactory.createAccessToken(clientDetails, tokenRequest));
+                assertThrows(InvalidGrantException.class, () -> tokenGranter.createAccessToken(clientDetails, tokenRequest));
             }
         }
 
@@ -119,7 +121,7 @@ class ClientCredentialsTokenFactoryTest {
             @Test
             @DisplayName("토큰 아이디는 토큰 아이디 생성기에서 생성된 토큰 아이디어야 한다.")
             void shouldTokenIdIsCreatedByTokenIdGenerator() {
-                OAuth2AuthorizedAccessToken accessToken = tokenFactory.createAccessToken(clientDetails, tokenRequest);
+                OAuth2AuthorizedAccessToken accessToken = tokenGranter.createAccessToken(clientDetails, tokenRequest);
 
                 assertEquals(TOKEN_ID, accessToken.getTokenId());
             }
@@ -127,7 +129,7 @@ class ClientCredentialsTokenFactoryTest {
             @Test
             @DisplayName("토큰의 유저 이메일은 null로 저장되어있어야 한다.")
             void shouldSetNullUserEmail() {
-                OAuth2AuthorizedAccessToken accessToken = tokenFactory.createAccessToken(clientDetails, tokenRequest);
+                OAuth2AuthorizedAccessToken accessToken = tokenGranter.createAccessToken(clientDetails, tokenRequest);
 
                 assertNull(accessToken.getEmail());
             }
@@ -135,7 +137,7 @@ class ClientCredentialsTokenFactoryTest {
             @Test
             @DisplayName("클라이언트 아이디는 ClientDetails에 저장된 아이디어야 한다.")
             void shouldClientIdIsStoredInClientDetails() {
-                OAuth2AuthorizedAccessToken accessToken = tokenFactory.createAccessToken(clientDetails, tokenRequest);
+                OAuth2AuthorizedAccessToken accessToken = tokenGranter.createAccessToken(clientDetails, tokenRequest);
 
                 assertEquals(CLIENT_ID, accessToken.getClient());
             }
@@ -143,7 +145,7 @@ class ClientCredentialsTokenFactoryTest {
             @Test
             @DisplayName("토큰의 인증 타입은 Client Credentials이어야 한다.")
             void shouldGrantTypeIsClientCredentials() {
-                OAuth2AuthorizedAccessToken accessToken = tokenFactory.createAccessToken(clientDetails, tokenRequest);
+                OAuth2AuthorizedAccessToken accessToken = tokenGranter.createAccessToken(clientDetails, tokenRequest);
 
                 assertEquals(AuthorizationGrantType.CLIENT_CREDENTIALS, accessToken.getTokenGrantType());
             }
@@ -153,14 +155,14 @@ class ClientCredentialsTokenFactoryTest {
             void shouldScopeIsStoredInRequest() {
                 Set<OAuth2ScopeId> exceptedScopes = RAW_SCOPES.stream().map(OAuth2ScopeId::new).collect(Collectors.toSet());
 
-                OAuth2AuthorizedAccessToken accessToken = tokenFactory.createAccessToken(clientDetails, tokenRequest);
+                OAuth2AuthorizedAccessToken accessToken = tokenGranter.createAccessToken(clientDetails, tokenRequest);
                 assertEquals(exceptedScopes, accessToken.getScope());
             }
 
             @Test
             @DisplayName("리플래시 토큰은 저장되 있지 않아야 한다.")
             void shouldRefreshTokenNull() {
-                OAuth2AuthorizedAccessToken accessToken = tokenFactory.createAccessToken(clientDetails, tokenRequest);
+                OAuth2AuthorizedAccessToken accessToken = tokenGranter.createAccessToken(clientDetails, tokenRequest);
 
                 assertNull(accessToken.getRefreshToken());
             }
@@ -168,7 +170,7 @@ class ClientCredentialsTokenFactoryTest {
             @Test
             @DisplayName("토큰의 유효시간이 설정되어 있어야 한다.")
             void shouldSetTokenValidity() {
-                OAuth2AuthorizedAccessToken accessToken = tokenFactory.createAccessToken(clientDetails, tokenRequest);
+                OAuth2AuthorizedAccessToken accessToken = tokenGranter.createAccessToken(clientDetails, tokenRequest);
 
                 assertEquals(TOKEN_CREATED_DATETIME.plusSeconds(ACCESS_TOKEN_VALIDITY_SECONDS), accessToken.getExpiration());
             }
@@ -191,7 +193,7 @@ class ClientCredentialsTokenFactoryTest {
                     void shouldScopeIsStoredInClientDetails() {
                         Set<OAuth2ScopeId> exceptedScopes = CLIENT_SCOPE.stream().map(OAuth2ScopeId::new).collect(Collectors.toSet());
 
-                        OAuth2AuthorizedAccessToken accessToken = tokenFactory.createAccessToken(clientDetails, tokenRequest);
+                        OAuth2AuthorizedAccessToken accessToken = tokenGranter.createAccessToken(clientDetails, tokenRequest);
                         assertEquals(exceptedScopes, accessToken.getScope());
                     }
                 }
@@ -210,7 +212,7 @@ class ClientCredentialsTokenFactoryTest {
                     void shouldScopeIsStoredInClientDetails() {
                         Set<OAuth2ScopeId> exceptedScopes = CLIENT_SCOPE.stream().map(OAuth2ScopeId::new).collect(Collectors.toSet());
 
-                        OAuth2AuthorizedAccessToken accessToken = tokenFactory.createAccessToken(clientDetails, tokenRequest);
+                        OAuth2AuthorizedAccessToken accessToken = tokenGranter.createAccessToken(clientDetails, tokenRequest);
                         assertEquals(exceptedScopes, accessToken.getScope());
                     }
                 }
@@ -221,13 +223,13 @@ class ClientCredentialsTokenFactoryTest {
             class WhenAllowedRefreshToken {
                 @BeforeEach
                 void setup() {
-                    tokenFactory.setAllowedRefreshToken(true);
+                    tokenGranter.setAllowedRefreshToken(true);
                 }
 
                 @Test
                 @DisplayName("리플래스 토큰에 저장된 토큰 아이디는 토큰 아이디 생성기에서 생성한 아이디어야 한다.")
                 void shouldRefreshTokenIdIsCreatedByTokenIdGenerator() {
-                    OAuth2AuthorizedAccessToken accessToken = tokenFactory.createAccessToken(clientDetails, tokenRequest);
+                    OAuth2AuthorizedAccessToken accessToken = tokenGranter.createAccessToken(clientDetails, tokenRequest);
 
                     assertEquals(TOKEN_ID, accessToken.getRefreshToken().getTokenId());
                 }
@@ -235,7 +237,7 @@ class ClientCredentialsTokenFactoryTest {
                 @Test
                 @DisplayName("토큰의 유효시간이 설정되어 있어야 한다.")
                 void shouldSetTokenValidity() {
-                    OAuth2AuthorizedAccessToken accessToken = tokenFactory.createAccessToken(clientDetails, tokenRequest);
+                    OAuth2AuthorizedAccessToken accessToken = tokenGranter.createAccessToken(clientDetails, tokenRequest);
 
                     assertEquals(TOKEN_CREATED_DATETIME.plusSeconds(REFRESH_TOKEN_VALIDITY_SECONDS), accessToken.getRefreshToken().getExpiration());
                 }
@@ -247,26 +249,26 @@ class ClientCredentialsTokenFactoryTest {
                     @BeforeEach
                     void setup() {
                         when(refreshTokenIdGenerator.generateTokenValue()).thenReturn(REFRESH_TOKEN_ID);
-                        tokenFactory.setRefreshTokenIdGenerator(refreshTokenIdGenerator);
+                        tokenGranter.setRefreshTokenIdGenerator(refreshTokenIdGenerator);
                     }
 
                     @Test
                     @DisplayName("리플래시 토큰에 저장된 토큰 아이디는 리플래스 토큰 아이디 생성기에서 생성한 아이디어야 한다.")
                     void shouldRefreshTokenIdIsCreatedByRefreshTokenIdGenerator() {
-                        OAuth2AuthorizedAccessToken accessToken = tokenFactory.createAccessToken(clientDetails, tokenRequest);
+                        OAuth2AuthorizedAccessToken accessToken = tokenGranter.createAccessToken(clientDetails, tokenRequest);
 
                         assertEquals(REFRESH_TOKEN_ID, accessToken.getRefreshToken().getTokenId());
                     }
 
                     @AfterEach
                     void after() {
-                        tokenFactory.setRefreshTokenIdGenerator(null);
+                        tokenGranter.setRefreshTokenIdGenerator(null);
                     }
                 }
 
                 @AfterEach
                 void after() {
-                    tokenFactory.setAllowedRefreshToken(false);
+                    tokenGranter.setAllowedRefreshToken(false);
                 }
             }
         }
