@@ -7,6 +7,7 @@ import cube8540.oauth.authentication.credentials.oauth.client.provider.ClientCre
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidClientException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidRequestException;
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTranslator;
+import cube8540.oauth.authentication.credentials.oauth.token.OAuth2AccessTokenDetails;
 import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2AccessTokenService;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenRegistrationException;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedAccessToken;
@@ -116,18 +117,18 @@ class OAuth2TokenIntrospectionEndpointTest {
         class WhenAuthenticationClientIdAndAccessTokenIdAreDifferent {
             private ClientCredentialsToken clientCredentialsToken;
             private OAuth2ClientDetails clientDetails;
-            private OAuth2AuthorizedAccessToken accessToken;
+            private OAuth2AccessTokenDetails accessToken;
 
             @BeforeEach
             void setup() {
                 this.clientCredentialsToken = mock(ClientCredentialsToken.class);
                 this.clientDetails = mock(OAuth2ClientDetails.class);
-                this.accessToken = mock(OAuth2AuthorizedAccessToken.class);
+                this.accessToken = mock(OAuth2AccessTokenDetails.class);
 
                 when(service.readAccessToken(TOKEN_VALUE)).thenReturn(this.accessToken);
                 when(this.clientCredentialsToken.getPrincipal()).thenReturn(clientDetails);
                 when(this.clientDetails.clientId()).thenReturn("DIFFERENT_CLIENT_ID");
-                when(this.accessToken.getClient()).thenReturn(CLIENT_ID);
+                when(this.accessToken.clientId()).thenReturn(CLIENT_ID);
             }
 
             @Test
@@ -145,13 +146,13 @@ class OAuth2TokenIntrospectionEndpointTest {
         void setup() {
             this.clientCredentials = mock(ClientCredentialsToken.class);
             OAuth2ClientDetails clientDetails = mock(OAuth2ClientDetails.class);
-            OAuth2AuthorizedAccessToken accessToken = mock(OAuth2AuthorizedAccessToken.class);
+            OAuth2AccessTokenDetails accessToken = mock(OAuth2AccessTokenDetails.class);
             OAuth2AccessTokenIntrospectionConverter converter = mock(OAuth2AccessTokenIntrospectionConverter.class);
             this.responseMap = mock(Map.class);
 
             when(this.clientCredentials.getPrincipal()).thenReturn(clientDetails);
             when(clientDetails.clientId()).thenReturn(RAW_CLIENT_ID);
-            when(accessToken.getClient()).thenReturn(CLIENT_ID);
+            when(accessToken.clientId()).thenReturn(CLIENT_ID);
             when(service.readAccessToken(TOKEN_VALUE)).thenReturn(accessToken);
             when(converter.convertAccessToken(accessToken)).thenReturn(responseMap);
 

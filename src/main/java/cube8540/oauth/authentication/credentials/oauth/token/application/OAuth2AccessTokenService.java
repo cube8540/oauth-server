@@ -1,9 +1,9 @@
 package cube8540.oauth.authentication.credentials.oauth.token.application;
 
-import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedAccessToken;
+import cube8540.oauth.authentication.credentials.oauth.token.OAuth2AccessTokenDetails;
 
 public interface OAuth2AccessTokenService {
 
-    OAuth2AuthorizedAccessToken readAccessToken(String tokenValue);
+    OAuth2AccessTokenDetails readAccessToken(String tokenValue);
 
 }

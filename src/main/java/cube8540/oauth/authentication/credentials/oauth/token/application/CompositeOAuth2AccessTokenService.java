@@ -42,14 +42,14 @@ public class CompositeOAuth2AccessTokenService implements OAuth2AccessTokenGrant
     }
 
     @Override
-    public OAuth2AuthorizedAccessToken readAccessToken(String tokenValue) {
+    public OAuth2AccessTokenDetails readAccessToken(String tokenValue) {
         OAuth2AuthorizedAccessToken accessToken = tokenRepository.findById(new OAuth2TokenId(tokenValue))
                 .orElseThrow(() -> new OAuth2AccessTokenNotFoundException("[" + tokenValue + "] token is not found"));
 
         if (accessToken.isExpired()) {
             throw new OAuth2AccessTokenExpiredException("[" + tokenValue + "] is expired");
         }
-        return accessToken;
+        return new DefaultAccessTokenDetails(accessToken);
     }
 
     private static final class NullOAuth2TokenEnhancer implements OAuth2TokenEnhancer {

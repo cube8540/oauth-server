@@ -7,9 +7,9 @@ import cube8540.oauth.authentication.credentials.oauth.error.DefaultOAuth2Except
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidClientException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidRequestException;
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTranslator;
+import cube8540.oauth.authentication.credentials.oauth.token.OAuth2AccessTokenDetails;
 import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2AccessTokenService;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenRegistrationException;
-import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedAccessToken;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,9 +58,9 @@ public class OAuth2TokenIntrospectionEndpoint {
             throw new InsufficientAuthenticationException("this is no client authentication");
         }
 
-        OAuth2AuthorizedAccessToken accessToken = service.readAccessToken(token);
+        OAuth2AccessTokenDetails accessToken = service.readAccessToken(token);
         OAuth2ClientDetails clientDetails = (OAuth2ClientDetails) clientCredentials.getPrincipal();
-        if (!accessToken.getClient().getValue().equals(clientDetails.clientId())) {
+        if (!accessToken.clientId().getValue().equals(clientDetails.clientId())) {
             throw new InvalidClientException("client and access token client is different");
         }
 

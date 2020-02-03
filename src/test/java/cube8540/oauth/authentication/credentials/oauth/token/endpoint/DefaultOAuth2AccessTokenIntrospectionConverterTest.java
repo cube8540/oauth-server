@@ -3,6 +3,7 @@ package cube8540.oauth.authentication.credentials.oauth.token.endpoint;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2Utils;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
+import cube8540.oauth.authentication.credentials.oauth.token.OAuth2AccessTokenDetails;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedAccessToken;
 import cube8540.oauth.authentication.users.domain.UserEmail;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,17 +42,17 @@ class DefaultOAuth2AccessTokenIntrospectionConverterTest {
             new OAuth2ScopeId("SCOPE-3")
     ));
 
-    private OAuth2AuthorizedAccessToken accessToken;
+    private OAuth2AccessTokenDetails accessToken;
     private DefaultOAuth2AccessTokenIntrospectionConverter converter;
 
     @BeforeEach
     void setup() {
-        this.accessToken = mock(OAuth2AuthorizedAccessToken.class);
+        this.accessToken = mock(OAuth2AccessTokenDetails.class);
 
-        when(accessToken.getClient()).thenReturn(CLIENT_ID);
-        when(accessToken.getEmail()).thenReturn(USERNAME);
-        when(accessToken.getExpiration()).thenReturn(EXPIRATION);
-        when(accessToken.getScope()).thenReturn(SCOPE);
+        when(accessToken.clientId()).thenReturn(CLIENT_ID);
+        when(accessToken.username()).thenReturn(RAW_USERNAME);
+        when(accessToken.expiration()).thenReturn(EXPIRATION);
+        when(accessToken.scope()).thenReturn(SCOPE);
 
         this.converter = new DefaultOAuth2AccessTokenIntrospectionConverter();
     }
@@ -105,16 +106,16 @@ class DefaultOAuth2AccessTokenIntrospectionConverterTest {
         @Nested
         @DisplayName("엑세스 토큰의 유저 아이디가 null 일시")
         class WhenAccessTokenUsernameIsNull {
-            private OAuth2AuthorizedAccessToken accessToken;
+            private OAuth2AccessTokenDetails accessToken;
 
             @BeforeEach
             void setup() {
-                this.accessToken = mock(OAuth2AuthorizedAccessToken.class);
+                this.accessToken = mock(OAuth2AccessTokenDetails.class);
 
-                when(accessToken.getClient()).thenReturn(CLIENT_ID);
-                when(accessToken.getEmail()).thenReturn(null);
-                when(accessToken.getExpiration()).thenReturn(EXPIRATION);
-                when(accessToken.getScope()).thenReturn(SCOPE);
+                when(accessToken.clientId()).thenReturn(CLIENT_ID);
+                when(accessToken.username()).thenReturn(null);
+                when(accessToken.expiration()).thenReturn(EXPIRATION);
+                when(accessToken.scope()).thenReturn(SCOPE);
             }
 
             @Test
