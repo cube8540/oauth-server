@@ -8,9 +8,8 @@ import cube8540.oauth.authentication.credentials.oauth.error.InvalidClientExcept
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidRequestException;
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTranslator;
 import cube8540.oauth.authentication.credentials.oauth.token.OAuth2AccessTokenDetails;
-import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2AccessTokenService;
+import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2AccessTokenReadService;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenRegistrationException;
-import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedAccessToken;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -40,13 +39,13 @@ class OAuth2TokenIntrospectionEndpointTest {
     private static final String RAW_CLIENT_ID = "CLIENT-ID";
     private static final OAuth2ClientId CLIENT_ID = new OAuth2ClientId(RAW_CLIENT_ID);
 
-    private OAuth2AccessTokenService service;
+    private OAuth2AccessTokenReadService service;
     private OAuth2AccessTokenIntrospectionConverter converter;
     private OAuth2TokenIntrospectionEndpoint endpoint;
 
     @BeforeEach
     void setup() {
-        this.service = mock(OAuth2AccessTokenService.class);
+        this.service = mock(OAuth2AccessTokenReadService.class);
         this.converter = mock(OAuth2AccessTokenIntrospectionConverter.class);
         this.endpoint = new OAuth2TokenIntrospectionEndpoint(service);
         this.endpoint.setConverter(converter);

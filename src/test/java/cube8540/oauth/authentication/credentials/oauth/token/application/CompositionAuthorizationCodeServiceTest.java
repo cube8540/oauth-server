@@ -1,11 +1,11 @@
-package cube8540.oauth.authentication.credentials.oauth.code.application;
+package cube8540.oauth.authentication.credentials.oauth.token.application;
 
 import cube8540.oauth.authentication.credentials.oauth.AuthorizationRequest;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
-import cube8540.oauth.authentication.credentials.oauth.code.domain.AuthorizationCode;
-import cube8540.oauth.authentication.credentials.oauth.code.domain.AuthorizationCodeGenerator;
-import cube8540.oauth.authentication.credentials.oauth.code.domain.AuthorizationCodeRepository;
-import cube8540.oauth.authentication.credentials.oauth.code.domain.OAuth2AuthorizationCode;
+import cube8540.oauth.authentication.credentials.oauth.token.domain.AuthorizationCode;
+import cube8540.oauth.authentication.credentials.oauth.token.domain.AuthorizationCodeGenerator;
+import cube8540.oauth.authentication.credentials.oauth.token.domain.AuthorizationCodeRepository;
+import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizationCode;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import cube8540.oauth.authentication.users.domain.UserEmail;
 import org.junit.jupiter.api.BeforeEach;

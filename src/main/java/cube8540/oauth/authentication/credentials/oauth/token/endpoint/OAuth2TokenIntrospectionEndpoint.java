@@ -8,7 +8,7 @@ import cube8540.oauth.authentication.credentials.oauth.error.InvalidClientExcept
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidRequestException;
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTranslator;
 import cube8540.oauth.authentication.credentials.oauth.token.OAuth2AccessTokenDetails;
-import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2AccessTokenService;
+import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2AccessTokenReadService;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenRegistrationException;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +30,7 @@ import java.util.Map;
 @RestController
 public class OAuth2TokenIntrospectionEndpoint {
 
-    private final OAuth2AccessTokenService service;
+    private final OAuth2AccessTokenReadService service;
 
     @Setter
     private OAuth2ExceptionTranslator exceptionTranslator = new DefaultOAuth2ExceptionTranslator();
@@ -39,7 +39,7 @@ public class OAuth2TokenIntrospectionEndpoint {
     private OAuth2AccessTokenIntrospectionConverter converter = new DefaultOAuth2AccessTokenIntrospectionConverter();
 
     @Autowired
-    public OAuth2TokenIntrospectionEndpoint(OAuth2AccessTokenService service) {
+    public OAuth2TokenIntrospectionEndpoint(OAuth2AccessTokenReadService service) {
         this.service = service;
     }
 

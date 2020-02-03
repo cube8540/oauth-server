@@ -1,12 +1,12 @@
-package cube8540.oauth.authentication.credentials.oauth.code.application;
+package cube8540.oauth.authentication.credentials.oauth.token.application;
 
 import cube8540.oauth.authentication.AuthenticationApplication;
 import cube8540.oauth.authentication.credentials.oauth.AuthorizationRequest;
-import cube8540.oauth.authentication.credentials.oauth.code.domain.AuthorizationCode;
-import cube8540.oauth.authentication.credentials.oauth.code.domain.AuthorizationCodeGenerator;
-import cube8540.oauth.authentication.credentials.oauth.code.domain.AuthorizationCodeRepository;
-import cube8540.oauth.authentication.credentials.oauth.code.domain.OAuth2AuthorizationCode;
-import cube8540.oauth.authentication.credentials.oauth.code.infra.DefaultAuthorizationCodeGenerator;
+import cube8540.oauth.authentication.credentials.oauth.token.domain.AuthorizationCode;
+import cube8540.oauth.authentication.credentials.oauth.token.domain.AuthorizationCodeGenerator;
+import cube8540.oauth.authentication.credentials.oauth.token.domain.AuthorizationCodeRepository;
+import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizationCode;
+import cube8540.oauth.authentication.credentials.oauth.token.infra.DefaultAuthorizationCodeGenerator;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;

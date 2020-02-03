@@ -1,7 +1,7 @@
-package cube8540.oauth.authentication.credentials.oauth.code.infra;
+package cube8540.oauth.authentication.credentials.oauth.token.infra;
 
-import cube8540.oauth.authentication.credentials.oauth.code.domain.AuthorizationCode;
-import cube8540.oauth.authentication.credentials.oauth.code.domain.AuthorizationCodeGenerator;
+import cube8540.oauth.authentication.credentials.oauth.token.domain.AuthorizationCode;
+import cube8540.oauth.authentication.credentials.oauth.token.domain.AuthorizationCodeGenerator;
 
 import java.security.SecureRandom;
 import java.util.Random;

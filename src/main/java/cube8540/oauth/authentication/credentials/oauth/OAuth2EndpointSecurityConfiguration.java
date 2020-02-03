@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetailsService;
 import cube8540.oauth.authentication.credentials.oauth.client.provider.ClientCredentialsAuthenticationProvider;
 import cube8540.oauth.authentication.credentials.oauth.client.provider.ClientCredentialsEndpointFilter;
-import cube8540.oauth.authentication.credentials.oauth.code.application.OAuth2AuthorizationCodeConsumer;
+import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2AuthorizationCodeConsumer;
 import cube8540.oauth.authentication.credentials.oauth.error.DefaultOAuth2ExceptionTranslator;
 import cube8540.oauth.authentication.credentials.oauth.error.DefaultOauth2ExceptionResponseRenderer;
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2AuthenticationExceptionEntryPoint;

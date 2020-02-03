@@ -1,4 +1,4 @@
-package cube8540.oauth.authentication.credentials.oauth.code.domain;
+package cube8540.oauth.authentication.credentials.oauth.token.domain;
 
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;

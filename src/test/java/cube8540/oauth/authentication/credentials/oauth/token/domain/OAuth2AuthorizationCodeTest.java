@@ -1,4 +1,4 @@
-package cube8540.oauth.authentication.credentials.oauth.code.domain;
+package cube8540.oauth.authentication.credentials.oauth.token.domain;
 
 import cube8540.oauth.authentication.credentials.oauth.AuthorizationRequest;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
@@ -6,6 +6,9 @@ import cube8540.oauth.authentication.credentials.oauth.error.AuthorizationCodeEx
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidClientException;
 import cube8540.oauth.authentication.credentials.oauth.error.RedirectMismatchException;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
+import cube8540.oauth.authentication.credentials.oauth.token.domain.AuthorizationCode;
+import cube8540.oauth.authentication.credentials.oauth.token.domain.AuthorizationCodeGenerator;
+import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizationCode;
 import cube8540.oauth.authentication.users.domain.UserEmail;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

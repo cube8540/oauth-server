@@ -1,4 +1,4 @@
-package cube8540.oauth.authentication.credentials.oauth.code.domain;
+package cube8540.oauth.authentication.credentials.oauth.token.domain;
 
 import cube8540.oauth.authentication.AuthenticationApplication;
 import cube8540.oauth.authentication.credentials.oauth.AuthorizationRequest;

@@ -4,7 +4,6 @@ import cube8540.oauth.authentication.credentials.oauth.OAuth2TokenRequest;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.token.DefaultAccessTokenDetails;
 import cube8540.oauth.authentication.credentials.oauth.token.OAuth2AccessTokenDetails;
-import cube8540.oauth.authentication.credentials.oauth.token.OAuth2AccessTokenGrantService;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenExpiredException;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenNotFoundException;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenRepository;
@@ -17,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class CompositeOAuth2AccessTokenService implements OAuth2AccessTokenGrantService, OAuth2AccessTokenService {
+public class CompositeOAuth2AccessTokenService implements OAuth2AccessTokenGrantService, OAuth2AccessTokenReadService {
 
     private final OAuth2AccessTokenRepository tokenRepository;
     private final OAuth2TokenFactory tokenFactory;
