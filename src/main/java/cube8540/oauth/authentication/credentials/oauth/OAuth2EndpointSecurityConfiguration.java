@@ -5,21 +5,22 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetailsService;
 import cube8540.oauth.authentication.credentials.oauth.client.provider.ClientCredentialsAuthenticationProvider;
 import cube8540.oauth.authentication.credentials.oauth.client.provider.ClientCredentialsEndpointFilter;
-import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2AuthorizationCodeConsumer;
 import cube8540.oauth.authentication.credentials.oauth.error.DefaultOAuth2ExceptionTranslator;
 import cube8540.oauth.authentication.credentials.oauth.error.DefaultOauth2ExceptionResponseRenderer;
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2AuthenticationExceptionEntryPoint;
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionResponseRenderer;
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTranslator;
+import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2AccessTokenGrantService;
+import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2AuthorizationCodeConsumer;
+import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenRepository;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2RefreshTokenRepository;
-import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2TokenFactory;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2TokenIdGenerator;
-import cube8540.oauth.authentication.credentials.oauth.token.infra.AuthorizationCodeTokenFactory;
-import cube8540.oauth.authentication.credentials.oauth.token.infra.ClientCredentialsTokenFactory;
+import cube8540.oauth.authentication.credentials.oauth.token.application.AuthorizationCodeTokenGranter;
+import cube8540.oauth.authentication.credentials.oauth.token.application.ClientCredentialsTokenGranter;
 import cube8540.oauth.authentication.credentials.oauth.token.infra.DefaultTokenIdGenerator;
-import cube8540.oauth.authentication.credentials.oauth.token.infra.OAuth2AccessTokenFactory;
-import cube8540.oauth.authentication.credentials.oauth.token.infra.RefreshTokenFactory;
-import cube8540.oauth.authentication.credentials.oauth.token.infra.ResourceOwnerPasswordTokenFactory;
+import cube8540.oauth.authentication.credentials.oauth.token.application.CompositeOAuth2AccessTokenGranter;
+import cube8540.oauth.authentication.credentials.oauth.token.application.RefreshTokenGranter;
+import cube8540.oauth.authentication.credentials.oauth.token.application.ResourceOwnerPasswordTokenGranter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -46,6 +47,9 @@ public class OAuth2EndpointSecurityConfiguration extends WebSecurityConfigurerAd
 
     @Setter(onMethod_ = @Autowired)
     private OAuth2AuthorizationCodeConsumer authorizationCodeConsumer;
+
+    @Setter(onMethod_ = @Autowired)
+    private OAuth2AccessTokenRepository accessTokenRepository;
 
     @Setter(onMethod_ = @Autowired)
     private OAuth2RefreshTokenRepository refreshTokenRepository;
@@ -98,18 +102,18 @@ public class OAuth2EndpointSecurityConfiguration extends WebSecurityConfigurerAd
     }
 
     @Bean
-    public OAuth2TokenFactory accessTokenFactory() throws Exception {
-        OAuth2AccessTokenFactory tokenFactory = new OAuth2AccessTokenFactory();
+    public OAuth2AccessTokenGrantService accessTokenGranter() throws Exception {
+        CompositeOAuth2AccessTokenGranter tokenGranter = new CompositeOAuth2AccessTokenGranter();
 
-        tokenFactory.putTokenFactoryMap(AuthorizationGrantType.AUTHORIZATION_CODE,
-                new AuthorizationCodeTokenFactory(tokenIdGenerator(), authorizationCodeConsumer));
-        tokenFactory.putTokenFactoryMap(AuthorizationGrantType.REFRESH_TOKEN,
-                new RefreshTokenFactory(refreshTokenRepository, tokenIdGenerator()));
-        tokenFactory.putTokenFactoryMap(AuthorizationGrantType.CLIENT_CREDENTIALS,
-                new ClientCredentialsTokenFactory(tokenIdGenerator()));
-        tokenFactory.putTokenFactoryMap(AuthorizationGrantType.PASSWORD,
-                new ResourceOwnerPasswordTokenFactory(tokenIdGenerator(), authenticationManagerBean()));
-        return tokenFactory;
+        tokenGranter.putTokenGranterMap(AuthorizationGrantType.AUTHORIZATION_CODE,
+                new AuthorizationCodeTokenGranter(tokenIdGenerator(), accessTokenRepository, authorizationCodeConsumer));
+        tokenGranter.putTokenGranterMap(AuthorizationGrantType.REFRESH_TOKEN,
+                new RefreshTokenGranter(accessTokenRepository, refreshTokenRepository, tokenIdGenerator()));
+        tokenGranter.putTokenGranterMap(AuthorizationGrantType.CLIENT_CREDENTIALS,
+                new ClientCredentialsTokenGranter(tokenIdGenerator(), accessTokenRepository));
+        tokenGranter.putTokenGranterMap(AuthorizationGrantType.PASSWORD,
+                new ResourceOwnerPasswordTokenGranter(tokenIdGenerator(), accessTokenRepository, authenticationManagerBean()));
+        return tokenGranter;
     }
 
     @Bean

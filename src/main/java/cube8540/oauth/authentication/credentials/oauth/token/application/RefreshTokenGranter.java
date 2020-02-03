@@ -1,21 +1,23 @@
-package cube8540.oauth.authentication.credentials.oauth.token.infra;
+package cube8540.oauth.authentication.credentials.oauth.token.application;
 
 import cube8540.oauth.authentication.credentials.oauth.OAuth2TokenRequest;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidGrantException;
+import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenRepository;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedAccessToken;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedRefreshToken;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2RefreshTokenRepository;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2TokenId;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2TokenIdGenerator;
 
-public class RefreshTokenFactory extends AbstractOAuth2TokenFactory {
+public class RefreshTokenGranter extends AbstractOAuth2TokenGranter {
 
     private final OAuth2RefreshTokenRepository refreshTokenRepository;
 
-    public RefreshTokenFactory(OAuth2RefreshTokenRepository refreshTokenRepository, OAuth2TokenIdGenerator tokenIdGenerator) {
-        super(tokenIdGenerator);
+    public RefreshTokenGranter(OAuth2AccessTokenRepository tokenRepository, OAuth2RefreshTokenRepository refreshTokenRepository,
+                               OAuth2TokenIdGenerator tokenIdGenerator) {
+        super(tokenIdGenerator, tokenRepository);
         this.refreshTokenRepository = refreshTokenRepository;
     }
 
