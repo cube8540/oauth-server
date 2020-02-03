@@ -44,7 +44,7 @@ public class AuthorizationEndpointSecurityConfiguration extends WebSecurityConfi
                 .antMatchers(HttpMethod.POST, loginProcessUrl)
                 .and()
             .authorizeRequests()
-                .anyRequest().permitAll()
+                .anyRequest().authenticated()
                 .and()
             .formLogin()
                 .permitAll();
