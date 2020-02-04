@@ -191,7 +191,7 @@ public class AuthorizationEndpoint {
             OAuth2ClientDetails clientDetails = clientDetailsService.loadClientDetailsByClientId(authorizationRequest.clientId());
             String storedRedirectURI = Optional.ofNullable(authorizationRequest.redirectURI()).map(URI::toString).orElse(null);
             URI redirectURI = redirectResolver.resolveRedirectURI(storedRedirectURI, clientDetails);
-            return new ModelAndView(new RedirectView(getUnsuccessfulRedirectURI(redirectURI, responseEntity.getBody(), authorizationRequest)));
+            return getUnsuccessfulRedirectView(redirectURI, responseEntity.getBody(), authorizationRequest);
         } catch (Exception exception) {
             if (log.isErrorEnabled()) {
                 log.error("An exception occurred during error handling {} {}", exception.getClass().getName(), exception.getMessage());
@@ -200,17 +200,15 @@ public class AuthorizationEndpoint {
         }
     }
 
-    private String getUnsuccessfulRedirectURI(URI redirectURI, OAuth2Error error, AuthorizationRequest authorizationRequest) {
-        StringBuilder finalRedirectURI = new StringBuilder(redirectURI.toString())
-                .append("?error=").append(error.getErrorCode())
-                .append("&error_description=").append(error.getDescription());
-        if (error.getUri() != null) {
-            finalRedirectURI.append("&uri=").append(error.getUri());
-        }
+    private ModelAndView getUnsuccessfulRedirectView(URI redirectURI, OAuth2Error error, AuthorizationRequest authorizationRequest) {
+        ModelAndView modelAndView = new ModelAndView(new RedirectView(redirectURI.toString()))
+                .addObject("error_code", error.getErrorCode())
+                .addObject("error_description", error.getDescription());
+
         if (authorizationRequest.state() != null) {
-            finalRedirectURI.append("&state=").append(authorizationRequest.state());
+            modelAndView.addObject("state", authorizationRequest.state());
         }
-        return finalRedirectURI.toString();
+        return modelAndView;
     }
 
     private AuthorizationRequest getErrorAuthorizationRequest(ServletWebRequest webRequest) {
