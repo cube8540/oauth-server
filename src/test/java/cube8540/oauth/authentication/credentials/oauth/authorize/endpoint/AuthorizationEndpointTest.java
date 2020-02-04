@@ -105,7 +105,6 @@ class AuthorizationEndpointTest {
 
             private Map<String, String> parameter;
             private Map<String, Object> model;
-            private SessionStatus sessionStatus;
             private Principal principal;
 
             @BeforeEach
@@ -113,7 +112,6 @@ class AuthorizationEndpointTest {
             void setup() {
                 this.parameter = mock(Map.class);
                 this.model = mock(Map.class);
-                this.sessionStatus = mock(SessionStatus.class);
                 this.principal = mock(Principal.class);
             }
 
@@ -130,7 +128,6 @@ class AuthorizationEndpointTest {
 
             private Map<String, String> parameter;
             private Map<String, Object> model;
-            private SessionStatus sessionStatus;
             private Authentication principal;
 
             @BeforeEach
@@ -138,7 +135,6 @@ class AuthorizationEndpointTest {
             void setup() {
                 this.parameter = mock(Map.class);
                 this.model = mock(Map.class);
-                this.sessionStatus = mock(SessionStatus.class);
                 this.principal = mock(Authentication.class);
 
                 when(principal.isAuthenticated()).thenReturn(false);
@@ -156,13 +152,11 @@ class AuthorizationEndpointTest {
         class WhenAuthenticationCompletedRequesting {
 
             private Map<String, Object> model;
-            private SessionStatus sessionStatus;
             private Authentication principal;
 
             @BeforeEach
             void setup() {
                 this.model = new HashMap<>();
-                this.sessionStatus = mock(SessionStatus.class);
                 this.principal = mock(Authentication.class);
 
                 when(principal.isAuthenticated()).thenReturn(true);
@@ -461,8 +455,6 @@ class AuthorizationEndpointTest {
         private SessionStatus sessionStatus;
         private Authentication authentication;
         private AuthorizationRequest originalAuthorizationRequest;
-        private ScopeApprovalResolver resolver;
-        private Set<String> originalRequestScope;
         private Set<String> resolvedRequestScope;
 
         @BeforeEach
@@ -472,9 +464,10 @@ class AuthorizationEndpointTest {
             this.sessionStatus = mock(SessionStatus.class);
             this.authentication = mock(Authentication.class);
             this.originalAuthorizationRequest = mock(AuthorizationRequest.class);
-            this.resolver = mock(ScopeApprovalResolver.class);
-            this.originalRequestScope = new HashSet<>(Arrays.asList("SCOPE-1", "SCOPE-2", "SCOPE-3"));
             this.resolvedRequestScope = new HashSet<>(Arrays.asList("RESOLVED-SCOPE-1", "RESOLVED-SCOPE-2", "RESOLVED-SCOPE-3"));
+
+            ScopeApprovalResolver resolver = mock(ScopeApprovalResolver.class);
+            Set<String> originalRequestScope = new HashSet<>(Arrays.asList("SCOPE-1", "SCOPE-2", "SCOPE-3"));
 
             this.model.put(AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE, originalAuthorizationRequest);
 
@@ -612,23 +605,20 @@ class AuthorizationEndpointTest {
         class WhenThrowsRedirectMismatchException {
             private RedirectMismatchException redirectMismatchException;
             private ServletWebRequest servletWebRequest;
-            private HttpServletRequest servletRequest;
             private HttpServletResponse servletResponse;
 
             private OAuth2Error oAuth2Error;
-            private ResponseEntity<OAuth2Error> oAuth2ErrorResponseEntity;
-            private OAuth2ExceptionTranslator exceptionTranslator;
 
             @BeforeEach
             void setup() {
+                HttpServletRequest servletRequest = mock(HttpServletRequest.class);
+                OAuth2ExceptionTranslator exceptionTranslator = mock(OAuth2ExceptionTranslator.class);
+                ResponseEntity<OAuth2Error> oAuth2ErrorResponseEntity = new ResponseEntity<>(oAuth2Error, HttpStatus.UNAUTHORIZED);
+
                 this.redirectMismatchException = new RedirectMismatchException("TEST");
-                this.servletRequest = mock(HttpServletRequest.class);
                 this.servletResponse = mock(HttpServletResponse.class);
                 this.servletWebRequest = new ServletWebRequest(servletRequest, servletResponse);
-
-                this.exceptionTranslator = mock(OAuth2ExceptionTranslator.class);
                 this.oAuth2Error = new OAuth2Error(OAuth2ErrorCodes.INVALID_GRANT);
-                this.oAuth2ErrorResponseEntity = new ResponseEntity<>(oAuth2Error, HttpStatus.UNAUTHORIZED);
 
                 when(exceptionTranslator.translate(redirectMismatchException)).thenReturn(oAuth2ErrorResponseEntity);
                 endpoint.setExceptionTranslator(exceptionTranslator);
@@ -665,22 +655,19 @@ class AuthorizationEndpointTest {
             private OAuth2AuthenticationException authenticationException;
             private ServletWebRequest servletWebRequest;
             private HttpServletRequest servletRequest;
-            private HttpServletResponse servletResponse;
 
             private OAuth2Error oAuth2Error;
-            private ResponseEntity<OAuth2Error> oAuth2ErrorResponseEntity;
-            private OAuth2ExceptionTranslator exceptionTranslator;
 
             @BeforeEach
             void setup() {
+                HttpServletResponse servletResponse = mock(HttpServletResponse.class);
+                ResponseEntity<OAuth2Error> oAuth2ErrorResponseEntity = new ResponseEntity<>(oAuth2Error, HttpStatus.UNAUTHORIZED);
+                OAuth2ExceptionTranslator exceptionTranslator = mock(OAuth2ExceptionTranslator.class);
+
                 this.authenticationException = mock(OAuth2AuthenticationException.class);
                 this.servletRequest = mock(HttpServletRequest.class);
-                this.servletResponse = mock(HttpServletResponse.class);
                 this.servletWebRequest = new ServletWebRequest(servletRequest, servletResponse);
-
                 this.oAuth2Error = new OAuth2Error(OAuth2ErrorCodes.INVALID_REQUEST);
-                this.oAuth2ErrorResponseEntity = new ResponseEntity<>(oAuth2Error, HttpStatus.UNAUTHORIZED);
-                this.exceptionTranslator = mock(OAuth2ExceptionTranslator.class);
 
                 when(exceptionTranslator.translate(authenticationException)).thenReturn(oAuth2ErrorResponseEntity);
                 endpoint.setExceptionTranslator(exceptionTranslator);
@@ -691,11 +678,10 @@ class AuthorizationEndpointTest {
             class WhenAuthorizationRequestNotRemainedInSession {
                 private URI storedURI;
                 private String storedClientId;
-                private SessionAttributeStore sessionAttributeStore;
 
                 @BeforeEach
                 void setup() {
-                    this.sessionAttributeStore = mock(SessionAttributeStore.class);
+                    SessionAttributeStore sessionAttributeStore = mock(SessionAttributeStore.class);
                     this.storedURI = URI.create("http://stored.localhost:8080");
                     this.storedClientId = "STORED-CLIENT-ID";
 
@@ -863,12 +849,11 @@ class AuthorizationEndpointTest {
                 private AuthorizationRequest authorizationRequest;
                 private URI storedURI;
                 private String storedClientId;
-                private SessionAttributeStore sessionAttributeStore;
 
                 @BeforeEach
                 void setup() {
+                    SessionAttributeStore sessionAttributeStore = mock(SessionAttributeStore.class);
                     this.authorizationRequest = mock(AuthorizationRequest.class);
-                    this.sessionAttributeStore = mock(SessionAttributeStore.class);
                     this.storedURI = URI.create("http://stored.localhost:8080");
                     this.storedClientId = "STORED-CLIENT-ID";
 
@@ -1035,23 +1020,20 @@ class AuthorizationEndpointTest {
         class WhenThrowsClientAuthenticationException {
             private OAuth2ClientRegistrationException clientRegistrationException;
             private ServletWebRequest servletWebRequest;
-            private HttpServletRequest servletRequest;
             private HttpServletResponse servletResponse;
 
             private OAuth2Error oAuth2Error;
-            private ResponseEntity<OAuth2Error> oAuth2ErrorResponseEntity;
-            private OAuth2ExceptionTranslator exceptionTranslator;
 
             @BeforeEach
             void setup() {
+                HttpServletRequest servletRequest = mock(HttpServletRequest.class);
+                OAuth2ExceptionTranslator exceptionTranslator = mock(OAuth2ExceptionTranslator.class);
+                ResponseEntity<OAuth2Error> oAuth2ErrorResponseEntity = new ResponseEntity<>(oAuth2Error, HttpStatus.UNAUTHORIZED);
+
                 this.clientRegistrationException = new OAuth2ClientRegistrationException("TEST");
-                this.servletRequest = mock(HttpServletRequest.class);
                 this.servletResponse = mock(HttpServletResponse.class);
                 this.servletWebRequest = new ServletWebRequest(servletRequest, servletResponse);
-
-                this.exceptionTranslator = mock(OAuth2ExceptionTranslator.class);
                 this.oAuth2Error = new OAuth2Error(OAuth2ErrorCodes.UNAUTHORIZED_CLIENT);
-                this.oAuth2ErrorResponseEntity = new ResponseEntity<>(oAuth2Error, HttpStatus.UNAUTHORIZED);
 
                 when(exceptionTranslator.translate(clientRegistrationException)).thenReturn(oAuth2ErrorResponseEntity);
                 endpoint.setExceptionTranslator(exceptionTranslator);
@@ -1084,28 +1066,25 @@ class AuthorizationEndpointTest {
 
         @Nested
         @DisplayName("예상하지 못한 예외 발생했을시")
-        class WhenThrowsUnexceptedException {
-            private Exception Exception;
+        class WhenThrowsUnexpectedException {
+            private Exception exception;
             private ServletWebRequest servletWebRequest;
             private HttpServletRequest servletRequest;
-            private HttpServletResponse servletResponse;
 
             private OAuth2Error oAuth2Error;
-            private ResponseEntity<OAuth2Error> oAuth2ErrorResponseEntity;
-            private OAuth2ExceptionTranslator exceptionTranslator;
 
             @BeforeEach
             void setup() {
-                this.Exception = mock(Exception.class);
+                HttpServletResponse servletResponse = mock(HttpServletResponse.class);
+                ResponseEntity<OAuth2Error> oAuth2ErrorResponseEntity = new ResponseEntity<>(oAuth2Error, HttpStatus.UNAUTHORIZED);
+                OAuth2ExceptionTranslator exceptionTranslator = mock(OAuth2ExceptionTranslator.class);
+
+                this.exception = mock(Exception.class);
                 this.servletRequest = mock(HttpServletRequest.class);
-                this.servletResponse = mock(HttpServletResponse.class);
                 this.servletWebRequest = new ServletWebRequest(servletRequest, servletResponse);
-
                 this.oAuth2Error = new OAuth2Error(OAuth2ErrorCodes.INVALID_REQUEST, "TEST", null);
-                this.oAuth2ErrorResponseEntity = new ResponseEntity<>(oAuth2Error, HttpStatus.UNAUTHORIZED);
-                this.exceptionTranslator = mock(OAuth2ExceptionTranslator.class);
 
-                when(exceptionTranslator.translate(Exception)).thenReturn(oAuth2ErrorResponseEntity);
+                when(exceptionTranslator.translate(exception)).thenReturn(oAuth2ErrorResponseEntity);
                 endpoint.setExceptionTranslator(exceptionTranslator);
             }
 
@@ -1114,11 +1093,10 @@ class AuthorizationEndpointTest {
             class WhenAuthorizationRequestNotRemainedInSession {
                 private URI storedURI;
                 private String storedClientId;
-                private SessionAttributeStore sessionAttributeStore;
 
                 @BeforeEach
                 void setup() {
-                    this.sessionAttributeStore = mock(SessionAttributeStore.class);
+                    SessionAttributeStore sessionAttributeStore = mock(SessionAttributeStore.class);
                     this.storedURI = URI.create("http://stored.localhost:8080");
                     this.storedClientId = "STORED-CLIENT-ID";
 
@@ -1143,7 +1121,7 @@ class AuthorizationEndpointTest {
                     @Test
                     @DisplayName("에러 페이지로 포워딩 해야 한다.")
                     void shouldForwardingErrorPage() {
-                        ModelAndView modelAndView = endpoint.handleOtherException(Exception, servletWebRequest);
+                        ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
 
                         assertEquals("forward:/oauth/error", modelAndView.getViewName());
                     }
@@ -1151,7 +1129,7 @@ class AuthorizationEndpointTest {
                     @Test
                     @DisplayName("ModelAndView에 OAuth2 에러 정보를 저장해야 한다.")
                     void shouldSaveOAuth2ErrorCodeToModelAndView() {
-                        ModelAndView modelAndView = endpoint.handleOtherException(Exception, servletWebRequest);
+                        ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
 
                         assertEquals(oAuth2Error, modelAndView.getModel().get("error"));
                     }
@@ -1174,7 +1152,7 @@ class AuthorizationEndpointTest {
                     @Test
                     @DisplayName("에러 페이지로 포워딩 해야 한다.")
                     void shouldForwardingErrorPage() {
-                        ModelAndView modelAndView = endpoint.handleOtherException(Exception, servletWebRequest);
+                        ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
 
                         assertEquals("forward:/oauth/error", modelAndView.getViewName());
                     }
@@ -1182,7 +1160,7 @@ class AuthorizationEndpointTest {
                     @Test
                     @DisplayName("ModelAndView에 OAuth2 에러 정보를 저장해야 한다.")
                     void shouldSaveOAuth2ErrorCodeToModelAndView() {
-                        ModelAndView modelAndView = endpoint.handleOtherException(Exception, servletWebRequest);
+                        ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
 
                         assertEquals(oAuth2Error, modelAndView.getModel().get("error"));
                     }
@@ -1215,7 +1193,7 @@ class AuthorizationEndpointTest {
                         @Test
                         @DisplayName("에러 코드를 매개변수에 추가하여 리다이렉트 주소로 리다이렉트 해야 한다.")
                         void shouldRedirectWithErrorCode() {
-                            ModelAndView modelAndView = endpoint.handleOtherException(Exception, servletWebRequest);
+                            ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
 
                             assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
                             assertEquals(oAuth2Error.getErrorCode(), modelAndView.getModel().get("error_code"));
@@ -1224,7 +1202,7 @@ class AuthorizationEndpointTest {
                         @Test
                         @DisplayName("에러 메시지를 매개변수에 추가하여 리다이렉트 주소로 리다이렉트 해야 한다.")
                         void shouldRedirectWithErrorDescription() {
-                            ModelAndView modelAndView = endpoint.handleOtherException(Exception, servletWebRequest);
+                            ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
 
                             assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
                             assertEquals(oAuth2Error.getDescription(), modelAndView.getModel().get("error_description"));
@@ -1233,7 +1211,7 @@ class AuthorizationEndpointTest {
                         @Test
                         @DisplayName("STATE를 매개변수에 추가하여 리다이렉트 주소로 리다이렉트 해야 한다.")
                         void shouldRedirectWithState() {
-                            ModelAndView modelAndView = endpoint.handleOtherException(Exception, servletWebRequest);
+                            ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
 
                             assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
                             assertEquals(STATE, modelAndView.getModel().get("state"));
@@ -1252,7 +1230,7 @@ class AuthorizationEndpointTest {
                         @Test
                         @DisplayName("에러 코드를 매개변수에 추가하여 리다이렉트 주소로 리다이렉트 해야 한다.")
                         void shouldRedirectWithErrorCode() {
-                            ModelAndView modelAndView = endpoint.handleOtherException(Exception, servletWebRequest);
+                            ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
 
                             assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
                             assertEquals(oAuth2Error.getErrorCode(), modelAndView.getModel().get("error_code"));
@@ -1261,7 +1239,7 @@ class AuthorizationEndpointTest {
                         @Test
                         @DisplayName("에러 메시지를 매개변수에 추가하여 리다이렉트 주소로 리다이렉트 해야 한다.")
                         void shouldRedirectWithErrorDescription() {
-                            ModelAndView modelAndView = endpoint.handleOtherException(Exception, servletWebRequest);
+                            ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
 
                             assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
                             assertEquals(oAuth2Error.getDescription(), modelAndView.getModel().get("error_description"));
@@ -1270,7 +1248,7 @@ class AuthorizationEndpointTest {
                         @Test
                         @DisplayName("STATE를 매개변수에서 제외하고 리다이렉트 주소로 리다이렉트 해야 한다.")
                         void shouldRedirectWithState() {
-                            ModelAndView modelAndView = endpoint.handleOtherException(Exception, servletWebRequest);
+                            ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
 
                             assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
                             assertNull(modelAndView.getModel().get("state"));
@@ -1286,12 +1264,11 @@ class AuthorizationEndpointTest {
                 private AuthorizationRequest authorizationRequest;
                 private URI storedURI;
                 private String storedClientId;
-                private SessionAttributeStore sessionAttributeStore;
 
                 @BeforeEach
                 void setup() {
                     this.authorizationRequest = mock(AuthorizationRequest.class);
-                    this.sessionAttributeStore = mock(SessionAttributeStore.class);
+                    SessionAttributeStore sessionAttributeStore = mock(SessionAttributeStore.class);
                     this.storedURI = URI.create("http://stored.localhost:8080");
                     this.storedClientId = "STORED-CLIENT-ID";
 
@@ -1316,7 +1293,7 @@ class AuthorizationEndpointTest {
                     @Test
                     @DisplayName("에러 페이지로 포워딩 해야 한다.")
                     void shouldForwardingErrorPage() {
-                        ModelAndView modelAndView = endpoint.handleOtherException(Exception, servletWebRequest);
+                        ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
 
                         assertEquals("forward:/oauth/error", modelAndView.getViewName());
                     }
@@ -1324,7 +1301,7 @@ class AuthorizationEndpointTest {
                     @Test
                     @DisplayName("ModelAndView에 OAuth2 에러 정보를 저장해야 한다.")
                     void shouldSaveOAuth2ErrorCodeToModelAndView() {
-                        ModelAndView modelAndView = endpoint.handleOtherException(Exception, servletWebRequest);
+                        ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
 
                         assertEquals(oAuth2Error, modelAndView.getModel().get("error"));
                     }
@@ -1347,7 +1324,7 @@ class AuthorizationEndpointTest {
                     @Test
                     @DisplayName("에러 페이지로 포워딩 해야 한다.")
                     void shouldForwardingErrorPage() {
-                        ModelAndView modelAndView = endpoint.handleOtherException(Exception, servletWebRequest);
+                        ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
 
                         assertEquals("forward:/oauth/error", modelAndView.getViewName());
                     }
@@ -1355,7 +1332,7 @@ class AuthorizationEndpointTest {
                     @Test
                     @DisplayName("ModelAndView에 OAuth2 에러 정보를 저장해야 한다.")
                     void shouldSaveOAuth2ErrorCodeToModelAndView() {
-                        ModelAndView modelAndView = endpoint.handleOtherException(Exception, servletWebRequest);
+                        ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
 
                         assertEquals(oAuth2Error, modelAndView.getModel().get("error"));
                     }
@@ -1388,7 +1365,7 @@ class AuthorizationEndpointTest {
                         @Test
                         @DisplayName("에러 코드를 매개변수에 추가하여 리다이렉트 주소로 리다이렉트 해야 한다.")
                         void shouldRedirectWithErrorCode() {
-                            ModelAndView modelAndView = endpoint.handleOtherException(Exception, servletWebRequest);
+                            ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
 
                             assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
                             assertEquals(oAuth2Error.getErrorCode(), modelAndView.getModel().get("error_code"));
@@ -1397,7 +1374,7 @@ class AuthorizationEndpointTest {
                         @Test
                         @DisplayName("에러 메시지를 매개변수에 추가하여 리다이렉트 주소로 리다이렉트 해야 한다.")
                         void shouldRedirectWithErrorDescription() {
-                            ModelAndView modelAndView = endpoint.handleOtherException(Exception, servletWebRequest);
+                            ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
 
                             assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
                             assertEquals(oAuth2Error.getDescription(), modelAndView.getModel().get("error_description"));
@@ -1406,7 +1383,7 @@ class AuthorizationEndpointTest {
                         @Test
                         @DisplayName("STATE를 매개변수에 추가하여 리다이렉트 주소로 리다이렉트 해야 한다.")
                         void shouldRedirectWithState() {
-                            ModelAndView modelAndView = endpoint.handleOtherException(Exception, servletWebRequest);
+                            ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
 
                             assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
                             assertEquals(STATE, modelAndView.getModel().get("state"));
@@ -1425,7 +1402,7 @@ class AuthorizationEndpointTest {
                         @Test
                         @DisplayName("에러 코드를 매개변수에 추가하여 리다이렉트 주소로 리다이렉트 해야 한다.")
                         void shouldRedirectWithErrorCode() {
-                            ModelAndView modelAndView = endpoint.handleOtherException(Exception, servletWebRequest);
+                            ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
 
                             assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
                             assertEquals(oAuth2Error.getErrorCode(), modelAndView.getModel().get("error_code"));
@@ -1434,7 +1411,7 @@ class AuthorizationEndpointTest {
                         @Test
                         @DisplayName("에러 메시지를 매개변수에 추가하여 리다이렉트 주소로 리다이렉트 해야 한다.")
                         void shouldRedirectWithErrorDescription() {
-                            ModelAndView modelAndView = endpoint.handleOtherException(Exception, servletWebRequest);
+                            ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
 
                             assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
                             assertEquals(oAuth2Error.getDescription(), modelAndView.getModel().get("error_description"));
@@ -1443,7 +1420,7 @@ class AuthorizationEndpointTest {
                         @Test
                         @DisplayName("STATE를 매개변수에서 제외하고 리다이렉트 주소로 리다이렉트 해야 한다.")
                         void shouldRedirectWithState() {
-                            ModelAndView modelAndView = endpoint.handleOtherException(Exception, servletWebRequest);
+                            ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
 
                             assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
                             assertNull(modelAndView.getModel().get("state"));
