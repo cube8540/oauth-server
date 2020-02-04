@@ -790,15 +790,30 @@ class AuthorizationEndpointTest {
                         }
 
                         @Test
-                        @DisplayName("에러 정보와 STATE를 매개변수로 리다이렉트 주소로 리다이렉트 해야 한다.")
-                        void shouldRedirectWithErrorInformationAndState() {
-                            ModelAndView modelAndView = endpoint.handleOAuth2AuthenticationException(authenticationException, servletWebRequest);
+                        @DisplayName("에러 코드를 매개변수에 추가하여 리다이렉트 주소로 리다이렉트 해야 한다.")
+                        void shouldRedirectWithErrorCode() {
+                            ModelAndView modelAndView = endpoint.handleOtherException(authenticationException, servletWebRequest);
 
-                            String excepted = storedURI.toString() + "?error=" + oAuth2Error.getErrorCode()
-                                    + "&error_description=" + oAuth2Error.getDescription()
-                                    + "&state=" + STATE;
                             assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
-                            assertEquals(excepted, ((RedirectView) modelAndView.getView()).getUrl());
+                            assertEquals(oAuth2Error.getErrorCode(), modelAndView.getModel().get("error_code"));
+                        }
+
+                        @Test
+                        @DisplayName("에러 메시지를 매개변수에 추가하여 리다이렉트 주소로 리다이렉트 해야 한다.")
+                        void shouldRedirectWithErrorDescription() {
+                            ModelAndView modelAndView = endpoint.handleOtherException(authenticationException, servletWebRequest);
+
+                            assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
+                            assertEquals(oAuth2Error.getDescription(), modelAndView.getModel().get("error_description"));
+                        }
+
+                        @Test
+                        @DisplayName("STATE를 매개변수에 추가하여 리다이렉트 주소로 리다이렉트 해야 한다.")
+                        void shouldRedirectWithState() {
+                            ModelAndView modelAndView = endpoint.handleOtherException(authenticationException, servletWebRequest);
+
+                            assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
+                            assertEquals(STATE, modelAndView.getModel().get("state"));
                         }
                     }
 
@@ -812,14 +827,30 @@ class AuthorizationEndpointTest {
                         }
 
                         @Test
-                        @DisplayName("에러 정보를 매개변수로 리다이렉트 주소로 리다이렉트 해야 한다.")
-                        void shouldRedirectWithErrorInformation() {
-                            ModelAndView modelAndView = endpoint.handleOAuth2AuthenticationException(authenticationException, servletWebRequest);
+                        @DisplayName("에러 코드를 매개변수에 추가하여 리다이렉트 주소로 리다이렉트 해야 한다.")
+                        void shouldRedirectWithErrorCode() {
+                            ModelAndView modelAndView = endpoint.handleOtherException(authenticationException, servletWebRequest);
 
-                            String excepted = storedURI.toString() + "?error=" + oAuth2Error.getErrorCode()
-                                    + "&error_description=" + oAuth2Error.getDescription();
                             assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
-                            assertEquals(excepted, ((RedirectView) modelAndView.getView()).getUrl());
+                            assertEquals(oAuth2Error.getErrorCode(), modelAndView.getModel().get("error_code"));
+                        }
+
+                        @Test
+                        @DisplayName("에러 메시지를 매개변수에 추가하여 리다이렉트 주소로 리다이렉트 해야 한다.")
+                        void shouldRedirectWithErrorDescription() {
+                            ModelAndView modelAndView = endpoint.handleOtherException(authenticationException, servletWebRequest);
+
+                            assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
+                            assertEquals(oAuth2Error.getDescription(), modelAndView.getModel().get("error_description"));
+                        }
+
+                        @Test
+                        @DisplayName("STATE를 매개변수에서 제외하고 리다이렉트 주소로 리다이렉트 해야 한다.")
+                        void shouldRedirectWithState() {
+                            ModelAndView modelAndView = endpoint.handleOtherException(authenticationException, servletWebRequest);
+
+                            assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
+                            assertNull(modelAndView.getModel().get("state"));
                         }
                     }
                 }
@@ -932,15 +963,30 @@ class AuthorizationEndpointTest {
                         }
 
                         @Test
-                        @DisplayName("에러 정보와 STATE를 매개변수로 리다이렉트 주소로 리다이렉트 해야 한다.")
-                        void shouldRedirectWithErrorInformationAndState() {
-                            ModelAndView modelAndView = endpoint.handleOAuth2AuthenticationException(authenticationException, servletWebRequest);
+                        @DisplayName("에러 코드를 매개변수에 추가하여 리다이렉트 주소로 리다이렉트 해야 한다.")
+                        void shouldRedirectWithErrorCode() {
+                            ModelAndView modelAndView = endpoint.handleOtherException(authenticationException, servletWebRequest);
 
-                            String excepted = storedURI.toString() + "?error=" + oAuth2Error.getErrorCode()
-                                    + "&error_description=" + oAuth2Error.getDescription()
-                                    + "&state=" + STATE;
                             assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
-                            assertEquals(excepted, ((RedirectView) modelAndView.getView()).getUrl());
+                            assertEquals(oAuth2Error.getErrorCode(), modelAndView.getModel().get("error_code"));
+                        }
+
+                        @Test
+                        @DisplayName("에러 메시지를 매개변수에 추가하여 리다이렉트 주소로 리다이렉트 해야 한다.")
+                        void shouldRedirectWithErrorDescription() {
+                            ModelAndView modelAndView = endpoint.handleOtherException(authenticationException, servletWebRequest);
+
+                            assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
+                            assertEquals(oAuth2Error.getDescription(), modelAndView.getModel().get("error_description"));
+                        }
+
+                        @Test
+                        @DisplayName("STATE를 매개변수에 추가하여 리다이렉트 주소로 리다이렉트 해야 한다.")
+                        void shouldRedirectWithState() {
+                            ModelAndView modelAndView = endpoint.handleOtherException(authenticationException, servletWebRequest);
+
+                            assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
+                            assertEquals(STATE, modelAndView.getModel().get("state"));
                         }
                     }
 
@@ -954,14 +1000,30 @@ class AuthorizationEndpointTest {
                         }
 
                         @Test
-                        @DisplayName("에러 정보를 매개변수로 리다이렉트 주소로 리다이렉트 해야 한다.")
-                        void shouldRedirectWithErrorInformation() {
-                            ModelAndView modelAndView = endpoint.handleOAuth2AuthenticationException(authenticationException, servletWebRequest);
+                        @DisplayName("에러 코드를 매개변수에 추가하여 리다이렉트 주소로 리다이렉트 해야 한다.")
+                        void shouldRedirectWithErrorCode() {
+                            ModelAndView modelAndView = endpoint.handleOtherException(authenticationException, servletWebRequest);
 
-                            String excepted = storedURI.toString() + "?error=" + oAuth2Error.getErrorCode()
-                                    + "&error_description=" + oAuth2Error.getDescription();
                             assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
-                            assertEquals(excepted, ((RedirectView) modelAndView.getView()).getUrl());
+                            assertEquals(oAuth2Error.getErrorCode(), modelAndView.getModel().get("error_code"));
+                        }
+
+                        @Test
+                        @DisplayName("에러 메시지를 매개변수에 추가하여 리다이렉트 주소로 리다이렉트 해야 한다.")
+                        void shouldRedirectWithErrorDescription() {
+                            ModelAndView modelAndView = endpoint.handleOtherException(authenticationException, servletWebRequest);
+
+                            assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
+                            assertEquals(oAuth2Error.getDescription(), modelAndView.getModel().get("error_description"));
+                        }
+
+                        @Test
+                        @DisplayName("STATE를 매개변수에서 제외하고 리다이렉트 주소로 리다이렉트 해야 한다.")
+                        void shouldRedirectWithState() {
+                            ModelAndView modelAndView = endpoint.handleOtherException(authenticationException, servletWebRequest);
+
+                            assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
+                            assertNull(modelAndView.getModel().get("state"));
                         }
                     }
                 }
@@ -1039,7 +1101,7 @@ class AuthorizationEndpointTest {
                 this.servletResponse = mock(HttpServletResponse.class);
                 this.servletWebRequest = new ServletWebRequest(servletRequest, servletResponse);
 
-                this.oAuth2Error = new OAuth2Error(OAuth2ErrorCodes.INVALID_REQUEST);
+                this.oAuth2Error = new OAuth2Error(OAuth2ErrorCodes.INVALID_REQUEST, "TEST", null);
                 this.oAuth2ErrorResponseEntity = new ResponseEntity<>(oAuth2Error, HttpStatus.UNAUTHORIZED);
                 this.exceptionTranslator = mock(OAuth2ExceptionTranslator.class);
 
@@ -1151,15 +1213,30 @@ class AuthorizationEndpointTest {
                         }
 
                         @Test
-                        @DisplayName("에러 정보와 STATE를 매개변수로 리다이렉트 주소로 리다이렉트 해야 한다.")
-                        void shouldRedirectWithErrorInformationAndState() {
+                        @DisplayName("에러 코드를 매개변수에 추가하여 리다이렉트 주소로 리다이렉트 해야 한다.")
+                        void shouldRedirectWithErrorCode() {
                             ModelAndView modelAndView = endpoint.handleOtherException(Exception, servletWebRequest);
 
-                            String excepted = storedURI.toString() + "?error=" + oAuth2Error.getErrorCode()
-                                    + "&error_description=" + oAuth2Error.getDescription()
-                                    + "&state=" + STATE;
                             assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
-                            assertEquals(excepted, ((RedirectView) modelAndView.getView()).getUrl());
+                            assertEquals(oAuth2Error.getErrorCode(), modelAndView.getModel().get("error_code"));
+                        }
+
+                        @Test
+                        @DisplayName("에러 메시지를 매개변수에 추가하여 리다이렉트 주소로 리다이렉트 해야 한다.")
+                        void shouldRedirectWithErrorDescription() {
+                            ModelAndView modelAndView = endpoint.handleOtherException(Exception, servletWebRequest);
+
+                            assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
+                            assertEquals(oAuth2Error.getDescription(), modelAndView.getModel().get("error_description"));
+                        }
+
+                        @Test
+                        @DisplayName("STATE를 매개변수에 추가하여 리다이렉트 주소로 리다이렉트 해야 한다.")
+                        void shouldRedirectWithState() {
+                            ModelAndView modelAndView = endpoint.handleOtherException(Exception, servletWebRequest);
+
+                            assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
+                            assertEquals(STATE, modelAndView.getModel().get("state"));
                         }
                     }
 
@@ -1173,14 +1250,30 @@ class AuthorizationEndpointTest {
                         }
 
                         @Test
-                        @DisplayName("에러 정보를 매개변수로 리다이렉트 주소로 리다이렉트 해야 한다.")
-                        void shouldRedirectWithErrorInformation() {
+                        @DisplayName("에러 코드를 매개변수에 추가하여 리다이렉트 주소로 리다이렉트 해야 한다.")
+                        void shouldRedirectWithErrorCode() {
                             ModelAndView modelAndView = endpoint.handleOtherException(Exception, servletWebRequest);
 
-                            String excepted = storedURI.toString() + "?error=" + oAuth2Error.getErrorCode()
-                                    + "&error_description=" + oAuth2Error.getDescription();
                             assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
-                            assertEquals(excepted, ((RedirectView) modelAndView.getView()).getUrl());
+                            assertEquals(oAuth2Error.getErrorCode(), modelAndView.getModel().get("error_code"));
+                        }
+
+                        @Test
+                        @DisplayName("에러 메시지를 매개변수에 추가하여 리다이렉트 주소로 리다이렉트 해야 한다.")
+                        void shouldRedirectWithErrorDescription() {
+                            ModelAndView modelAndView = endpoint.handleOtherException(Exception, servletWebRequest);
+
+                            assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
+                            assertEquals(oAuth2Error.getDescription(), modelAndView.getModel().get("error_description"));
+                        }
+
+                        @Test
+                        @DisplayName("STATE를 매개변수에서 제외하고 리다이렉트 주소로 리다이렉트 해야 한다.")
+                        void shouldRedirectWithState() {
+                            ModelAndView modelAndView = endpoint.handleOtherException(Exception, servletWebRequest);
+
+                            assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
+                            assertNull(modelAndView.getModel().get("state"));
                         }
                     }
                 }
@@ -1293,15 +1386,30 @@ class AuthorizationEndpointTest {
                         }
 
                         @Test
-                        @DisplayName("에러 정보와 STATE를 매개변수로 리다이렉트 주소로 리다이렉트 해야 한다.")
-                        void shouldRedirectWithErrorInformationAndState() {
+                        @DisplayName("에러 코드를 매개변수에 추가하여 리다이렉트 주소로 리다이렉트 해야 한다.")
+                        void shouldRedirectWithErrorCode() {
                             ModelAndView modelAndView = endpoint.handleOtherException(Exception, servletWebRequest);
 
-                            String excepted = storedURI.toString() + "?error=" + oAuth2Error.getErrorCode()
-                                    + "&error_description=" + oAuth2Error.getDescription()
-                                    + "&state=" + STATE;
                             assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
-                            assertEquals(excepted, ((RedirectView) modelAndView.getView()).getUrl());
+                            assertEquals(oAuth2Error.getErrorCode(), modelAndView.getModel().get("error_code"));
+                        }
+
+                        @Test
+                        @DisplayName("에러 메시지를 매개변수에 추가하여 리다이렉트 주소로 리다이렉트 해야 한다.")
+                        void shouldRedirectWithErrorDescription() {
+                            ModelAndView modelAndView = endpoint.handleOtherException(Exception, servletWebRequest);
+
+                            assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
+                            assertEquals(oAuth2Error.getDescription(), modelAndView.getModel().get("error_description"));
+                        }
+
+                        @Test
+                        @DisplayName("STATE를 매개변수에 추가하여 리다이렉트 주소로 리다이렉트 해야 한다.")
+                        void shouldRedirectWithState() {
+                            ModelAndView modelAndView = endpoint.handleOtherException(Exception, servletWebRequest);
+
+                            assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
+                            assertEquals(STATE, modelAndView.getModel().get("state"));
                         }
                     }
 
@@ -1315,14 +1423,30 @@ class AuthorizationEndpointTest {
                         }
 
                         @Test
-                        @DisplayName("에러 정보를 매개변수로 리다이렉트 주소로 리다이렉트 해야 한다.")
-                        void shouldRedirectWithErrorInformation() {
+                        @DisplayName("에러 코드를 매개변수에 추가하여 리다이렉트 주소로 리다이렉트 해야 한다.")
+                        void shouldRedirectWithErrorCode() {
                             ModelAndView modelAndView = endpoint.handleOtherException(Exception, servletWebRequest);
 
-                            String excepted = storedURI.toString() + "?error=" + oAuth2Error.getErrorCode()
-                                    + "&error_description=" + oAuth2Error.getDescription();
                             assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
-                            assertEquals(excepted, ((RedirectView) modelAndView.getView()).getUrl());
+                            assertEquals(oAuth2Error.getErrorCode(), modelAndView.getModel().get("error_code"));
+                        }
+
+                        @Test
+                        @DisplayName("에러 메시지를 매개변수에 추가하여 리다이렉트 주소로 리다이렉트 해야 한다.")
+                        void shouldRedirectWithErrorDescription() {
+                            ModelAndView modelAndView = endpoint.handleOtherException(Exception, servletWebRequest);
+
+                            assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
+                            assertEquals(oAuth2Error.getDescription(), modelAndView.getModel().get("error_description"));
+                        }
+
+                        @Test
+                        @DisplayName("STATE를 매개변수에서 제외하고 리다이렉트 주소로 리다이렉트 해야 한다.")
+                        void shouldRedirectWithState() {
+                            ModelAndView modelAndView = endpoint.handleOtherException(Exception, servletWebRequest);
+
+                            assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
+                            assertNull(modelAndView.getModel().get("state"));
                         }
                     }
                 }
