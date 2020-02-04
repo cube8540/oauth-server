@@ -8,6 +8,7 @@ import java.security.Principal;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 @EqualsAndHashCode
@@ -28,11 +29,10 @@ public class DefaultAuthorizationRequest implements AuthorizationRequest {
     public DefaultAuthorizationRequest(Map<String, String> requestMap, Principal principal) {
         this.clientId = requestMap.get(OAuth2Utils.AuthorizationRequestKey.CLIENT_ID);
         this.state = requestMap.get(OAuth2Utils.AuthorizationRequestKey.STATE);
-        this.username = principal.getName();
         this.scopes = OAuth2Utils.extractScopes(requestMap.get(OAuth2Utils.AuthorizationRequestKey.SCOPE));
-        if (requestMap.get(OAuth2Utils.AuthorizationRequestKey.REDIRECT_URI) != null) {
-            this.redirectURI = URI.create(requestMap.get(OAuth2Utils.AuthorizationRequestKey.REDIRECT_URI));
-        }
+        this.username = Optional.ofNullable(principal).map(Principal::getName).orElse(null);
+        this.redirectURI = Optional.ofNullable(requestMap.get(OAuth2Utils.AuthorizationRequestKey.REDIRECT_URI))
+                .map(URI::create).orElse(null);
         if (OAuth2AuthorizationResponseType.CODE.getValue()
                 .equals(requestMap.get(OAuth2Utils.AuthorizationRequestKey.RESPONSE_TYPE))) {
             this.responseType = OAuth2AuthorizationResponseType.CODE;
