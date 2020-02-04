@@ -1,5 +1,7 @@
 package cube8540.oauth.authentication.credentials.oauth.error;
 
+import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientRegistrationException;
+import org.aspectj.lang.annotation.Before;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -113,6 +115,41 @@ class DefaultOAuth2ExceptionTranslatorTest {
         @DisplayName("ResponseEntity의 헤더에 Pragma는 no-cache로 저장되어야 한다.")
         void shouldHttpResponsePragmaSetNoCache() {
             ResponseEntity<OAuth2Error> result = translator.translate(exception);
+
+            assertEquals("no-cache", result.getHeaders().getPragma());
+        }
+    }
+
+    @Nested
+    @DisplayName("클라이언트 등록 관련 예외일시")
+    class WhenClientRegistrationException {
+        private OAuth2ClientRegistrationException clientRegistrationException;
+
+        @BeforeEach
+        void setup() {
+            this.clientRegistrationException = mock(OAuth2ClientRegistrationException.class);
+        }
+
+        @Test
+        @DisplayName("HTTP의 상태 코드는 401이어야 한다.")
+        void shouldHttpStatusCodeIs401() {
+            ResponseEntity<OAuth2Error> result = translator.translate(clientRegistrationException);
+
+            assertEquals(HttpStatus.UNAUTHORIZED, result.getStatusCode());
+        }
+
+        @Test
+        @DisplayName("ResponseEntity의 헤더에 Cache-Control이 no-store로 저장되어야 한다.")
+        void shouldHttpResponseCacheControlSetNoStore() {
+            ResponseEntity<OAuth2Error> result = translator.translate(clientRegistrationException);
+
+            assertEquals(CacheControl.noStore().getHeaderValue(), result.getHeaders().getCacheControl());
+        }
+
+        @Test
+        @DisplayName("ResponseEntity의 헤더에 Pragma는 no-cache로 저장되어야 한다.")
+        void shouldHttpResponsePragmaSetNoCache() {
+            ResponseEntity<OAuth2Error> result = translator.translate(clientRegistrationException);
 
             assertEquals("no-cache", result.getHeaders().getPragma());
         }
