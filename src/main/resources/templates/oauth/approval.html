@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="kr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Scope Approval Page</title>
+</head>
+<body>
+    <form th:action="@{/oauth/authorize}" method="post">
+        <div th:each="scope : ${authorizationRequestScopes}">
+            <label th:for="${scope}" th:text="${scope}"></label>
+            <input type="radio" value="true" th:name="${scope}" checked> Approval
+            <input type="radio" value="false" th:name="${scope}"> Denied
+        </div>
+        <button type="submit">submit</button>
+    </form>
+</body>
+</html>
