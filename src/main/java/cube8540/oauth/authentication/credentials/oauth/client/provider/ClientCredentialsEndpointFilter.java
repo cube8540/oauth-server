@@ -10,6 +10,8 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.authentication.AuthenticationConverter;
 import org.springframework.security.web.authentication.www.BasicAuthenticationConverter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 
 import javax.servlet.FilterChain;
@@ -29,8 +31,12 @@ public class ClientCredentialsEndpointFilter extends AbstractAuthenticationProce
     private AuthenticationConverter converter = new BasicAuthenticationConverter();
 
     public ClientCredentialsEndpointFilter(String endpoint) {
-        super(endpoint);
-        setRequiresAuthenticationRequestMatcher(new ClientCredentialsRequestMatcher(endpoint));
+        this(new AntPathRequestMatcher(endpoint));
+    }
+
+    public ClientCredentialsEndpointFilter(RequestMatcher requestMatcher) {
+        super(requestMatcher);
+        setRequiresAuthenticationRequestMatcher(requestMatcher);
     }
 
     @Override

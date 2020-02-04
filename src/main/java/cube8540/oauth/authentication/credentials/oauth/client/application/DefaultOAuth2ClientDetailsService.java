@@ -1,5 +1,6 @@
 package cube8540.oauth.authentication.credentials.oauth.client.application;
 
+import cube8540.oauth.authentication.credentials.oauth.client.DefaultOAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetailsService;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
