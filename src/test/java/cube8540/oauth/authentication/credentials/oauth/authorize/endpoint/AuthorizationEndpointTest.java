@@ -5,8 +5,11 @@ import cube8540.oauth.authentication.credentials.oauth.OAuth2RequestValidator;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2Utils;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetailsService;
+import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientRegistrationException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidGrantException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidRequestException;
+import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTranslator;
+import cube8540.oauth.authentication.credentials.oauth.error.RedirectMismatchException;
 import cube8540.oauth.authentication.credentials.oauth.error.UnsupportedResponseTypeException;
 import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2AuthorizationCodeGenerator;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.AuthorizationCode;
@@ -16,13 +19,22 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.OAuth2Error;
+import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationResponseType;
+import org.springframework.web.bind.support.SessionAttributeStore;
 import org.springframework.web.bind.support.SessionStatus;
+import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.net.URI;
 import java.security.Principal;
 import java.util.Arrays;
@@ -337,7 +349,7 @@ class AuthorizationEndpointTest {
                 void shouldForwardingConfigApprovalPage() {
                     ModelAndView modelAndView = endpoint.authorize(parameter, model, principal);
 
-                    assertEquals(FORWARD_PAGE, modelAndView.getViewName());
+                    assertEquals("forward:" + FORWARD_PAGE, modelAndView.getViewName());
                 }
 
                 @Test
@@ -587,6 +599,733 @@ class AuthorizationEndpointTest {
                 ModelAndView modelAndView = endpoint.approval(approvalParameter, model, sessionStatus, authentication);
 
                 assertFalse(modelAndView.getModel().containsKey(OAuth2Utils.AuthorizationResponseKey.STATE));
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("에외 처리")
+    class ExceptionHandling {
+
+        @Nested
+        @DisplayName("리다이렉트 인증 예외 발생시")
+        class WhenThrowsRedirectMismatchException {
+            private RedirectMismatchException redirectMismatchException;
+            private ServletWebRequest servletWebRequest;
+            private HttpServletRequest servletRequest;
+            private HttpServletResponse servletResponse;
+
+            private OAuth2Error oAuth2Error;
+            private ResponseEntity<OAuth2Error> oAuth2ErrorResponseEntity;
+            private OAuth2ExceptionTranslator exceptionTranslator;
+
+            @BeforeEach
+            void setup() {
+                this.redirectMismatchException = new RedirectMismatchException("TEST");
+                this.servletRequest = mock(HttpServletRequest.class);
+                this.servletResponse = mock(HttpServletResponse.class);
+                this.servletWebRequest = new ServletWebRequest(servletRequest, servletResponse);
+
+                this.exceptionTranslator = mock(OAuth2ExceptionTranslator.class);
+                this.oAuth2Error = new OAuth2Error(OAuth2ErrorCodes.INVALID_GRANT);
+                this.oAuth2ErrorResponseEntity = new ResponseEntity<>(oAuth2Error, HttpStatus.UNAUTHORIZED);
+
+                when(exceptionTranslator.translate(redirectMismatchException)).thenReturn(oAuth2ErrorResponseEntity);
+                endpoint.setExceptionTranslator(exceptionTranslator);
+            }
+
+            @Test
+            @DisplayName("HTTP 상태 코드는 401이어야 한다.")
+            void shouldHttpStatusCode401() {
+                endpoint.handleOAuth2AuthenticationException(redirectMismatchException, servletWebRequest);
+
+                verify(servletResponse, times(1)).setStatus(401);
+            }
+
+            @Test
+            @DisplayName("에러페이지로 포워딩 되어야 한다.")
+            void shouldForwardingErrorPage() {
+                ModelAndView modelAndView = endpoint.handleOAuth2AuthenticationException(redirectMismatchException, servletWebRequest);
+
+                assertEquals("forward:/oauth/error", modelAndView.getViewName());
+            }
+
+            @Test
+            @DisplayName("ModelAndView에 OAuth2 에러 정보를 저장해야 한다.")
+            void shouldSaveOAuth2ErrorCodeToModelAndView() {
+                ModelAndView modelAndView = endpoint.handleOAuth2AuthenticationException(redirectMismatchException, servletWebRequest);
+
+                assertEquals(oAuth2Error, modelAndView.getModel().get("error"));
+            }
+        }
+
+        @Nested
+        @DisplayName("리다이렉트 인증 예외를 제외한 OAuth2 인증 예외가 발생했을시")
+        class WhenThrowsOAuth2AuthenticationExceptionExcludingRedirectMismatched {
+            private OAuth2AuthenticationException authenticationException;
+            private ServletWebRequest servletWebRequest;
+            private HttpServletRequest servletRequest;
+            private HttpServletResponse servletResponse;
+
+            private OAuth2Error oAuth2Error;
+            private ResponseEntity<OAuth2Error> oAuth2ErrorResponseEntity;
+            private OAuth2ExceptionTranslator exceptionTranslator;
+
+            @BeforeEach
+            void setup() {
+                this.authenticationException = mock(OAuth2AuthenticationException.class);
+                this.servletRequest = mock(HttpServletRequest.class);
+                this.servletResponse = mock(HttpServletResponse.class);
+                this.servletWebRequest = new ServletWebRequest(servletRequest, servletResponse);
+
+                this.oAuth2Error = new OAuth2Error(OAuth2ErrorCodes.INVALID_REQUEST);
+                this.oAuth2ErrorResponseEntity = new ResponseEntity<>(oAuth2Error, HttpStatus.UNAUTHORIZED);
+                this.exceptionTranslator = mock(OAuth2ExceptionTranslator.class);
+
+                when(exceptionTranslator.translate(authenticationException)).thenReturn(oAuth2ErrorResponseEntity);
+                endpoint.setExceptionTranslator(exceptionTranslator);
+            }
+
+            @Nested
+            @DisplayName("세션에 인가 요청 정보가 남아 있지 않을시")
+            class WhenAuthorizationRequestNotRemainedInSession {
+                private URI storedURI;
+                private String storedClientId;
+                private SessionAttributeStore sessionAttributeStore;
+
+                @BeforeEach
+                void setup() {
+                    this.sessionAttributeStore = mock(SessionAttributeStore.class);
+                    this.storedURI = URI.create("http://stored.localhost:8080");
+                    this.storedClientId = "STORED-CLIENT-ID";
+
+                    when(servletRequest.getParameter(OAuth2Utils.AuthorizationRequestKey.CLIENT_ID)).thenReturn(storedClientId);
+                    when(servletRequest.getParameter(OAuth2Utils.AuthorizationRequestKey.REDIRECT_URI)).thenReturn(storedURI.toString());
+                    when(sessionAttributeStore.retrieveAttribute(servletWebRequest, AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE))
+                            .thenReturn(null);
+                    endpoint.setSessionAttributeStore(sessionAttributeStore);
+                }
+
+
+                @Nested
+                @DisplayName("클라이언트 정보 검색중 예외가 발생할시")
+                class WhenThrowsExceptionDuringClientLookup {
+
+                    @BeforeEach
+                    void setup() {
+                        when(clientDetailsService.loadClientDetailsByClientId(storedClientId))
+                                .thenThrow(new OAuth2ClientRegistrationException("TEST"));
+                    }
+
+                    @Test
+                    @DisplayName("에러 페이지로 포워딩 해야 한다.")
+                    void shouldForwardingErrorPage() {
+                        ModelAndView modelAndView = endpoint.handleOAuth2AuthenticationException(authenticationException, servletWebRequest);
+
+                        assertEquals("forward:/oauth/error", modelAndView.getViewName());
+                    }
+
+                    @Test
+                    @DisplayName("ModelAndView에 OAuth2 에러 정보를 저장해야 한다.")
+                    void shouldSaveOAuth2ErrorCodeToModelAndView() {
+                        ModelAndView modelAndView = endpoint.handleOAuth2AuthenticationException(authenticationException, servletWebRequest);
+
+                        assertEquals(oAuth2Error, modelAndView.getModel().get("error"));
+                    }
+                }
+
+                @Nested
+                @DisplayName("요청 받은 리다이렉트 주소가 유효하지 않을시")
+                class WhenRequestingRedirectUriNotAllowed {
+
+                    @BeforeEach
+                    void setup() {
+                        OAuth2ClientDetails clientDetails = mock(OAuth2ClientDetails.class);
+                        RedirectResolver redirectResolver = mock(RedirectResolver.class);
+
+                        when(redirectResolver.resolveRedirectURI(storedURI.toString(), clientDetails))
+                                .thenThrow(new RedirectMismatchException("TEST"));
+                        endpoint.setRedirectResolver(redirectResolver);
+                    }
+
+                    @Test
+                    @DisplayName("에러 페이지로 포워딩 해야 한다.")
+                    void shouldForwardingErrorPage() {
+                        ModelAndView modelAndView = endpoint.handleOAuth2AuthenticationException(authenticationException, servletWebRequest);
+
+                        assertEquals("forward:/oauth/error", modelAndView.getViewName());
+                    }
+
+                    @Test
+                    @DisplayName("ModelAndView에 OAuth2 에러 정보를 저장해야 한다.")
+                    void shouldSaveOAuth2ErrorCodeToModelAndView() {
+                        ModelAndView modelAndView = endpoint.handleOAuth2AuthenticationException(authenticationException, servletWebRequest);
+
+                        assertEquals(oAuth2Error, modelAndView.getModel().get("error"));
+                    }
+                }
+
+                @Nested
+                @DisplayName("요청 받은 리다이렉트 주소가 유효할시")
+                class WhenRequestingRedirectUriAllowed {
+
+                    @BeforeEach
+                    void setup() {
+                        OAuth2ClientDetails clientDetails = mock(OAuth2ClientDetails.class);
+                        RedirectResolver redirectResolver = mock(RedirectResolver.class);
+
+                        when(clientDetailsService.loadClientDetailsByClientId(storedClientId)).thenReturn(clientDetails);
+                        when(redirectResolver.resolveRedirectURI(storedURI.toString(), clientDetails))
+                                .thenReturn(storedURI);
+                        endpoint.setRedirectResolver(redirectResolver);
+                    }
+
+                    @Nested
+                    @DisplayName("요청 정보에 state가 존재할시")
+                    class WhenRequestingIncludeState {
+
+                        @BeforeEach
+                        void setup() {
+                            when(servletRequest.getParameter(OAuth2Utils.AuthorizationRequestKey.STATE)).thenReturn(STATE);
+                        }
+
+                        @Test
+                        @DisplayName("에러 정보와 STATE를 매개변수로 리다이렉트 주소로 리다이렉트 해야 한다.")
+                        void shouldRedirectWithErrorInformationAndState() {
+                            ModelAndView modelAndView = endpoint.handleOAuth2AuthenticationException(authenticationException, servletWebRequest);
+
+                            String excepted = storedURI.toString() + "?error=" + oAuth2Error.getErrorCode()
+                                    + "&error_description=" + oAuth2Error.getDescription()
+                                    + "&state=" + STATE;
+                            assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
+                            assertEquals(excepted, ((RedirectView) modelAndView.getView()).getUrl());
+                        }
+                    }
+
+                    @Nested
+                    @DisplayName("요청 정보에 state가 존재하지 않을시")
+                    class WhenRequestingExcludingState {
+
+                        @BeforeEach
+                        void setup() {
+                            when(servletRequest.getParameter(OAuth2Utils.AuthorizationRequestKey.STATE)).thenReturn(null);
+                        }
+
+                        @Test
+                        @DisplayName("에러 정보를 매개변수로 리다이렉트 주소로 리다이렉트 해야 한다.")
+                        void shouldRedirectWithErrorInformation() {
+                            ModelAndView modelAndView = endpoint.handleOAuth2AuthenticationException(authenticationException, servletWebRequest);
+
+                            String excepted = storedURI.toString() + "?error=" + oAuth2Error.getErrorCode()
+                                    + "&error_description=" + oAuth2Error.getDescription();
+                            assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
+                            assertEquals(excepted, ((RedirectView) modelAndView.getView()).getUrl());
+                        }
+                    }
+                }
+            }
+
+            @Nested
+            @DisplayName("세션에 인가 요청 정보가 남아 있을시")
+            class WhenAuthorizationRequestRemainedInSession {
+
+                private AuthorizationRequest authorizationRequest;
+                private URI storedURI;
+                private String storedClientId;
+                private SessionAttributeStore sessionAttributeStore;
+
+                @BeforeEach
+                void setup() {
+                    this.authorizationRequest = mock(AuthorizationRequest.class);
+                    this.sessionAttributeStore = mock(SessionAttributeStore.class);
+                    this.storedURI = URI.create("http://stored.localhost:8080");
+                    this.storedClientId = "STORED-CLIENT-ID";
+
+                    when(authorizationRequest.clientId()).thenReturn(storedClientId);
+                    when(authorizationRequest.redirectURI()).thenReturn(storedURI);
+                    when(sessionAttributeStore.retrieveAttribute(servletWebRequest, AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE))
+                            .thenReturn(authorizationRequest);
+
+                    endpoint.setSessionAttributeStore(sessionAttributeStore);
+                }
+
+                @Nested
+                @DisplayName("클라이언트 정보 검색중 예외가 발생할시")
+                class WhenThrowsExceptionDuringClientLookup {
+
+                    @BeforeEach
+                    void setup() {
+                        when(clientDetailsService.loadClientDetailsByClientId(storedClientId))
+                                .thenThrow(new OAuth2ClientRegistrationException("TEST"));
+                    }
+
+                    @Test
+                    @DisplayName("에러 페이지로 포워딩 해야 한다.")
+                    void shouldForwardingErrorPage() {
+                        ModelAndView modelAndView = endpoint.handleOAuth2AuthenticationException(authenticationException, servletWebRequest);
+
+                        assertEquals("forward:/oauth/error", modelAndView.getViewName());
+                    }
+
+                    @Test
+                    @DisplayName("ModelAndView에 OAuth2 에러 정보를 저장해야 한다.")
+                    void shouldSaveOAuth2ErrorCodeToModelAndView() {
+                        ModelAndView modelAndView = endpoint.handleOAuth2AuthenticationException(authenticationException, servletWebRequest);
+
+                        assertEquals(oAuth2Error, modelAndView.getModel().get("error"));
+                    }
+                }
+
+                @Nested
+                @DisplayName("요청 받은 리다이렉트 주소가 유효하지 않을시")
+                class WhenRequestingRedirectUriNotAllowed {
+
+                    @BeforeEach
+                    void setup() {
+                        OAuth2ClientDetails clientDetails = mock(OAuth2ClientDetails.class);
+                        RedirectResolver redirectResolver = mock(RedirectResolver.class);
+
+                        when(redirectResolver.resolveRedirectURI(storedURI.toString(), clientDetails))
+                                .thenThrow(new RedirectMismatchException("TEST"));
+                        endpoint.setRedirectResolver(redirectResolver);
+                    }
+
+                    @Test
+                    @DisplayName("에러 페이지로 포워딩 해야 한다.")
+                    void shouldForwardingErrorPage() {
+                        ModelAndView modelAndView = endpoint.handleOAuth2AuthenticationException(authenticationException, servletWebRequest);
+
+                        assertEquals("forward:/oauth/error", modelAndView.getViewName());
+                    }
+
+                    @Test
+                    @DisplayName("ModelAndView에 OAuth2 에러 정보를 저장해야 한다.")
+                    void shouldSaveOAuth2ErrorCodeToModelAndView() {
+                        ModelAndView modelAndView = endpoint.handleOAuth2AuthenticationException(authenticationException, servletWebRequest);
+
+                        assertEquals(oAuth2Error, modelAndView.getModel().get("error"));
+                    }
+                }
+
+                @Nested
+                @DisplayName("요청 받은 리다이렉트 주소가 유효할시")
+                class WhenRequestingRedirectUriAllowed {
+
+                    @BeforeEach
+                    void setup() {
+                        OAuth2ClientDetails clientDetails = mock(OAuth2ClientDetails.class);
+                        RedirectResolver redirectResolver = mock(RedirectResolver.class);
+
+                        when(clientDetailsService.loadClientDetailsByClientId(storedClientId)).thenReturn(clientDetails);
+                        when(redirectResolver.resolveRedirectURI(storedURI.toString(), clientDetails))
+                                .thenReturn(storedURI);
+                        endpoint.setRedirectResolver(redirectResolver);
+                    }
+
+                    @Nested
+                    @DisplayName("요청 정보에 state가 존재할시")
+                    class WhenRequestingIncludeState {
+
+                        @BeforeEach
+                        void setup() {
+                            when(authorizationRequest.state()).thenReturn(STATE);
+                        }
+
+                        @Test
+                        @DisplayName("에러 정보와 STATE를 매개변수로 리다이렉트 주소로 리다이렉트 해야 한다.")
+                        void shouldRedirectWithErrorInformationAndState() {
+                            ModelAndView modelAndView = endpoint.handleOAuth2AuthenticationException(authenticationException, servletWebRequest);
+
+                            String excepted = storedURI.toString() + "?error=" + oAuth2Error.getErrorCode()
+                                    + "&error_description=" + oAuth2Error.getDescription()
+                                    + "&state=" + STATE;
+                            assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
+                            assertEquals(excepted, ((RedirectView) modelAndView.getView()).getUrl());
+                        }
+                    }
+
+                    @Nested
+                    @DisplayName("요청 정보에 state가 존재하지 않을시")
+                    class WhenRequestingExcludingState {
+
+                        @BeforeEach
+                        void setup() {
+                            when(authorizationRequest.state()).thenReturn(null);
+                        }
+
+                        @Test
+                        @DisplayName("에러 정보를 매개변수로 리다이렉트 주소로 리다이렉트 해야 한다.")
+                        void shouldRedirectWithErrorInformation() {
+                            ModelAndView modelAndView = endpoint.handleOAuth2AuthenticationException(authenticationException, servletWebRequest);
+
+                            String excepted = storedURI.toString() + "?error=" + oAuth2Error.getErrorCode()
+                                    + "&error_description=" + oAuth2Error.getDescription();
+                            assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
+                            assertEquals(excepted, ((RedirectView) modelAndView.getView()).getUrl());
+                        }
+                    }
+                }
+            }
+        }
+
+        @Nested
+        @DisplayName("OAuth 클라이언트 인증 예외 발생시")
+        class WhenThrowsClientAuthenticationException {
+            private OAuth2ClientRegistrationException clientRegistrationException;
+            private ServletWebRequest servletWebRequest;
+            private HttpServletRequest servletRequest;
+            private HttpServletResponse servletResponse;
+
+            private OAuth2Error oAuth2Error;
+            private ResponseEntity<OAuth2Error> oAuth2ErrorResponseEntity;
+            private OAuth2ExceptionTranslator exceptionTranslator;
+
+            @BeforeEach
+            void setup() {
+                this.clientRegistrationException = new OAuth2ClientRegistrationException("TEST");
+                this.servletRequest = mock(HttpServletRequest.class);
+                this.servletResponse = mock(HttpServletResponse.class);
+                this.servletWebRequest = new ServletWebRequest(servletRequest, servletResponse);
+
+                this.exceptionTranslator = mock(OAuth2ExceptionTranslator.class);
+                this.oAuth2Error = new OAuth2Error(OAuth2ErrorCodes.UNAUTHORIZED_CLIENT);
+                this.oAuth2ErrorResponseEntity = new ResponseEntity<>(oAuth2Error, HttpStatus.UNAUTHORIZED);
+
+                when(exceptionTranslator.translate(clientRegistrationException)).thenReturn(oAuth2ErrorResponseEntity);
+                endpoint.setExceptionTranslator(exceptionTranslator);
+            }
+
+            @Test
+            @DisplayName("HTTP 상태 코드는 401이어야 한다.")
+            void shouldHttpStatusCode401() {
+                endpoint.handleClientRegistrationException(clientRegistrationException, servletWebRequest);
+
+                verify(servletResponse, times(1)).setStatus(401);
+            }
+
+            @Test
+            @DisplayName("에러페이지로 포워딩 되어야 한다.")
+            void shouldForwardingErrorPage() {
+                ModelAndView modelAndView = endpoint.handleClientRegistrationException(clientRegistrationException, servletWebRequest);
+
+                assertEquals("forward:/oauth/error", modelAndView.getViewName());
+            }
+
+            @Test
+            @DisplayName("ModelAndView에 OAuth2 에러 정보를 저장해야 한다.")
+            void shouldSaveOAuth2ErrorCodeToModelAndView() {
+                ModelAndView modelAndView = endpoint.handleClientRegistrationException(clientRegistrationException, servletWebRequest);
+
+                assertEquals(oAuth2Error, modelAndView.getModel().get("error"));
+            }
+        }
+
+        @Nested
+        @DisplayName("예상하지 못한 예외 발생했을시")
+        class WhenThrowsUnexceptedException {
+            private Exception Exception;
+            private ServletWebRequest servletWebRequest;
+            private HttpServletRequest servletRequest;
+            private HttpServletResponse servletResponse;
+
+            private OAuth2Error oAuth2Error;
+            private ResponseEntity<OAuth2Error> oAuth2ErrorResponseEntity;
+            private OAuth2ExceptionTranslator exceptionTranslator;
+
+            @BeforeEach
+            void setup() {
+                this.Exception = mock(Exception.class);
+                this.servletRequest = mock(HttpServletRequest.class);
+                this.servletResponse = mock(HttpServletResponse.class);
+                this.servletWebRequest = new ServletWebRequest(servletRequest, servletResponse);
+
+                this.oAuth2Error = new OAuth2Error(OAuth2ErrorCodes.INVALID_REQUEST);
+                this.oAuth2ErrorResponseEntity = new ResponseEntity<>(oAuth2Error, HttpStatus.UNAUTHORIZED);
+                this.exceptionTranslator = mock(OAuth2ExceptionTranslator.class);
+
+                when(exceptionTranslator.translate(Exception)).thenReturn(oAuth2ErrorResponseEntity);
+                endpoint.setExceptionTranslator(exceptionTranslator);
+            }
+
+            @Nested
+            @DisplayName("세션에 인가 요청 정보가 남아 있지 않을시")
+            class WhenAuthorizationRequestNotRemainedInSession {
+                private URI storedURI;
+                private String storedClientId;
+                private SessionAttributeStore sessionAttributeStore;
+
+                @BeforeEach
+                void setup() {
+                    this.sessionAttributeStore = mock(SessionAttributeStore.class);
+                    this.storedURI = URI.create("http://stored.localhost:8080");
+                    this.storedClientId = "STORED-CLIENT-ID";
+
+                    when(servletRequest.getParameter(OAuth2Utils.AuthorizationRequestKey.CLIENT_ID)).thenReturn(storedClientId);
+                    when(servletRequest.getParameter(OAuth2Utils.AuthorizationRequestKey.REDIRECT_URI)).thenReturn(storedURI.toString());
+                    when(sessionAttributeStore.retrieveAttribute(servletWebRequest, AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE))
+                            .thenReturn(null);
+                    endpoint.setSessionAttributeStore(sessionAttributeStore);
+                }
+
+
+                @Nested
+                @DisplayName("클라이언트 정보 검색중 예외가 발생할시")
+                class WhenThrowsExceptionDuringClientLookup {
+
+                    @BeforeEach
+                    void setup() {
+                        when(clientDetailsService.loadClientDetailsByClientId(storedClientId))
+                                .thenThrow(new OAuth2ClientRegistrationException("TEST"));
+                    }
+
+                    @Test
+                    @DisplayName("에러 페이지로 포워딩 해야 한다.")
+                    void shouldForwardingErrorPage() {
+                        ModelAndView modelAndView = endpoint.handleOtherException(Exception, servletWebRequest);
+
+                        assertEquals("forward:/oauth/error", modelAndView.getViewName());
+                    }
+
+                    @Test
+                    @DisplayName("ModelAndView에 OAuth2 에러 정보를 저장해야 한다.")
+                    void shouldSaveOAuth2ErrorCodeToModelAndView() {
+                        ModelAndView modelAndView = endpoint.handleOtherException(Exception, servletWebRequest);
+
+                        assertEquals(oAuth2Error, modelAndView.getModel().get("error"));
+                    }
+                }
+
+                @Nested
+                @DisplayName("요청 받은 리다이렉트 주소가 유효하지 않을시")
+                class WhenRequestingRedirectUriNotAllowed {
+
+                    @BeforeEach
+                    void setup() {
+                        OAuth2ClientDetails clientDetails = mock(OAuth2ClientDetails.class);
+                        RedirectResolver redirectResolver = mock(RedirectResolver.class);
+
+                        when(redirectResolver.resolveRedirectURI(storedURI.toString(), clientDetails))
+                                .thenThrow(new RedirectMismatchException("TEST"));
+                        endpoint.setRedirectResolver(redirectResolver);
+                    }
+
+                    @Test
+                    @DisplayName("에러 페이지로 포워딩 해야 한다.")
+                    void shouldForwardingErrorPage() {
+                        ModelAndView modelAndView = endpoint.handleOtherException(Exception, servletWebRequest);
+
+                        assertEquals("forward:/oauth/error", modelAndView.getViewName());
+                    }
+
+                    @Test
+                    @DisplayName("ModelAndView에 OAuth2 에러 정보를 저장해야 한다.")
+                    void shouldSaveOAuth2ErrorCodeToModelAndView() {
+                        ModelAndView modelAndView = endpoint.handleOtherException(Exception, servletWebRequest);
+
+                        assertEquals(oAuth2Error, modelAndView.getModel().get("error"));
+                    }
+                }
+
+                @Nested
+                @DisplayName("요청 받은 리다이렉트 주소가 유효할시")
+                class WhenRequestingRedirectUriAllowed {
+
+                    @BeforeEach
+                    void setup() {
+                        OAuth2ClientDetails clientDetails = mock(OAuth2ClientDetails.class);
+                        RedirectResolver redirectResolver = mock(RedirectResolver.class);
+
+                        when(clientDetailsService.loadClientDetailsByClientId(storedClientId)).thenReturn(clientDetails);
+                        when(redirectResolver.resolveRedirectURI(storedURI.toString(), clientDetails))
+                                .thenReturn(storedURI);
+                        endpoint.setRedirectResolver(redirectResolver);
+                    }
+
+                    @Nested
+                    @DisplayName("요청 정보에 state가 존재할시")
+                    class WhenRequestingIncludeState {
+
+                        @BeforeEach
+                        void setup() {
+                            when(servletRequest.getParameter(OAuth2Utils.AuthorizationRequestKey.STATE)).thenReturn(STATE);
+                        }
+
+                        @Test
+                        @DisplayName("에러 정보와 STATE를 매개변수로 리다이렉트 주소로 리다이렉트 해야 한다.")
+                        void shouldRedirectWithErrorInformationAndState() {
+                            ModelAndView modelAndView = endpoint.handleOtherException(Exception, servletWebRequest);
+
+                            String excepted = storedURI.toString() + "?error=" + oAuth2Error.getErrorCode()
+                                    + "&error_description=" + oAuth2Error.getDescription()
+                                    + "&state=" + STATE;
+                            assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
+                            assertEquals(excepted, ((RedirectView) modelAndView.getView()).getUrl());
+                        }
+                    }
+
+                    @Nested
+                    @DisplayName("요청 정보에 state가 존재하지 않을시")
+                    class WhenRequestingExcludingState {
+
+                        @BeforeEach
+                        void setup() {
+                            when(servletRequest.getParameter(OAuth2Utils.AuthorizationRequestKey.STATE)).thenReturn(null);
+                        }
+
+                        @Test
+                        @DisplayName("에러 정보를 매개변수로 리다이렉트 주소로 리다이렉트 해야 한다.")
+                        void shouldRedirectWithErrorInformation() {
+                            ModelAndView modelAndView = endpoint.handleOtherException(Exception, servletWebRequest);
+
+                            String excepted = storedURI.toString() + "?error=" + oAuth2Error.getErrorCode()
+                                    + "&error_description=" + oAuth2Error.getDescription();
+                            assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
+                            assertEquals(excepted, ((RedirectView) modelAndView.getView()).getUrl());
+                        }
+                    }
+                }
+            }
+
+            @Nested
+            @DisplayName("세션에 인가 요청 정보가 남아 있을시")
+            class WhenAuthorizationRequestRemainedInSession {
+
+                private AuthorizationRequest authorizationRequest;
+                private URI storedURI;
+                private String storedClientId;
+                private SessionAttributeStore sessionAttributeStore;
+
+                @BeforeEach
+                void setup() {
+                    this.authorizationRequest = mock(AuthorizationRequest.class);
+                    this.sessionAttributeStore = mock(SessionAttributeStore.class);
+                    this.storedURI = URI.create("http://stored.localhost:8080");
+                    this.storedClientId = "STORED-CLIENT-ID";
+
+                    when(authorizationRequest.clientId()).thenReturn(storedClientId);
+                    when(authorizationRequest.redirectURI()).thenReturn(storedURI);
+                    when(sessionAttributeStore.retrieveAttribute(servletWebRequest, AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE))
+                            .thenReturn(authorizationRequest);
+
+                    endpoint.setSessionAttributeStore(sessionAttributeStore);
+                }
+
+                @Nested
+                @DisplayName("클라이언트 정보 검색중 예외가 발생할시")
+                class WhenThrowsExceptionDuringClientLookup {
+
+                    @BeforeEach
+                    void setup() {
+                        when(clientDetailsService.loadClientDetailsByClientId(storedClientId))
+                                .thenThrow(new OAuth2ClientRegistrationException("TEST"));
+                    }
+
+                    @Test
+                    @DisplayName("에러 페이지로 포워딩 해야 한다.")
+                    void shouldForwardingErrorPage() {
+                        ModelAndView modelAndView = endpoint.handleOtherException(Exception, servletWebRequest);
+
+                        assertEquals("forward:/oauth/error", modelAndView.getViewName());
+                    }
+
+                    @Test
+                    @DisplayName("ModelAndView에 OAuth2 에러 정보를 저장해야 한다.")
+                    void shouldSaveOAuth2ErrorCodeToModelAndView() {
+                        ModelAndView modelAndView = endpoint.handleOtherException(Exception, servletWebRequest);
+
+                        assertEquals(oAuth2Error, modelAndView.getModel().get("error"));
+                    }
+                }
+
+                @Nested
+                @DisplayName("요청 받은 리다이렉트 주소가 유효하지 않을시")
+                class WhenRequestingRedirectUriNotAllowed {
+
+                    @BeforeEach
+                    void setup() {
+                        OAuth2ClientDetails clientDetails = mock(OAuth2ClientDetails.class);
+                        RedirectResolver redirectResolver = mock(RedirectResolver.class);
+
+                        when(redirectResolver.resolveRedirectURI(storedURI.toString(), clientDetails))
+                                .thenThrow(new RedirectMismatchException("TEST"));
+                        endpoint.setRedirectResolver(redirectResolver);
+                    }
+
+                    @Test
+                    @DisplayName("에러 페이지로 포워딩 해야 한다.")
+                    void shouldForwardingErrorPage() {
+                        ModelAndView modelAndView = endpoint.handleOtherException(Exception, servletWebRequest);
+
+                        assertEquals("forward:/oauth/error", modelAndView.getViewName());
+                    }
+
+                    @Test
+                    @DisplayName("ModelAndView에 OAuth2 에러 정보를 저장해야 한다.")
+                    void shouldSaveOAuth2ErrorCodeToModelAndView() {
+                        ModelAndView modelAndView = endpoint.handleOtherException(Exception, servletWebRequest);
+
+                        assertEquals(oAuth2Error, modelAndView.getModel().get("error"));
+                    }
+                }
+
+                @Nested
+                @DisplayName("요청 받은 리다이렉트 주소가 유효할시")
+                class WhenRequestingRedirectUriAllowed {
+
+                    @BeforeEach
+                    void setup() {
+                        OAuth2ClientDetails clientDetails = mock(OAuth2ClientDetails.class);
+                        RedirectResolver redirectResolver = mock(RedirectResolver.class);
+
+                        when(clientDetailsService.loadClientDetailsByClientId(storedClientId)).thenReturn(clientDetails);
+                        when(redirectResolver.resolveRedirectURI(storedURI.toString(), clientDetails))
+                                .thenReturn(storedURI);
+                        endpoint.setRedirectResolver(redirectResolver);
+                    }
+
+                    @Nested
+                    @DisplayName("요청 정보에 state가 존재할시")
+                    class WhenRequestingIncludeState {
+
+                        @BeforeEach
+                        void setup() {
+                            when(authorizationRequest.state()).thenReturn(STATE);
+                        }
+
+                        @Test
+                        @DisplayName("에러 정보와 STATE를 매개변수로 리다이렉트 주소로 리다이렉트 해야 한다.")
+                        void shouldRedirectWithErrorInformationAndState() {
+                            ModelAndView modelAndView = endpoint.handleOtherException(Exception, servletWebRequest);
+
+                            String excepted = storedURI.toString() + "?error=" + oAuth2Error.getErrorCode()
+                                    + "&error_description=" + oAuth2Error.getDescription()
+                                    + "&state=" + STATE;
+                            assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
+                            assertEquals(excepted, ((RedirectView) modelAndView.getView()).getUrl());
+                        }
+                    }
+
+                    @Nested
+                    @DisplayName("요청 정보에 state가 존재하지 않을시")
+                    class WhenRequestingExcludingState {
+
+                        @BeforeEach
+                        void setup() {
+                            when(authorizationRequest.state()).thenReturn(null);
+                        }
+
+                        @Test
+                        @DisplayName("에러 정보를 매개변수로 리다이렉트 주소로 리다이렉트 해야 한다.")
+                        void shouldRedirectWithErrorInformation() {
+                            ModelAndView modelAndView = endpoint.handleOtherException(Exception, servletWebRequest);
+
+                            String excepted = storedURI.toString() + "?error=" + oAuth2Error.getErrorCode()
+                                    + "&error_description=" + oAuth2Error.getDescription();
+                            assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
+                            assertEquals(excepted, ((RedirectView) modelAndView.getView()).getUrl());
+                        }
+                    }
+                }
             }
         }
     }

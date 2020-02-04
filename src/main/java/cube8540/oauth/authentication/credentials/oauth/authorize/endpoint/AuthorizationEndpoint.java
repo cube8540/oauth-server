@@ -57,8 +57,9 @@ public class AuthorizationEndpoint {
     protected static final String AUTHORIZATION_REQUEST_CLIENT_NAME = "authorizationRequestClientName";
     protected static final String AUTHORIZATION_REQUEST_SCOPES_NAME = "authorizationRequestScopes";
 
-    private static final String DEFAULT_ERROR_PAGE = "forward:/oauth/error";
-    private static final String DEFAULT_APPROVAL_PAGE = "forward:/oauth/approval";
+    private static final String DEFAULT_FORWARD_PREFIX = "forward:";
+    private static final String DEFAULT_ERROR_PAGE = "/oauth/error";
+    private static final String DEFAULT_APPROVAL_PAGE = "/oauth/approval";
 
     private final OAuth2ClientDetailsService clientDetailsService;
 
@@ -70,11 +71,9 @@ public class AuthorizationEndpoint {
     @Setter
     private OAuth2ExceptionTranslator exceptionTranslator = new DefaultOAuth2ExceptionTranslator();
 
-    @Setter
-    private String errorPage = DEFAULT_ERROR_PAGE;
+    private String errorPage = DEFAULT_FORWARD_PREFIX + DEFAULT_ERROR_PAGE;
 
-    @Setter
-    private String approvalPage = DEFAULT_APPROVAL_PAGE;
+    private String approvalPage = DEFAULT_FORWARD_PREFIX + DEFAULT_APPROVAL_PAGE;
 
     @Setter
     private RedirectResolver redirectResolver = new DefaultRedirectResolver();
@@ -168,6 +167,16 @@ public class AuthorizationEndpoint {
         return handleException(e, webRequest);
     }
 
+    public void setErrorPage(String errorPage) {
+        Objects.requireNonNull(errorPage);
+        this.errorPage = DEFAULT_FORWARD_PREFIX + errorPage;
+    }
+
+    public void setApprovalPage(String approvalPage) {
+        Objects.requireNonNull(approvalPage);
+        this.approvalPage = DEFAULT_FORWARD_PREFIX + approvalPage;
+    }
+
     private ModelAndView handleException(Exception e, ServletWebRequest webRequest) {
         ResponseEntity<OAuth2Error> responseEntity = exceptionTranslator.translate(e);
         webRequest.getResponse().setStatus(responseEntity.getStatusCode().value());
@@ -181,7 +190,7 @@ public class AuthorizationEndpoint {
             OAuth2ClientDetails clientDetails = clientDetailsService.loadClientDetailsByClientId(authorizationRequest.clientId());
             String storedRedirectURI = Optional.ofNullable(authorizationRequest.redirectURI()).map(URI::toString).orElse(null);
             URI redirectURI = redirectResolver.resolveRedirectURI(storedRedirectURI, clientDetails);
-            return new ModelAndView(new RedirectView(getUnsuccessfulRedirectURI(redirectURI,responseEntity.getBody(), authorizationRequest)));
+            return new ModelAndView(new RedirectView(getUnsuccessfulRedirectURI(redirectURI, responseEntity.getBody(), authorizationRequest)));
         } catch (Exception exception) {
             if (log.isErrorEnabled()) {
                 log.error("An exception occurred during error handling {} {}", exception.getClass().getName(), exception.getMessage());
@@ -210,13 +219,12 @@ public class AuthorizationEndpoint {
             return authorizationRequest;
         }
         Map<String, String> parameters = new HashMap<>();
-        Map<String, String[]> map = webRequest.getParameterMap();
-        for (String key : map.keySet()) {
-            String[] values = map.get(key);
-            for (String value : values) {
-                parameters.merge(key, value, (a, b) -> (a + " " + b));
-            }
-        }
+        parameters.put(OAuth2Utils.AuthorizationRequestKey.REDIRECT_URI,
+                webRequest.getParameter(OAuth2Utils.AuthorizationRequestKey.REDIRECT_URI));
+        parameters.put(OAuth2Utils.AuthorizationRequestKey.CLIENT_ID,
+                webRequest.getParameter(OAuth2Utils.AuthorizationRequestKey.CLIENT_ID));
+        parameters.put(OAuth2Utils.AuthorizationRequestKey.STATE,
+                webRequest.getParameter(OAuth2Utils.AuthorizationRequestKey.STATE));
         return new DefaultAuthorizationRequest(parameters, SecurityContextHolder.getContext().getAuthentication());
     }
 
