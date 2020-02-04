@@ -58,8 +58,9 @@ public class AuthorizationEndpoint {
     protected static final String AUTHORIZATION_REQUEST_SCOPES_NAME = "authorizationRequestScopes";
 
     private static final String DEFAULT_FORWARD_PREFIX = "forward:";
-    private static final String DEFAULT_ERROR_PAGE = "/oauth/error";
-    private static final String DEFAULT_APPROVAL_PAGE = "/oauth/approval";
+
+    public static final String DEFAULT_ERROR_PAGE = "/oauth/error";
+    public static final String DEFAULT_APPROVAL_PAGE = "/oauth/approval";
 
     private final OAuth2ClientDetailsService clientDetailsService;
 
