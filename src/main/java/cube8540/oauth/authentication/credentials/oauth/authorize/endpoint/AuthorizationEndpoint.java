@@ -14,6 +14,8 @@ import cube8540.oauth.authentication.credentials.oauth.error.InvalidRequestExcep
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTranslator;
 import cube8540.oauth.authentication.credentials.oauth.error.RedirectMismatchException;
 import cube8540.oauth.authentication.credentials.oauth.error.UnsupportedResponseTypeException;
+import cube8540.oauth.authentication.credentials.oauth.scope.OAuth2ScopeDetails;
+import cube8540.oauth.authentication.credentials.oauth.scope.OAuth2ScopeDetailsService;
 import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2AuthorizationCodeGenerator;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.AuthorizationCode;
 import lombok.Setter;
@@ -41,6 +43,7 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import java.net.URI;
 import java.security.Principal;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -64,6 +67,8 @@ public class AuthorizationEndpoint {
 
     private final OAuth2ClientDetailsService clientDetailsService;
 
+    private final OAuth2ScopeDetailsService scopeDetailsService;
+
     private final OAuth2AuthorizationCodeGenerator codeGenerator;
 
     @Setter
@@ -86,8 +91,11 @@ public class AuthorizationEndpoint {
     private OAuth2RequestValidator requestValidator = new DefaultOAuth2RequestValidator();
 
     @Autowired
-    public AuthorizationEndpoint(OAuth2ClientDetailsService clientDetailsService, OAuth2AuthorizationCodeGenerator codeGenerator) {
+    public AuthorizationEndpoint(OAuth2ClientDetailsService clientDetailsService,
+                                 OAuth2ScopeDetailsService scopeDetailsService,
+                                 OAuth2AuthorizationCodeGenerator codeGenerator) {
         this.clientDetailsService = clientDetailsService;
+        this.scopeDetailsService = scopeDetailsService;
         this.codeGenerator = codeGenerator;
     }
 
@@ -110,10 +118,11 @@ public class AuthorizationEndpoint {
         }
         authorizationRequest.setRequestScopes(extractRequestScope(clientDetails, authorizationRequest));
 
+        Collection<OAuth2ScopeDetails> scopeDetails = scopeDetailsService.loopScopes(authorizationRequest.requestScopes());
         model.put(AUTHORIZATION_REQUEST_ATTRIBUTE, authorizationRequest);
         return new ModelAndView(approvalPage)
                 .addObject(AUTHORIZATION_REQUEST_CLIENT_NAME, clientDetails.clientName())
-                .addObject(AUTHORIZATION_REQUEST_SCOPES_NAME, authorizationRequest.requestScopes());
+                .addObject(AUTHORIZATION_REQUEST_SCOPES_NAME, scopeDetails);
     }
 
     @PostMapping(value = "/oauth/authorize")
