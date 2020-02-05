@@ -1,5 +1,6 @@
-package cube8540.oauth.authentication.credentials.oauth.client;
+package cube8540.oauth.authentication.credentials.oauth.client.application;
 
+import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2Client;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import lombok.EqualsAndHashCode;
