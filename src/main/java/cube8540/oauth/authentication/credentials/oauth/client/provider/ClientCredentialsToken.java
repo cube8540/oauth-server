@@ -1,11 +1,15 @@
 package cube8540.oauth.authentication.credentials.oauth.client.provider;
 
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 
 import java.util.Collection;
 
+@ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
 public class ClientCredentialsToken extends AbstractAuthenticationToken {
 
     private Object principal;

@@ -2,9 +2,13 @@ package cube8540.oauth.authentication.credentials.oauth.token.application;
 
 import cube8540.oauth.authentication.credentials.oauth.token.OAuth2RefreshTokenDetails;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedRefreshToken;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 
+@ToString
+@EqualsAndHashCode
 public class DefaultRefreshTokenDetails implements OAuth2RefreshTokenDetails {
 
     private final String tokenValue;
