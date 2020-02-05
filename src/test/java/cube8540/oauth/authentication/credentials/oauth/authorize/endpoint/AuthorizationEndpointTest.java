@@ -11,6 +11,8 @@ import cube8540.oauth.authentication.credentials.oauth.error.InvalidRequestExcep
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTranslator;
 import cube8540.oauth.authentication.credentials.oauth.error.RedirectMismatchException;
 import cube8540.oauth.authentication.credentials.oauth.error.UnsupportedResponseTypeException;
+import cube8540.oauth.authentication.credentials.oauth.scope.OAuth2ScopeDetails;
+import cube8540.oauth.authentication.credentials.oauth.scope.OAuth2ScopeDetailsService;
 import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2AuthorizationCodeGenerator;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.AuthorizationCode;
 import org.junit.jupiter.api.AfterEach;
@@ -37,7 +39,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.net.URI;
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -83,6 +87,7 @@ class AuthorizationEndpointTest {
     private static final String FORWARD_PAGE = "/forward";
 
     private OAuth2ClientDetailsService clientDetailsService;
+    private OAuth2ScopeDetailsService scopeDetailsService;
     private OAuth2AuthorizationCodeGenerator codeGenerator;
 
     private AuthorizationEndpoint endpoint;
@@ -90,9 +95,10 @@ class AuthorizationEndpointTest {
     @BeforeEach
     void setup() {
         this.clientDetailsService = mock(OAuth2ClientDetailsService.class);
+        this.scopeDetailsService = mock(OAuth2ScopeDetailsService.class);
         this.codeGenerator = mock(OAuth2AuthorizationCodeGenerator.class);
 
-        this.endpoint = new AuthorizationEndpoint(clientDetailsService, codeGenerator);
+        this.endpoint = new AuthorizationEndpoint(clientDetailsService, scopeDetailsService, codeGenerator);
     }
 
     @Nested
@@ -211,9 +217,13 @@ class AuthorizationEndpointTest {
                 private Map<String, String> parameter;
                 private OAuth2RequestValidator requestValidator;
                 private OAuth2ClientDetails clientDetails;
+                private Collection<OAuth2ScopeDetails> scopeDetails;
+                private Collection<OAuth2ScopeDetails> clientScopeDetails;
 
                 @BeforeEach
                 void setup() {
+                    this.scopeDetails = new ArrayList<>();
+                    this.clientScopeDetails = new ArrayList<>();
                     this.parameter = new HashMap<>();
                     RedirectResolver redirectResolver = mock(RedirectResolver.class);
                     this.requestValidator = mock(OAuth2RequestValidator.class);
@@ -224,12 +234,22 @@ class AuthorizationEndpointTest {
                     this.parameter.put(OAuth2Utils.AuthorizationRequestKey.SCOPE, RAW_SCOPE);
                     this.parameter.put(OAuth2Utils.AuthorizationRequestKey.RESPONSE_TYPE, RESPONSE_TYPE);
 
+                    this.scopeDetails.add(mock(OAuth2ScopeDetails.class));
+                    this.scopeDetails.add(mock(OAuth2ScopeDetails.class));
+                    this.scopeDetails.add(mock(OAuth2ScopeDetails.class));
+
+                    this.clientScopeDetails.add(mock(OAuth2ScopeDetails.class));
+                    this.clientScopeDetails.add(mock(OAuth2ScopeDetails.class));
+                    this.clientScopeDetails.add(mock(OAuth2ScopeDetails.class));
+
                     when(clientDetailsService.loadClientDetailsByClientId(RAW_CLIENT_ID)).thenReturn(clientDetails);
                     when(redirectResolver.resolveRedirectURI(RAW_REDIRECT_URI, clientDetails)).thenReturn(RESOLVED_REDIRECT_URI);
                     when(requestValidator.validateScopes(clientDetails, SCOPE)).thenReturn(true);
                     when(codeGenerator.generateNewAuthorizationCode(any(AuthorizationRequest.class))).thenReturn(CODE);
                     when(clientDetails.scope()).thenReturn(CLIENT_SCOPE);
                     when(clientDetails.clientName()).thenReturn(CLIENT_NAME);
+                    when(scopeDetailsService.loopScopes(SCOPE)).thenReturn(scopeDetails);
+                    when(scopeDetailsService.loopScopes(CLIENT_SCOPE)).thenReturn(clientScopeDetails);
 
                     endpoint.setRedirectResolver(redirectResolver);
                     endpoint.setRequestValidator(requestValidator);
@@ -328,7 +348,7 @@ class AuthorizationEndpointTest {
                     void shouldSaveClientScopeToModelAndView() {
                         ModelAndView modelAndView = endpoint.authorize(parameter, model, principal);
 
-                        assertEquals(CLIENT_SCOPE, modelAndView.getModel().get(AuthorizationEndpoint.AUTHORIZATION_REQUEST_SCOPES_NAME));
+                        assertEquals(clientScopeDetails, modelAndView.getModel().get(AuthorizationEndpoint.AUTHORIZATION_REQUEST_SCOPES_NAME));
                     }
 
                     @AfterEach
@@ -355,11 +375,11 @@ class AuthorizationEndpointTest {
                 }
 
                 @Test
-                @DisplayName("요청한 스코프를 ModelAndView에 저장해야 한다.")
+                @DisplayName("요청한 스코프의 상세 정보를 ModelAndView에 저장해야 한다.")
                 void shouldSaveRequestingScopeToModelAndView() {
                     ModelAndView modelAndView = endpoint.authorize(parameter, model, principal);
 
-                    assertEquals(SCOPE, modelAndView.getModel().get(AuthorizationEndpoint.AUTHORIZATION_REQUEST_SCOPES_NAME));
+                    assertEquals(scopeDetails, modelAndView.getModel().get(AuthorizationEndpoint.AUTHORIZATION_REQUEST_SCOPES_NAME));
                 }
             }
 

@@ -7,9 +7,9 @@
 <body>
     <form th:action="@{/oauth/authorize}" method="post">
         <div th:each="scope : ${authorizationRequestScopes}">
-            <label th:for="${scope}" th:text="${scope}"></label>
-            <input type="radio" value="true" th:name="${scope}" checked> Approval
-            <input type="radio" value="false" th:name="${scope}"> Denied
+            <label th:for="${scope.scopeId}" th:text="${scope.description}"></label>
+            <input type="radio" value="true" th:name="${scope.scopeId}" checked> Approval
+            <input type="radio" value="false" th:name="${scope.scopeId}"> Denied
         </div>
         <button type="submit">submit</button>
     </form>
