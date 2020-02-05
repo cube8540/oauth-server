@@ -1,5 +1,7 @@
 package cube8540.oauth.authentication.credentials.oauth;
 
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 
 import java.net.URI;
@@ -7,6 +9,8 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
+@ToString
+@EqualsAndHashCode
 public class DefaultOAuth2TokenRequest implements OAuth2TokenRequest {
 
     private AuthorizationGrantType grantType;
