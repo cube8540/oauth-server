@@ -611,6 +611,8 @@ class AuthorizationEndpointTest {
 
             @BeforeEach
             void setup() {
+                this.oAuth2Error = new OAuth2Error(OAuth2ErrorCodes.INVALID_GRANT);
+
                 HttpServletRequest servletRequest = mock(HttpServletRequest.class);
                 OAuth2ExceptionTranslator exceptionTranslator = mock(OAuth2ExceptionTranslator.class);
                 ResponseEntity<OAuth2Error> oAuth2ErrorResponseEntity = new ResponseEntity<>(oAuth2Error, HttpStatus.UNAUTHORIZED);
@@ -618,7 +620,6 @@ class AuthorizationEndpointTest {
                 this.redirectMismatchException = new RedirectMismatchException("TEST");
                 this.servletResponse = mock(HttpServletResponse.class);
                 this.servletWebRequest = new ServletWebRequest(servletRequest, servletResponse);
-                this.oAuth2Error = new OAuth2Error(OAuth2ErrorCodes.INVALID_GRANT);
 
                 when(exceptionTranslator.translate(redirectMismatchException)).thenReturn(oAuth2ErrorResponseEntity);
                 endpoint.setExceptionTranslator(exceptionTranslator);
@@ -660,6 +661,8 @@ class AuthorizationEndpointTest {
 
             @BeforeEach
             void setup() {
+                this.oAuth2Error = new OAuth2Error(OAuth2ErrorCodes.INVALID_REQUEST);
+
                 HttpServletResponse servletResponse = mock(HttpServletResponse.class);
                 ResponseEntity<OAuth2Error> oAuth2ErrorResponseEntity = new ResponseEntity<>(oAuth2Error, HttpStatus.UNAUTHORIZED);
                 OAuth2ExceptionTranslator exceptionTranslator = mock(OAuth2ExceptionTranslator.class);
@@ -667,7 +670,6 @@ class AuthorizationEndpointTest {
                 this.authenticationException = mock(OAuth2AuthenticationException.class);
                 this.servletRequest = mock(HttpServletRequest.class);
                 this.servletWebRequest = new ServletWebRequest(servletRequest, servletResponse);
-                this.oAuth2Error = new OAuth2Error(OAuth2ErrorCodes.INVALID_REQUEST);
 
                 when(exceptionTranslator.translate(authenticationException)).thenReturn(oAuth2ErrorResponseEntity);
                 endpoint.setExceptionTranslator(exceptionTranslator);
@@ -1026,6 +1028,8 @@ class AuthorizationEndpointTest {
 
             @BeforeEach
             void setup() {
+                this.oAuth2Error = new OAuth2Error(OAuth2ErrorCodes.UNAUTHORIZED_CLIENT);
+
                 HttpServletRequest servletRequest = mock(HttpServletRequest.class);
                 OAuth2ExceptionTranslator exceptionTranslator = mock(OAuth2ExceptionTranslator.class);
                 ResponseEntity<OAuth2Error> oAuth2ErrorResponseEntity = new ResponseEntity<>(oAuth2Error, HttpStatus.UNAUTHORIZED);
@@ -1033,7 +1037,6 @@ class AuthorizationEndpointTest {
                 this.clientRegistrationException = new OAuth2ClientRegistrationException("TEST");
                 this.servletResponse = mock(HttpServletResponse.class);
                 this.servletWebRequest = new ServletWebRequest(servletRequest, servletResponse);
-                this.oAuth2Error = new OAuth2Error(OAuth2ErrorCodes.UNAUTHORIZED_CLIENT);
 
                 when(exceptionTranslator.translate(clientRegistrationException)).thenReturn(oAuth2ErrorResponseEntity);
                 endpoint.setExceptionTranslator(exceptionTranslator);
@@ -1075,6 +1078,8 @@ class AuthorizationEndpointTest {
 
             @BeforeEach
             void setup() {
+                this.oAuth2Error = new OAuth2Error(OAuth2ErrorCodes.INVALID_REQUEST, "TEST", null);
+
                 HttpServletResponse servletResponse = mock(HttpServletResponse.class);
                 ResponseEntity<OAuth2Error> oAuth2ErrorResponseEntity = new ResponseEntity<>(oAuth2Error, HttpStatus.UNAUTHORIZED);
                 OAuth2ExceptionTranslator exceptionTranslator = mock(OAuth2ExceptionTranslator.class);
@@ -1082,7 +1087,6 @@ class AuthorizationEndpointTest {
                 this.exception = mock(Exception.class);
                 this.servletRequest = mock(HttpServletRequest.class);
                 this.servletWebRequest = new ServletWebRequest(servletRequest, servletResponse);
-                this.oAuth2Error = new OAuth2Error(OAuth2ErrorCodes.INVALID_REQUEST, "TEST", null);
 
                 when(exceptionTranslator.translate(exception)).thenReturn(oAuth2ErrorResponseEntity);
                 endpoint.setExceptionTranslator(exceptionTranslator);
