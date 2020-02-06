@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -15,8 +16,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @EnableWebSecurity
 public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
-    private static final String DEFAULT_LOGIN_PAGE = "/login";
-    private static final String DEFAULT_LOGIN_PROCESS_URL = "/login";
+    private static final String DEFAULT_LOGIN_PAGE = "/accounts/signin";
+    private static final String DEFAULT_LOGIN_PROCESS_URL = "/accounts/signin";
 
     @Setter(onMethod_ = {@Autowired, @Qualifier("defaultUserService")})
     private UserDetailsService userDetailsService;
@@ -41,6 +42,13 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
             .anyRequest().authenticated()
             .and()
         .formLogin()
+            .loginPage(loginPage)
+            .loginProcessingUrl(loginProcessUrl)
             .permitAll();
+    }
+
+    @Override
+    public void configure(WebSecurity web) throws Exception {
+        web.ignoring().antMatchers("/css/**", "/img/**", "/js/**");
     }
 }
