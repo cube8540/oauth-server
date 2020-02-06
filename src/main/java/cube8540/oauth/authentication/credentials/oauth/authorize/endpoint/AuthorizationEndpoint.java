@@ -118,7 +118,7 @@ public class AuthorizationEndpoint {
         }
         authorizationRequest.setRequestScopes(extractRequestScope(clientDetails, authorizationRequest));
 
-        Collection<OAuth2ScopeDetails> scopeDetails = scopeDetailsService.loopScopes(authorizationRequest.requestScopes());
+        Collection<OAuth2ScopeDetails> scopeDetails = scopeDetailsService.loadScopeDetailsByScopeIds(authorizationRequest.requestScopes());
         model.put(AUTHORIZATION_REQUEST_ATTRIBUTE, authorizationRequest);
         return new ModelAndView(approvalPage)
                 .addObject(AUTHORIZATION_REQUEST_CLIENT_NAME, clientDetails.clientName())

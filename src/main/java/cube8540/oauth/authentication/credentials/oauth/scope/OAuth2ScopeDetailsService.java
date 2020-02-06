@@ -4,6 +4,6 @@ import java.util.Collection;
 
 public interface OAuth2ScopeDetailsService {
 
-    Collection<OAuth2ScopeDetails> loopScopes(Collection<String> scopeIds);
+    Collection<OAuth2ScopeDetails> loadScopeDetailsByScopeIds(Collection<String> scopeIds);
 
 }
