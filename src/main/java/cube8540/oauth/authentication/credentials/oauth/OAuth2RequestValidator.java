@@ -8,4 +8,6 @@ public interface OAuth2RequestValidator {
 
     boolean validateScopes(OAuth2ClientDetails clientDetails, Set<String> scopes);
 
+    boolean validateScopes(Set<String> approvalScopes, Set<String> requestScopes);
+
 }
