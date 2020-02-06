@@ -9,4 +9,9 @@ public class DefaultOAuth2RequestValidator implements OAuth2RequestValidator {
     public boolean validateScopes(OAuth2ClientDetails clientDetails, Set<String> scopes) {
         return scopes == null || clientDetails.scope().containsAll(scopes);
     }
+
+    @Override
+    public boolean validateScopes(Set<String> approvalScopes, Set<String> requestScopes) {
+        return requestScopes == null || approvalScopes.containsAll(requestScopes);
+    }
 }

@@ -62,7 +62,7 @@ class DefaultScopeDetailsServiceTest {
             @Test
             @DisplayName("빈 리스트가 반환되어야 한다.")
             void shouldReturnsEmptyList() {
-                Collection<OAuth2ScopeDetails> results = service.loopScopes(parameters);
+                Collection<OAuth2ScopeDetails> results = service.loadScopeDetailsByScopeIds(parameters);
 
                 assertEquals(Collections.emptyList(), results);
             }
@@ -87,7 +87,7 @@ class DefaultScopeDetailsServiceTest {
             @Test
             @DisplayName("저장소 스코프의 정보를 반환해야 한다.")
             void shouldReturnsScopeDetails() {
-                Collection<OAuth2ScopeDetails> results = service.loopScopes(parameters);
+                Collection<OAuth2ScopeDetails> results = service.loadScopeDetailsByScopeIds(parameters);
 
                 Collection<OAuth2ScopeDetails> expected = SCOPES.stream().map(DetailsOAuth2ScopeDetails::new).collect(Collectors.toList());
                 assertEquals(expected, results);

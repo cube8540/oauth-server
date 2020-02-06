@@ -248,8 +248,8 @@ class AuthorizationEndpointTest {
                     when(codeGenerator.generateNewAuthorizationCode(any(AuthorizationRequest.class))).thenReturn(CODE);
                     when(clientDetails.scope()).thenReturn(CLIENT_SCOPE);
                     when(clientDetails.clientName()).thenReturn(CLIENT_NAME);
-                    when(scopeDetailsService.loopScopes(SCOPE)).thenReturn(scopeDetails);
-                    when(scopeDetailsService.loopScopes(CLIENT_SCOPE)).thenReturn(clientScopeDetails);
+                    when(scopeDetailsService.loadScopeDetailsByScopeIds(SCOPE)).thenReturn(scopeDetails);
+                    when(scopeDetailsService.loadScopeDetailsByScopeIds(CLIENT_SCOPE)).thenReturn(clientScopeDetails);
 
                     endpoint.setRedirectResolver(redirectResolver);
                     endpoint.setRequestValidator(requestValidator);
