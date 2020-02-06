@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'cube8540.oauth'
-version = '0.6.5'
+version = '0.6.6'
 sourceCompatibility = '13'
 
 configurations {
