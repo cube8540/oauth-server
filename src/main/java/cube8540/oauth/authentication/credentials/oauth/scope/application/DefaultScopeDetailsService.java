@@ -22,7 +22,7 @@ public class DefaultScopeDetailsService implements OAuth2ScopeDetailsService {
     }
 
     @Override
-    public Collection<OAuth2ScopeDetails> loopScopes(Collection<String> scopeIds) {
+    public Collection<OAuth2ScopeDetails> loadScopeDetailsByScopeIds(Collection<String> scopeIds) {
         List<OAuth2ScopeId> scopeIn = scopeIds.stream()
                 .map(OAuth2ScopeId::new).collect(Collectors.toList());
         return repository.findByIdIn(scopeIn).stream()
