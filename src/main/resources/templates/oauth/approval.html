@@ -3,15 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <title>Scope Approval Page</title>
+
+    <link rel="stylesheet" type="text/css" th:href="@{/css/reset.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{/css/accounts/approval.css}">
+
+    <script type="application/javascript" th:src="@{/js/accounts/approval.js}"></script>
 </head>
 <body>
-    <form th:action="@{/oauth/authorize}" method="post">
-        <div th:each="scope : ${authorizationRequestScopes}">
-            <label th:for="${scope.scopeId}" th:text="${scope.description}"></label>
-            <input type="radio" value="true" th:name="${scope.scopeId}" checked> Approval
-            <input type="radio" value="false" th:name="${scope.scopeId}"> Denied
+    <div class="approval-container" th:style="|background-image:url(@{/img/login-background.jpg})|">
+        <div class="approval-box">
+            <div class="title">
+                <h2>OAuth2 Scope Approval</h2>
+            </div>
+            <div id="scope-approval" class="body">
+                <div class="message">
+                    <strong th:text="${authorizationRequestClientName}"></strong>
+                    <span>가 아래의 접근 권한을 요청합니다.</span>
+                </div>
+                <form id="scope-form" th:action="@{/oauth/authorize}" method="post">
+                    <div class="scopes">
+                        <div class="scope" th:each="scope : ${authorizationRequestScopes}">
+                            <label class="description" th:text="${scope.description}"></label>
+                            <input type="hidden" value="true" th:name="${scope.scopeId}">
+                        </div>
+                    </div>
+                </form>
+                <div class="buttons">
+                    <button type="button" id="agree" onclick="approvalOrDeny(true)">허용</button>
+                    <button type="button" id="deny" onclick="approvalOrDeny(false)">거부</button>
+                </div>
+            </div>
         </div>
-        <button type="submit">submit</button>
-    </form>
+    </div>
 </body>
 </html>
