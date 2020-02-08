@@ -21,17 +21,17 @@ import java.time.LocalDateTime;
 @Embeddable
 public class UserCredentialsKey implements Serializable {
 
+    @Transient
+    @Setter(AccessLevel.PROTECTED)
+    private static Clock clock = Clock.system(AuthenticationApplication.DEFAULT_TIME_ZONE.toZoneId());
+
     private String keyValue;
 
     private LocalDateTime expiryDateTime;
 
-    @Transient
-    @Setter(AccessLevel.PROTECTED)
-    private Clock clock = Clock.system(AuthenticationApplication.DEFAULT_TIME_ZONE.toZoneId());
-
-    public UserCredentialsKey(String keyValue, LocalDateTime expiryDateTime) {
+    public UserCredentialsKey(String keyValue) {
         this.keyValue = keyValue;
-        this.expiryDateTime = expiryDateTime;
+        this.expiryDateTime = LocalDateTime.now(clock).plusMinutes(5);
     }
 
     public UserKeyMatchedResult matches(String key) {

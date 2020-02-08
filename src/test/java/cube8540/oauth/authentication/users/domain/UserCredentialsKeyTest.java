@@ -16,7 +16,36 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class UserCredentialsKeyTest {
 
     private static final String KEY_VALUE = "KEY-VALUE";
-    private static final LocalDateTime EXPIRATION_DATETIME = LocalDateTime.of(2020, 1, 29, 23, 4);
+
+    private static final LocalDateTime NOW = LocalDateTime.of(2020, 2, 8, 23, 5);
+    private static final LocalDateTime EXPIRATION_DATETIME = NOW.plusMinutes(5);
+
+    @Nested
+    @DisplayName("키 생성")
+    class CreateNewKey {
+
+        private UserCredentialsKey key;
+
+        @BeforeEach
+        void setup() {
+            Clock clock = Clock.fixed(NOW.toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
+            UserCredentialsKey.setClock(clock);
+
+            this.key = new UserCredentialsKey(KEY_VALUE);
+        }
+
+        @Test
+        @DisplayName("인자로 받은 키값을 저장해야 한다.")
+        void shouldSaveKeyValueForArguments() {
+            assertEquals(KEY_VALUE, key.getKeyValue());
+        }
+
+        @Test
+        @DisplayName("만료시간은 현재시간 + 5분 이어야 한다.")
+        void shouldExpirationDateTimeIsNowPlus5Minute() {
+            assertEquals(EXPIRATION_DATETIME, key.getExpiryDateTime());
+        }
+    }
 
     @Nested
     @DisplayName("키 매칭")
@@ -29,10 +58,13 @@ class UserCredentialsKeyTest {
 
             @BeforeEach
             void setup() {
-                this.key = new UserCredentialsKey(KEY_VALUE, EXPIRATION_DATETIME);
+                Clock registeredClock = Clock.fixed(NOW.toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
+                UserCredentialsKey.setClock(registeredClock);
+
+                this.key = new UserCredentialsKey(KEY_VALUE);
 
                 Clock clock = Clock.fixed(EXPIRATION_DATETIME.minusNanos(1).toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
-                this.key.setClock(clock);
+                UserCredentialsKey.setClock(clock);
             }
 
             @Test
@@ -50,10 +82,13 @@ class UserCredentialsKeyTest {
 
             @BeforeEach
             void setup() {
-                this.key = new UserCredentialsKey(KEY_VALUE, EXPIRATION_DATETIME);
+                Clock registeredClock = Clock.fixed(NOW.toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
+                UserCredentialsKey.setClock(registeredClock);
+
+                this.key = new UserCredentialsKey(KEY_VALUE);
 
                 Clock clock = Clock.fixed(EXPIRATION_DATETIME.plusNanos(1).toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
-                this.key.setClock(clock);
+                UserCredentialsKey.setClock(clock);
             }
 
             @Test
@@ -71,10 +106,13 @@ class UserCredentialsKeyTest {
 
             @BeforeEach
             void setup() {
-                this.key = new UserCredentialsKey(KEY_VALUE, EXPIRATION_DATETIME);
+                Clock registeredClock = Clock.fixed(NOW.toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
+                UserCredentialsKey.setClock(registeredClock);
+
+                this.key = new UserCredentialsKey(KEY_VALUE);
 
                 Clock clock = Clock.fixed(EXPIRATION_DATETIME.minusNanos(1).toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
-                this.key.setClock(clock);
+                UserCredentialsKey.setClock(clock);
             }
 
             @Test
