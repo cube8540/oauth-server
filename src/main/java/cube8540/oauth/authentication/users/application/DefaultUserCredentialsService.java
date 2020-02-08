@@ -7,9 +7,12 @@ import cube8540.oauth.authentication.users.domain.UserCredentialsKeyGenerator;
 import cube8540.oauth.authentication.users.domain.UserEmail;
 import cube8540.oauth.authentication.users.domain.UserNotFoundException;
 import cube8540.oauth.authentication.users.domain.UserRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Service
 public class DefaultUserCredentialsService implements UserCredentialsService {
 
     private final UserRepository repository;
@@ -25,6 +28,7 @@ public class DefaultUserCredentialsService implements UserCredentialsService {
     }
 
     @Override
+    @Transactional
     public UserProfile grantCredentialsKey(String email) {
         User user = repository.findByEmail(new UserEmail(email))
                 .orElseThrow(() -> new UserNotFoundException(email + " user not found"));
@@ -34,6 +38,7 @@ public class DefaultUserCredentialsService implements UserCredentialsService {
     }
 
     @Override
+    @Transactional
     public UserProfile accountCredentials(String email, String credentialsKey) {
         User user = repository.findByEmail(new UserEmail(email))
                 .orElseThrow(() -> new UserNotFoundException(email + " user not found"));

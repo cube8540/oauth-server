@@ -6,12 +6,17 @@ import cube8540.oauth.authentication.users.domain.UserEmail;
 import cube8540.oauth.authentication.users.domain.UserNotFoundException;
 import cube8540.oauth.authentication.users.domain.UserPasswordEncoder;
 import cube8540.oauth.authentication.users.domain.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+@Service
 public class DefaultUserManagementService implements UserManagementService {
 
     private final UserRepository repository;
     private final UserPasswordEncoder encoder;
 
+    @Autowired
     public DefaultUserManagementService(UserRepository repository, UserPasswordEncoder encoder) {
         this.repository = repository;
         this.encoder = encoder;
@@ -29,6 +34,7 @@ public class DefaultUserManagementService implements UserManagementService {
     }
 
     @Override
+    @Transactional
     public UserProfile registerUser(UserRegisterRequest registerRequest) {
         if (repository.countByEmail(new UserEmail(registerRequest.getEmail())) > 0) {
             throw new UserAlreadyExistsException(registerRequest.getEmail() + " is exists");
@@ -38,6 +44,7 @@ public class DefaultUserManagementService implements UserManagementService {
     }
 
     @Override
+    @Transactional
     public UserProfile removeUser(String email) {
         User registerUser = repository.findByEmail(new UserEmail(email))
                 .orElseThrow(() -> new UserNotFoundException(email + " user not found"));

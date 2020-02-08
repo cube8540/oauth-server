@@ -7,7 +7,11 @@ import cube8540.oauth.authentication.users.domain.UserKeyMatchedResult;
 import cube8540.oauth.authentication.users.domain.UserNotFoundException;
 import cube8540.oauth.authentication.users.domain.UserPasswordEncoder;
 import cube8540.oauth.authentication.users.domain.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+@Service
 public class DefaultUserPasswordService implements UserPasswordService {
 
     private final UserRepository repository;
@@ -16,6 +20,7 @@ public class DefaultUserPasswordService implements UserPasswordService {
 
     private final UserCredentialsKeyGenerator keyGenerator;
 
+    @Autowired
     public DefaultUserPasswordService(UserRepository repository, UserPasswordEncoder encoder, UserCredentialsKeyGenerator keyGenerator) {
         this.repository = repository;
         this.encoder = encoder;
@@ -23,6 +28,7 @@ public class DefaultUserPasswordService implements UserPasswordService {
     }
 
     @Override
+    @Transactional
     public UserProfile changePassword(ChangePasswordRequest changeRequest) {
         User user = repository.findByEmail(new UserEmail(changeRequest.getEmail()))
                 .orElseThrow(() -> new UserNotFoundException(changeRequest.getEmail() + " user not found"));
@@ -32,6 +38,7 @@ public class DefaultUserPasswordService implements UserPasswordService {
     }
 
     @Override
+    @Transactional
     public UserProfile forgotPassword(String email) {
         User user = repository.findByEmail(new UserEmail(email))
                 .orElseThrow(() -> new UserNotFoundException(email + " user not found"));
@@ -48,6 +55,7 @@ public class DefaultUserPasswordService implements UserPasswordService {
     }
 
     @Override
+    @Transactional
     public UserProfile resetPassword(ResetPasswordRequest resetRequest) {
         User user = repository.findByEmail(new UserEmail(resetRequest.getEmail()))
                 .orElseThrow(() -> new UserNotFoundException(resetRequest.getEmail() + " user not found"));
