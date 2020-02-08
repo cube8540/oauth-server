@@ -9,7 +9,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.annotation.PostConstruct;
 import java.time.Clock;
@@ -32,14 +31,8 @@ public class AuthenticationApplication {
 
     @Bean
     @Primary
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
-    @Bean
-    @Primary
-    public UserPasswordEncoder userPasswordEncoder(PasswordEncoder encoder) {
-        return new DefaultUserPasswordEncoder(encoder);
+    public UserPasswordEncoder userPasswordEncoder() {
+        return new DefaultUserPasswordEncoder(new BCryptPasswordEncoder());
     }
 
     @Bean
