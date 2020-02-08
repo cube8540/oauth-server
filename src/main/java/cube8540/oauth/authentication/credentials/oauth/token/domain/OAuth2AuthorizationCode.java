@@ -44,6 +44,10 @@ import java.util.stream.Collectors;
 @Table(name = "oauth2_authorization_code")
 public class OAuth2AuthorizationCode extends AbstractAggregateRoot<OAuth2AuthorizationCode> {
 
+    @Transient
+    @Setter(AccessLevel.PROTECTED)
+    private static Clock clock = AuthenticationApplication.DEFAULT_CLOCK;
+
     @EmbeddedId
     @AttributeOverride(name = "value", column = @Column(name = "authorization_code", length = 6))
     private AuthorizationCode code;
@@ -71,13 +75,9 @@ public class OAuth2AuthorizationCode extends AbstractAggregateRoot<OAuth2Authori
     @AttributeOverride(name = "value", column = @Column(name = "scope_id", length = 32, nullable = false))
     private Set<OAuth2ScopeId> approvedScopes;
 
-    @Transient
-    @Setter(AccessLevel.PROTECTED)
-    private Clock clock = Clock.system(AuthenticationApplication.DEFAULT_TIME_ZONE.toZoneId());
-
-    public OAuth2AuthorizationCode(AuthorizationCodeGenerator generator, LocalDateTime expirationDateTime) {
+    public OAuth2AuthorizationCode(AuthorizationCodeGenerator generator) {
         this.code = generator.generate();
-        this.expirationDateTime = expirationDateTime;
+        this.expirationDateTime = LocalDateTime.now(clock).plusMinutes(5);
     }
 
     public void setAuthorizationRequest(AuthorizationRequest request) {

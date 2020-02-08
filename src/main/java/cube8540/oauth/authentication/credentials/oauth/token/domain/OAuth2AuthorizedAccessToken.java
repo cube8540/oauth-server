@@ -57,6 +57,10 @@ import java.util.Set;
 @DynamicUpdate
 public class OAuth2AuthorizedAccessToken extends AbstractAggregateRoot<OAuth2AuthorizedAccessToken> {
 
+    @Transient
+    @Setter(AccessLevel.PROTECTED)
+    private static Clock clock = AuthenticationApplication.DEFAULT_CLOCK;
+
     @EmbeddedId
     @AttributeOverride(name = "value", column = @Column(name = "token_id", length = 32))
     private OAuth2TokenId tokenId;
@@ -91,11 +95,6 @@ public class OAuth2AuthorizedAccessToken extends AbstractAggregateRoot<OAuth2Aut
     @MapKeyColumn(name = "info_key")
     @Column(name = "info_value", length = 128)
     private Map<String, String> additionalInformation;
-
-    @Transient
-    @Builder.Default
-    @Setter(AccessLevel.PROTECTED)
-    private Clock clock = Clock.system(AuthenticationApplication.DEFAULT_TIME_ZONE.toZoneId());
 
     public static OAuth2AuthorizedAccessTokenBuilder builder(OAuth2TokenIdGenerator tokenIdGenerator) {
         return new OAuth2AuthorizedAccessTokenBuilder()

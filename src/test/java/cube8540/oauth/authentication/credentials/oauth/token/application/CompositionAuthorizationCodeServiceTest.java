@@ -2,11 +2,11 @@ package cube8540.oauth.authentication.credentials.oauth.token.application;
 
 import cube8540.oauth.authentication.credentials.oauth.AuthorizationRequest;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
+import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.AuthorizationCode;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.AuthorizationCodeGenerator;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.AuthorizationCodeRepository;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizationCode;
-import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import cube8540.oauth.authentication.users.domain.UserEmail;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -15,17 +15,12 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import java.net.URI;
-import java.time.Clock;
-import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static cube8540.oauth.authentication.AuthenticationApplication.DEFAULT_TIME_ZONE;
-import static cube8540.oauth.authentication.AuthenticationApplication.DEFAULT_ZONE_OFFSET;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -39,10 +34,6 @@ class CompositionAuthorizationCodeServiceTest {
 
     private static final String RAW_CODE = "CODE";
     private static final AuthorizationCode CODE = new AuthorizationCode(RAW_CODE);
-
-    private static final LocalDateTime CREATED_DATETIME = LocalDateTime.of(2020, 1, 29, 22, 42);
-
-    private static final Duration CODE_DURATION = Duration.ofSeconds(10);
 
     private static final String RAW_CLIENT_ID = "CLIENT";
     private static final OAuth2ClientId CLIENT_ID = new OAuth2ClientId(RAW_CLIENT_ID);
@@ -146,10 +137,6 @@ class CompositionAuthorizationCodeServiceTest {
             when(authorizationRequest.state()).thenReturn(STATE);
 
             codeService.setCodeGenerator(generator);
-            codeService.setCodeDuration(CODE_DURATION);
-
-            Clock clock = Clock.fixed(CREATED_DATETIME.toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
-            codeService.setClock(clock);
         }
 
         @Test
@@ -160,16 +147,6 @@ class CompositionAuthorizationCodeServiceTest {
             codeService.generateNewAuthorizationCode(authorizationRequest);
             verify(codeRepository, times(1)).save(codeArgumentCaptor.capture());
             assertEquals(CODE, codeArgumentCaptor.getValue().getCode());
-        }
-
-        @Test
-        @DisplayName("인증 코드는 설정된 시간 만큼의 유효 시간을 가져야 한다.")
-        void shouldCodeHaveValidTimeOfSetTime() {
-            ArgumentCaptor<OAuth2AuthorizationCode> codeArgumentCaptor = ArgumentCaptor.forClass(OAuth2AuthorizationCode.class);
-
-            codeService.generateNewAuthorizationCode(authorizationRequest);
-            verify(codeRepository, times(1)).save(codeArgumentCaptor.capture());
-            assertEquals(CREATED_DATETIME.plus(CODE_DURATION), codeArgumentCaptor.getValue().getExpirationDateTime());
         }
 
         @Test

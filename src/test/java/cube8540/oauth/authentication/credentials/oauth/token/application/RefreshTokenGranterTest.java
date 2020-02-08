@@ -119,7 +119,7 @@ class RefreshTokenGranterTest {
             tokenGranter.setTokenRequestValidator(validator);
 
             Clock clock = Clock.fixed(TOKEN_CREATED_DATETIME.toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
-            tokenGranter.setClock(clock);
+            AbstractOAuth2TokenGranter.setClock(clock);
         }
 
         @Nested

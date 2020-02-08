@@ -123,7 +123,7 @@ class OAuth2AuthorizedAccessTokenTest {
                         .email(EMAIL).client(CLIENT_ID).tokenGrantType(GRANT_TYPE).expiration(EXPIRATION_DATETIME).build();
 
                 Clock clock = Clock.fixed(EXPIRATION_DATETIME.plusNanos(1).toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
-                this.accessToken.setClock(clock);
+                OAuth2AuthorizedAccessToken.setClock(clock);
             }
 
             @Test
@@ -145,7 +145,7 @@ class OAuth2AuthorizedAccessTokenTest {
                         .email(EMAIL).client(CLIENT_ID).tokenGrantType(GRANT_TYPE).expiration(EXPIRATION_DATETIME).build();
 
                 Clock clock = Clock.fixed(EXPIRATION_DATETIME.minusNanos(1).toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
-                this.accessToken.setClock(clock);
+                OAuth2AuthorizedAccessToken.setClock(clock);
             }
 
             @Test
@@ -172,7 +172,7 @@ class OAuth2AuthorizedAccessTokenTest {
                         .email(EMAIL).client(CLIENT_ID).tokenGrantType(GRANT_TYPE).expiration(EXPIRATION_DATETIME).build();
 
                 Clock clock = Clock.fixed(EXPIRATION_DATETIME.plusNanos(1).toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
-                this.accessToken.setClock(clock);
+                OAuth2AuthorizedAccessToken.setClock(clock);
             }
 
             @Test
@@ -195,7 +195,7 @@ class OAuth2AuthorizedAccessTokenTest {
                         .email(EMAIL).client(CLIENT_ID).tokenGrantType(GRANT_TYPE).expiration(EXPIRATION_DATETIME).build();
 
                 Clock clock = Clock.fixed(EXPIRATION_DATETIME.minusSeconds(expiresIn).toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
-                this.accessToken.setClock(clock);
+                OAuth2AuthorizedAccessToken.setClock(clock);
             }
 
 
