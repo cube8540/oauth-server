@@ -1,5 +1,7 @@
 package cube8540.oauth.authentication;
 
+import cube8540.oauth.authentication.users.domain.UserPasswordEncoder;
+import cube8540.oauth.authentication.users.infra.DefaultUserPasswordEncoder;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -30,6 +32,12 @@ public class AuthenticationApplication {
     @Primary
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    @Primary
+    public UserPasswordEncoder userPasswordEncoder(PasswordEncoder encoder) {
+        return new DefaultUserPasswordEncoder(encoder);
     }
 
     public static void main(String[] args) {
