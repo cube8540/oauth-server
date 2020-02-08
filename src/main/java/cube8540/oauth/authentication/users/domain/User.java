@@ -85,7 +85,7 @@ public class User extends AbstractAggregateRoot<User> {
                 .registerRule(new UserPasswordValidationRule())
                 .getResult().hasErrorThrows(UserInvalidException::new);
         encrypted(encoder);
-        registerEvent(new UserCreatedEvent(this.email));
+        registerEvent(new UserRegisterEvent(this.email));
     }
 
     public void generateCredentialsKey(UserCredentialsKeyGenerator keyGenerator) {

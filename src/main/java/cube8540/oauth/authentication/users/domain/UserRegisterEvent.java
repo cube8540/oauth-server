@@ -6,7 +6,7 @@ import lombok.Value;
 
 @Value
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
-public class UserCreatedEvent {
+public class UserRegisterEvent {
 
     private UserEmail email;
 
