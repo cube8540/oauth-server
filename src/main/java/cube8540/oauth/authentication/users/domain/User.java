@@ -93,6 +93,7 @@ public class User extends AbstractAggregateRoot<User> {
             throw new UserAlreadyCertificationException("this account is already certification");
         }
         this.credentialsKey = keyGenerator.generateKey();
+        registerEvent(new UserGeneratedCredentialsKeyEvent(email, credentialsKey));
     }
 
     public void credentials(String credentialsKey, Collection<AuthorityCode> authorities) {
