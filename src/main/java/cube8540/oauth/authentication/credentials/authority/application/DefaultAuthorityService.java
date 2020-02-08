@@ -1,9 +1,11 @@
 package cube8540.oauth.authentication.credentials.authority.application;
 
 import cube8540.oauth.authentication.credentials.authority.domain.Authority;
+import cube8540.oauth.authentication.credentials.authority.domain.AuthorityCode;
 import cube8540.oauth.authentication.credentials.authority.domain.AuthorityRepository;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class DefaultAuthorityService implements BasicAuthorityService {
 
@@ -14,7 +16,7 @@ public class DefaultAuthorityService implements BasicAuthorityService {
     }
 
     @Override
-    public List<Authority> getBasicAuthority() {
-        return repository.findByBasicTrue();
+    public List<AuthorityCode> getBasicAuthority() {
+        return repository.findByBasicTrue().stream().map(Authority::getCode).collect(Collectors.toList());
     }
 }
