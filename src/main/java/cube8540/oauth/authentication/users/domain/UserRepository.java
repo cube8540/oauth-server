@@ -9,4 +9,6 @@ public interface UserRepository extends JpaRepository<User, UserEmail> {
 
     @EntityGraph(attributePaths = "authorities", type = EntityGraph.EntityGraphType.LOAD)
     Optional<User> findByEmail(UserEmail userEmail);
+
+    Long countByEmail(UserEmail userEmail);
 }

@@ -85,7 +85,7 @@ public class User extends AbstractAggregateRoot<User> {
                 .registerRule(new UserPasswordValidationRule())
                 .getResult().hasErrorThrows(UserInvalidException::new);
         encrypted(encoder);
-        registerEvent(new UserCreatedEvent(this.email));
+        registerEvent(new UserRegisterEvent(this.email));
     }
 
     public void generateCredentialsKey(UserCredentialsKeyGenerator keyGenerator) {
@@ -93,6 +93,7 @@ public class User extends AbstractAggregateRoot<User> {
             throw new UserAlreadyCertificationException("this account is already certification");
         }
         this.credentialsKey = keyGenerator.generateKey();
+        registerEvent(new UserGeneratedCredentialsKeyEvent(email, credentialsKey));
     }
 
     public void credentials(String credentialsKey, Collection<AuthorityCode> authorities) {
