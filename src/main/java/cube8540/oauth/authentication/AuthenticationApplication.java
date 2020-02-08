@@ -1,6 +1,8 @@
 package cube8540.oauth.authentication;
 
+import cube8540.oauth.authentication.users.domain.UserCredentialsKeyGenerator;
 import cube8540.oauth.authentication.users.domain.UserPasswordEncoder;
+import cube8540.oauth.authentication.users.infra.DefaultUserCredentialsKeyGenerator;
 import cube8540.oauth.authentication.users.infra.DefaultUserPasswordEncoder;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -38,6 +40,12 @@ public class AuthenticationApplication {
     @Primary
     public UserPasswordEncoder userPasswordEncoder(PasswordEncoder encoder) {
         return new DefaultUserPasswordEncoder(encoder);
+    }
+
+    @Bean
+    @Primary
+    public UserCredentialsKeyGenerator userCredentialsKeyGenerator() {
+        return new DefaultUserCredentialsKeyGenerator();
     }
 
     public static void main(String[] args) {
