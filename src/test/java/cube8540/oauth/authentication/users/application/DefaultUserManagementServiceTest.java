@@ -4,13 +4,16 @@ import cube8540.oauth.authentication.users.domain.User;
 import cube8540.oauth.authentication.users.domain.UserAlreadyExistsException;
 import cube8540.oauth.authentication.users.domain.UserEmail;
 import cube8540.oauth.authentication.users.domain.UserNotFoundException;
-import cube8540.oauth.authentication.users.domain.UserPasswordEncoder;
 import cube8540.oauth.authentication.users.domain.UserRepository;
+import cube8540.oauth.authentication.users.domain.UserValidationPolicy;
+import cube8540.validator.core.ValidationRule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -18,8 +21,10 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -37,14 +42,14 @@ class DefaultUserManagementServiceTest {
 
     private static final LocalDateTime REGISTERED_AT = LocalDateTime.of(2020, 2, 8, 15, 38);
 
-    private UserPasswordEncoder encoder;
+    private PasswordEncoder encoder;
     private UserRepository userRepository;
     private DefaultUserManagementService service;
 
     @BeforeEach
     void setup() {
         this.userRepository = mock(UserRepository.class);
-        this.encoder = mock(UserPasswordEncoder.class);
+        this.encoder = mock(PasswordEncoder.class);
         this.service = new DefaultUserManagementService(userRepository, encoder);
     }
 
@@ -150,32 +155,52 @@ class DefaultUserManagementServiceTest {
         @DisplayName("저장소에 저장되지 않은 유저일시")
         class WhenNotRegisterInRepository {
 
+            private ValidationRule<User> emailRule;
+            private ValidationRule<User> passwordRule;
+
             @BeforeEach
+            @SuppressWarnings("unchecked")
             void setup() {
+                UserValidationPolicy policy = mock(UserValidationPolicy.class);
+                this.emailRule = mock(ValidationRule.class);
+                this.passwordRule = mock(ValidationRule.class);
+
+                when(policy.emailRule()).thenReturn(emailRule);
+                when(policy.passwordRule()).thenReturn(passwordRule);
                 when(userRepository.countByEmail(new UserEmail(RAW_EMAIL))).thenReturn(0L);
                 when(encoder.encode(RAW_PASSWORD)).thenReturn(ENCODING_PASSWORD);
+                when(emailRule.isValid(any(User.class))).thenReturn(true);
+                when(passwordRule.isValid(any(User.class))).thenReturn(true);
 
                 doAnswer(returnsFirstArg()).when(userRepository).save(isA(User.class));
+
+                service.setValidationPolicy(policy);
             }
 
             @Test
-            @DisplayName("요청 받은 유저 이메일을 저장해야 한다.")
-            void shouldSaveRequestingUserEmail() {
+            @DisplayName("요청 받은 유저 이메일을 유효성 검사 후 저장해야 한다.")
+            void shouldSaveRequestingUserEmailAfterValidation() {
                 ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+                InOrder inOrder = inOrder(emailRule, userRepository);
 
                 service.registerUser(registerRequest);
-                verify(userRepository, times(1)).save(userCaptor.capture());
+                inOrder.verify(emailRule, times(1)).isValid(userCaptor.capture());
+                inOrder.verify(userRepository, times(1)).save(userCaptor.capture());
+                assertEquals(userCaptor.getAllValues().get(0), userCaptor.getAllValues().get(1));
                 assertEquals(EMAIL, userCaptor.getValue().getEmail());
             }
 
             @Test
-            @DisplayName("요청 받은 유저 패스워드를 암호화 하여 저장해야 한다.")
-            void shouldSaveEncodedRequestingUserPassword() {
+            @DisplayName("요청 받은 유저 패스워드 유효성 검사 후 암호화 하여 저장해야 한다.")
+            void shouldSaveEncodedRequestingUserPasswordAfterValidation() {
                 ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+                InOrder inOrder = inOrder(passwordRule, userRepository);
 
                 service.registerUser(registerRequest);
-                verify(userRepository, times(1)).save(userCaptor.capture());
-                assertEquals(ENCODING_PASSWORD, userCaptor.getValue().getPassword().getPassword());
+                inOrder.verify(passwordRule, times(1)).isValid(userCaptor.capture());
+                inOrder.verify(userRepository, times(1)).save(userCaptor.capture());
+                assertEquals(userCaptor.getAllValues().get(0), userCaptor.getAllValues().get(1));
+                assertEquals(ENCODING_PASSWORD, userCaptor.getValue().getPassword());
             }
 
             @Test

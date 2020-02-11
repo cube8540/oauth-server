@@ -6,13 +6,14 @@ import cube8540.oauth.authentication.users.domain.UserCredentialsKeyGenerator;
 import cube8540.oauth.authentication.users.domain.UserEmail;
 import cube8540.oauth.authentication.users.domain.UserKeyMatchedResult;
 import cube8540.oauth.authentication.users.domain.UserNotFoundException;
-import cube8540.oauth.authentication.users.domain.UserPasswordEncoder;
 import cube8540.oauth.authentication.users.domain.UserRepository;
+import cube8540.oauth.authentication.users.domain.UserValidationPolicy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -39,22 +40,25 @@ class DefaultUserPasswordServiceTest {
     private static final String RAW_EXISTING_PASSWORD = "Password1234!@#$";
     private static final String RAW_NEW_PASSWORD = "NewPassword1234!@#$";
 
+    private static final String ENCRYPTED_EXISTING_PASSWORD = "ENCRYPTED_NEW_PASSWORD";
+
     private static final LocalDateTime REGISTERED_AT = LocalDateTime.of(2020, 2, 8, 19, 24);
 
     private static final String RAW_CREDENTIALS_KEY = "KEY";
 
     private UserRepository userRepository;
-    private UserPasswordEncoder encoder;
+    private PasswordEncoder encoder;
     private UserCredentialsKeyGenerator keyGenerator;
     private DefaultUserPasswordService service;
 
     @BeforeEach
     void setup() {
         this.userRepository = mock(UserRepository.class);
-        this.encoder = mock(UserPasswordEncoder.class);
+        this.encoder = mock(PasswordEncoder.class);
         this.keyGenerator = mock(UserCredentialsKeyGenerator.class);
 
-        this.service = new DefaultUserPasswordService(userRepository, encoder, keyGenerator);
+        this.service = new DefaultUserPasswordService(userRepository, encoder);
+        this.service.setKeyGenerator(keyGenerator);
     }
 
     @Nested
@@ -90,17 +94,22 @@ class DefaultUserPasswordServiceTest {
 
             private User user;
             private ChangePasswordRequest changeRequest;
+            private UserValidationPolicy policy;
 
             @BeforeEach
             void setup() {
+                this.policy = mock(UserValidationPolicy.class);
                 this.user = mock(User.class);
                 this.changeRequest = new ChangePasswordRequest(RAW_EMAIL, RAW_EXISTING_PASSWORD, RAW_NEW_PASSWORD);
 
                 when(user.getEmail()).thenReturn(EMAIL);
                 when(user.getRegisteredAt()).thenReturn(REGISTERED_AT);
                 when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
+                when(encoder.encode(RAW_EXISTING_PASSWORD)).thenReturn(ENCRYPTED_EXISTING_PASSWORD);
 
                 doAnswer(returnsFirstArg()).when(userRepository).save(isA(User.class));
+
+                service.setValidationPolicy(policy);
             }
 
             @Test
@@ -108,16 +117,36 @@ class DefaultUserPasswordServiceTest {
             void shouldChangeUserPassword() {
                 service.changePassword(changeRequest);
 
-                verify(user, times(1)).changePassword(RAW_EXISTING_PASSWORD, RAW_NEW_PASSWORD, encoder);
+                verify(user, times(1)).changePassword(ENCRYPTED_EXISTING_PASSWORD, RAW_NEW_PASSWORD);
             }
 
             @Test
-            @DisplayName("유저의 패스워드를 변경한 후 저장소에 저장해야 한다.")
-            void shouldSaveUserForRepositoryAfterPasswordChanged() {
+            @DisplayName("유저의 패스워드를 변경한 후 유효성 검사를 해야 한다.")
+            void shouldValidationPasswordAfterChangeUserPassword() {
+                service.changePassword(changeRequest);
+
+                InOrder inOrder = inOrder(user);
+                inOrder.verify(user, times(1)).changePassword(ENCRYPTED_EXISTING_PASSWORD, RAW_NEW_PASSWORD);
+                inOrder.verify(user, times(1)).validation(policy);
+            }
+
+            @Test
+            @DisplayName("유저의 패스워드 유효성을 검사한 후 패스워드를 암호화 해야 한다.")
+            void shouldPasswordEncryptingAfterChangeUserPassword() {
+                service.changePassword(changeRequest);
+
+                InOrder inOrder = inOrder(user);
+                inOrder.verify(user, times(1)).validation(policy);
+                inOrder.verify(user, times(1)).encrypted(encoder);
+            }
+
+            @Test
+            @DisplayName("유저의 패스워드를 암호화 한 후 저장소에 저장해야 한다.")
+            void shouldSaveUserForRepositoryAfterEncryptingPassword() {
                 service.changePassword(changeRequest);
 
                 InOrder inOrder = inOrder(user, userRepository);
-                inOrder.verify(user, times(1)).changePassword(RAW_EXISTING_PASSWORD, RAW_NEW_PASSWORD, encoder);
+                inOrder.verify(user, times(1)).encrypted(encoder);
                 inOrder.verify(userRepository, times(1)).save(user);
             }
 
@@ -333,16 +362,20 @@ class DefaultUserPasswordServiceTest {
         class WhenUserRegisterInRepository {
 
             private User user;
+            private UserValidationPolicy policy;
 
             @BeforeEach
             void setup() {
                 this.user = mock(User.class);
+                this.policy = mock(UserValidationPolicy.class);
 
                 when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
                 when(user.getEmail()).thenReturn(EMAIL);
                 when(user.getRegisteredAt()).thenReturn(REGISTERED_AT);
 
                 doAnswer(returnsFirstArg()).when(userRepository).save(isA(User.class));
+
+                service.setValidationPolicy(policy);
             }
 
             @Test
@@ -350,16 +383,36 @@ class DefaultUserPasswordServiceTest {
             void shouldResetPassword() {
                 service.resetPassword(request);
 
-                verify(user, times(1)).resetPassword(RAW_CREDENTIALS_KEY, RAW_NEW_PASSWORD, encoder);
+                verify(user, times(1)).resetPassword(RAW_CREDENTIALS_KEY, RAW_NEW_PASSWORD);
             }
 
             @Test
-            @DisplayName("유저의 패스워드를 초기화한 이후에 저장소에 저장해야 한다.")
-            void shouldSaveUserForRepositoryAfterResetPassword() {
+            @DisplayName("유저의 패스워드를 초기화한 후 유효성 검사를 해야 한다.")
+            void shouldValidationAfterResetUserPassword() {
+                service.resetPassword(request);
+
+                InOrder inOrder = inOrder(user);
+                inOrder.verify(user, times(1)).resetPassword(RAW_CREDENTIALS_KEY, RAW_NEW_PASSWORD);
+                inOrder.verify(user, times(1)).validation(policy);
+            }
+
+            @Test
+            @DisplayName("유저의 유효성을 검사한 후 패스워드를 암호화 해야 한다.")
+            void shouldEncryptingPasswordAfterValidation() {
+                service.resetPassword(request);
+
+                InOrder inOrder = inOrder(user);
+                inOrder.verify(user, times(1)).validation(policy);
+                inOrder.verify(user, times(1)).encrypted(encoder);
+            }
+
+            @Test
+            @DisplayName("유저의 패스워드를 암호화 한 후 저장소에 저장해야 한다.")
+            void shouldSaveUserForRepositoryAfterEncryptingPassword() {
                 service.resetPassword(request);
 
                 InOrder inOrder = inOrder(user, userRepository);
-                inOrder.verify(user, times(1)).resetPassword(RAW_CREDENTIALS_KEY, RAW_NEW_PASSWORD, encoder);
+                inOrder.verify(user, times(1)).encrypted(encoder);
                 inOrder.verify(userRepository, times(1)).save(user);
             }
 
