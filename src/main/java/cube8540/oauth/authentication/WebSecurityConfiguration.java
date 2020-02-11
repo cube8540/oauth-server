@@ -4,6 +4,7 @@ import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
@@ -39,12 +40,17 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
-            .anyRequest().authenticated()
-            .and()
-        .formLogin()
-            .loginPage(loginPage)
-            .loginProcessingUrl(loginProcessUrl)
-            .permitAll();
+                .antMatchers(HttpMethod.POST,"/api/accounts").permitAll()
+                .antMatchers(HttpMethod.GET, "/api/accounts/attributes/email").permitAll()
+                .antMatchers(HttpMethod.PUT, "/api/accounts/credentials/**").permitAll()
+                .and()
+            .authorizeRequests()
+                .anyRequest().authenticated()
+                .and()
+            .formLogin()
+                .loginPage(loginPage)
+                .loginProcessingUrl(loginProcessUrl)
+                .permitAll();
     }
 
     @Override
