@@ -35,7 +35,7 @@ public class DefaultUserService implements UserDetailsService {
                 .stream().map(auth -> new SimpleGrantedAuthority(auth.getValue()))
                 .collect(Collectors.toSet());
         return org.springframework.security.core.userdetails.User.builder()
-                .username(user.getEmail().getValue()).password(user.getPassword().getPassword())
+                .username(user.getEmail().getValue()).password(user.getPassword())
                 .accountLocked(authorities.isEmpty()).authorities(authorities)
                 .build();
     }

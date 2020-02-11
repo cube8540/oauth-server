@@ -3,7 +3,6 @@ package cube8540.oauth.authentication.users.application;
 import cube8540.oauth.authentication.credentials.authority.domain.AuthorityCode;
 import cube8540.oauth.authentication.users.domain.User;
 import cube8540.oauth.authentication.users.domain.UserEmail;
-import cube8540.oauth.authentication.users.domain.UserRawPassword;
 import cube8540.oauth.authentication.users.domain.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -47,7 +46,7 @@ class DefaultUserServiceTest {
     @DisplayName("저장소의 유저를 로딩")
     class WhenLoadingUser {
         private UserEmail email = new UserEmail("email@email.com");
-        private UserRawPassword password = new UserRawPassword("password");
+        private String password = "password";
         private Set<AuthorityCode> authorityCodes = new HashSet<>(Arrays.asList(
                 new AuthorityCode("CODE-1"), new AuthorityCode("CODE-2"), new AuthorityCode("CODE-3")));
 

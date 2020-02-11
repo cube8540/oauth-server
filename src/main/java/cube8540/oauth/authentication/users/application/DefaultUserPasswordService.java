@@ -5,9 +5,13 @@ import cube8540.oauth.authentication.users.domain.UserCredentialsKeyGenerator;
 import cube8540.oauth.authentication.users.domain.UserEmail;
 import cube8540.oauth.authentication.users.domain.UserKeyMatchedResult;
 import cube8540.oauth.authentication.users.domain.UserNotFoundException;
-import cube8540.oauth.authentication.users.domain.UserPasswordEncoder;
 import cube8540.oauth.authentication.users.domain.UserRepository;
+import cube8540.oauth.authentication.users.domain.UserValidationPolicy;
+import cube8540.oauth.authentication.users.infra.DefaultUserCredentialsKeyGenerator;
+import cube8540.oauth.authentication.users.infra.DefaultUserValidationPolicy;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,15 +20,18 @@ public class DefaultUserPasswordService implements UserPasswordService {
 
     private final UserRepository repository;
 
-    private final UserPasswordEncoder encoder;
+    private final PasswordEncoder encoder;
 
-    private final UserCredentialsKeyGenerator keyGenerator;
+    @Setter
+    private UserCredentialsKeyGenerator keyGenerator = new DefaultUserCredentialsKeyGenerator();
+
+    @Setter
+    private UserValidationPolicy validationPolicy = new DefaultUserValidationPolicy();
 
     @Autowired
-    public DefaultUserPasswordService(UserRepository repository, UserPasswordEncoder encoder, UserCredentialsKeyGenerator keyGenerator) {
+    public DefaultUserPasswordService(UserRepository repository, PasswordEncoder encoder) {
         this.repository = repository;
         this.encoder = encoder;
-        this.keyGenerator = keyGenerator;
     }
 
     @Override
@@ -33,7 +40,10 @@ public class DefaultUserPasswordService implements UserPasswordService {
         User user = repository.findByEmail(new UserEmail(changeRequest.getEmail()))
                 .orElseThrow(() -> new UserNotFoundException(changeRequest.getEmail() + " user not found"));
 
-        user.changePassword(changeRequest.getExistingPassword(), changeRequest.getNewPassword(), encoder);
+        user.changePassword(encoder.encode(changeRequest.getExistingPassword()), changeRequest.getNewPassword());
+        user.validation(validationPolicy);
+        user.encrypted(encoder);
+
         return new UserProfile(repository.save(user));
     }
 
@@ -59,7 +69,11 @@ public class DefaultUserPasswordService implements UserPasswordService {
     public UserProfile resetPassword(ResetPasswordRequest resetRequest) {
         User user = repository.findByEmail(new UserEmail(resetRequest.getEmail()))
                 .orElseThrow(() -> new UserNotFoundException(resetRequest.getEmail() + " user not found"));
-        user.resetPassword(resetRequest.getCredentialsKey(), resetRequest.getNewPassword(), encoder);
+
+        user.resetPassword(resetRequest.getCredentialsKey(), resetRequest.getNewPassword());
+        user.validation(validationPolicy);
+        user.encrypted(encoder);
+
         return new UserProfile(repository.save(user));
     }
 }

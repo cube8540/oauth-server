@@ -7,6 +7,8 @@ import cube8540.oauth.authentication.users.domain.UserCredentialsKeyGenerator;
 import cube8540.oauth.authentication.users.domain.UserEmail;
 import cube8540.oauth.authentication.users.domain.UserNotFoundException;
 import cube8540.oauth.authentication.users.domain.UserRepository;
+import cube8540.oauth.authentication.users.infra.DefaultUserCredentialsKeyGenerator;
+import lombok.Setter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,12 +21,12 @@ public class DefaultUserCredentialsService implements UserCredentialsService {
 
     private final BasicAuthorityService authorityService;
 
-    private final UserCredentialsKeyGenerator keyGenerator;
+    @Setter
+    private UserCredentialsKeyGenerator keyGenerator = new DefaultUserCredentialsKeyGenerator();
 
-    public DefaultUserCredentialsService(UserRepository repository, BasicAuthorityService authorityService, UserCredentialsKeyGenerator keyGenerator) {
+    public DefaultUserCredentialsService(UserRepository repository, BasicAuthorityService authorityService) {
         this.repository = repository;
         this.authorityService = authorityService;
-        this.keyGenerator = keyGenerator;
     }
 
     @Override

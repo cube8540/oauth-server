@@ -50,7 +50,8 @@ class DefaultUserCredentialsServiceTest {
         this.authorityService = mock(BasicAuthorityService.class);
         this.keyGenerator = mock(UserCredentialsKeyGenerator.class);
 
-        this.service = new DefaultUserCredentialsService(userRepository, authorityService, keyGenerator);
+        this.service = new DefaultUserCredentialsService(userRepository, authorityService);
+        this.service.setKeyGenerator(keyGenerator);
     }
 
     @Nested

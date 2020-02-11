@@ -10,9 +10,9 @@ import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.Target;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.domain.AbstractAggregateRoot;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.persistence.AttributeOverride;
 import javax.persistence.AttributeOverrides;
@@ -44,10 +44,8 @@ public class User extends AbstractAggregateRoot<User> {
     @AttributeOverride(name = "value", column = @Column(name = "email", length = 128))
     private UserEmail email;
 
-    @Embedded
-    @Target(value = UserEncryptedPassword.class)
-    @AttributeOverride(name = "password", column = @Column(name = "password", length = 64, nullable = false))
-    private UserPassword password;
+    @Column(name = "password", length = 64, nullable = false)
+    private String password;
 
     @Embedded
     @AttributeOverrides(value = {
@@ -77,15 +75,16 @@ public class User extends AbstractAggregateRoot<User> {
     @Column(name = "last_updated_at", nullable = false)
     private LocalDateTime lastUpdatedAt;
 
-    public User(String email, String password, UserPasswordEncoder encoder) {
+    public User(String email, String password) {
         this.email = new UserEmail(email);
-        this.password = new UserRawPassword(password);
-
-        Validator.of(this).registerRule(new UserEmailValidationRule())
-                .registerRule(new UserPasswordValidationRule())
-                .getResult().hasErrorThrows(UserInvalidException::new);
-        encrypted(encoder);
+        this.password = password;
         registerEvent(new UserRegisterEvent(this.email));
+    }
+
+    public void validation(UserValidationPolicy policy) {
+        Validator.of(this).registerRule(policy.emailRule())
+                .registerRule(policy.passwordRule())
+                .getResult().hasErrorThrows(UserInvalidException::new);
     }
 
     public void generateCredentialsKey(UserCredentialsKeyGenerator keyGenerator) {
@@ -105,11 +104,11 @@ public class User extends AbstractAggregateRoot<User> {
         this.credentialsKey = null;
     }
 
-    public void changePassword(String existsPassword, String changePassword, UserPasswordEncoder encoder) {
-        if (!encoder.matches(password, new UserRawPassword(existsPassword))) {
+    public void changePassword(String existsPassword, String changePassword) {
+        if (!this.password.equals(existsPassword)) {
             throw new UserNotMatchedException("existing password is not matched");
         }
-        changePassword(changePassword, encoder);
+        this.password = changePassword;
     }
 
     public void forgotPassword(UserCredentialsKeyGenerator keyGenerator) {
@@ -117,24 +116,17 @@ public class User extends AbstractAggregateRoot<User> {
         registerEvent(new UserGeneratedPasswordCredentialsKeyEvent(email, passwordCredentialsKey));
     }
 
-    public void resetPassword(String passwordCredentialsKey, String changePassword, UserPasswordEncoder encoder) {
+    public void resetPassword(String passwordCredentialsKey, String changePassword) {
         UserKeyMatchedResult matchedResult = Optional.ofNullable(this.passwordCredentialsKey)
                 .map(key -> key.matches(passwordCredentialsKey))
                 .orElseThrow(() -> new UserNotMatchedException("key is not matched"));
         assertMatchedResult(matchedResult);
-        changePassword(changePassword, encoder);
+        this.password = changePassword;
         this.passwordCredentialsKey = null;
     }
 
-    private void changePassword(String changePassword, UserPasswordEncoder encoder) {
-        this.password = new UserRawPassword(changePassword);
-        Validator.of(this).registerRule(new UserPasswordValidationRule())
-                .getResult().hasErrorThrows(UserInvalidException::new);
-        encrypted(encoder);
-    }
-
-    private void encrypted(UserPasswordEncoder encoder) {
-        this.password = this.password.encrypted(encoder);
+    public void encrypted(PasswordEncoder encoder) {
+        this.password = encoder.encode(this.password);
     }
 
     private void assertMatchedResult(UserKeyMatchedResult matchedResult) {
