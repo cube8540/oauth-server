@@ -1,12 +1,7 @@
-@font-face {
-    font-family: 'NanumGothic';
-    src: url("/css/fonts/NanumGothic-Regular.ttf") format("truetype");
-    font-style: normal;
-    font-weight: normal;
-}
+@import url('https://fonts.googleapis.com/css?family=Nanum+Gothic&display=swap');
 
 * {
-    font-family: NanumGothic, "나눔고딕", Sans-Serif, serif;
+    font-family: 'Nanum Gothic', sans-serif;
     color: #404040;
 }
 
@@ -110,4 +105,16 @@ button.danger {
 .alert.warning {
     color: #9F6000;
     background-color: #FEEFB3;
+}
+
+.text-align-center {
+    text-align: center;
+}
+
+.text-align-left {
+    text-align: left;
+}
+
+.text-align-right {
+    text-align: right;
 }
