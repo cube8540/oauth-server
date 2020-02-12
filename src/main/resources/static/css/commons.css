@@ -1,0 +1,113 @@
+@font-face {
+    font-family: 'NanumGothic';
+    src: url("/css/fonts/NanumGothic-Regular.ttf") format("truetype");
+    font-style: normal;
+    font-weight: normal;
+}
+
+* {
+    font-family: NanumGothic, "나눔고딕", Sans-Serif, serif;
+    color: #404040;
+}
+
+a {
+    text-decoration: none;
+    color: #007bff;
+}
+
+strong {
+    color: #4d4d4d;
+}
+
+button {
+    padding: .5rem 1rem;
+    font-size: 1.2rem;
+    border: none;
+    cursor: pointer;
+}
+
+button.submit {
+    color: #ffffff;
+    background-color: #007bff;
+}
+
+button.danger {
+    color: #ffffff;
+    background-color: #f44336;
+}
+
+.block {
+    width: 100%;
+    display: block;
+}
+
+.radius {
+    border-radius: .25rem;
+}
+
+.container {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+}
+
+.content-align-center {
+    justify-content: center;
+    align-items: center;
+}
+
+.form-input {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+}
+
+.form-input > .input-box {
+    flex: 1;
+}
+
+.form-input > .input-box:nth-child(even) {
+    margin-left: 10px;
+}
+
+.form-input > .input-box > label {
+    display: block;
+    height: 20px;
+    line-height: 20px;
+    font-size: .9rem;
+    margin-bottom: 5px;
+}
+
+.form-input > .input-box > input {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    height: 40px;
+    padding: .7rem .5rem;
+    border: 1px solid #ced4aa;
+}
+
+.form-input > .input-box > .options {
+    display: flex;
+    margin-top: 10px;
+    padding: .5rem 0;
+    font-size: .8rem;
+}
+
+.alert {
+    padding: .7rem 1rem;
+    font-size: .8rem;
+    margin-bottom: 10px;
+}
+
+.alert.error {
+    color: #ffffff;
+    background-color: #f44336;
+}
+
+.alert.warning {
+    color: #9F6000;
+    background-color: #FEEFB3;
+}

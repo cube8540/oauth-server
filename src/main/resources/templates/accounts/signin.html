@@ -5,42 +5,49 @@
     <title>Sign In Account</title>
 
     <link rel="stylesheet" type="text/css" th:href="@{/css/reset.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{/css/commons.css}">
     <link rel="stylesheet" type="text/css" th:href="@{/css/accounts/signin.css}">
 </head>
 <body>
-    <div class="login-container" th:style="|background-image:url(@{/img/login-background.jpg})|">
+    <div class="container content-align-center">
         <div class="login-box">
             <div class="title">
-                <h2>로그인</h2>
+                <strong>로그인</strong>
             </div>
             <div class="body">
                 <form th:action="@{/accounts/signin}" method="post">
                     <div class="form-input">
-                        <label for="username">이메일</label>
-                        <input type="email" id="username" name="username">
-                    </div>
-                    <div class="form-input">
-                        <label for="password">패스워드</label>
-                        <input type="password" id="password" name="password">
-                        <div class="options">
-                            <span class="remember-me">
-                                <input type="checkbox" id="remember-me" name="remember-me">
-                                <label for="remember-me">비밀번호 기억하기</label>
-                            </span>
-                            <span class="forgot-password">
-                                <a th:href="@{/accounts/forgot-password}">패스워드 찾기</a>
-                            </span>
+                        <div class="input-box">
+                            <label for="username">이메일</label>
+                            <input type="email" id="username" name="username">
                         </div>
                     </div>
-                    <div class="form-input error" th:if="${session.SPRING_SECURITY_LAST_EXCEPTION != null}">
-                        <span>아이디나 비밀번호를 다시 확인해 주세요.</span>
+                    <div class="form-input">
+                        <div class="input-box">
+                            <label for="password">패스워드</label>
+                            <input type="password" id="password" name="password">
+                            <div class="options">
+                                <span class="remember-me">
+                                    <input type="checkbox" id="remember-me" name="remember-me">
+                                    <label for="remember-me">기억하기</label>
+                                </span>
+                                    <span class="forgot-password">
+                                    <a th:href="@{/accounts/forgot-password}">패스워드 찾기</a>
+                                </span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="form-input login-buttons">
-                        <input type="submit" value="로그인">
-                        <div class="options">
-                            <span class="register">
-                                <a th:href="@{/accounts/signup}">새 계정 만들기</a>
-                            </span>
+                    <div class="alert error" th:if="${session.SPRING_SECURITY_LAST_EXCEPTION != null}">
+                        아이디나 비밀번호를 다시 확인해 주세요.
+                    </div>
+                    <div class="form-input">
+                        <div class="input-box">
+                            <button type="submit" class="submit block">로그인</button>
+                            <div class="options">
+                                <span class="register">
+                                    <a th:href="@{/accounts/signup}">새 계정 만들기</a>
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </form>
