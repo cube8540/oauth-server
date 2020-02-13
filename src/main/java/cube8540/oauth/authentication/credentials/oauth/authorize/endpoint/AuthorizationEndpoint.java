@@ -63,7 +63,7 @@ public class AuthorizationEndpoint {
     private static final String DEFAULT_FORWARD_PREFIX = "forward:";
 
     public static final String DEFAULT_ERROR_PAGE = "/oauth/error";
-    public static final String DEFAULT_APPROVAL_PAGE = "/oauth/approval";
+    public static final String DEFAULT_APPROVAL_PAGE = DEFAULT_FORWARD_PREFIX + "/oauth/approval";
 
     private final OAuth2ClientDetailsService clientDetailsService;
 
@@ -77,9 +77,9 @@ public class AuthorizationEndpoint {
     @Setter
     private OAuth2ExceptionTranslator exceptionTranslator = new DefaultOAuth2ExceptionTranslator();
 
-    private String errorPage = DEFAULT_FORWARD_PREFIX + DEFAULT_ERROR_PAGE;
+    private String errorPage = DEFAULT_ERROR_PAGE;
 
-    private String approvalPage = DEFAULT_FORWARD_PREFIX + DEFAULT_APPROVAL_PAGE;
+    private String approvalPage = DEFAULT_APPROVAL_PAGE;
 
     @Setter
     private RedirectResolver redirectResolver = new DefaultRedirectResolver();
