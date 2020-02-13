@@ -15,7 +15,7 @@ strong {
 }
 
 button {
-    padding: .5rem 1rem;
+    padding: .75rem 1rem;
     font-size: 1.2rem;
     border: none;
     cursor: pointer;
@@ -41,30 +41,35 @@ span.error {
 }
 
 .radius {
-    border-radius: .25rem;
+    border-radius: .5rem;
 }
 
 .container {
     width: 100vw;
     height: 100vh;
     display: flex;
+    background-color: #f9f9f9;
 }
 
 .content-align-center {
     justify-content: center;
+    align-items: center;
 }
 
 .content-box {
     width: 90%;
-    max-width: 500px;
-    padding: 30px;
-    margin-top: 50px;
+    max-width: 650px;
+    padding: 65px 55px;
+    border: 1px solid #ced4da;
+    background-color: #ffffff;
+    box-sizing: border-box;
 }
 
 .content-box > .title {
     height: 50px;
     line-height: 50px;
-    font-size: 1.5rem;
+    font-size: 2rem;
+    font-weight: bold;
     text-align: center;
 }
 
@@ -127,8 +132,7 @@ span.error {
 }
 
 .alert.error {
-    color: #ffffff;
-    background-color: #f44336;
+    color: #f44336;
 }
 
 .alert.warning {
