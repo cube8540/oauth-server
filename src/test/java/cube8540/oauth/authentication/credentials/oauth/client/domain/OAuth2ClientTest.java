@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 
 import java.net.URI;
@@ -27,12 +28,8 @@ class OAuth2ClientTest {
 
     private static final String CLIENT_NAME = "CLIENT_NAME";
 
-    private OAuth2ClientSecretEncoder encoder;
-
     @BeforeEach
     void setup() {
-        this.encoder = mock(OAuth2ClientSecretEncoder.class);
-        when(encoder.encode(RAW_SECRET)).thenReturn(RAW_ENCODING_SECRET);
     }
 
     @Nested
@@ -43,7 +40,7 @@ class OAuth2ClientTest {
 
         @BeforeEach
         void setup() {
-            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET, CLIENT_NAME, encoder);
+            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET, CLIENT_NAME);
         }
 
         @Test
@@ -53,9 +50,9 @@ class OAuth2ClientTest {
         }
 
         @Test
-        @DisplayName("인자로 받은 클라이언트 패스워드를 암호화 하여 저장해야 한다.")
-        void shouldSaveEncryptedGivenSecret() {
-            assertEquals(RAW_ENCODING_SECRET, client.getSecret().getSecret());
+        @DisplayName("인자로 받은 클라이언트 패스워드를 저장해야 한다.")
+        void shouldSaveGivenSecret() {
+            assertEquals(RAW_SECRET, client.getSecret());
         }
 
         @Test
@@ -85,7 +82,7 @@ class OAuth2ClientTest {
 
         @BeforeEach
         void setup() {
-            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET, CLIENT_NAME, encoder);
+            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET, CLIENT_NAME);
         }
 
         @Nested
@@ -139,7 +136,7 @@ class OAuth2ClientTest {
 
         @BeforeEach
         void setup() {
-            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET, CLIENT_NAME, encoder);
+            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET, CLIENT_NAME);
         }
 
         @Nested
@@ -178,7 +175,7 @@ class OAuth2ClientTest {
 
         @BeforeEach
         void setup() {
-            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET, CLIENT_NAME, encoder);
+            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET, CLIENT_NAME);
         }
 
         @Nested
@@ -231,7 +228,7 @@ class OAuth2ClientTest {
 
         @BeforeEach
         void setup() {
-            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET, CLIENT_NAME, encoder);
+            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET, CLIENT_NAME);
         }
 
         @Nested
@@ -272,7 +269,7 @@ class OAuth2ClientTest {
         @BeforeEach
         void setup(){
             this.newScope = new OAuth2ScopeId("SCOPE-1");
-            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET, CLIENT_NAME, encoder);
+            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET, CLIENT_NAME);
         }
 
         @Nested
@@ -333,7 +330,7 @@ class OAuth2ClientTest {
         @BeforeEach
         void setup() {
             this.scope = new OAuth2ScopeId("SCOPE-1");
-            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET, CLIENT_NAME, encoder);
+            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET, CLIENT_NAME);
         }
 
         @Nested
@@ -362,6 +359,29 @@ class OAuth2ClientTest {
                 client.removeScope(scope);
                 assertFalse(client.getScope().contains(scope));
             }
+        }
+    }
+
+    @Nested
+    @DisplayName("클라이언트 패스워드 암호화")
+    class SecretEncrypting {
+        private OAuth2Client client;
+        private PasswordEncoder passwordEncoder;
+
+        @BeforeEach
+        void setup() {
+            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET, CLIENT_NAME);
+            this.passwordEncoder = mock(PasswordEncoder.class);
+
+            when(passwordEncoder.encode(RAW_SECRET)).thenReturn(RAW_ENCODING_SECRET);
+        }
+
+        @Test
+        @DisplayName("클라이언트 패스워드를 암호화 하여 저장해야 한다.")
+        void shouldSaveEncryptedClientSecret() {
+            client.encrypted(passwordEncoder);
+
+            assertEquals(RAW_ENCODING_SECRET, client.getSecret());
         }
     }
 }

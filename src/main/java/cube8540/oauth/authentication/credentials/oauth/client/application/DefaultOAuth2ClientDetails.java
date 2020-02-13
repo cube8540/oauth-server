@@ -28,7 +28,7 @@ public class DefaultOAuth2ClientDetails implements OAuth2ClientDetails, Credenti
 
     public DefaultOAuth2ClientDetails(OAuth2Client client) {
         this.clientId = client.getClientId().getValue();
-        this.clientSecret = client.getSecret().getSecret();
+        this.clientSecret = client.getSecret();
         this.clientName = client.getClientName();
         this.registeredRedirectURI = Collections.unmodifiableSet(client.getRedirectURI());
         this.authorizedGrantType = Collections.unmodifiableSet(client.getGrantType());
