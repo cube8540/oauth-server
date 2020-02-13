@@ -16,12 +16,11 @@ import org.springframework.http.ResponseEntity;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -86,56 +85,40 @@ class UserPasswordAPIEndpointTest {
     @DisplayName("패스워드 수정")
     class ChangePassword {
         private Principal principal;
-        private Map<String, String> parameterMap;
+        private ChangePasswordRequest changeRequest;
         private UserProfile userProfile;
 
         @BeforeEach
         void setup() {
             this.principal = mock(Principal.class);
-            this.parameterMap = new HashMap<>();
             this.userProfile = new UserProfile(EMAIL, LocalDateTime.now());
-
-            parameterMap.put("existsPassword", EXISTS_PASSWORD);
-            parameterMap.put("newPassword", NEW_PASSWORD);
+            this.changeRequest = new ChangePasswordRequest(EXISTS_PASSWORD, NEW_PASSWORD);
 
             when(principal.getName()).thenReturn(EMAIL);
-            when(service.changePassword(any())).thenReturn(userProfile);
+            when(service.changePassword(eq(principal), eq(changeRequest))).thenReturn(userProfile);
         }
 
         @Test
         @DisplayName("인증 받은 사용자의 패스워드를 수정해야 한다.")
         void shouldChangePasswordForAuthenticationUser() {
-            ArgumentCaptor<ChangePasswordRequest> requestCaptor = ArgumentCaptor.forClass(ChangePasswordRequest.class);
-
-            endpoint.changePassword(principal, parameterMap);
-            verify(service, times(1)).changePassword(requestCaptor.capture());
-            assertEquals(EMAIL, requestCaptor.getValue().getEmail());
+            endpoint.changePassword(principal, changeRequest);
+            verify(service, times(1)).changePassword(eq(principal), any());
         }
 
         @Test
-        @DisplayName("요청 받은 이전에 사용하던 패스워드로 패스워드를 변경해야 한다.")
-        void shouldChangePasswordViaExistsPassword() {
+        @DisplayName("요청 받은 패스워드 변경 정보로 패스워드를 변경 해야 한다.")
+        void shouldChangePasswordViaChangeRequestInformation() {
             ArgumentCaptor<ChangePasswordRequest> requestCaptor = ArgumentCaptor.forClass(ChangePasswordRequest.class);
 
-            endpoint.changePassword(principal, parameterMap);
-            verify(service, times(1)).changePassword(requestCaptor.capture());
-            assertEquals(EXISTS_PASSWORD, requestCaptor.getValue().getExistingPassword());
-        }
-
-        @Test
-        @DisplayName("요청 받은 새 패스워드로 패스워드를 변경해야 한다.")
-        void shouldChangePasswordViaNewPassword() {
-            ArgumentCaptor<ChangePasswordRequest> requestCaptor = ArgumentCaptor.forClass(ChangePasswordRequest.class);
-
-            endpoint.changePassword(principal, parameterMap);
-            verify(service, times(1)).changePassword(requestCaptor.capture());
-            assertEquals(NEW_PASSWORD, requestCaptor.getValue().getNewPassword());
+            endpoint.changePassword(principal, changeRequest);
+            verify(service, times(1)).changePassword(any(), requestCaptor.capture());
+            assertEquals(changeRequest, requestCaptor.getValue());
         }
 
         @Test
         @DisplayName("HTTP 상태 코드는 200 이어야 한다.")
         void shouldHttpStatusCodeIs200() {
-            ResponseEntity<ResponseMessage> response = endpoint.changePassword(principal, parameterMap);
+            ResponseEntity<ResponseMessage> response = endpoint.changePassword(principal, changeRequest);
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
         }
@@ -143,7 +126,7 @@ class UserPasswordAPIEndpointTest {
         @Test
         @DisplayName("응답 바디에는 패스워드를 변경한 계정의 정보를 반환해야 한다.")
         void shouldResponseBodyContainsChangedPasswordAccounts() {
-            ResponseEntity<ResponseMessage> response = endpoint.changePassword(principal, parameterMap);
+            ResponseEntity<ResponseMessage> response = endpoint.changePassword(principal, changeRequest);
 
             assertNotNull(response.getBody());
             assertEquals(userProfile, ((SuccessResponseMessage<?>) response.getBody()).getData());

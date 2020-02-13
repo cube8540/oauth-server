@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.security.Principal;
-import java.util.Map;
 
 @RestController
 public class UserPasswordAPIEndpoint {
@@ -29,11 +28,9 @@ public class UserPasswordAPIEndpoint {
     }
 
     @PutMapping(value = "/api/accounts/attributes/password")
-    public ResponseEntity<ResponseMessage> changePassword(Principal principal, @RequestBody Map<String, String> parameterMap) {
-        ChangePasswordRequest changeRequest = new ChangePasswordRequest(principal.getName(),
-                parameterMap.get("existsPassword"), parameterMap.get("newPassword"));
+    public ResponseEntity<ResponseMessage> changePassword(Principal principal, @RequestBody ChangePasswordRequest changeRequest) {
+        UserProfile user = service.changePassword(principal, changeRequest);
 
-        UserProfile user = service.changePassword(changeRequest);
         ResponseMessage message = SuccessResponseMessage.ok(user);
         return new ResponseEntity<>(message, message.getStatus());
     }
