@@ -15,6 +15,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.Principal;
+
 @Service
 public class DefaultUserPasswordService implements UserPasswordService {
 
@@ -36,9 +38,9 @@ public class DefaultUserPasswordService implements UserPasswordService {
 
     @Override
     @Transactional
-    public UserProfile changePassword(ChangePasswordRequest changeRequest) {
-        User user = repository.findByEmail(new UserEmail(changeRequest.getEmail()))
-                .orElseThrow(() -> new UserNotFoundException(changeRequest.getEmail() + " user not found"));
+    public UserProfile changePassword(Principal principal, ChangePasswordRequest changeRequest) {
+        User user = repository.findByEmail(new UserEmail(principal.getName()))
+                .orElseThrow(() -> new UserNotFoundException(principal.getName() + " user not found"));
 
         user.changePassword(encoder.encode(changeRequest.getExistingPassword()), changeRequest.getNewPassword());
         user.validation(validationPolicy);

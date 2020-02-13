@@ -6,10 +6,8 @@ import lombok.Value;
 import java.beans.ConstructorProperties;
 
 @Value
-@RequiredArgsConstructor(onConstructor_ = @ConstructorProperties({"email", "existingPassword", "newPassword"}))
+@RequiredArgsConstructor(onConstructor_ = @ConstructorProperties({"existingPassword", "newPassword"}))
 public class ChangePasswordRequest {
-
-    private String email;
 
     private String existingPassword;
 

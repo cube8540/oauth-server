@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -65,11 +66,15 @@ class DefaultUserPasswordServiceTest {
     @DisplayName("패스워드 변경")
     class ChangePassword {
 
+        private Principal principal;
         private ChangePasswordRequest changeRequest;
 
         @BeforeEach
         void setup() {
-            this.changeRequest = new ChangePasswordRequest(RAW_EMAIL, RAW_EXISTING_PASSWORD, RAW_NEW_PASSWORD);
+            this.principal = mock(Principal.class);
+            this.changeRequest = new ChangePasswordRequest(RAW_EXISTING_PASSWORD, RAW_NEW_PASSWORD);
+
+            when(principal.getName()).thenReturn(RAW_EMAIL);
         }
 
         @Nested
@@ -84,7 +89,7 @@ class DefaultUserPasswordServiceTest {
             @Test
             @DisplayName("UserNotFoundException이 발생해야 한다.")
             void shouldThrowsUserNotFoundException() {
-                assertThrows(UserNotFoundException.class, () -> service.changePassword(changeRequest));
+                assertThrows(UserNotFoundException.class, () -> service.changePassword(principal, changeRequest));
             }
         }
 
@@ -93,15 +98,18 @@ class DefaultUserPasswordServiceTest {
         class WhenUserRegisterInRepository {
 
             private User user;
+            private Principal principal;
             private ChangePasswordRequest changeRequest;
             private UserValidationPolicy policy;
 
             @BeforeEach
             void setup() {
+                this.principal = mock(Principal.class);
                 this.policy = mock(UserValidationPolicy.class);
                 this.user = mock(User.class);
-                this.changeRequest = new ChangePasswordRequest(RAW_EMAIL, RAW_EXISTING_PASSWORD, RAW_NEW_PASSWORD);
+                this.changeRequest = new ChangePasswordRequest(RAW_EXISTING_PASSWORD, RAW_NEW_PASSWORD);
 
+                when(principal.getName()).thenReturn(RAW_EMAIL);
                 when(user.getEmail()).thenReturn(EMAIL);
                 when(user.getRegisteredAt()).thenReturn(REGISTERED_AT);
                 when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
@@ -115,7 +123,7 @@ class DefaultUserPasswordServiceTest {
             @Test
             @DisplayName("유저의 패스워드를 변경해야 한다.")
             void shouldChangeUserPassword() {
-                service.changePassword(changeRequest);
+                service.changePassword(principal, changeRequest);
 
                 verify(user, times(1)).changePassword(ENCRYPTED_EXISTING_PASSWORD, RAW_NEW_PASSWORD);
             }
@@ -123,7 +131,7 @@ class DefaultUserPasswordServiceTest {
             @Test
             @DisplayName("유저의 패스워드를 변경한 후 유효성 검사를 해야 한다.")
             void shouldValidationPasswordAfterChangeUserPassword() {
-                service.changePassword(changeRequest);
+                service.changePassword(principal, changeRequest);
 
                 InOrder inOrder = inOrder(user);
                 inOrder.verify(user, times(1)).changePassword(ENCRYPTED_EXISTING_PASSWORD, RAW_NEW_PASSWORD);
@@ -133,7 +141,7 @@ class DefaultUserPasswordServiceTest {
             @Test
             @DisplayName("유저의 패스워드 유효성을 검사한 후 패스워드를 암호화 해야 한다.")
             void shouldPasswordEncryptingAfterChangeUserPassword() {
-                service.changePassword(changeRequest);
+                service.changePassword(principal, changeRequest);
 
                 InOrder inOrder = inOrder(user);
                 inOrder.verify(user, times(1)).validation(policy);
@@ -143,7 +151,7 @@ class DefaultUserPasswordServiceTest {
             @Test
             @DisplayName("유저의 패스워드를 암호화 한 후 저장소에 저장해야 한다.")
             void shouldSaveUserForRepositoryAfterEncryptingPassword() {
-                service.changePassword(changeRequest);
+                service.changePassword(principal, changeRequest);
 
                 InOrder inOrder = inOrder(user, userRepository);
                 inOrder.verify(user, times(1)).encrypted(encoder);
@@ -153,7 +161,7 @@ class DefaultUserPasswordServiceTest {
             @Test
             @DisplayName("패스워드를 변경한 유저의 이메일을 반환해야 한다.")
             void shouldReturnsUserEmail() {
-                UserProfile profile = service.changePassword(changeRequest);
+                UserProfile profile = service.changePassword(principal, changeRequest);
 
                 assertEquals(RAW_EMAIL, profile.getEmail());
             }
@@ -161,7 +169,7 @@ class DefaultUserPasswordServiceTest {
             @Test
             @DisplayName("패스워드를 변경한 유저의 등록일을 반환해야 한다.")
             void shouldReturnsUserRegisteredAt() {
-                UserProfile profile = service.changePassword(changeRequest);
+                UserProfile profile = service.changePassword(principal, changeRequest);
 
                 assertEquals(REGISTERED_AT, profile.getRegisteredAt());
             }

@@ -15,7 +15,11 @@ import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @DisplayName("계저 인증 엔드 포인트 테스트")
@@ -47,6 +51,22 @@ class UserCredentialsAPIEndpointTest {
             this.userProfile = new UserProfile(EMAIL, REGISTERED_AT);
 
             when(service.accountCredentials(EMAIL, CREDENTIALS_KEY)).thenReturn(userProfile);
+        }
+
+        @Test
+        @DisplayName("요청 받은 이메일의 인증을 해야 한다.")
+        void shouldCredentialsRequestingEmail() {
+            endpoint.credentials(EMAIL, CREDENTIALS_KEY);
+
+            verify(service, times(1)).accountCredentials(eq(EMAIL), any());
+        }
+
+        @Test
+        @DisplayName("요청 받은 인증키로 인증을 해야 한다.")
+        void shouldCredentialsViaRequestingCredentialsKey() {
+            endpoint.credentials(EMAIL, CREDENTIALS_KEY);
+
+            verify(service, times(1)).accountCredentials(any(), eq(CREDENTIALS_KEY));
         }
 
         @Test
