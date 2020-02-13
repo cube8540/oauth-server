@@ -6,7 +6,6 @@
 
     <link rel="stylesheet" type="text/css" th:href="@{/css/reset.css}">
     <link rel="stylesheet" type="text/css" th:href="@{/css/commons.css}">
-    <link rel="stylesheet" type="text/css" th:href="@{/css/accounts/account-commons.css}">
     <link rel="stylesheet" type="text/css" th:href="@{/css/accounts/signin.css}">
 </head>
 <body>
@@ -28,10 +27,6 @@
                             <label for="password">패스워드</label>
                             <input type="password" id="password" name="password">
                             <div class="options">
-                                <span class="remember-me">
-                                    <input type="checkbox" id="remember-me" name="remember-me">
-                                    <label for="remember-me">기억하기</label>
-                                </span>
                                 <span class="forgot-password">
                                     <a th:href="@{/accounts/forgot-password}">패스워드 찾기</a>
                                 </span>

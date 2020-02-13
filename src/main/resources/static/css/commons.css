@@ -31,6 +31,10 @@ button.danger {
     background-color: #f44336;
 }
 
+span.error {
+    color: #f44336;
+}
+
 .block {
     width: 100%;
     display: block;
@@ -48,7 +52,24 @@ button.danger {
 
 .content-align-center {
     justify-content: center;
-    align-items: center;
+}
+
+.content-box {
+    width: 90%;
+    max-width: 500px;
+    padding: 30px;
+    margin-top: 50px;
+}
+
+.content-box > .title {
+    height: 50px;
+    line-height: 50px;
+    font-size: 1.5rem;
+    text-align: center;
+}
+
+.content-box > .body {
+    margin-top: 35px;
 }
 
 .form-input {
@@ -82,6 +103,14 @@ button.danger {
     height: 40px;
     padding: .7rem .5rem;
     border: 1px solid #ced4aa;
+}
+
+.form-input > .input-box > input.error {
+    border: 1px solid #f44336;
+}
+
+.form-input > .input-box > input.success {
+    border: 1px solid #007bff;
 }
 
 .form-input > .input-box > .options {
