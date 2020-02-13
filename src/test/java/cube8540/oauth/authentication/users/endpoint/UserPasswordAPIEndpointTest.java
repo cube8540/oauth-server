@@ -30,6 +30,11 @@ import static org.mockito.Mockito.when;
 @DisplayName("패스워드 API 엔드 포인트 테스트")
 class UserPasswordAPIEndpointTest {
 
+    private static final String EMAIL = "email@email.com";
+    private static final String CREDENTIALS_KEY = "CREDENTIALS-KEY";
+    private static final String EXISTS_PASSWORD = "EXISTS-PASSWORD";
+    private static final String NEW_PASSWORD = "NEW-PASSWORD";
+
     private UserPasswordService service;
     private UserPasswordAPIEndpoint endpoint;
 
@@ -42,29 +47,27 @@ class UserPasswordAPIEndpointTest {
     @Nested
     @DisplayName("패스워드 분실")
     class ForgotPassword {
-        private String email;
         private UserProfile userProfile;
 
         @BeforeEach
         void setup() {
-            this.email = "email@email.com";
-            this.userProfile = new UserProfile(email, LocalDateTime.now());
+            this.userProfile = new UserProfile(EMAIL, LocalDateTime.now());
 
-            when(service.forgotPassword(email)).thenReturn(userProfile);
+            when(service.forgotPassword(EMAIL)).thenReturn(userProfile);
         }
 
         @Test
         @DisplayName("요청 받은 이메일의 패스워드 분실을 요청해야 한다.")
         void shouldCallForgotPasswordForRequestingEmail() {
-            endpoint.forgotPassword(email);
+            endpoint.forgotPassword(EMAIL);
 
-            verify(service, times(1)).forgotPassword(email);
+            verify(service, times(1)).forgotPassword(EMAIL);
         }
 
         @Test
         @DisplayName("HTTP 상태 코드는 200 이어야 한다.")
         void shouldHttpStatusCodeIs200() {
-            ResponseEntity<ResponseMessage> response = endpoint.forgotPassword(email);
+            ResponseEntity<ResponseMessage> response = endpoint.forgotPassword(EMAIL);
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
         }
@@ -72,7 +75,7 @@ class UserPasswordAPIEndpointTest {
         @Test
         @DisplayName("응답 바디에는 패스워드를 분실한 계정의 정보를 반환해야 한다.")
         void shouldResponseBodyContainsForgotPasswordAccounts() {
-            ResponseEntity<ResponseMessage> response = endpoint.forgotPassword(email);
+            ResponseEntity<ResponseMessage> response = endpoint.forgotPassword(EMAIL);
 
             assertNotNull(response.getBody());
             assertEquals(userProfile, ((SuccessResponseMessage<?>) response.getBody()).getData());
@@ -86,23 +89,16 @@ class UserPasswordAPIEndpointTest {
         private Map<String, String> parameterMap;
         private UserProfile userProfile;
 
-        private String email;
-        private String existsPassword;
-        private String newPassword;
-
         @BeforeEach
         void setup() {
-            this.email = "email@email.com";
-            this.existsPassword = "EXISTS-PASSWORD";
-            this.newPassword = "NEW-PASSWORD";
             this.principal = mock(Principal.class);
             this.parameterMap = new HashMap<>();
-            this.userProfile = new UserProfile(email, LocalDateTime.now());
+            this.userProfile = new UserProfile(EMAIL, LocalDateTime.now());
 
-            parameterMap.put("existsPassword", existsPassword);
-            parameterMap.put("newPassword", newPassword);
+            parameterMap.put("existsPassword", EXISTS_PASSWORD);
+            parameterMap.put("newPassword", NEW_PASSWORD);
 
-            when(principal.getName()).thenReturn(email);
+            when(principal.getName()).thenReturn(EMAIL);
             when(service.changePassword(any())).thenReturn(userProfile);
         }
 
@@ -113,7 +109,7 @@ class UserPasswordAPIEndpointTest {
 
             endpoint.changePassword(principal, parameterMap);
             verify(service, times(1)).changePassword(requestCaptor.capture());
-            assertEquals(email, requestCaptor.getValue().getEmail());
+            assertEquals(EMAIL, requestCaptor.getValue().getEmail());
         }
 
         @Test
@@ -123,7 +119,7 @@ class UserPasswordAPIEndpointTest {
 
             endpoint.changePassword(principal, parameterMap);
             verify(service, times(1)).changePassword(requestCaptor.capture());
-            assertEquals(existsPassword, requestCaptor.getValue().getExistingPassword());
+            assertEquals(EXISTS_PASSWORD, requestCaptor.getValue().getExistingPassword());
         }
 
         @Test
@@ -133,7 +129,7 @@ class UserPasswordAPIEndpointTest {
 
             endpoint.changePassword(principal, parameterMap);
             verify(service, times(1)).changePassword(requestCaptor.capture());
-            assertEquals(newPassword, requestCaptor.getValue().getNewPassword());
+            assertEquals(NEW_PASSWORD, requestCaptor.getValue().getNewPassword());
         }
 
         @Test
@@ -157,53 +153,26 @@ class UserPasswordAPIEndpointTest {
     @Nested
     @DisplayName("패스워드 초기화")
     class ResetPassword {
-        private String email;
         private UserProfile userProfile;
-
-        private String credentialsKey;
-        private String newPassword;
 
         private ResetPasswordRequest resetPasswordRequest;
 
         @BeforeEach
         void setup() {
-            this.email = "email@email.com";
-            this.credentialsKey = "CREDENTIALS-KEY";
-            this.newPassword = "NEW-PASSWORD";
-            this.userProfile = new UserProfile(email, LocalDateTime.now());
-            this.resetPasswordRequest = new ResetPasswordRequest(email, credentialsKey, newPassword);
+            this.userProfile = new UserProfile(EMAIL, LocalDateTime.now());
+            this.resetPasswordRequest = new ResetPasswordRequest(EMAIL, CREDENTIALS_KEY, NEW_PASSWORD);
 
-            when(service.resetPassword(any())).thenReturn(userProfile);
+            when(service.resetPassword(resetPasswordRequest)).thenReturn(userProfile);
         }
 
         @Test
-        @DisplayName("요청 받은 이메일의 패스워드를 초기화 해야 한다.")
-        void shouldResetPasswordForRequestingEmail() {
+        @DisplayName("요청 받은 정보로 패스워드를 초기화 해야 한다.")
+        void shouldResetPasswordViaRequestingInformation() {
             ArgumentCaptor<ResetPasswordRequest> requestCaptor = ArgumentCaptor.forClass(ResetPasswordRequest.class);
 
             endpoint.resetPassword(resetPasswordRequest);
             verify(service, times(1)).resetPassword(requestCaptor.capture());
-            assertEquals(email, requestCaptor.getValue().getEmail());
-        }
-
-        @Test
-        @DisplayName("요청 받은 인증키로 패스워드를 초기화 해야 한다.")
-        void shouldResetPasswordViaRequestingCredentialsKey() {
-            ArgumentCaptor<ResetPasswordRequest> requestCaptor = ArgumentCaptor.forClass(ResetPasswordRequest.class);
-
-            endpoint.resetPassword(resetPasswordRequest);
-            verify(service, times(1)).resetPassword(requestCaptor.capture());
-            assertEquals(credentialsKey, requestCaptor.getValue().getCredentialsKey());
-        }
-
-        @Test
-        @DisplayName("요청 받은 새 패스워드로 패스워드를 초기화 해야 한다.")
-        void shouldResetPasswordViaRequestingNewPassword() {
-            ArgumentCaptor<ResetPasswordRequest> requestCaptor = ArgumentCaptor.forClass(ResetPasswordRequest.class);
-
-            endpoint.resetPassword(resetPasswordRequest);
-            verify(service, times(1)).resetPassword(requestCaptor.capture());
-            assertEquals(newPassword, requestCaptor.getValue().getNewPassword());
+            assertEquals(resetPasswordRequest, requestCaptor.getValue());
         }
 
         @Test
