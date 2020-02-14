@@ -157,15 +157,11 @@ class OAuth2ScopeTest {
         @BeforeEach
         void setup() {
             this.scope = new OAuth2Scope(RAW_SCOPE_ID, DESCRIPTION);
-
-            this.scope.addAccessibleAuthority(new AuthorityCode("AUTHORITY-CODE-1"));
-            this.scope.addAccessibleAuthority(new AuthorityCode("AUTHORITY-CODE-2"));
-            this.scope.addAccessibleAuthority(new AuthorityCode("AUTHORITY-CODE-3"));
         }
 
         @Nested
-        @DisplayName("인증 정보에 접근 가능한 권한이 없을시")
-        class WhenAuthenticationNotHaveAccessibleAuthority {
+        @DisplayName("스코프의 접근 가능한 권한이 null일시")
+        class WhenScopeAccessibleAuthorityIsNull {
             private Authentication authentication;
 
             @BeforeEach
@@ -186,24 +182,58 @@ class OAuth2ScopeTest {
         }
 
         @Nested
-        @DisplayName("인증 정보에 접근 가능한 권한이 있을시")
-        class WhenAuthenticationHaveAccessibleAuthority {
-            private Authentication authentication;
+        @DisplayName("스코프의 접근 가능한 권한이 null이 아닐시")
+        class WhenScopeAccessibleAuthorityIsNotNull {
 
             @BeforeEach
             void setup() {
-                this.authentication = mock(Authentication.class);
-
-                Collection<? extends GrantedAuthority> authorities = Arrays.asList(new SimpleGrantedAuthority("AUTHORITY-CODE-1"),
-                        new SimpleGrantedAuthority("SCOPE-2"),
-                        new SimpleGrantedAuthority("SCOPE-3"));
-                doReturn(authorities).when(authentication).getAuthorities();
+                scope.addAccessibleAuthority(new AuthorityCode("AUTHORITY-CODE-1"));
+                scope.addAccessibleAuthority(new AuthorityCode("AUTHORITY-CODE-2"));
+                scope.addAccessibleAuthority(new AuthorityCode("AUTHORITY-CODE-3"));
             }
 
-            @Test
-            @DisplayName("접근 가능 여부는 true가 반환되어야 한다.")
-            void shouldReturnsTrue() {
-                assertTrue(scope.isAccessible(authentication));
+            @Nested
+            @DisplayName("인증 정보에 접근 가능한 권한이 없을시")
+            class WhenAuthenticationNotHaveAccessibleAuthority {
+                private Authentication authentication;
+
+                @BeforeEach
+                void setup() {
+                    this.authentication = mock(Authentication.class);
+
+                    Collection<? extends GrantedAuthority> authorities = Arrays.asList(new SimpleGrantedAuthority("SCOPE-1"),
+                            new SimpleGrantedAuthority("SCOPE-2"),
+                            new SimpleGrantedAuthority("SCOPE-3"));
+                    doReturn(authorities).when(authentication).getAuthorities();
+                }
+
+                @Test
+                @DisplayName("접근 가능 여부는 false가 반환되어야 한다.")
+                void shouldReturnsFalse() {
+                    assertFalse(scope.isAccessible(authentication));
+                }
+            }
+
+            @Nested
+            @DisplayName("인증 정보에 접근 가능한 권한이 있을시")
+            class WhenAuthenticationHaveAccessibleAuthority {
+                private Authentication authentication;
+
+                @BeforeEach
+                void setup() {
+                    this.authentication = mock(Authentication.class);
+
+                    Collection<? extends GrantedAuthority> authorities = Arrays.asList(new SimpleGrantedAuthority("AUTHORITY-CODE-1"),
+                            new SimpleGrantedAuthority("SCOPE-2"),
+                            new SimpleGrantedAuthority("SCOPE-3"));
+                    doReturn(authorities).when(authentication).getAuthorities();
+                }
+
+                @Test
+                @DisplayName("접근 가능 여부는 true가 반환되어야 한다.")
+                void shouldReturnsTrue() {
+                    assertTrue(scope.isAccessible(authentication));
+                }
             }
         }
     }
