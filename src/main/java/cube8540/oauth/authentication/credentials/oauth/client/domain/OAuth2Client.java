@@ -9,6 +9,7 @@ import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 import org.springframework.data.domain.AbstractAggregateRoot;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -48,6 +49,7 @@ public class OAuth2Client extends AbstractAggregateRoot<OAuth2Client> {
     @Column(name = "client_secret", length = 64, nullable = false)
     private String secret;
 
+    @Setter
     @Column(name = "client_name", length = 32, nullable = false)
     private String clientName;
 
@@ -68,6 +70,7 @@ public class OAuth2Client extends AbstractAggregateRoot<OAuth2Client> {
     @AttributeOverride(name = "value", column = @Column(name = "scope_id", length = 32, nullable = false))
     private Set<OAuth2ScopeId> scope;
 
+    @Setter
     @Embedded
     @AttributeOverride(name = "value", column = @Column(name = "oauth2_client_owner", nullable = false, length = 128))
     private UserEmail owner;
@@ -78,11 +81,9 @@ public class OAuth2Client extends AbstractAggregateRoot<OAuth2Client> {
     @Column(name = "refresh_token_validity", nullable = false)
     private Duration refreshTokenValidity;
 
-    public OAuth2Client(String clientId, String secret, String clientName, UserEmail owner) {
+    public OAuth2Client(String clientId, String secret) {
         this.clientId = new OAuth2ClientId(clientId);
         this.secret = secret;
-        this.clientName = clientName;
-        this.owner = owner;
         this.accessTokenValidity = DEFAULT_ACCESS_TOKEN_VALIDITY;
         this.refreshTokenValidity = DEFAULT_REFRESH_TOKEN_VALIDITY;
     }
@@ -135,5 +136,12 @@ public class OAuth2Client extends AbstractAggregateRoot<OAuth2Client> {
                 .registerRule(policy.grantTypeRule())
                 .registerRule(policy.scopeRule())
                 .getResult().hasErrorThrows(ClientInvalidException::new);
+    }
+
+    public void changeSecret(String existsSecret, String changeSecret) {
+        if (!this.secret.equals(existsSecret)) {
+            throw new ClientNotMatchedException("Exists secret is not matched");
+        }
+        this.secret = changeSecret;
     }
 }

@@ -29,10 +29,7 @@ class OAuth2ClientTest {
 
     private static final String RAW_SECRET = "SECRET";
     private static final String RAW_ENCODING_SECRET = "ENCODING-SECRET";
-
-    private static final String CLIENT_NAME = "CLIENT_NAME";
-
-    private static final UserEmail CLIENT_OWNER = new UserEmail("email@email.com");
+    private static final String RAW_CHANGE_SECRET = "CHANGE-SECRET";
 
     @Nested
     @DisplayName("OAuth2 클라이언트 생성")
@@ -42,7 +39,7 @@ class OAuth2ClientTest {
 
         @BeforeEach
         void setup() {
-            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET, CLIENT_NAME, CLIENT_OWNER);
+            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET);
         }
 
         @Test
@@ -55,18 +52,6 @@ class OAuth2ClientTest {
         @DisplayName("인자로 받은 클라이언트 패스워드를 저장해야 한다.")
         void shouldSaveGivenSecret() {
             assertEquals(RAW_SECRET, client.getSecret());
-        }
-
-        @Test
-        @DisplayName("인자로 받은 클라이언트명을 저장해야 한다.")
-        void shouldSaveGivenClientName() {
-            assertEquals(CLIENT_NAME, client.getClientName());
-        }
-
-        @Test
-        @DisplayName("인자로 받은 클라이언트 소우자를 저장해야 한다.")
-        void shouldSaveGivenClientOwner() {
-            assertEquals(CLIENT_OWNER, client.getOwner());
         }
 
         @Test
@@ -90,7 +75,7 @@ class OAuth2ClientTest {
 
         @BeforeEach
         void setup() {
-            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET, CLIENT_NAME, CLIENT_OWNER);
+            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET);
         }
 
         @Nested
@@ -144,7 +129,7 @@ class OAuth2ClientTest {
 
         @BeforeEach
         void setup() {
-            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET, CLIENT_NAME, CLIENT_OWNER);
+            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET);
         }
 
         @Nested
@@ -183,7 +168,7 @@ class OAuth2ClientTest {
 
         @BeforeEach
         void setup() {
-            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET, CLIENT_NAME, CLIENT_OWNER);
+            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET);
         }
 
         @Nested
@@ -236,7 +221,7 @@ class OAuth2ClientTest {
 
         @BeforeEach
         void setup() {
-            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET, CLIENT_NAME, CLIENT_OWNER);
+            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET);
         }
 
         @Nested
@@ -277,7 +262,7 @@ class OAuth2ClientTest {
         @BeforeEach
         void setup(){
             this.newScope = new OAuth2ScopeId("SCOPE-1");
-            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET, CLIENT_NAME, CLIENT_OWNER);
+            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET);
         }
 
         @Nested
@@ -338,7 +323,7 @@ class OAuth2ClientTest {
         @BeforeEach
         void setup() {
             this.scope = new OAuth2ScopeId("SCOPE-1");
-            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET, CLIENT_NAME, CLIENT_OWNER);
+            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET);
         }
 
         @Nested
@@ -378,7 +363,7 @@ class OAuth2ClientTest {
 
         @BeforeEach
         void setup() {
-            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET, CLIENT_NAME, CLIENT_OWNER);
+            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET);
             this.passwordEncoder = mock(PasswordEncoder.class);
 
             when(passwordEncoder.encode(RAW_SECRET)).thenReturn(RAW_ENCODING_SECRET);
@@ -410,7 +395,7 @@ class OAuth2ClientTest {
         @BeforeEach
         @SuppressWarnings("unchecked")
         void setup() {
-            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET, CLIENT_NAME, CLIENT_OWNER);
+            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET);
 
             this.policy = mock(OAuth2ClientValidatePolicy.class);
             this.clientIdRule = mock(ValidationRule.class);
@@ -617,6 +602,42 @@ class OAuth2ClientTest {
             void shouldContainsScopeErrorMessage() {
                 ClientInvalidException exception = assertThrows(ClientInvalidException.class, () -> client.validate(policy));
                 assertTrue(exception.getErrors().contains(ownerError));
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("클라이언트 패스워드 변경")
+    class ClientChangeSecret {
+
+        private OAuth2Client client;
+
+        @BeforeEach
+        void setup() {
+            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET);
+        }
+
+        @Nested
+        @DisplayName("이전에 사용하던 패스워드가 서로 일치 하지 않을시")
+        class WhenExistsPasswordIsNotMatched {
+
+            @Test
+            @DisplayName("ClientNotMatchedException이 발생해야 한다.")
+            void shouldThrowsClientNotMatchedException() {
+                assertThrows(ClientNotMatchedException.class, () -> client.changeSecret("NOT_MATCHED_SECRET", RAW_CHANGE_SECRET));
+            }
+        }
+
+        @Nested
+        @DisplayName("이전에 사용하던 패스워드가 서로 일치할시")
+        class WhenExistsPasswordMatched {
+
+            @Test
+            @DisplayName("요청 받은 패스워드로 클라이언트의 패스워드를 변경해야 한다.")
+            void shouldChangeSecretWithRequestingSecret() {
+                client.changeSecret(RAW_SECRET, RAW_CHANGE_SECRET);
+
+                assertEquals(RAW_CHANGE_SECRET, client.getSecret());
             }
         }
     }
