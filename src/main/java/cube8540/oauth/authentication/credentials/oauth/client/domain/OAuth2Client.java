@@ -3,6 +3,8 @@ package cube8540.oauth.authentication.credentials.oauth.client.domain;
 import cube8540.oauth.authentication.credentials.oauth.converter.AuthorizationGrantTypeConverter;
 import cube8540.oauth.authentication.credentials.oauth.converter.RedirectUriConverter;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
+import cube8540.oauth.authentication.users.domain.UserEmail;
+import cube8540.validator.core.Validator;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -17,6 +19,7 @@ import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.ElementCollection;
+import javax.persistence.Embedded;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -65,16 +68,21 @@ public class OAuth2Client extends AbstractAggregateRoot<OAuth2Client> {
     @AttributeOverride(name = "value", column = @Column(name = "scope_id", length = 32, nullable = false))
     private Set<OAuth2ScopeId> scope;
 
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "oauth2_client_owner", nullable = false, length = 128))
+    private UserEmail owner;
+
     @Column(name = "access_token_validity", nullable = false)
     private Duration accessTokenValidity;
 
     @Column(name = "refresh_token_validity", nullable = false)
     private Duration refreshTokenValidity;
 
-    public OAuth2Client(String clientId, String secret, String clientName) {
+    public OAuth2Client(String clientId, String secret, String clientName, UserEmail owner) {
         this.clientId = new OAuth2ClientId(clientId);
         this.secret = secret;
         this.clientName = clientName;
+        this.owner = owner;
         this.accessTokenValidity = DEFAULT_ACCESS_TOKEN_VALIDITY;
         this.refreshTokenValidity = DEFAULT_REFRESH_TOKEN_VALIDITY;
     }
@@ -117,5 +125,15 @@ public class OAuth2Client extends AbstractAggregateRoot<OAuth2Client> {
     public void removeScope(OAuth2ScopeId scope) {
         Optional.ofNullable(this.scope)
                 .ifPresent(scopes -> scopes.remove(scope));
+    }
+
+    public void validate(OAuth2ClientValidatePolicy policy) {
+        Validator.of(this).registerRule(policy.clientIdRule())
+                .registerRule(policy.secretRule())
+                .registerRule(policy.ownerRule())
+                .registerRule(policy.clientNameRule())
+                .registerRule(policy.grantTypeRule())
+                .registerRule(policy.scopeRule())
+                .getResult().hasErrorThrows(ClientInvalidException::new);
     }
 }
