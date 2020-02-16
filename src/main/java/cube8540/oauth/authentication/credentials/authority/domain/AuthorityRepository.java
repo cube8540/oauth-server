@@ -6,6 +6,8 @@ import java.util.List;
 
 public interface AuthorityRepository extends JpaRepository<Authority, AuthorityCode> {
 
+    Long countByCode(AuthorityCode code);
+
     List<Authority> findByBasicTrue();
 
 }
