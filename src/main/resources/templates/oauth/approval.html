@@ -5,18 +5,19 @@
     <title>Scope Approval Page</title>
 
     <link rel="stylesheet" type="text/css" th:href="@{/css/reset.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{/css/commons.css}">
     <link rel="stylesheet" type="text/css" th:href="@{/css/accounts/approval.css}">
 
     <script type="application/javascript" th:src="@{/js/accounts/approval.js}"></script>
 </head>
 <body>
-    <div class="approval-container" th:style="|background-image:url(@{/img/login-background.jpg})|">
-        <div class="approval-box">
+    <div class="container content-align-center">
+        <div class="content-box radius">
             <div class="title">
-                <h2>OAuth2 Scope Approval</h2>
+                <strong>스코프 접근 허용</strong>
             </div>
             <div id="scope-approval" class="body">
-                <div class="message">
+                <div class="alert warning">
                     <strong th:text="${authorizationRequestClientName}"></strong>
                     <span>가 아래의 접근 권한을 요청합니다.</span>
                 </div>
@@ -29,8 +30,8 @@
                     </div>
                 </form>
                 <div class="buttons">
-                    <button type="button" id="agree" onclick="approvalOrDeny(true)">허용</button>
-                    <button type="button" id="deny" onclick="approvalOrDeny(false)">거부</button>
+                    <button type="button" class="submit" onclick="approvalOrDeny(true)">허용</button>
+                    <button type="button" class="danger" onclick="approvalOrDeny(false)">거부</button>
                 </div>
             </div>
         </div>
