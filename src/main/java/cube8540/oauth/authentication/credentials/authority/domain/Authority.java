@@ -1,10 +1,10 @@
 package cube8540.oauth.authentication.credentials.authority.domain;
 
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 import org.springframework.data.domain.AbstractAggregateRoot;
 
@@ -17,7 +17,6 @@ import javax.persistence.Table;
 @Getter
 @ToString
 @EqualsAndHashCode(callSuper = false)
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "authority")
@@ -27,17 +26,24 @@ public class Authority extends AbstractAggregateRoot<Authority> {
     @AttributeOverride(name = "value", column = @Column(name = "code", length = 32))
     private AuthorityCode code;
 
+    @Setter
     @Column(name = "description", length = 64)
     private String description;
 
     @Column(name = "is_basic", nullable = false)
     private boolean basic;
 
-    public static Authority createBasicAuthority(String authorityCode, String description) {
-        return new Authority(new AuthorityCode(authorityCode), description, Boolean.TRUE);
+    public Authority(String code, String description) {
+        this.code = new AuthorityCode(code);
+        this.description = description;
+        this.basic = false;
     }
 
-    public static Authority createDefaultAuthority(String authorityCode, String description) {
-        return new Authority(new AuthorityCode(authorityCode), description, Boolean.FALSE);
+    public void settingBasicAuthority() {
+        this.basic = true;
+    }
+
+    public void settingNotBasicAuthority() {
+        this.basic = false;
     }
 }
