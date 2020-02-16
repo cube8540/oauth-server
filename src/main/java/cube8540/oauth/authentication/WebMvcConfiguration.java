@@ -10,5 +10,6 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
         registry.addViewController("/accounts/signin").setViewName("accounts/signin");
+        registry.addViewController("/oauth/approval").setViewName("oauth/approval");
     }
 }
