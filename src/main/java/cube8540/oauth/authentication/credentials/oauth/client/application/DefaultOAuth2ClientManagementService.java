@@ -3,6 +3,7 @@ package cube8540.oauth.authentication.credentials.oauth.client.application;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2Utils;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.ClientNotMatchedException;
+import cube8540.oauth.authentication.credentials.oauth.client.domain.ClientOwnerNotMatchedException;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2Client;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientAlreadyExistsException;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
@@ -67,7 +68,7 @@ public class DefaultOAuth2ClientManagementService extends DefaultOAuth2ClientDet
                 .orElseThrow(() -> new OAuth2ClientNotFoundException(clientId + " is not found"));
         UserEmail authenticated = new UserEmail(SecurityContextHolder.getContext().getAuthentication().getName());
         if (!client.getOwner().equals(authenticated)) {
-            throw new ClientNotMatchedException("owner and authenticated user not matched");
+            throw new ClientOwnerNotMatchedException("owner and authenticated user not matched");
         }
         client.setClientName(modifyRequest.getClientName());
         modifyRequest.getRemoveRedirectUris().forEach(uri -> client.removeRedirectURI(URI.create(uri)));
@@ -89,7 +90,7 @@ public class DefaultOAuth2ClientManagementService extends DefaultOAuth2ClientDet
 
         UserEmail authenticated = new UserEmail(SecurityContextHolder.getContext().getAuthentication().getName());
         if (!client.getOwner().equals(authenticated)) {
-            throw new ClientNotMatchedException("owner and authenticated user not matched");
+            throw new ClientOwnerNotMatchedException("owner and authenticated user not matched");
         }
 
         client.changeSecret(changeRequest.getExistsSecret(), changeRequest.getNewSecret());
@@ -106,7 +107,7 @@ public class DefaultOAuth2ClientManagementService extends DefaultOAuth2ClientDet
 
         UserEmail authenticated = new UserEmail(SecurityContextHolder.getContext().getAuthentication().getName());
         if (!client.getOwner().equals(authenticated)) {
-            throw new ClientNotMatchedException("owner and authenticated user not matched");
+            throw new ClientOwnerNotMatchedException("owner and authenticated user not matched");
         }
 
         getRepository().delete(client);

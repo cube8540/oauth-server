@@ -1,7 +1,7 @@
 package cube8540.oauth.authentication.credentials.oauth.client.application;
 
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
-import cube8540.oauth.authentication.credentials.oauth.client.domain.ClientNotMatchedException;
+import cube8540.oauth.authentication.credentials.oauth.client.domain.ClientOwnerNotMatchedException;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2Client;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientAlreadyExistsException;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
@@ -458,9 +458,9 @@ class DefaultOAuth2ClientManagementServiceTest {
                 }
 
                 @Test
-                @DisplayName("ClientNotMatchedException이 발생해야 한다.")
-                void shouldThrowsClientNotMatchedException() {
-                    assertThrows(ClientNotMatchedException.class, () -> service.modifyClient(RAW_CLIENT_ID, modifyRequest));
+                @DisplayName("ClientOwnerNotMatchedException이 발생해야 한다.")
+                void shouldThrowsClientOwnerNotMatchedException() {
+                    assertThrows(ClientOwnerNotMatchedException.class, () -> service.modifyClient(RAW_CLIENT_ID, modifyRequest));
                 }
             }
 
@@ -625,9 +625,9 @@ class DefaultOAuth2ClientManagementServiceTest {
                 }
 
                 @Test
-                @DisplayName("ClientNotMatchedException이 발생해야 한다.")
-                void shouldThrowsClientNotMatchedException() {
-                    assertThrows(ClientNotMatchedException.class, () -> service.changeSecret(RAW_CLIENT_ID, changeRequest));
+                @DisplayName("ClientOwnerNotMatchedException이 발생해야 한다.")
+                void shouldThrowsClientOwnerNotMatchedException() {
+                    assertThrows(ClientOwnerNotMatchedException.class, () -> service.changeSecret(RAW_CLIENT_ID, changeRequest));
                 }
             }
 
@@ -763,9 +763,9 @@ class DefaultOAuth2ClientManagementServiceTest {
                 }
 
                 @Test
-                @DisplayName("ClientNotMatchedException이 발생해야 한다.")
-                void shouldThrowsClientNotMatchedException() {
-                    assertThrows(ClientNotMatchedException.class, () -> service.removeClient(RAW_CLIENT_ID));
+                @DisplayName("ClientOwnerNotMatchedException이 발생해야 한다.")
+                void shouldThrowsClientOwnerNotMatchedException() {
+                    assertThrows(ClientOwnerNotMatchedException.class, () -> service.removeClient(RAW_CLIENT_ID));
                 }
             }
 
