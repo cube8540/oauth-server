@@ -2,6 +2,7 @@ package cube8540.oauth.authentication.credentials.oauth;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.springframework.security.oauth2.core.AuthorizationGrantType;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -82,6 +83,25 @@ public final class OAuth2Utils {
             result.addAll(Arrays.asList(scopes));
         }
         return result;
+    }
+
+    public static AuthorizationGrantType extractGrantType(String value) {
+        if (value.equalsIgnoreCase(AuthorizationGrantType.AUTHORIZATION_CODE.getValue())) {
+            return AuthorizationGrantType.AUTHORIZATION_CODE;
+        }
+        if (value.equalsIgnoreCase(AuthorizationGrantType.PASSWORD.getValue())) {
+            return AuthorizationGrantType.PASSWORD;
+        }
+        if (value.equalsIgnoreCase(AuthorizationGrantType.CLIENT_CREDENTIALS.getValue())) {
+            return AuthorizationGrantType.CLIENT_CREDENTIALS;
+        }
+        if (value.equalsIgnoreCase(AuthorizationGrantType.REFRESH_TOKEN.getValue())) {
+            return AuthorizationGrantType.REFRESH_TOKEN;
+        }
+        if (value.equalsIgnoreCase(AuthorizationGrantType.IMPLICIT.getValue())) {
+            return AuthorizationGrantType.IMPLICIT;
+        }
+        throw new IllegalArgumentException("Unknowns authorization grant type");
     }
 
 }
