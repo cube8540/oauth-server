@@ -1,13 +1,13 @@
-package cube8540.oauth.authentication.credentials.oauth;
+package cube8540.oauth.authentication.credentials.oauth.client.application;
 
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetailsService;
-import cube8540.oauth.authentication.credentials.oauth.client.application.DefaultOAuth2ClientDetailsService;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2Client;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientNotFoundException;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientRepository;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
+import cube8540.oauth.authentication.users.domain.UserEmail;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -56,6 +56,9 @@ class DefaultOAuth2ClientDetailsServiceTest {
 
     private static final Duration REFRESH_TOKEN_VALIDITY = Duration.ofHours(2);
 
+    private static final String RAW_OWNER = "owner@email.com";
+    private static final UserEmail OWNER = new UserEmail(RAW_OWNER);
+
     private OAuth2Client client;
 
     private OAuth2ClientRepository repository;
@@ -102,6 +105,7 @@ class DefaultOAuth2ClientDetailsServiceTest {
                 when(client.getScope()).thenReturn(SCOPE);
                 when(client.getAccessTokenValidity()).thenReturn(ACCESS_TOKEN_VALIDITY);
                 when(client.getRefreshTokenValidity()).thenReturn(REFRESH_TOKEN_VALIDITY);
+                when(client.getOwner()).thenReturn(OWNER);
                 when(repository.findByClientId(CLIENT_ID)).thenReturn(Optional.of(client));
             }
 
