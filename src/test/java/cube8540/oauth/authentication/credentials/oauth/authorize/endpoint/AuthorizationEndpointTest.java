@@ -658,7 +658,7 @@ class AuthorizationEndpointTest {
             void shouldForwardingErrorPage() {
                 ModelAndView modelAndView = endpoint.handleOAuth2AuthenticationException(redirectMismatchException, servletWebRequest);
 
-                assertEquals("forward:/oauth/error", modelAndView.getViewName());
+                assertEquals("/oauth/error", modelAndView.getViewName());
             }
 
             @Test
@@ -730,7 +730,7 @@ class AuthorizationEndpointTest {
                     void shouldForwardingErrorPage() {
                         ModelAndView modelAndView = endpoint.handleOAuth2AuthenticationException(authenticationException, servletWebRequest);
 
-                        assertEquals("forward:/oauth/error", modelAndView.getViewName());
+                        assertEquals("/oauth/error", modelAndView.getViewName());
                     }
 
                     @Test
@@ -761,7 +761,7 @@ class AuthorizationEndpointTest {
                     void shouldForwardingErrorPage() {
                         ModelAndView modelAndView = endpoint.handleOAuth2AuthenticationException(authenticationException, servletWebRequest);
 
-                        assertEquals("forward:/oauth/error", modelAndView.getViewName());
+                        assertEquals("/oauth/error", modelAndView.getViewName());
                     }
 
                     @Test
@@ -902,7 +902,7 @@ class AuthorizationEndpointTest {
                     void shouldForwardingErrorPage() {
                         ModelAndView modelAndView = endpoint.handleOAuth2AuthenticationException(authenticationException, servletWebRequest);
 
-                        assertEquals("forward:/oauth/error", modelAndView.getViewName());
+                        assertEquals("/oauth/error", modelAndView.getViewName());
                     }
 
                     @Test
@@ -933,7 +933,7 @@ class AuthorizationEndpointTest {
                     void shouldForwardingErrorPage() {
                         ModelAndView modelAndView = endpoint.handleOAuth2AuthenticationException(authenticationException, servletWebRequest);
 
-                        assertEquals("forward:/oauth/error", modelAndView.getViewName());
+                        assertEquals("/oauth/error", modelAndView.getViewName());
                     }
 
                     @Test
@@ -1075,7 +1075,7 @@ class AuthorizationEndpointTest {
             void shouldForwardingErrorPage() {
                 ModelAndView modelAndView = endpoint.handleClientRegistrationException(clientRegistrationException, servletWebRequest);
 
-                assertEquals("forward:/oauth/error", modelAndView.getViewName());
+                assertEquals("/oauth/error", modelAndView.getViewName());
             }
 
             @Test
@@ -1147,7 +1147,7 @@ class AuthorizationEndpointTest {
                     void shouldForwardingErrorPage() {
                         ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
 
-                        assertEquals("forward:/oauth/error", modelAndView.getViewName());
+                        assertEquals("/oauth/error", modelAndView.getViewName());
                     }
 
                     @Test
@@ -1178,7 +1178,7 @@ class AuthorizationEndpointTest {
                     void shouldForwardingErrorPage() {
                         ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
 
-                        assertEquals("forward:/oauth/error", modelAndView.getViewName());
+                        assertEquals("/oauth/error", modelAndView.getViewName());
                     }
 
                     @Test
@@ -1319,7 +1319,7 @@ class AuthorizationEndpointTest {
                     void shouldForwardingErrorPage() {
                         ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
 
-                        assertEquals("forward:/oauth/error", modelAndView.getViewName());
+                        assertEquals("/oauth/error", modelAndView.getViewName());
                     }
 
                     @Test
@@ -1350,7 +1350,7 @@ class AuthorizationEndpointTest {
                     void shouldForwardingErrorPage() {
                         ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
 
-                        assertEquals("forward:/oauth/error", modelAndView.getViewName());
+                        assertEquals("/oauth/error", modelAndView.getViewName());
                     }
 
                     @Test
