@@ -36,6 +36,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
@@ -43,6 +44,7 @@ import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -290,6 +292,27 @@ class DefaultOAuth2ClientManagementServiceTest {
                 assertEquals(CLIENT_NAME, clientCaptor.getValue().getClientName());
             }
 
+            @Nested
+            @DisplayName("요청 받은 권한 부여 방식이 null일시")
+            class WhenRequestingGrantTypeIsNull {
+                private OAuth2ClientRegisterRequest request;
+
+                @BeforeEach
+                void setup() {
+                    this.request = new OAuth2ClientRegisterRequest(RAW_CLIENT_ID, SECRET, CLIENT_NAME, RAW_REDIRECT_URIS, RAW_SCOPES, null);
+                }
+
+                @Test
+                @DisplayName("클라이언트에 권한 부여 방식을 저장하지 않아야 한다.")
+                void shouldNotSaveGrantTypeForClient() {
+                    ArgumentCaptor<OAuth2Client> clientCaptor = ArgumentCaptor.forClass(OAuth2Client.class);
+
+                    service.registerNewClient(request);
+                    verify(repository, times(1)).save(clientCaptor.capture());
+                    assertNull(clientCaptor.getValue().getGrantType());
+                }
+            }
+
             @Test
             @DisplayName("요청 받은 클라이언트 권한 부여 방식의 유효성을 검사한 후 저장소에 저장해야 한다.")
             void shouldSaveRequestingClientGrantTypeAfterValidation() {
@@ -301,6 +324,27 @@ class DefaultOAuth2ClientManagementServiceTest {
                 inOrder.verify(repository, times(1)).save(clientCaptor.capture());
                 assertEquals(clientCaptor.getAllValues().get(0), clientCaptor.getAllValues().get(1));
                 assertEquals(GRANT_TYPES, clientCaptor.getValue().getGrantType());
+            }
+
+            @Nested
+            @DisplayName("요청 받은 스코프가 null일시")
+            class WhenRequestingScopeIsNull {
+                private OAuth2ClientRegisterRequest request;
+
+                @BeforeEach
+                void setup() {
+                    this.request = new OAuth2ClientRegisterRequest(RAW_CLIENT_ID, SECRET, CLIENT_NAME, RAW_REDIRECT_URIS, null, RAW_GRANT_TYPES);
+                }
+
+                @Test
+                @DisplayName("클라이언트에 스코프를 저장하지 않아야 한다.")
+                void shouldNotSaveScopeForClient() {
+                    ArgumentCaptor<OAuth2Client> clientCaptor = ArgumentCaptor.forClass(OAuth2Client.class);
+
+                    service.registerNewClient(request);
+                    verify(repository, times(1)).save(clientCaptor.capture());
+                    assertNull(clientCaptor.getValue().getScope());
+                }
             }
 
             @Test
@@ -327,6 +371,27 @@ class DefaultOAuth2ClientManagementServiceTest {
                 inOrder.verify(repository, times(1)).save(clientCaptor.capture());
                 assertEquals(clientCaptor.getAllValues().get(0), clientCaptor.getAllValues().get(1));
                 assertEquals(OWNER, clientCaptor.getValue().getOwner());
+            }
+
+            @Nested
+            @DisplayName("요청 받은 리다이렉트 URI가 null일시")
+            class WhenRequestingRedirectUrisIsNull {
+                private OAuth2ClientRegisterRequest request;
+
+                @BeforeEach
+                void setup() {
+                    this.request = new OAuth2ClientRegisterRequest(RAW_CLIENT_ID, SECRET, CLIENT_NAME, null, RAW_SCOPES, RAW_GRANT_TYPES);
+                }
+
+                @Test
+                @DisplayName("클라이언트에 리다이렉트 URI를 저장하지 않아야 한다.")
+                void shouldNotSaveRedirectUrisForClient() {
+                    ArgumentCaptor<OAuth2Client> clientCaptor = ArgumentCaptor.forClass(OAuth2Client.class);
+
+                    service.registerNewClient(request);
+                    verify(repository, times(1)).save(clientCaptor.capture());
+                    assertNull(clientCaptor.getValue().getRedirectURI());
+                }
             }
 
             @Test
@@ -472,6 +537,120 @@ class DefaultOAuth2ClientManagementServiceTest {
                 service.modifyClient(RAW_CLIENT_ID, modifyRequest);
                 inOrder.verify(client, times(1)).setClientName(MODIFY_CLIENT_NAME);
                 inOrder.verify(client, times(1)).validate(policy);
+            }
+
+            @Nested
+            @DisplayName("삭제할 리다이렉트 URI가 null일시")
+            class WhenRequestingRemoveRedirectUrisIsNull {
+                private OAuth2ClientModifyRequest request;
+
+                @BeforeEach
+                void setup() {
+                    this.request = new OAuth2ClientModifyRequest(MODIFY_CLIENT_NAME, RAW_NEW_REDIRECT_URIS, null,
+                            RAW_NEW_GRANT_TYPES, RAW_REMOVE_GRANT_TYPES, RAW_NEW_SCOPES, RAW_REMOVE_SCOPES);
+                }
+
+                @Test
+                @DisplayName("클라이언트의 리다이렉트 URI를 삭제하지 않아야 한다.")
+                void shouldNotRemoveClientsRedirectUri() {
+                    service.modifyClient(RAW_CLIENT_ID, request);
+                    verify(client, never()).removeRedirectURI(any());
+                }
+            }
+
+            @Nested
+            @DisplayName("추가할 리다이렉트 URI가 null일시")
+            class WhenRequestingNewRedirectUrisIsNull {
+                private OAuth2ClientModifyRequest request;
+
+                @BeforeEach
+                void setup() {
+                    this.request = new OAuth2ClientModifyRequest(MODIFY_CLIENT_NAME, null, RAW_REMOVE_REDIRECT_URIS,
+                            RAW_NEW_GRANT_TYPES, RAW_REMOVE_GRANT_TYPES, RAW_NEW_SCOPES, RAW_REMOVE_SCOPES);
+                }
+
+                @Test
+                @DisplayName("클라이언트의 리다이렉트 URI를 추가하지 않아야 한다.")
+                void shouldNotAddClientsRedirectUri() {
+                    service.modifyClient(RAW_CLIENT_ID, request);
+                    verify(client, never()).addRedirectURI(any());
+                }
+            }
+
+            @Nested
+            @DisplayName("삭제할 권한 부여 방식이 null일시")
+            class WhenRequestingRemoveGrantTypeIsNull {
+                private OAuth2ClientModifyRequest request;
+
+                @BeforeEach
+                void setup() {
+                    this.request = new OAuth2ClientModifyRequest(MODIFY_CLIENT_NAME, RAW_NEW_REDIRECT_URIS, RAW_REMOVE_REDIRECT_URIS,
+                            RAW_NEW_GRANT_TYPES, null, RAW_NEW_SCOPES, RAW_REMOVE_SCOPES);
+                }
+
+                @Test
+                @DisplayName("클라이언트의 권한 부여 방식을 삭제하지 않아야 한다.")
+                void shouldNotRemoveClientsGrantType() {
+                    service.modifyClient(RAW_CLIENT_ID, request);
+                    verify(client, never()).removeGrantType(any());
+                }
+            }
+
+            @Nested
+            @DisplayName("추가할 권한 부여 방식이 null일시")
+            class WhenRequestingNewGrantTypeIsNull {
+                private OAuth2ClientModifyRequest request;
+
+                @BeforeEach
+                void setup() {
+                    this.request = new OAuth2ClientModifyRequest(MODIFY_CLIENT_NAME, RAW_NEW_REDIRECT_URIS, RAW_REMOVE_REDIRECT_URIS,
+                            null, RAW_REMOVE_GRANT_TYPES, RAW_NEW_SCOPES, RAW_REMOVE_SCOPES);
+                }
+
+                @Test
+                @DisplayName("클라이언트의 권한 부여 방식을 추가하지 않아야 한다.")
+                void shouldNotAddClientsGrantType() {
+                    service.modifyClient(RAW_CLIENT_ID, request);
+                    verify(client, never()).addGrantType(any());
+                }
+            }
+
+            @Nested
+            @DisplayName("삭제할 스코프가 null일시")
+            class WhenRequestingScopeIsNull {
+                private OAuth2ClientModifyRequest request;
+
+                @BeforeEach
+                void setup() {
+                    this.request = new OAuth2ClientModifyRequest(MODIFY_CLIENT_NAME, RAW_NEW_REDIRECT_URIS, RAW_REMOVE_REDIRECT_URIS,
+                            RAW_NEW_GRANT_TYPES, RAW_REMOVE_GRANT_TYPES, RAW_NEW_SCOPES, null);
+                }
+
+                @Test
+                @DisplayName("클라이언트의 스코프를 삭제하지 않아야 한다.")
+                void shouldNotRemoveClientsScope() {
+                    service.modifyClient(RAW_CLIENT_ID, request);
+                    verify(client, never()).removeScope(any());
+                }
+            }
+
+            @Nested
+            @DisplayName("추가할 스코프가 null일시")
+            class WhenRequestingNewScopeIsNull {
+                private OAuth2ClientModifyRequest request;
+
+                @BeforeEach
+                void setup() {
+                    this.request = new OAuth2ClientModifyRequest(MODIFY_CLIENT_NAME, RAW_NEW_REDIRECT_URIS, RAW_REMOVE_REDIRECT_URIS,
+                            RAW_NEW_GRANT_TYPES, RAW_REMOVE_GRANT_TYPES, null, RAW_REMOVE_SCOPES);
+                }
+
+                @Test
+                @DisplayName("클라이언트의 스코프를 추가하지 않아야 한다.")
+                void shouldNotAddClientsScope() {
+                    service.modifyClient(RAW_CLIENT_ID, request);
+                    verify(client, never()).addScope(any());
+                }
             }
 
             @Test
@@ -637,7 +816,7 @@ class DefaultOAuth2ClientManagementServiceTest {
                 InOrder inOrder = inOrder(client);
 
                 service.changeSecret(RAW_CLIENT_ID, changeRequest);
-                inOrder.verify(client, times(1)).changeSecret(SECRET, MODIFY_SECRET);
+                inOrder.verify(client, times(1)).changeSecret(ENCODING_SECRET, MODIFY_SECRET);
                 inOrder.verify(client, times(1)).validate(policy);
             }
 

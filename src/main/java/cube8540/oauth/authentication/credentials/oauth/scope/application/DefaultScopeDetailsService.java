@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class DefaultScopeDetailsService implements OAuth2ScopeManagementService, OAuth2AccessibleScopeDetailsService {
@@ -50,7 +51,8 @@ public class DefaultScopeDetailsService implements OAuth2ScopeManagementService,
         }
 
         OAuth2Scope scope = new OAuth2Scope(registerRequest.getScopeId(), registerRequest.getDescription());
-        registerRequest.getAccessibleAuthority().forEach(authority -> scope.addAccessibleAuthority(new AuthorityCode(authority)));
+        Optional.ofNullable(registerRequest.getAccessibleAuthority())
+                .ifPresent(authorities -> authorities.forEach(authority -> scope.addAccessibleAuthority(new AuthorityCode(authority))));
 
         scope.validate(validationPolicy);
         return new DefaultOAuth2ScopeDetails(repository.save(scope));
@@ -63,8 +65,10 @@ public class DefaultScopeDetailsService implements OAuth2ScopeManagementService,
                 .orElseThrow(() -> new OAuth2ScopeNotFoundException(scopeId + " is not found"));
 
         scope.setDescription(modifyRequest.getDescription());
-        modifyRequest.getRemoveAccessibleAuthority().forEach(auth -> scope.removeAccessibleAuthority(new AuthorityCode(auth)));
-        modifyRequest.getNewAccessibleAuthority().forEach(auth -> scope.addAccessibleAuthority(new AuthorityCode(auth)));
+        Optional.ofNullable(modifyRequest.getRemoveAccessibleAuthority())
+                .ifPresent(authorities -> authorities.forEach(auth -> scope.removeAccessibleAuthority(new AuthorityCode(auth))));
+        Optional.ofNullable(modifyRequest.getNewAccessibleAuthority())
+                .ifPresent(authorities -> authorities.forEach(auth -> scope.addAccessibleAuthority(new AuthorityCode(auth))));
 
         scope.validate(validationPolicy);
         return new DefaultOAuth2ScopeDetails(repository.save(scope));

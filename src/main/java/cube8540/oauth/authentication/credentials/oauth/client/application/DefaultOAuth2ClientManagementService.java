@@ -19,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.net.URI;
+import java.util.Optional;
 
 public class DefaultOAuth2ClientManagementService extends DefaultOAuth2ClientDetailsService implements OAuth2ClientManagementService {
 
@@ -53,13 +54,15 @@ public class DefaultOAuth2ClientManagementService extends DefaultOAuth2ClientDet
 
         client.setClientName(registerRequest.getClientName());
         client.setOwner(new UserEmail(SecurityContextHolder.getContext().getAuthentication().getName()));
-        registerRequest.getGrantTypes().forEach(grant -> client.addGrantType(OAuth2Utils.extractGrantType(grant)));
-        registerRequest.getScopes().forEach(scope -> client.addScope(new OAuth2ScopeId(scope)));
-        registerRequest.getRedirectUris().forEach(uri -> client.addRedirectURI(URI.create(uri)));
+        Optional.ofNullable(registerRequest.getGrantTypes())
+                .ifPresent(grantType -> grantType.forEach(grant -> client.addGrantType(OAuth2Utils.extractGrantType(grant))));
+        Optional.ofNullable(registerRequest.getScopes())
+                .ifPresent(scope -> scope.forEach(s -> client.addScope(new OAuth2ScopeId(s))));
+        Optional.ofNullable(registerRequest.getRedirectUris())
+                .ifPresent(redirectUri -> redirectUri.forEach(uri -> client.addRedirectURI(URI.create(uri))));
 
         client.validate(validatePolicy);
         client.encrypted(passwordEncoder);
-
         return new DefaultOAuth2ClientDetails(getRepository().save(client));
     }
 
@@ -73,15 +76,20 @@ public class DefaultOAuth2ClientManagementService extends DefaultOAuth2ClientDet
             throw new ClientOwnerNotMatchedException("owner and authenticated user not matched");
         }
         client.setClientName(modifyRequest.getClientName());
-        modifyRequest.getRemoveRedirectUris().forEach(uri -> client.removeRedirectURI(URI.create(uri)));
-        modifyRequest.getNewRedirectUris().forEach(uri -> client.addRedirectURI(URI.create(uri)));
-        modifyRequest.getRemoveGrantTypes().forEach(grant -> client.removeGrantType(OAuth2Utils.extractGrantType(grant)));
-        modifyRequest.getNewGrantTypes().forEach(grant -> client.addGrantType(OAuth2Utils.extractGrantType(grant)));
-        modifyRequest.getRemoveScopes().forEach(scope -> client.removeScope(new OAuth2ScopeId(scope)));
-        modifyRequest.getNewScopes().forEach(scope -> client.addScope(new OAuth2ScopeId(scope)));
+        Optional.ofNullable(modifyRequest.getRemoveRedirectUris())
+                .ifPresent(redirectUri -> redirectUri.forEach(uri -> client.removeRedirectURI(URI.create(uri))));
+        Optional.ofNullable(modifyRequest.getNewRedirectUris())
+                .ifPresent(redirectUri -> redirectUri.forEach(uri -> client.addRedirectURI(URI.create(uri))));
+        Optional.ofNullable(modifyRequest.getRemoveGrantTypes())
+                .ifPresent(grantType -> grantType.forEach(grant -> client.removeGrantType(OAuth2Utils.extractGrantType(grant))));
+        Optional.ofNullable(modifyRequest.getNewGrantTypes())
+                .ifPresent(grantType -> grantType.forEach(grant -> client.addGrantType(OAuth2Utils.extractGrantType(grant))));
+        Optional.ofNullable(modifyRequest.getRemoveScopes())
+                .ifPresent(scope -> scope.forEach(s -> client.removeScope(new OAuth2ScopeId(s))));
+        Optional.ofNullable(modifyRequest.getNewScopes())
+                .ifPresent(scope -> scope.forEach(s -> client.addScope(new OAuth2ScopeId(s))));
 
         client.validate(validatePolicy);
-
         return new DefaultOAuth2ClientDetails(getRepository().save(client));
     }
 
@@ -96,7 +104,7 @@ public class DefaultOAuth2ClientManagementService extends DefaultOAuth2ClientDet
             throw new ClientOwnerNotMatchedException("owner and authenticated user not matched");
         }
 
-        client.changeSecret(changeRequest.getExistsSecret(), changeRequest.getNewSecret());
+        client.changeSecret(passwordEncoder.encode(changeRequest.getExistsSecret()), changeRequest.getNewSecret());
         client.validate(validatePolicy);
         client.encrypted(passwordEncoder);
 

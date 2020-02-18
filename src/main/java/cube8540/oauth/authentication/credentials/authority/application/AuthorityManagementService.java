@@ -1,16 +1,11 @@
 package cube8540.oauth.authentication.credentials.authority.application;
 
 import cube8540.oauth.authentication.credentials.authority.AuthorityDetails;
+import cube8540.oauth.authentication.credentials.authority.AuthorityDetailsService;
 
-import java.util.Collection;
-
-public interface AuthorityManagementService {
+public interface AuthorityManagementService extends AuthorityDetailsService {
 
     Long countAuthority(String code);
-
-    AuthorityDetails getAuthority(String code);
-
-    Collection<AuthorityDetails> getAuthorities();
 
     AuthorityDetails registerAuthority(AuthorityRegisterRequest registerRequest);
 
