@@ -10,6 +10,7 @@ import org.springframework.security.oauth2.core.AuthorizationGrantType;
 
 import java.net.URI;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -31,9 +32,10 @@ public class DefaultOAuth2ClientDetails implements OAuth2ClientDetails, Credenti
         this.clientId = client.getClientId().getValue();
         this.clientSecret = client.getSecret();
         this.clientName = client.getClientName();
-        this.registeredRedirectURI = Collections.unmodifiableSet(client.getRedirectURI());
-        this.authorizedGrantType = Collections.unmodifiableSet(client.getGrantType());
-        this.scope = client.getScope().stream().map(OAuth2ScopeId::getValue).collect(Collectors.toUnmodifiableSet());
+        this.registeredRedirectURI = Collections.unmodifiableSet(Optional.ofNullable(client.getRedirectURI()).orElse(Collections.emptySet()));
+        this.authorizedGrantType = Collections.unmodifiableSet(Optional.ofNullable(client.getGrantType()).orElse(Collections.emptySet()));
+        this.scope = Optional.ofNullable(client.getScope()).orElse(Collections.emptySet()).stream()
+                .map(OAuth2ScopeId::getValue).collect(Collectors.toUnmodifiableSet());
         this.owner = client.getOwner().getValue();
         this.accessTokenValiditySeconds = Double.valueOf(client.getAccessTokenValidity().toSeconds()).intValue();
         this.refreshTokenValiditySeconds = Double.valueOf(client.getRefreshTokenValidity().toSeconds()).intValue();

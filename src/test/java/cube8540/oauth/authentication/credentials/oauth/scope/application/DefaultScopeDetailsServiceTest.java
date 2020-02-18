@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
@@ -35,6 +36,7 @@ import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -239,6 +241,28 @@ class DefaultScopeDetailsServiceTest {
                 assertEquals(DESCRIPTION, scopeCaptor.getValue().getDescription());
             }
 
+            @Nested
+            @DisplayName("요청 받은 접근 권한이 null일시")
+            class WhenRequestingAccessibleAuthorityIsNull {
+
+                private OAuth2ScopeRegisterRequest request;
+
+                @BeforeEach
+                void setup() {
+                    this.request = new OAuth2ScopeRegisterRequest(RAW_SCOPE_ID, DESCRIPTION, null);
+                }
+
+                @Test
+                @DisplayName("스코프에 저장소를 저장하지 않아야 한다.")
+                void shouldNotSaveAccessibleAuthority() {
+                    ArgumentCaptor<OAuth2Scope> scopeCaptor = ArgumentCaptor.forClass(OAuth2Scope.class);
+
+                    service.registerNewScope(request);
+                    verify(repository, times(1)).save(scopeCaptor.capture());
+                    assertNull(scopeCaptor.getValue().getAccessibleAuthority());
+                }
+            }
+
             @Test
             @DisplayName("요청 받은 접근 권한을 유효성 검사 후 저장해야 한다.")
             void shouldSaveAccessibleAuthorityAfterValidation() {
@@ -310,6 +334,46 @@ class DefaultScopeDetailsServiceTest {
                 service.modifyScope(RAW_SCOPE_ID, request);
                 inOrder.verify(scope, times(1)).setDescription(MODIFY_DESCRIPTION);
                 inOrder.verify(repository, times(1)).save(scope);
+            }
+
+            @Nested
+            @DisplayName("삭제할 접근 권한이 null일시")
+            class WhenRequestingRemoveAuthorityIsNull {
+
+                private OAuth2ScopeModifyRequest request;
+
+                @BeforeEach
+                void setup() {
+                    this.request = new OAuth2ScopeModifyRequest(MODIFY_DESCRIPTION, null, RAW_NEW_AUTHORITIES);
+                }
+
+                @Test
+                @DisplayName("스코프에서 접근 권한을 삭제하지 않아야 한다.")
+                void shouldNotRemoveAuthorityInScope() {
+                    service.modifyScope(RAW_SCOPE_ID, this.request);
+
+                    verify(scope, never()).removeAccessibleAuthority(any());
+                }
+            }
+
+            @Nested
+            @DisplayName("추가할 접근 권한이 null일시")
+            class WhenRequestingNewAuthorityIsNull {
+
+                private OAuth2ScopeModifyRequest request;
+
+                @BeforeEach
+                void setup() {
+                    this.request = new OAuth2ScopeModifyRequest(MODIFY_DESCRIPTION, RAW_REMOVE_AUTHORITIES, null);
+                }
+
+                @Test
+                @DisplayName("스코프에서 접근 권한을 추가하지 않아야 한다.")
+                void shouldNotAddAuthorityInScope() {
+                    service.modifyScope(RAW_SCOPE_ID, request);
+
+                    verify(scope, never()).addAccessibleAuthority(any());
+                }
             }
 
             @Test
