@@ -9,4 +9,6 @@ public interface OAuth2ScopeRepository extends JpaRepository<OAuth2Scope, OAuth2
 
     List<OAuth2Scope> findByIdIn(Collection<OAuth2ScopeId> scopeIds);
 
+    Long countById(OAuth2ScopeId scopeId);
+
 }

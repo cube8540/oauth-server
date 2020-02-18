@@ -1,14 +1,13 @@
-package cube8540.oauth.authentication.credentials.oauth;
+package cube8540.oauth.authentication.credentials.oauth.client.application;
 
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetailsService;
-import cube8540.oauth.authentication.credentials.oauth.client.application.DefaultOAuth2ClientDetailsService;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2Client;
-import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientDefaultSecret;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientNotFoundException;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientRepository;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
+import cube8540.oauth.authentication.users.domain.UserEmail;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -36,7 +35,6 @@ class DefaultOAuth2ClientDetailsServiceTest {
     private static final OAuth2ClientId CLIENT_ID = new OAuth2ClientId(RAW_CLIENT_ID);
 
     private static final String RAW_SECRET = "SECRET";
-    private static final OAuth2ClientDefaultSecret SECRET = new OAuth2ClientDefaultSecret(RAW_SECRET);
     private static final String CLIENT_NAME = "CLIENT-NAME";
 
     private static final Set<URI> REGISTERED_REDIRECT_URI = new HashSet<>(Arrays.asList(
@@ -57,6 +55,9 @@ class DefaultOAuth2ClientDetailsServiceTest {
     private static final Duration ACCESS_TOKEN_VALIDITY = Duration.ofMinutes(10);
 
     private static final Duration REFRESH_TOKEN_VALIDITY = Duration.ofHours(2);
+
+    private static final String RAW_OWNER = "owner@email.com";
+    private static final UserEmail OWNER = new UserEmail(RAW_OWNER);
 
     private OAuth2Client client;
 
@@ -97,13 +98,14 @@ class DefaultOAuth2ClientDetailsServiceTest {
             @BeforeEach
             void setup() {
                 when(client.getClientId()).thenReturn(CLIENT_ID);
-                when(client.getSecret()).thenReturn(SECRET);
+                when(client.getSecret()).thenReturn(RAW_SECRET);
                 when(client.getClientName()).thenReturn(CLIENT_NAME);
                 when(client.getRedirectURI()).thenReturn(REGISTERED_REDIRECT_URI);
                 when(client.getGrantType()).thenReturn(AUTHORIZED_GRANT_TYPE);
                 when(client.getScope()).thenReturn(SCOPE);
                 when(client.getAccessTokenValidity()).thenReturn(ACCESS_TOKEN_VALIDITY);
                 when(client.getRefreshTokenValidity()).thenReturn(REFRESH_TOKEN_VALIDITY);
+                when(client.getOwner()).thenReturn(OWNER);
                 when(repository.findByClientId(CLIENT_ID)).thenReturn(Optional.of(client));
             }
 

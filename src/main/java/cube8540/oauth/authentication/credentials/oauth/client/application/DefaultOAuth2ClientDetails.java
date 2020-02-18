@@ -23,16 +23,18 @@ public class DefaultOAuth2ClientDetails implements OAuth2ClientDetails, Credenti
     private Set<URI> registeredRedirectURI;
     private Set<AuthorizationGrantType> authorizedGrantType;
     private Set<String> scope;
+    private String owner;
     private Integer accessTokenValiditySeconds;
     private Integer refreshTokenValiditySeconds;
 
     public DefaultOAuth2ClientDetails(OAuth2Client client) {
         this.clientId = client.getClientId().getValue();
-        this.clientSecret = client.getSecret().getSecret();
+        this.clientSecret = client.getSecret();
         this.clientName = client.getClientName();
         this.registeredRedirectURI = Collections.unmodifiableSet(client.getRedirectURI());
         this.authorizedGrantType = Collections.unmodifiableSet(client.getGrantType());
         this.scope = client.getScope().stream().map(OAuth2ScopeId::getValue).collect(Collectors.toUnmodifiableSet());
+        this.owner = client.getOwner().getValue();
         this.accessTokenValiditySeconds = Double.valueOf(client.getAccessTokenValidity().toSeconds()).intValue();
         this.refreshTokenValiditySeconds = Double.valueOf(client.getRefreshTokenValidity().toSeconds()).intValue();
     }
@@ -65,6 +67,11 @@ public class DefaultOAuth2ClientDetails implements OAuth2ClientDetails, Credenti
     @Override
     public Set<String> scope() {
         return scope;
+    }
+
+    @Override
+    public String owner() {
+        return owner;
     }
 
     @Override

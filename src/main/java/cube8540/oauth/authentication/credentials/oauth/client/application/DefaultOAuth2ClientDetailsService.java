@@ -6,12 +6,15 @@ import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2Clien
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientNotFoundException;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientRegistrationException;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientRepository;
+import lombok.AccessLevel;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class DefaultOAuth2ClientDetailsService implements OAuth2ClientDetailsService {
 
+    @Getter(AccessLevel.PROTECTED)
     private final OAuth2ClientRepository repository;
 
     @Autowired

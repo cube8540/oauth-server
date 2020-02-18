@@ -5,13 +5,13 @@ import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2Scope;
 import lombok.Value;
 
 @Value
-public class DetailsOAuth2ScopeDetails implements OAuth2ScopeDetails {
+public class DefaultOAuth2ScopeDetails implements OAuth2ScopeDetails {
 
     private String scopeId;
 
     private String description;
 
-    public DetailsOAuth2ScopeDetails(OAuth2Scope scope) {
+    public DefaultOAuth2ScopeDetails(OAuth2Scope scope) {
         this.scopeId = scope.getId().getValue();
         this.description = scope.getDescription();
     }
