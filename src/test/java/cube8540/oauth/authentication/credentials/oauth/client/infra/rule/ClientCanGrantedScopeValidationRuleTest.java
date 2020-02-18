@@ -12,6 +12,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -58,6 +59,54 @@ class ClientCanGrantedScopeValidationRuleTest {
         @BeforeEach
         void setup() {
             this.client = mock(OAuth2Client.class);
+        }
+
+        @Test
+        @DisplayName("유효성 감사 결과는 반드시 false가 반환되어야 한다.")
+        void shouldReturnsFalse() {
+            assertFalse(rule.isValid(client));
+        }
+    }
+
+    @Nested
+    @DisplayName("클라이언트의 스코프가 null일시")
+    class WhenClientScopesIsNull {
+
+        private OAuth2Client client;
+
+        @BeforeEach
+        void setup() {
+            OAuth2AccessibleScopeDetailsService scopeDetailsService = mock(OAuth2AccessibleScopeDetailsService.class);
+            SecurityContext securityContext = mock(SecurityContext.class);
+            this.client = mock(OAuth2Client.class);
+
+            when(client.getScope()).thenReturn(null);
+            rule.setScopeDetailsService(scopeDetailsService);
+            rule.setSecurityContext(securityContext);
+        }
+
+        @Test
+        @DisplayName("유효성 감사 결과는 반드시 false가 반환되어야 한다.")
+        void shouldReturnsFalse() {
+            assertFalse(rule.isValid(client));
+        }
+    }
+
+    @Nested
+    @DisplayName("클라이언트의 스코프가 비어있을시")
+    class WhenClientScopesIsEmpty {
+
+        private OAuth2Client client;
+
+        @BeforeEach
+        void setup() {
+            OAuth2AccessibleScopeDetailsService scopeDetailsService = mock(OAuth2AccessibleScopeDetailsService.class);
+            SecurityContext securityContext = mock(SecurityContext.class);
+            this.client = mock(OAuth2Client.class);
+
+            when(client.getScope()).thenReturn(Collections.emptySet());
+            rule.setScopeDetailsService(scopeDetailsService);
+            rule.setSecurityContext(securityContext);
         }
 
         @Test

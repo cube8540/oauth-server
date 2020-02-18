@@ -10,17 +10,17 @@ import cube8540.oauth.authentication.credentials.oauth.error.DefaultOauth2Except
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2AuthenticationExceptionEntryPoint;
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionResponseRenderer;
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTranslator;
+import cube8540.oauth.authentication.credentials.oauth.token.application.AuthorizationCodeTokenGranter;
+import cube8540.oauth.authentication.credentials.oauth.token.application.ClientCredentialsTokenGranter;
+import cube8540.oauth.authentication.credentials.oauth.token.application.CompositeOAuth2AccessTokenGranter;
 import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2AccessTokenGrantService;
 import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2AuthorizationCodeConsumer;
+import cube8540.oauth.authentication.credentials.oauth.token.application.RefreshTokenGranter;
+import cube8540.oauth.authentication.credentials.oauth.token.application.ResourceOwnerPasswordTokenGranter;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenRepository;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2RefreshTokenRepository;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2TokenIdGenerator;
-import cube8540.oauth.authentication.credentials.oauth.token.application.AuthorizationCodeTokenGranter;
-import cube8540.oauth.authentication.credentials.oauth.token.application.ClientCredentialsTokenGranter;
 import cube8540.oauth.authentication.credentials.oauth.token.infra.DefaultTokenIdGenerator;
-import cube8540.oauth.authentication.credentials.oauth.token.application.CompositeOAuth2AccessTokenGranter;
-import cube8540.oauth.authentication.credentials.oauth.token.application.RefreshTokenGranter;
-import cube8540.oauth.authentication.credentials.oauth.token.application.ResourceOwnerPasswordTokenGranter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -42,7 +42,7 @@ import org.springframework.web.HttpMediaTypeNotSupportedException;
 @EnableWebSecurity
 public class OAuth2EndpointSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
-    @Setter(onMethod_ = @Autowired)
+    @Setter(onMethod_ = {@Autowired, @Qualifier("defaultOAuth2ClientDetailsService")})
     private OAuth2ClientDetailsService clientDetailsService;
 
     @Setter(onMethod_ = @Autowired)

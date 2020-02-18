@@ -21,6 +21,7 @@ import cube8540.oauth.authentication.credentials.oauth.token.domain.Authorizatio
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
@@ -91,7 +92,7 @@ public class AuthorizationEndpoint {
     private OAuth2RequestValidator requestValidator = new DefaultOAuth2RequestValidator();
 
     @Autowired
-    public AuthorizationEndpoint(OAuth2ClientDetailsService clientDetailsService,
+    public AuthorizationEndpoint(@Qualifier("defaultOAuth2ClientDetailsService") OAuth2ClientDetailsService clientDetailsService,
                                  OAuth2ScopeDetailsService scopeDetailsService,
                                  OAuth2AuthorizationCodeGenerator codeGenerator) {
         this.clientDetailsService = clientDetailsService;

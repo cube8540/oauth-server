@@ -1,9 +1,11 @@
 package cube8540.oauth.authentication.credentials.oauth.client.application;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2Client;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.ToString;
 import org.springframework.security.core.CredentialsContainer;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
@@ -14,18 +16,28 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Getter
 @ToString
 @EqualsAndHashCode
 public class DefaultOAuth2ClientDetails implements OAuth2ClientDetails, CredentialsContainer {
 
     private String clientId;
+
+    @JsonIgnore
     private String clientSecret;
+
     private String clientName;
+
     private Set<URI> registeredRedirectURI;
+
     private Set<AuthorizationGrantType> authorizedGrantType;
+
     private Set<String> scope;
+
     private String owner;
+
     private Integer accessTokenValiditySeconds;
+
     private Integer refreshTokenValiditySeconds;
 
     public DefaultOAuth2ClientDetails(OAuth2Client client) {

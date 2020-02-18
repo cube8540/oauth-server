@@ -104,7 +104,7 @@ public class DefaultOAuth2ClientManagementService extends DefaultOAuth2ClientDet
             throw new ClientOwnerNotMatchedException("owner and authenticated user not matched");
         }
 
-        client.changeSecret(changeRequest.getExistsSecret(), changeRequest.getNewSecret());
+        client.changeSecret(passwordEncoder.encode(changeRequest.getExistsSecret()), changeRequest.getNewSecret());
         client.validate(validatePolicy);
         client.encrypted(passwordEncoder);
 
