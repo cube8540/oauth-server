@@ -11,6 +11,7 @@ import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeR
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeValidationPolicy;
 import lombok.Setter;
 import org.springframework.security.core.Authentication;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.List;
@@ -42,6 +43,7 @@ public class DefaultScopeDetailsService implements OAuth2ScopeManagementService,
     }
 
     @Override
+    @Transactional
     public OAuth2ScopeDetails registerNewScope(OAuth2ScopeRegisterRequest registerRequest) {
         if (repository.countById(new OAuth2ScopeId(registerRequest.getScopeId())) > 0) {
             throw new OAuth2ScopeAlreadyExistsException(registerRequest.getScopeId() + " is exists");
@@ -55,6 +57,7 @@ public class DefaultScopeDetailsService implements OAuth2ScopeManagementService,
     }
 
     @Override
+    @Transactional
     public OAuth2ScopeDetails modifyScope(String scopeId, OAuth2ScopeModifyRequest modifyRequest) {
         OAuth2Scope scope = repository.findById(new OAuth2ScopeId(scopeId))
                 .orElseThrow(() -> new OAuth2ScopeNotFoundException(scopeId + " is not found"));
@@ -68,6 +71,7 @@ public class DefaultScopeDetailsService implements OAuth2ScopeManagementService,
     }
 
     @Override
+    @Transactional
     public OAuth2ScopeDetails removeScope(String scopeId) {
         OAuth2Scope scope = repository.findById(new OAuth2ScopeId(scopeId))
                 .orElseThrow(() -> new OAuth2ScopeNotFoundException(scopeId + " is not found"));
