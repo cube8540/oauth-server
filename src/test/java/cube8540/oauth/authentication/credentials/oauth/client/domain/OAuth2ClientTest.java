@@ -1,7 +1,6 @@
 package cube8540.oauth.authentication.credentials.oauth.client.domain;
 
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
-import cube8540.oauth.authentication.users.domain.UserEmail;
 import cube8540.validator.core.ValidationError;
 import cube8540.validator.core.ValidationRule;
 import org.junit.jupiter.api.BeforeEach;
@@ -620,22 +619,38 @@ class OAuth2ClientTest {
         @Nested
         @DisplayName("이전에 사용하던 패스워드가 서로 일치 하지 않을시")
         class WhenExistsPasswordIsNotMatched {
+            private PasswordEncoder passwordEncoder;
+
+            @BeforeEach
+            void setup() {
+                this.passwordEncoder = mock(PasswordEncoder.class);
+
+                when(passwordEncoder.matches(RAW_SECRET, RAW_SECRET)).thenReturn(false);
+            }
 
             @Test
             @DisplayName("ClientNotMatchedException이 발생해야 한다.")
             void shouldThrowsClientNotMatchedException() {
-                assertThrows(ClientNotMatchedException.class, () -> client.changeSecret("NOT_MATCHED_SECRET", RAW_CHANGE_SECRET));
+                assertThrows(ClientNotMatchedException.class, () -> client.changeSecret(RAW_SECRET, RAW_CHANGE_SECRET, passwordEncoder));
             }
         }
 
         @Nested
         @DisplayName("이전에 사용하던 패스워드가 서로 일치할시")
         class WhenExistsPasswordMatched {
+            private PasswordEncoder passwordEncoder;
+
+            @BeforeEach
+            void setup() {
+                this.passwordEncoder = mock(PasswordEncoder.class);
+
+                when(passwordEncoder.matches(RAW_SECRET, RAW_SECRET)).thenReturn(true);
+            }
 
             @Test
             @DisplayName("요청 받은 패스워드로 클라이언트의 패스워드를 변경해야 한다.")
             void shouldChangeSecretWithRequestingSecret() {
-                client.changeSecret(RAW_SECRET, RAW_CHANGE_SECRET);
+                client.changeSecret(RAW_SECRET, RAW_CHANGE_SECRET, passwordEncoder);
 
                 assertEquals(RAW_CHANGE_SECRET, client.getSecret());
             }

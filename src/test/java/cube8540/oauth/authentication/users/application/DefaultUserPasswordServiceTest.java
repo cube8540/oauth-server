@@ -125,7 +125,7 @@ class DefaultUserPasswordServiceTest {
             void shouldChangeUserPassword() {
                 service.changePassword(principal, changeRequest);
 
-                verify(user, times(1)).changePassword(ENCRYPTED_EXISTING_PASSWORD, RAW_NEW_PASSWORD);
+                verify(user, times(1)).changePassword(RAW_EXISTING_PASSWORD, RAW_NEW_PASSWORD, encoder);
             }
 
             @Test
@@ -134,7 +134,7 @@ class DefaultUserPasswordServiceTest {
                 service.changePassword(principal, changeRequest);
 
                 InOrder inOrder = inOrder(user);
-                inOrder.verify(user, times(1)).changePassword(ENCRYPTED_EXISTING_PASSWORD, RAW_NEW_PASSWORD);
+                inOrder.verify(user, times(1)).changePassword(RAW_EXISTING_PASSWORD, RAW_NEW_PASSWORD, encoder);
                 inOrder.verify(user, times(1)).validation(policy);
             }
 

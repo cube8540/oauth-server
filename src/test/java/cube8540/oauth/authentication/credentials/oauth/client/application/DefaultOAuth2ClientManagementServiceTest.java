@@ -816,7 +816,7 @@ class DefaultOAuth2ClientManagementServiceTest {
                 InOrder inOrder = inOrder(client);
 
                 service.changeSecret(RAW_CLIENT_ID, changeRequest);
-                inOrder.verify(client, times(1)).changeSecret(ENCODING_SECRET, MODIFY_SECRET);
+                inOrder.verify(client, times(1)).changeSecret(SECRET, MODIFY_SECRET, passwordEncoder);
                 inOrder.verify(client, times(1)).validate(policy);
             }
 

@@ -138,8 +138,8 @@ public class OAuth2Client extends AbstractAggregateRoot<OAuth2Client> {
                 .getResult().hasErrorThrows(ClientInvalidException::new);
     }
 
-    public void changeSecret(String existsSecret, String changeSecret) {
-        if (!this.secret.equals(existsSecret)) {
+    public void changeSecret(String existsSecret, String changeSecret, PasswordEncoder encoder) {
+        if (!encoder.matches(existsSecret, secret)) {
             throw new ClientNotMatchedException("Exists secret is not matched");
         }
         this.secret = changeSecret;
