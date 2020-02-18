@@ -1,10 +1,12 @@
 package cube8540.oauth.authentication.credentials.oauth.scope.domain;
 
 import cube8540.oauth.authentication.credentials.authority.domain.AuthorityCode;
+import cube8540.validator.core.Validator;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 import org.springframework.data.domain.AbstractAggregateRoot;
 import org.springframework.security.core.Authentication;
@@ -34,6 +36,7 @@ public class OAuth2Scope extends AbstractAggregateRoot<OAuth2Scope> {
     @AttributeOverride(name = "value", column = @Column(name = "scope_id", length = 32))
     private OAuth2ScopeId id;
 
+    @Setter
     @Column(name = "description", length = 64)
     private String description;
 
@@ -67,5 +70,11 @@ public class OAuth2Scope extends AbstractAggregateRoot<OAuth2Scope> {
         return authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority).map(AuthorityCode::new)
                 .anyMatch(authority -> accessibleAuthority.contains(authority));
+    }
+
+    public void validate(OAuth2ScopeValidationPolicy policy) {
+        Validator.of(this).registerRule(policy.scopeIdRule())
+                .registerRule(policy.accessibleRule())
+                .getResult().hasErrorThrows(OAuth2ScopeInvalidException::new);
     }
 }
