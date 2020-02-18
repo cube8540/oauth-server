@@ -136,13 +136,16 @@ class UserTest {
         @DisplayName("이전에 사용하던 패스워드와 일치하지 않을시")
         class WhenNotMatchedExistingPassword {
 
+            @BeforeEach
+            void setup() {
+                when(encoder.matches(PASSWORD, PASSWORD)).thenReturn(false);
+            }
+
             @Test
             @DisplayName("UserNotMatchedException이 발생해야 한다.")
             void shouldThrowsUserNotMatchedException() {
                 assertThrows(UserNotMatchedException.class,
-                        () -> user.changePassword("NOT MATCHED PASSWORD 1", CHANGE_PASSWORD));
-                assertThrows(UserNotMatchedException.class,
-                        () -> user.changePassword("NOT MATCHED PASSWORD 2", CHANGE_PASSWORD));
+                        () -> user.changePassword(PASSWORD, CHANGE_PASSWORD, encoder));
             }
         }
 
@@ -150,10 +153,15 @@ class UserTest {
         @DisplayName("이전에 사용하던 패스워드가 일치할시")
         class WhenExistingPasswordMatched {
 
+            @BeforeEach
+            void setup() {
+                when(encoder.matches(PASSWORD, PASSWORD)).thenReturn(true);
+            }
+
             @Test
             @DisplayName("인자로 받은 변경될 패스워드를 저장하여야 한다.")
             void shouldSaveGivenPassword() {
-                user.changePassword(PASSWORD, CHANGE_PASSWORD);
+                user.changePassword(PASSWORD, CHANGE_PASSWORD, encoder);
                 assertEquals(CHANGE_PASSWORD, user.getPassword());
             }
         }

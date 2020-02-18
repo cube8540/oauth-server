@@ -42,7 +42,7 @@ public class DefaultUserPasswordService implements UserPasswordService {
         User user = repository.findByEmail(new UserEmail(principal.getName()))
                 .orElseThrow(() -> new UserNotFoundException(principal.getName() + " user not found"));
 
-        user.changePassword(encoder.encode(changeRequest.getExistingPassword()), changeRequest.getNewPassword());
+        user.changePassword(changeRequest.getExistingPassword(), changeRequest.getNewPassword(), encoder);
         user.validation(validationPolicy);
         user.encrypted(encoder);
 

@@ -104,8 +104,8 @@ public class User extends AbstractAggregateRoot<User> {
         this.credentialsKey = null;
     }
 
-    public void changePassword(String existsPassword, String changePassword) {
-        if (!this.password.equals(existsPassword)) {
+    public void changePassword(String existsPassword, String changePassword, PasswordEncoder encoder) {
+        if (!encoder.matches(existsPassword, password)) {
             throw new UserNotMatchedException("existing password is not matched");
         }
         this.password = changePassword;
