@@ -3,10 +3,10 @@ package cube8540.oauth.authentication.credentials.oauth.token.endpoint;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2Utils;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.client.provider.ClientCredentialsToken;
-import cube8540.oauth.authentication.credentials.oauth.error.DefaultOAuth2ExceptionTranslator;
+import cube8540.oauth.authentication.credentials.oauth.error.AbstractOAuth2AuthenticationException;
+import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTranslator;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidClientException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidRequestException;
-import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTranslator;
 import cube8540.oauth.authentication.credentials.oauth.token.OAuth2AccessTokenDetails;
 import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2AccessTokenReadService;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenRegistrationException;
@@ -15,7 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
-import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -33,7 +32,7 @@ public class OAuth2TokenIntrospectionEndpoint {
     private final OAuth2AccessTokenReadService service;
 
     @Setter
-    private OAuth2ExceptionTranslator exceptionTranslator = new DefaultOAuth2ExceptionTranslator();
+    private OAuth2ExceptionTranslator exceptionTranslator = new OAuth2ExceptionTranslator();
 
     @Setter
     private OAuth2AccessTokenIntrospectionConverter converter = new DefaultOAuth2AccessTokenIntrospectionConverter();
@@ -75,8 +74,8 @@ public class OAuth2TokenIntrospectionEndpoint {
         return exceptionTranslator.translate(e);
     }
 
-    @ExceptionHandler(OAuth2AuthenticationException.class)
-    public ResponseEntity<OAuth2Error> handleException(OAuth2AuthenticationException e) {
+    @ExceptionHandler(AbstractOAuth2AuthenticationException.class)
+    public ResponseEntity<OAuth2Error> handleException(AbstractOAuth2AuthenticationException e) {
         if (log.isWarnEnabled()) {
             log.warn("Handling error {}, {}", e.getClass(), e.getMessage());
         }

@@ -8,10 +8,10 @@ import cube8540.oauth.authentication.credentials.oauth.OAuth2Utils;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetailsService;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientRegistrationException;
-import cube8540.oauth.authentication.credentials.oauth.error.DefaultOAuth2ExceptionTranslator;
+import cube8540.oauth.authentication.credentials.oauth.error.AbstractOAuth2AuthenticationException;
+import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTranslator;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidGrantException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidRequestException;
-import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTranslator;
 import cube8540.oauth.authentication.credentials.oauth.error.RedirectMismatchException;
 import cube8540.oauth.authentication.credentials.oauth.error.UnsupportedResponseTypeException;
 import cube8540.oauth.authentication.credentials.oauth.scope.OAuth2ScopeDetails;
@@ -26,7 +26,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationResponseType;
 import org.springframework.stereotype.Controller;
@@ -76,7 +75,7 @@ public class AuthorizationEndpoint {
     private SessionAttributeStore sessionAttributeStore = new DefaultSessionAttributeStore();
 
     @Setter
-    private OAuth2ExceptionTranslator exceptionTranslator = new DefaultOAuth2ExceptionTranslator();
+    private OAuth2ExceptionTranslator exceptionTranslator = new OAuth2ExceptionTranslator();
 
     private String errorPage = DEFAULT_ERROR_PAGE;
 
@@ -162,8 +161,8 @@ public class AuthorizationEndpoint {
         return handleException(e, webRequest);
     }
 
-    @ExceptionHandler(OAuth2AuthenticationException.class)
-    public ModelAndView handleOAuth2AuthenticationException(OAuth2AuthenticationException e, ServletWebRequest webRequest) {
+    @ExceptionHandler(AbstractOAuth2AuthenticationException.class)
+    public ModelAndView handleOAuth2AuthenticationException(AbstractOAuth2AuthenticationException e, ServletWebRequest webRequest) {
         if (log.isWarnEnabled()) {
             log.warn("Handling error : {}, {}", e.getClass().getName(), e.getMessage());
         }

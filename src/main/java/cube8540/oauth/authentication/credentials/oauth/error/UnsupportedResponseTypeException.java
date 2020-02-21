@@ -7,19 +7,7 @@ public class UnsupportedResponseTypeException extends AbstractOAuth2Authenticati
 
     private static final int HTTP_STATUS = 401;
 
-    public UnsupportedResponseTypeException() {
-        super(HTTP_STATUS, new OAuth2Error(OAuth2ErrorCodes.UNSUPPORTED_RESPONSE_TYPE));
-    }
-
     public UnsupportedResponseTypeException(String message) {
         super(HTTP_STATUS, new OAuth2Error(OAuth2ErrorCodes.UNSUPPORTED_RESPONSE_TYPE, message, null));
-    }
-
-    public UnsupportedResponseTypeException(Throwable cause) {
-        super(HTTP_STATUS, new OAuth2Error(OAuth2ErrorCodes.UNSUPPORTED_RESPONSE_TYPE), cause);
-    }
-
-    public UnsupportedResponseTypeException(String message, Throwable cause) {
-        super(HTTP_STATUS, new OAuth2Error(OAuth2ErrorCodes.UNSUPPORTED_RESPONSE_TYPE, message, null), cause);
     }
 }

@@ -6,6 +6,7 @@ import cube8540.oauth.authentication.credentials.oauth.OAuth2Utils;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetailsService;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientRegistrationException;
+import cube8540.oauth.authentication.credentials.oauth.error.AbstractOAuth2AuthenticationException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidGrantException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidRequestException;
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTranslator;
@@ -25,7 +26,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationResponseType;
@@ -50,6 +50,7 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -673,7 +674,7 @@ class AuthorizationEndpointTest {
         @Nested
         @DisplayName("리다이렉트 인증 예외를 제외한 OAuth2 인증 예외가 발생했을시")
         class WhenThrowsOAuth2AuthenticationExceptionExcludingRedirectMismatched {
-            private OAuth2AuthenticationException authenticationException;
+            private AbstractOAuth2AuthenticationException authenticationException;
             private ServletWebRequest servletWebRequest;
             private HttpServletRequest servletRequest;
 
@@ -687,7 +688,7 @@ class AuthorizationEndpointTest {
                 ResponseEntity<OAuth2Error> oAuth2ErrorResponseEntity = new ResponseEntity<>(oAuth2Error, HttpStatus.UNAUTHORIZED);
                 OAuth2ExceptionTranslator exceptionTranslator = mock(OAuth2ExceptionTranslator.class);
 
-                this.authenticationException = mock(OAuth2AuthenticationException.class);
+                this.authenticationException = mock(AbstractOAuth2AuthenticationException.class);
                 this.servletRequest = mock(HttpServletRequest.class);
                 this.servletWebRequest = new ServletWebRequest(servletRequest, servletResponse);
 
@@ -802,6 +803,7 @@ class AuthorizationEndpointTest {
                         void shouldRedirectWithErrorCode() {
                             ModelAndView modelAndView = endpoint.handleOtherException(authenticationException, servletWebRequest);
 
+                            assertNotNull(modelAndView.getView());
                             assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
                             assertEquals(oAuth2Error.getErrorCode(), modelAndView.getModel().get("error_code"));
                         }
@@ -811,6 +813,7 @@ class AuthorizationEndpointTest {
                         void shouldRedirectWithErrorDescription() {
                             ModelAndView modelAndView = endpoint.handleOtherException(authenticationException, servletWebRequest);
 
+                            assertNotNull(modelAndView.getView());
                             assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
                             assertEquals(oAuth2Error.getDescription(), modelAndView.getModel().get("error_description"));
                         }
@@ -820,6 +823,7 @@ class AuthorizationEndpointTest {
                         void shouldRedirectWithState() {
                             ModelAndView modelAndView = endpoint.handleOtherException(authenticationException, servletWebRequest);
 
+                            assertNotNull(modelAndView.getView());
                             assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
                             assertEquals(STATE, modelAndView.getModel().get("state"));
                         }
@@ -839,6 +843,7 @@ class AuthorizationEndpointTest {
                         void shouldRedirectWithErrorCode() {
                             ModelAndView modelAndView = endpoint.handleOtherException(authenticationException, servletWebRequest);
 
+                            assertNotNull(modelAndView.getView());
                             assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
                             assertEquals(oAuth2Error.getErrorCode(), modelAndView.getModel().get("error_code"));
                         }
@@ -848,6 +853,7 @@ class AuthorizationEndpointTest {
                         void shouldRedirectWithErrorDescription() {
                             ModelAndView modelAndView = endpoint.handleOtherException(authenticationException, servletWebRequest);
 
+                            assertNotNull(modelAndView.getView());
                             assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
                             assertEquals(oAuth2Error.getDescription(), modelAndView.getModel().get("error_description"));
                         }
@@ -857,6 +863,7 @@ class AuthorizationEndpointTest {
                         void shouldRedirectWithState() {
                             ModelAndView modelAndView = endpoint.handleOtherException(authenticationException, servletWebRequest);
 
+                            assertNotNull(modelAndView.getView());
                             assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
                             assertNull(modelAndView.getModel().get("state"));
                         }
@@ -974,6 +981,7 @@ class AuthorizationEndpointTest {
                         void shouldRedirectWithErrorCode() {
                             ModelAndView modelAndView = endpoint.handleOtherException(authenticationException, servletWebRequest);
 
+                            assertNotNull(modelAndView.getView());
                             assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
                             assertEquals(oAuth2Error.getErrorCode(), modelAndView.getModel().get("error_code"));
                         }
@@ -983,6 +991,7 @@ class AuthorizationEndpointTest {
                         void shouldRedirectWithErrorDescription() {
                             ModelAndView modelAndView = endpoint.handleOtherException(authenticationException, servletWebRequest);
 
+                            assertNotNull(modelAndView.getView());
                             assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
                             assertEquals(oAuth2Error.getDescription(), modelAndView.getModel().get("error_description"));
                         }
@@ -992,6 +1001,7 @@ class AuthorizationEndpointTest {
                         void shouldRedirectWithState() {
                             ModelAndView modelAndView = endpoint.handleOtherException(authenticationException, servletWebRequest);
 
+                            assertNotNull(modelAndView.getView());
                             assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
                             assertEquals(STATE, modelAndView.getModel().get("state"));
                         }
@@ -1011,6 +1021,7 @@ class AuthorizationEndpointTest {
                         void shouldRedirectWithErrorCode() {
                             ModelAndView modelAndView = endpoint.handleOtherException(authenticationException, servletWebRequest);
 
+                            assertNotNull(modelAndView.getView());
                             assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
                             assertEquals(oAuth2Error.getErrorCode(), modelAndView.getModel().get("error_code"));
                         }
@@ -1020,6 +1031,7 @@ class AuthorizationEndpointTest {
                         void shouldRedirectWithErrorDescription() {
                             ModelAndView modelAndView = endpoint.handleOtherException(authenticationException, servletWebRequest);
 
+                            assertNotNull(modelAndView.getView());
                             assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
                             assertEquals(oAuth2Error.getDescription(), modelAndView.getModel().get("error_description"));
                         }
@@ -1029,6 +1041,7 @@ class AuthorizationEndpointTest {
                         void shouldRedirectWithState() {
                             ModelAndView modelAndView = endpoint.handleOtherException(authenticationException, servletWebRequest);
 
+                            assertNotNull(modelAndView.getView());
                             assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
                             assertNull(modelAndView.getModel().get("state"));
                         }
@@ -1219,6 +1232,7 @@ class AuthorizationEndpointTest {
                         void shouldRedirectWithErrorCode() {
                             ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
 
+                            assertNotNull(modelAndView.getView());
                             assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
                             assertEquals(oAuth2Error.getErrorCode(), modelAndView.getModel().get("error_code"));
                         }
@@ -1228,6 +1242,7 @@ class AuthorizationEndpointTest {
                         void shouldRedirectWithErrorDescription() {
                             ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
 
+                            assertNotNull(modelAndView.getView());
                             assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
                             assertEquals(oAuth2Error.getDescription(), modelAndView.getModel().get("error_description"));
                         }
@@ -1237,6 +1252,7 @@ class AuthorizationEndpointTest {
                         void shouldRedirectWithState() {
                             ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
 
+                            assertNotNull(modelAndView.getView());
                             assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
                             assertEquals(STATE, modelAndView.getModel().get("state"));
                         }
@@ -1256,6 +1272,7 @@ class AuthorizationEndpointTest {
                         void shouldRedirectWithErrorCode() {
                             ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
 
+                            assertNotNull(modelAndView.getView());
                             assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
                             assertEquals(oAuth2Error.getErrorCode(), modelAndView.getModel().get("error_code"));
                         }
@@ -1265,6 +1282,7 @@ class AuthorizationEndpointTest {
                         void shouldRedirectWithErrorDescription() {
                             ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
 
+                            assertNotNull(modelAndView.getView());
                             assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
                             assertEquals(oAuth2Error.getDescription(), modelAndView.getModel().get("error_description"));
                         }
@@ -1274,6 +1292,7 @@ class AuthorizationEndpointTest {
                         void shouldRedirectWithState() {
                             ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
 
+                            assertNotNull(modelAndView.getView());
                             assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
                             assertNull(modelAndView.getModel().get("state"));
                         }
@@ -1391,6 +1410,7 @@ class AuthorizationEndpointTest {
                         void shouldRedirectWithErrorCode() {
                             ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
 
+                            assertNotNull(modelAndView.getView());
                             assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
                             assertEquals(oAuth2Error.getErrorCode(), modelAndView.getModel().get("error_code"));
                         }
@@ -1400,6 +1420,7 @@ class AuthorizationEndpointTest {
                         void shouldRedirectWithErrorDescription() {
                             ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
 
+                            assertNotNull(modelAndView.getView());
                             assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
                             assertEquals(oAuth2Error.getDescription(), modelAndView.getModel().get("error_description"));
                         }
@@ -1409,6 +1430,7 @@ class AuthorizationEndpointTest {
                         void shouldRedirectWithState() {
                             ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
 
+                            assertNotNull(modelAndView.getView());
                             assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
                             assertEquals(STATE, modelAndView.getModel().get("state"));
                         }
@@ -1428,6 +1450,7 @@ class AuthorizationEndpointTest {
                         void shouldRedirectWithErrorCode() {
                             ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
 
+                            assertNotNull(modelAndView.getView());
                             assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
                             assertEquals(oAuth2Error.getErrorCode(), modelAndView.getModel().get("error_code"));
                         }
@@ -1437,6 +1460,7 @@ class AuthorizationEndpointTest {
                         void shouldRedirectWithErrorDescription() {
                             ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
 
+                            assertNotNull(modelAndView.getView());
                             assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
                             assertEquals(oAuth2Error.getDescription(), modelAndView.getModel().get("error_description"));
                         }
@@ -1446,6 +1470,7 @@ class AuthorizationEndpointTest {
                         void shouldRedirectWithState() {
                             ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
 
+                            assertNotNull(modelAndView.getView());
                             assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
                             assertNull(modelAndView.getModel().get("state"));
                         }

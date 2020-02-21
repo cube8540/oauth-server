@@ -7,19 +7,7 @@ public class BadClientCredentialsException extends AbstractOAuth2AuthenticationE
 
     private static final int HTTP_STATUS_CODE = 401;
 
-    public BadClientCredentialsException() {
-        super(HTTP_STATUS_CODE, new OAuth2Error(OAuth2ErrorCodes.INVALID_CLIENT));
-    }
-
     public BadClientCredentialsException(String message) {
         super(HTTP_STATUS_CODE, new OAuth2Error(OAuth2ErrorCodes.INVALID_CLIENT, message, null));
-    }
-
-    public BadClientCredentialsException(Throwable cause) {
-        super(HTTP_STATUS_CODE, new OAuth2Error(OAuth2ErrorCodes.INVALID_CLIENT), cause);
-    }
-
-    public BadClientCredentialsException(String message, Throwable cause) {
-        super(HTTP_STATUS_CODE, new OAuth2Error(OAuth2ErrorCodes.INVALID_CLIENT, message, null), cause);
     }
 }

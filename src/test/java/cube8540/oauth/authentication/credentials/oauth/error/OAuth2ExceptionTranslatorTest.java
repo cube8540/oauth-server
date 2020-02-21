@@ -1,7 +1,6 @@
 package cube8540.oauth.authentication.credentials.oauth.error;
 
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientRegistrationException;
-import org.aspectj.lang.annotation.Before;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -18,13 +17,13 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @DisplayName("OAuth2 기본 에러 변환기 테스트")
-class DefaultOAuth2ExceptionTranslatorTest {
+class OAuth2ExceptionTranslatorTest {
 
-    private DefaultOAuth2ExceptionTranslator translator;
+    private OAuth2ExceptionTranslator translator;
 
     @BeforeEach
     void setup() {
-        this.translator = new DefaultOAuth2ExceptionTranslator();
+        this.translator = new OAuth2ExceptionTranslator();
     }
 
     @Nested

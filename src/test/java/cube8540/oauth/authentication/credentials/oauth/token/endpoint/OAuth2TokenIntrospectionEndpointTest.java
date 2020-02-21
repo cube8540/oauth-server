@@ -4,9 +4,10 @@ import cube8540.oauth.authentication.credentials.oauth.OAuth2Utils;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
 import cube8540.oauth.authentication.credentials.oauth.client.provider.ClientCredentialsToken;
+import cube8540.oauth.authentication.credentials.oauth.error.AbstractOAuth2AuthenticationException;
+import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTranslator;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidClientException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidRequestException;
-import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTranslator;
 import cube8540.oauth.authentication.credentials.oauth.token.OAuth2AccessTokenDetails;
 import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2AccessTokenReadService;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenRegistrationException;
@@ -18,7 +19,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 
 import java.security.Principal;
@@ -40,15 +40,12 @@ class OAuth2TokenIntrospectionEndpointTest {
     private static final OAuth2ClientId CLIENT_ID = new OAuth2ClientId(RAW_CLIENT_ID);
 
     private OAuth2AccessTokenReadService service;
-    private OAuth2AccessTokenIntrospectionConverter converter;
     private OAuth2TokenIntrospectionEndpoint endpoint;
 
     @BeforeEach
     void setup() {
         this.service = mock(OAuth2AccessTokenReadService.class);
-        this.converter = mock(OAuth2AccessTokenIntrospectionConverter.class);
         this.endpoint = new OAuth2TokenIntrospectionEndpoint(service);
-        this.endpoint.setConverter(converter);
     }
 
     @Nested
@@ -174,14 +171,13 @@ class OAuth2TokenIntrospectionEndpointTest {
         @Nested
         @DisplayName("OAuth2AccessTokenRegistrationException 관련 에러 발생시")
         class WhenThrowsOAuth2AccessTokenRegistrationException {
-            private OAuth2ExceptionTranslator exceptionTranslator;
             private OAuth2AccessTokenRegistrationException exception;
             private ResponseEntity<OAuth2Error> responseEntity;
 
             @BeforeEach
             @SuppressWarnings("unchecked")
             void setup() {
-                this.exceptionTranslator = mock(OAuth2ExceptionTranslator.class);
+                OAuth2ExceptionTranslator exceptionTranslator = mock(OAuth2ExceptionTranslator.class);
                 this.exception = mock(OAuth2AccessTokenRegistrationException.class);
                 this.responseEntity = mock(ResponseEntity.class);
 
@@ -206,15 +202,14 @@ class OAuth2TokenIntrospectionEndpointTest {
         @Nested
         @DisplayName("OAuth2AuthenticationException 관련 에러 발생시")
         class WhenThrowsOAuth2AuthenticationException {
-            private OAuth2ExceptionTranslator exceptionTranslator;
-            private OAuth2AuthenticationException exception;
+            private AbstractOAuth2AuthenticationException exception;
             private ResponseEntity<OAuth2Error> responseEntity;
 
             @BeforeEach
             @SuppressWarnings("unchecked")
             void setup() {
-                this.exceptionTranslator = mock(OAuth2ExceptionTranslator.class);
-                this.exception = mock(OAuth2AuthenticationException.class);
+                OAuth2ExceptionTranslator exceptionTranslator = mock(OAuth2ExceptionTranslator.class);
+                this.exception = mock(AbstractOAuth2AuthenticationException.class);
                 this.responseEntity = mock(ResponseEntity.class);
 
                 when(exceptionTranslator.translate(exception)).thenReturn(responseEntity);
