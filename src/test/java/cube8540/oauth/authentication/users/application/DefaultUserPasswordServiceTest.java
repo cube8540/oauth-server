@@ -19,7 +19,6 @@ import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -157,22 +156,6 @@ class DefaultUserPasswordServiceTest {
                 inOrder.verify(user, times(1)).encrypted(encoder);
                 inOrder.verify(userRepository, times(1)).save(user);
             }
-
-            @Test
-            @DisplayName("패스워드를 변경한 유저의 이메일을 반환해야 한다.")
-            void shouldReturnsUserEmail() {
-                UserProfile profile = service.changePassword(principal, changeRequest);
-
-                assertEquals(RAW_EMAIL, profile.getEmail());
-            }
-
-            @Test
-            @DisplayName("패스워드를 변경한 유저의 등록일을 반환해야 한다.")
-            void shouldReturnsUserRegisteredAt() {
-                UserProfile profile = service.changePassword(principal, changeRequest);
-
-                assertEquals(REGISTERED_AT, profile.getRegisteredAt());
-            }
         }
     }
 
@@ -229,22 +212,6 @@ class DefaultUserPasswordServiceTest {
                 InOrder inOrder = inOrder(user, userRepository);
                 inOrder.verify(user, times(1)).forgotPassword(keyGenerator);
                 inOrder.verify(userRepository, times(1)).save(user);
-            }
-
-            @Test
-            @DisplayName("인증키를 할당 받은 유저의 이메일을 반환해야 한다.")
-            void shouldReturnsUserEmail() {
-                UserProfile profile = service.forgotPassword(RAW_EMAIL);
-
-                assertEquals(RAW_EMAIL, profile.getEmail());
-            }
-
-            @Test
-            @DisplayName("인증키를 할당 받은 유저의 등록일을 반환해야 한다.")
-            void shouldReturnsUserRegisteredAt() {
-                UserProfile profile = service.forgotPassword(RAW_EMAIL);
-
-                assertEquals(REGISTERED_AT, profile.getRegisteredAt());
             }
         }
     }
@@ -422,22 +389,6 @@ class DefaultUserPasswordServiceTest {
                 InOrder inOrder = inOrder(user, userRepository);
                 inOrder.verify(user, times(1)).encrypted(encoder);
                 inOrder.verify(userRepository, times(1)).save(user);
-            }
-
-            @Test
-            @DisplayName("패스워드를 변경한 유저의 이메일을 반환해야 한다.")
-            void shouldReturnsUserEmail() {
-                UserProfile profile = service.resetPassword(request);
-
-                assertEquals(RAW_EMAIL, profile.getEmail());
-            }
-
-            @Test
-            @DisplayName("패스워드를 변경한 유저의 등록일을 반환해야 한다.")
-            void shouldReturnsUserRegisteredAt() {
-                UserProfile profile = service.resetPassword(request);
-
-                assertEquals(REGISTERED_AT, profile.getRegisteredAt());
             }
         }
     }

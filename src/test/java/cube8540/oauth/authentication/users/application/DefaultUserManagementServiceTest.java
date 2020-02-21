@@ -92,36 +92,6 @@ class DefaultUserManagementServiceTest {
                 assertThrows(UserNotFoundException.class, () -> service.loadUserProfile(RAW_EMAIL));
             }
         }
-
-        @Nested
-        @DisplayName("저장소에서 유저를 찾을시")
-        class WhenFoundUser {
-
-            @BeforeEach
-            void setup() {
-                User user = mock(User.class);
-
-                when(user.getEmail()).thenReturn(EMAIL);
-                when(user.getRegisteredAt()).thenReturn(REGISTERED_AT);
-                when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
-            }
-
-            @Test
-            @DisplayName("검색된 유저의 이메일을 반환해야 한다.")
-            void shouldReturnsUserEmail() {
-                UserProfile profile = service.loadUserProfile(RAW_EMAIL);
-
-                assertEquals(RAW_EMAIL, profile.getEmail());
-            }
-
-            @Test
-            @DisplayName("검색된 유저의 등록일을 반환해야 한다.")
-            void shouldReturnsUserRegisteredAt() {
-                UserProfile profile = service.loadUserProfile(RAW_EMAIL);
-
-                assertEquals(REGISTERED_AT, profile.getRegisteredAt());
-            }
-        }
     }
 
     @Nested
@@ -202,13 +172,6 @@ class DefaultUserManagementServiceTest {
                 assertEquals(userCaptor.getAllValues().get(0), userCaptor.getAllValues().get(1));
                 assertEquals(ENCODING_PASSWORD, userCaptor.getValue().getPassword());
             }
-
-            @Test
-            @DisplayName("저장된 유저의 이메일을 반환해야 한다.")
-            void shouldReturnsSaveUserEmail() {
-                UserProfile profile = service.registerUser(registerRequest);
-                assertEquals(RAW_EMAIL, profile.getEmail());
-            }
         }
     }
 
@@ -254,22 +217,6 @@ class DefaultUserManagementServiceTest {
                 service.removeUser(RAW_EMAIL);
                 verify(userRepository, times(1)).delete(userCaptor.capture());
                 assertEquals(user, userCaptor.getValue());
-            }
-
-            @Test
-            @DisplayName("삭제된 유저의 이메일을 반환해야 한다.")
-            void shouldReturnsUserEmail() {
-                UserProfile profile = service.removeUser(RAW_EMAIL);
-
-                assertEquals(RAW_EMAIL, profile.getEmail());
-            }
-
-            @Test
-            @DisplayName("삭제된 유저의 등록일을 반환해야 한다.")
-            void shouldReturnsUserRegisteredAt() {
-                UserProfile profile = service.removeUser(RAW_EMAIL);
-
-                assertEquals(REGISTERED_AT, profile.getRegisteredAt());
             }
         }
     }

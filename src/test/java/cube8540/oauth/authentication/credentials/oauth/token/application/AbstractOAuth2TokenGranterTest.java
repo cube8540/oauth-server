@@ -7,7 +7,6 @@ import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeI
 import cube8540.oauth.authentication.credentials.oauth.token.OAuth2AccessTokenDetails;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenRepository;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedAccessToken;
-import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedRefreshToken;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2TokenEnhancer;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2TokenId;
 import cube8540.oauth.authentication.users.domain.UserEmail;
@@ -44,9 +43,6 @@ class AbstractOAuth2TokenGranterTest {
     private static final String RAW_TOKEN_ID = "TOKEN_ID";
     private static final OAuth2TokenId TOKEN_ID = new OAuth2TokenId(RAW_TOKEN_ID);
 
-    private static final String RAW_REFRESH_TOKEN_ID = "REFRESH_TOKEN_ID";
-    private static final OAuth2TokenId REFRESH_TOKEN_ID = new OAuth2TokenId(RAW_REFRESH_TOKEN_ID);
-
     private static final String RAW_EMAIL = "email@email.com";
     private static final UserEmail EMAIL = new UserEmail(RAW_EMAIL);
 
@@ -59,15 +55,11 @@ class AbstractOAuth2TokenGranterTest {
     private static final LocalDateTime EXPIRATION = LocalDateTime.of(2020, 1, 24, 21, 24, 0);
     private static final long EXPIRATION_IN = 600000;
 
-    private static final LocalDateTime REFRESH_TOKEN_EXPIRATION = LocalDateTime.of(2020, 1, 24, 22, 24, 0);
-    private static final long REFRESH_EXPIRATION_IN = 12000000;
-
     private static final AuthorizationGrantType GRANT_TYPE = AuthorizationGrantType.AUTHORIZATION_CODE;
 
     private static final Map<String, String> ADDITIONAL_INFO = new HashMap<>();
 
     private static final boolean IS_EXPIRED = true;
-    private static final boolean IS_REFRESH_TOKEN_EXPIRED = true;
 
     private OAuth2AccessTokenRepository repository;
     private OAuth2TokenEnhancer enhancer;
@@ -146,75 +138,11 @@ class AbstractOAuth2TokenGranterTest {
         }
 
         @Test
-        @DisplayName("토큰의 아이디를 반환해야 한다.")
-        void shouldReturnsTokenId() {
-            OAuth2AccessTokenDetails tokenDetails = granter.grant(clientDetails, tokenRequest);
-
-            assertEquals(RAW_TOKEN_ID, tokenDetails.tokenValue());
-        }
-
-        @Test
-        @DisplayName("토큰의 유저 아이디를 반환해야 한다.")
-        void shouldReturnsUsername() {
-            OAuth2AccessTokenDetails tokenDetails = granter.grant(clientDetails, tokenRequest);
-
-            assertEquals(RAW_EMAIL, tokenDetails.username());
-        }
-
-        @Test
-        @DisplayName("토큰의 클라이언트 아이디를 반환해야 한다.")
-        void shouldReturnsClientId() {
-            OAuth2AccessTokenDetails tokenDetails = granter.grant(clientDetails, tokenRequest);
-
-            assertEquals(CLIENT, tokenDetails.clientId());
-        }
-
-        @Test
-        @DisplayName("토큰의 스코프를 반환해야 한다.")
-        void shouldReturnsScope() {
-            OAuth2AccessTokenDetails tokenDetails = granter.grant(clientDetails, tokenRequest);
-
-            assertEquals(SCOPE, tokenDetails.scope());
-        }
-
-        @Test
         @DisplayName("토큰의 타입은 Bearer이어야 한다.")
         void shouldTokenTypeMustBearer() {
             OAuth2AccessTokenDetails tokenDetails = granter.grant(clientDetails, tokenRequest);
 
             assertEquals("Bearer", tokenDetails.tokenType());
-        }
-
-        @Test
-        @DisplayName("토큰의 추가 정보를 반환해야 한다.")
-        void shouldReturnsAdditionalInformation() {
-            OAuth2AccessTokenDetails tokenDetails = granter.grant(clientDetails, tokenRequest);
-
-            assertEquals(ADDITIONAL_INFO, tokenDetails.additionalInformation());
-        }
-
-        @Test
-        @DisplayName("토큰의 유효 시간을 반환해야 한다.")
-        void shouldReturnsExpiration() {
-            OAuth2AccessTokenDetails tokenDetails = granter.grant(clientDetails, tokenRequest);
-
-            assertEquals(EXPIRATION, tokenDetails.expiration());
-        }
-
-        @Test
-        @DisplayName("토큰의 남은 유효 시간을 반환해야 한다.")
-        void shouldReturnsExpirationIn() {
-            OAuth2AccessTokenDetails tokenDetails = granter.grant(clientDetails, tokenRequest);
-
-            assertEquals(EXPIRATION_IN, tokenDetails.expiresIn());
-        }
-
-        @Test
-        @DisplayName("토큰의 만료 여부를 반환해야 한다.")
-        void shouldReturnsWhetherExpiredOrNot() {
-            OAuth2AccessTokenDetails tokenDetails = granter.grant(clientDetails, tokenRequest);
-
-            assertEquals(IS_EXPIRED, tokenDetails.isExpired());
         }
 
         @Test
@@ -247,54 +175,5 @@ class AbstractOAuth2TokenGranterTest {
                 assertNull(tokenDetails.refreshToken());
             }
         }
-
-        @Nested
-        @DisplayName("엑세스 토큰이 리플래시 토큰을 가지고 있을시")
-        class WhenAccessTokenHaveRefreshToken {
-
-            @BeforeEach
-            void setup() {
-                OAuth2AuthorizedRefreshToken refreshToken = mock(OAuth2AuthorizedRefreshToken.class);
-
-                when(accessToken.getRefreshToken()).thenReturn(refreshToken);
-                when(refreshToken.getTokenId()).thenReturn(REFRESH_TOKEN_ID);
-                when(refreshToken.getExpiration()).thenReturn(REFRESH_TOKEN_EXPIRATION);
-                when(refreshToken.expiresIn()).thenReturn(REFRESH_EXPIRATION_IN);
-                when(refreshToken.isExpired()).thenReturn(IS_REFRESH_TOKEN_EXPIRED);
-            }
-
-            @Test
-            @DisplayName("리플래시 토큰의 아이디를 반환해야 한다.")
-            void shouldReturnsRefreshTokenId() {
-                OAuth2AccessTokenDetails tokenDetails = granter.grant(clientDetails, tokenRequest);
-
-                assertEquals(RAW_REFRESH_TOKEN_ID, tokenDetails.refreshToken().tokenValue());
-            }
-
-            @Test
-            @DisplayName("리플래시 토큰의 만료일을 반환해야 한다.")
-            void shouldReturnsRefreshTokenExpiration() {
-                OAuth2AccessTokenDetails tokenDetails = granter.grant(clientDetails, tokenRequest);
-
-                assertEquals(REFRESH_TOKEN_EXPIRATION, tokenDetails.refreshToken().expiration());
-            }
-
-            @Test
-            @DisplayName("리플래시 토큰의 만료 여부를 반환해야 한다.")
-            void shouldRefreshTokenWhetherExpiredOrNot() {
-                OAuth2AccessTokenDetails tokenDetails = granter.grant(clientDetails, tokenRequest);
-
-                assertEquals(IS_REFRESH_TOKEN_EXPIRED, tokenDetails.isExpired());
-            }
-
-            @Test
-            @DisplayName("리플래시 토큰의 남은 시간을 반환해야 한다.")
-            void shouldRefreshTokenExpiresIn() {
-                OAuth2AccessTokenDetails tokenDetails = granter.grant(clientDetails, tokenRequest);
-
-                assertEquals(REFRESH_EXPIRATION_IN, tokenDetails.refreshToken().expiresIn());
-            }
-        }
     }
-
 }

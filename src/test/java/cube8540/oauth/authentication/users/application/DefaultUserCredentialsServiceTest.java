@@ -18,7 +18,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.isA;
@@ -108,22 +107,6 @@ class DefaultUserCredentialsServiceTest {
                 inOrder.verify(user, times(1)).generateCredentialsKey(keyGenerator);
                 inOrder.verify(userRepository, times(1)).save(user);
             }
-
-            @Test
-            @DisplayName("인증키를 할당한 유저의 이메일을 반환해야 한다.")
-            void shouldReturnsUserEmail() {
-                UserProfile profile = service.grantCredentialsKey(RAW_EMAIL);
-
-                assertEquals(RAW_EMAIL, profile.getEmail());
-            }
-
-            @Test
-            @DisplayName("인증키를 할당한 유저의 저장일을 반환해야 한다.")
-            void shouldReturnsUserRegisteredAt() {
-                UserProfile profile = service.grantCredentialsKey(RAW_EMAIL);
-
-                assertEquals(REGISTERED_AT, profile.getRegisteredAt());
-            }
         }
     }
 
@@ -184,22 +167,6 @@ class DefaultUserCredentialsServiceTest {
                 InOrder inOrder = inOrder(user, userRepository);
                 inOrder.verify(user, times(1)).credentials(RAW_CREDENTIALS_KEY, basicAuthority);
                 inOrder.verify(userRepository, times(1)).save(user);
-            }
-
-            @Test
-            @DisplayName("인증받은 유저의 이메일을 반환해야 한다.")
-            void shouldReturnsUserEmail() {
-                UserProfile profile = service.accountCredentials(RAW_EMAIL, RAW_CREDENTIALS_KEY);
-
-                assertEquals(RAW_EMAIL, profile.getEmail());
-            }
-
-            @Test
-            @DisplayName("인증받은 유저의 저장일을 반환해야 한다.")
-            void shouldReturnsUserRegisteredAt() {
-                UserProfile profile = service.accountCredentials(RAW_EMAIL, RAW_CREDENTIALS_KEY);
-
-                assertEquals(REGISTERED_AT, profile.getRegisteredAt());
             }
         }
     }

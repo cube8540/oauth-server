@@ -1,6 +1,5 @@
 package cube8540.oauth.authentication.credentials.oauth.client.application;
 
-import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetailsService;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2Client;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
@@ -21,9 +20,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -88,99 +85,6 @@ class DefaultOAuth2ClientDetailsServiceTest {
             @DisplayName("OAuth2ClientNotFoundException이 발생해야 한다.")
             void shouldThrowsClientNotFoundException() {
                 assertThrows(OAuth2ClientNotFoundException.class, () -> service.loadClientDetailsByClientId(RAW_CLIENT_ID));
-            }
-        }
-
-        @Nested
-        @DisplayName("클라이언트를 찾았을시")
-        class WhenFoundClient {
-
-            @BeforeEach
-            void setup() {
-                when(client.getClientId()).thenReturn(CLIENT_ID);
-                when(client.getSecret()).thenReturn(RAW_SECRET);
-                when(client.getClientName()).thenReturn(CLIENT_NAME);
-                when(client.getRedirectURI()).thenReturn(REGISTERED_REDIRECT_URI);
-                when(client.getGrantType()).thenReturn(AUTHORIZED_GRANT_TYPE);
-                when(client.getScope()).thenReturn(SCOPE);
-                when(client.getAccessTokenValidity()).thenReturn(ACCESS_TOKEN_VALIDITY);
-                when(client.getRefreshTokenValidity()).thenReturn(REFRESH_TOKEN_VALIDITY);
-                when(client.getOwner()).thenReturn(OWNER);
-                when(repository.findByClientId(CLIENT_ID)).thenReturn(Optional.of(client));
-            }
-
-            @Test
-            @DisplayName("검색된 클라이언트의 아이디를 반환해야 한다.")
-            void shouldReturnsClientId() {
-                OAuth2ClientDetails result = service.loadClientDetailsByClientId(RAW_CLIENT_ID);
-
-                assertEquals(RAW_CLIENT_ID, result.clientId());
-            }
-
-            @Test
-            @DisplayName("검색된 클라이언트의 패스워드를 반환해야 한다.")
-            void shouldReturnsSecret() {
-                OAuth2ClientDetails result = service.loadClientDetailsByClientId(RAW_CLIENT_ID);
-
-                assertEquals(RAW_SECRET, result.clientSecret());
-            }
-
-            @Test
-            @DisplayName("검색된 클라이언트명을 반환해야 한다.")
-            void shouldReturnClientName() {
-                OAuth2ClientDetails result = service.loadClientDetailsByClientId(RAW_CLIENT_ID);
-
-                assertEquals(CLIENT_NAME, result.clientName());
-            }
-
-            @Test
-            @DisplayName("검색된 클라이언트의 리다이렉트 URI를 반환해야 한다.")
-            void shouldReturnsClientRedirectURI() {
-                OAuth2ClientDetails result = service.loadClientDetailsByClientId(RAW_CLIENT_ID);
-
-                assertTrue(result.registeredRedirectURI().contains(URI.create("http://localhost:80")));
-                assertTrue(result.registeredRedirectURI().contains(URI.create("http://localhost:81")));
-                assertTrue(result.registeredRedirectURI().contains(URI.create("http://localhost:82")));
-            }
-
-            @Test
-            @DisplayName("검색된 클라이언트의 인증 방식을 반환해야 한다.")
-            void shouldReturnsClientGrantType() {
-                OAuth2ClientDetails result = service.loadClientDetailsByClientId(RAW_CLIENT_ID);
-
-                assertTrue(result.authorizedGrantType().contains(AuthorizationGrantType.AUTHORIZATION_CODE));
-                assertTrue(result.authorizedGrantType().contains(AuthorizationGrantType.CLIENT_CREDENTIALS));
-                assertTrue(result.authorizedGrantType().contains(AuthorizationGrantType.IMPLICIT));
-                assertTrue(result.authorizedGrantType().contains(AuthorizationGrantType.REFRESH_TOKEN));
-                assertTrue(result.authorizedGrantType().contains(AuthorizationGrantType.PASSWORD));
-            }
-
-            @Test
-            @DisplayName("검색된 클라이언트의 스코프를 반환해야 한다.")
-            void shouldReturnsClientScope() {
-                OAuth2ClientDetails result = service.loadClientDetailsByClientId(RAW_CLIENT_ID);
-
-                assertTrue(result.scope().contains("SCOPE-1"));
-                assertTrue(result.scope().contains("SCOPE-2"));
-                assertTrue(result.scope().contains("SCOPE-3"));
-            }
-
-            @Test
-            @DisplayName("검색된 클라이언트의 액세스 토큰의 유효시간을 초로 환산하여 반환해야 한다.")
-            void shouldReturnsClientAccessTokenValiditySeconds() {
-                OAuth2ClientDetails result = service.loadClientDetailsByClientId(RAW_CLIENT_ID);
-
-                int seconds = Double.valueOf(ACCESS_TOKEN_VALIDITY.toSeconds()).intValue();
-                assertEquals(seconds, result.accessTokenValiditySeconds());
-            }
-
-            @Test
-            @DisplayName("검색된 클라이언트의 리플래시 토큰의 유효시간을 초로 환산하여 반환해야 한다.")
-            void shouldReturnsClientRefreshTokenValiditySeconds() {
-                OAuth2ClientDetails result = service.loadClientDetailsByClientId(RAW_CLIENT_ID);
-
-                int seconds = Double.valueOf(REFRESH_TOKEN_VALIDITY.toSeconds()).intValue();
-                assertEquals(seconds, result.refreshTokenValiditySeconds());
             }
         }
     }
