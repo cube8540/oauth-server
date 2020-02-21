@@ -34,13 +34,13 @@ public class DefaultScopeDetailsService implements OAuth2ScopeManagementService,
         List<OAuth2ScopeId> scopeIn = scopeIds.stream()
                 .map(OAuth2ScopeId::new).collect(Collectors.toList());
         return repository.findByIdIn(scopeIn).stream()
-                .map(DefaultOAuth2ScopeDetails::new).collect(Collectors.toList());
+                .map(DefaultOAuth2ScopeDetails::of).collect(Collectors.toList());
     }
 
     @Override
     public Collection<OAuth2ScopeDetails> readAccessibleScopes(Authentication authentication) {
         return repository.findAll().stream().filter(scope -> scope.isAccessible(authentication))
-                .map(DefaultOAuth2ScopeDetails::new).collect(Collectors.toList());
+                .map(DefaultOAuth2ScopeDetails::of).collect(Collectors.toList());
     }
 
     @Override
@@ -55,7 +55,7 @@ public class DefaultScopeDetailsService implements OAuth2ScopeManagementService,
                 .ifPresent(authorities -> authorities.forEach(authority -> scope.addAccessibleAuthority(new AuthorityCode(authority))));
 
         scope.validate(validationPolicy);
-        return new DefaultOAuth2ScopeDetails(repository.save(scope));
+        return DefaultOAuth2ScopeDetails.of(repository.save(scope));
     }
 
     @Override
@@ -71,7 +71,7 @@ public class DefaultScopeDetailsService implements OAuth2ScopeManagementService,
                 .ifPresent(authorities -> authorities.forEach(auth -> scope.addAccessibleAuthority(new AuthorityCode(auth))));
 
         scope.validate(validationPolicy);
-        return new DefaultOAuth2ScopeDetails(repository.save(scope));
+        return DefaultOAuth2ScopeDetails.of(repository.save(scope));
     }
 
     @Override
@@ -82,6 +82,6 @@ public class DefaultScopeDetailsService implements OAuth2ScopeManagementService,
 
         repository.delete(scope);
 
-        return new DefaultOAuth2ScopeDetails(scope);
+        return DefaultOAuth2ScopeDetails.of(scope);
     }
 }

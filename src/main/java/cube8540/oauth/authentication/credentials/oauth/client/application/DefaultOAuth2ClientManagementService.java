@@ -41,7 +41,7 @@ public class DefaultOAuth2ClientManagementService extends DefaultOAuth2ClientDet
     @Override
     public Page<OAuth2ClientDetails> loadClientDetails(Pageable pageable) {
         UserEmail owner = new UserEmail(SecurityContextHolder.getContext().getAuthentication().getName());
-        return getRepository().findByOwner(owner, pageable).map(DefaultOAuth2ClientDetails::new);
+        return getRepository().findByOwner(owner, pageable).map(DefaultOAuth2ClientDetails::of);
     }
 
     @Override
@@ -63,7 +63,7 @@ public class DefaultOAuth2ClientManagementService extends DefaultOAuth2ClientDet
 
         client.validate(validatePolicy);
         client.encrypted(passwordEncoder);
-        return new DefaultOAuth2ClientDetails(getRepository().save(client));
+        return DefaultOAuth2ClientDetails.of(getRepository().save(client));
     }
 
     @Override
@@ -90,7 +90,7 @@ public class DefaultOAuth2ClientManagementService extends DefaultOAuth2ClientDet
                 .ifPresent(scope -> scope.forEach(s -> client.addScope(new OAuth2ScopeId(s))));
 
         client.validate(validatePolicy);
-        return new DefaultOAuth2ClientDetails(getRepository().save(client));
+        return DefaultOAuth2ClientDetails.of(getRepository().save(client));
     }
 
     @Override
@@ -108,7 +108,7 @@ public class DefaultOAuth2ClientManagementService extends DefaultOAuth2ClientDet
         client.validate(validatePolicy);
         client.encrypted(passwordEncoder);
 
-        return new DefaultOAuth2ClientDetails(getRepository().save(client));
+        return DefaultOAuth2ClientDetails.of(getRepository().save(client));
     }
 
     @Override
@@ -123,6 +123,6 @@ public class DefaultOAuth2ClientManagementService extends DefaultOAuth2ClientDet
         }
 
         getRepository().delete(client);
-        return new DefaultOAuth2ClientDetails(client);
+        return DefaultOAuth2ClientDetails.of(client);
     }
 }

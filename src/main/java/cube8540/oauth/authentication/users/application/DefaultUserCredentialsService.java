@@ -36,7 +36,7 @@ public class DefaultUserCredentialsService implements UserCredentialsService {
                 .orElseThrow(() -> new UserNotFoundException(email + " user not found"));
 
         user.generateCredentialsKey(keyGenerator);
-        return new UserProfile(repository.save(user));
+        return UserProfile.of(repository.save(user));
     }
 
     @Override
@@ -47,6 +47,6 @@ public class DefaultUserCredentialsService implements UserCredentialsService {
         List<AuthorityCode> authorityCodes = authorityService.getBasicAuthority();
 
         user.credentials(credentialsKey, authorityCodes);
-        return new UserProfile(repository.save(user));
+        return UserProfile.of(repository.save(user));
     }
 }

@@ -4,42 +4,46 @@ import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2Clien
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import cube8540.oauth.authentication.credentials.oauth.token.OAuth2AccessTokenDetails;
 import cube8540.oauth.authentication.credentials.oauth.token.OAuth2RefreshTokenDetails;
-import cube8540.oauth.authentication.credentials.oauth.token.application.DefaultRefreshTokenDetails;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedAccessToken;
+import cube8540.oauth.authentication.users.domain.UserEmail;
+import lombok.Builder;
+import lombok.Value;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
+@Value
+@Builder
 public class DefaultAccessTokenDetails implements OAuth2AccessTokenDetails {
 
     private static final String TOKEN_TYPE = "Bearer";
 
-    private final String tokenValue;
-    private final OAuth2ClientId clientId;
-    private final Set<OAuth2ScopeId> scopeId;
-    private final String tokenType;
-    private final String username;
-    private final Map<String, String> additionalInformation;
-    private final LocalDateTime expiration;
-    private final long expiresIn;
-    private final OAuth2RefreshTokenDetails refreshTokenDetails;
-    private final boolean isExpired;
+    private String tokenValue;
+    private OAuth2ClientId clientId;
+    private Set<OAuth2ScopeId> scopeId;
+    private String tokenType;
+    private String username;
+    private Map<String, String> additionalInformation;
+    private LocalDateTime expiration;
+    private long expiresIn;
+    private OAuth2RefreshTokenDetails refreshToken;
+    private boolean isExpired;
 
-    public DefaultAccessTokenDetails(OAuth2AuthorizedAccessToken accessToken) {
-        this.tokenValue = accessToken.getTokenId().getValue();
-        this.clientId = accessToken.getClient();
-        this.scopeId = Collections.unmodifiableSet(accessToken.getScope());
-        this.expiration = accessToken.getExpiration();
-        this.expiresIn = accessToken.expiresIn();
-        this.isExpired = accessToken.isExpired();
-        this.tokenType = TOKEN_TYPE;
-        this.username = accessToken.getEmail() != null ? accessToken.getEmail().getValue() : null;
-        this.refreshTokenDetails = accessToken.getRefreshToken() != null ?
-                new DefaultRefreshTokenDetails(accessToken.getRefreshToken()) : null;
-        this.additionalInformation = accessToken.getAdditionalInformation() != null ?
-                Collections.unmodifiableMap(accessToken.getAdditionalInformation()) : null;
+    public static DefaultAccessTokenDetails of(OAuth2AuthorizedAccessToken accessToken) {
+        DefaultAccessTokenDetailsBuilder builder = builder().tokenValue(accessToken.getTokenId().getValue())
+                .clientId(accessToken.getClient())
+                .expiration(accessToken.getExpiration())
+                .expiresIn(accessToken.expiresIn())
+                .isExpired(accessToken.isExpired())
+                .tokenType(TOKEN_TYPE);
+        builder.scopeId(Optional.ofNullable(accessToken.getScope()).orElse(Collections.emptySet()));
+        builder.username(Optional.ofNullable(accessToken.getEmail()).map(UserEmail::getValue).orElse(null));
+        builder.refreshToken(Optional.ofNullable(accessToken.getRefreshToken()).map(DefaultRefreshTokenDetails::of).orElse(null));
+        builder.additionalInformation(Optional.ofNullable(accessToken.getAdditionalInformation()).orElse(null));
+        return builder.build();
     }
 
     @Override
@@ -64,7 +68,7 @@ public class DefaultAccessTokenDetails implements OAuth2AccessTokenDetails {
 
     @Override
     public OAuth2RefreshTokenDetails refreshToken() {
-        return refreshTokenDetails;
+        return refreshToken;
     }
 
     @Override

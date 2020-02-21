@@ -53,7 +53,7 @@ public abstract class AbstractOAuth2TokenGranter implements OAuth2AccessTokenGra
         tokenRepository.findByClientAndEmail(accessToken.getClient(), accessToken.getEmail()).ifPresent(tokenRepository::delete);
         tokenEnhancer.enhance(accessToken);
         tokenRepository.save(accessToken);
-        return new DefaultAccessTokenDetails(accessToken);
+        return DefaultAccessTokenDetails.of(accessToken);
     }
 
     protected abstract OAuth2AuthorizedAccessToken createAccessToken(OAuth2ClientDetails clientDetails, OAuth2TokenRequest tokenRequest);

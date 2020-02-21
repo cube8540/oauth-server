@@ -46,7 +46,7 @@ public class DefaultUserPasswordService implements UserPasswordService {
         user.validation(validationPolicy);
         user.encrypted(encoder);
 
-        return new UserProfile(repository.save(user));
+        return UserProfile.of(repository.save(user));
     }
 
     @Override
@@ -55,7 +55,7 @@ public class DefaultUserPasswordService implements UserPasswordService {
         User user = repository.findByEmail(new UserEmail(email))
                 .orElseThrow(() -> new UserNotFoundException(email + " user not found"));
         user.forgotPassword(keyGenerator);
-        return new UserProfile(repository.save(user));
+        return UserProfile.of(repository.save(user));
     }
 
     @Override
@@ -76,6 +76,6 @@ public class DefaultUserPasswordService implements UserPasswordService {
         user.validation(validationPolicy);
         user.encrypted(encoder);
 
-        return new UserProfile(repository.save(user));
+        return UserProfile.of(repository.save(user));
     }
 }
