@@ -78,6 +78,13 @@ public final class OAuth2Utils {
         public static final String EXPIRATION = "exp";
     }
 
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    public static final class ErrorMessageKey {
+        public static final String ERROR = "error";
+
+        public static final String DESCRIPTION = "error_description";
+    }
+
     public static Set<String> extractScopes(String value) {
         Set<String> result = new HashSet<>();
         if (value != null && value.trim().length() > 0) {
