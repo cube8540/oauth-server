@@ -25,6 +25,8 @@ public final class OAuth2Utils {
 
         public static final String CODE = "code";
 
+        public static final String STATE = "state";
+
         public static final String REDIRECT_URI = "redirect_uri";
 
         public static final String SCOPE = "scope";
@@ -74,6 +76,13 @@ public final class OAuth2Utils {
         public static final String USERNAME = "username";
 
         public static final String EXPIRATION = "exp";
+    }
+
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    public static final class ErrorMessageKey {
+        public static final String ERROR = "error";
+
+        public static final String DESCRIPTION = "error_description";
     }
 
     public static Set<String> extractScopes(String value) {

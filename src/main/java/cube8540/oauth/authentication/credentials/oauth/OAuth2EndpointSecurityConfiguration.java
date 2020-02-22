@@ -1,7 +1,6 @@
 package cube8540.oauth.authentication.credentials.oauth;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetailsService;
 import cube8540.oauth.authentication.credentials.oauth.client.provider.ClientCredentialsAuthenticationProvider;
 import cube8540.oauth.authentication.credentials.oauth.client.provider.ClientCredentialsEndpointFilter;
@@ -35,7 +34,10 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.security.web.context.NullSecurityContextRepository;
+import org.springframework.web.cors.CorsConfiguration;
+
+import javax.annotation.PostConstruct;
 
 @Order(1)
 @EnableWebSecurity
@@ -59,11 +61,14 @@ public class OAuth2EndpointSecurityConfiguration extends WebSecurityConfigurerAd
     @Setter(onMethod_= @Autowired)
     private PasswordEncoder passwordEncoder;
 
+    @Setter(onMethod_ = {@Autowired, @Qualifier("escapeObjectMapper")})
+    private ObjectMapper objectMapper;
+
     @Setter
     private OAuth2AuthenticationExceptionEntryPoint oAuth2AuthenticationExceptionEntryPoint;
 
-    public OAuth2EndpointSecurityConfiguration() throws HttpMediaTypeNotSupportedException {
-        ObjectMapper objectMapper = new ObjectMapper().setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
+    @PostConstruct
+    public void initialize() throws Exception {
         MappingJackson2HttpMessageConverter messageConverter = new MappingJackson2HttpMessageConverter(objectMapper);
         OAuth2ExceptionTranslator translator = new OAuth2ExceptionTranslator();
         OAuth2ExceptionResponseRenderer renderer = new DefaultOauth2ExceptionResponseRenderer(messageConverter);
@@ -86,10 +91,14 @@ public class OAuth2EndpointSecurityConfiguration extends WebSecurityConfigurerAd
                 .anyRequest().authenticated()
                 .and()
             .addFilterBefore(tokenEndpointClientCredentialsFilter(), UsernamePasswordAuthenticationFilter.class)
+            .securityContext()
+                .securityContextRepository(new NullSecurityContextRepository())
+                .and()
             .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.NEVER)
                 .and()
-            .csrf().disable();
+            .csrf().disable()
+            .cors().configurationSource(request -> new CorsConfiguration().applyPermitDefaultValues());
     }
 
     @Bean

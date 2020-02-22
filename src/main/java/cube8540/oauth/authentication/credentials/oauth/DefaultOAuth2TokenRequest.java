@@ -25,6 +25,8 @@ public class DefaultOAuth2TokenRequest implements OAuth2TokenRequest {
 
     private String code;
 
+    private String state;
+
     private URI redirectURI;
 
     private Set<String> scopes;
@@ -36,6 +38,7 @@ public class DefaultOAuth2TokenRequest implements OAuth2TokenRequest {
         this.clientId = requestMap.get(OAuth2Utils.TokenRequestKey.CLIENT_ID);
         this.refreshToken = requestMap.get(OAuth2Utils.TokenRequestKey.REFRESH_TOKEN);
         this.code = requestMap.get(OAuth2Utils.TokenRequestKey.CODE);
+        this.state = requestMap.get(OAuth2Utils.TokenRequestKey.STATE);
         this.scopes = OAuth2Utils.extractScopes(requestMap.get(OAuth2Utils.TokenRequestKey.SCOPE));
 
         if (requestMap.get(OAuth2Utils.TokenRequestKey.REDIRECT_URI) != null) {
@@ -71,6 +74,11 @@ public class DefaultOAuth2TokenRequest implements OAuth2TokenRequest {
     @Override
     public String code() {
         return code;
+    }
+
+    @Override
+    public String state() {
+        return state;
     }
 
     @Override

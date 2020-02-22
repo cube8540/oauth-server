@@ -58,11 +58,15 @@ class AuthorizationCodeGranterTest {
     private static final String RAW_CLIENT_ID = "CLIENT-ID";
     private static final OAuth2ClientId CLIENT_ID = new OAuth2ClientId(RAW_CLIENT_ID);
 
+    private static final String RAW_AUTH_CLIENT_ID = "AUTH-CLIENT-ID";
+
     private static final URI REDIRECT_URI = URI.create("http://localhost:8080");
 
     private static final UserEmail STORED_EMAIL = new UserEmail("email@email.com");
 
     private static final LocalDateTime TOKEN_CREATED_DATETIME = LocalDateTime.of(2020, 1, 29, 22, 57);
+
+    private static final String STATE = "REQUESTED_STATE";
 
     private static final Integer ACCESS_TOKEN_VALIDITY_SECONDS = 600;
     private static final Integer REFRESH_TOKEN_VALIDITY_SECONDS = 6000;
@@ -102,6 +106,7 @@ class AuthorizationCodeGranterTest {
             this.tokenRequest = mock(OAuth2TokenRequest.class);
             this.authorizationCode = mock(OAuth2AuthorizationCode.class);
 
+            when(clientDetails.clientId()).thenReturn(RAW_AUTH_CLIENT_ID);
             when(clientDetails.accessTokenValiditySeconds()).thenReturn(ACCESS_TOKEN_VALIDITY_SECONDS);
             when(clientDetails.refreshTokenValiditySeconds()).thenReturn(REFRESH_TOKEN_VALIDITY_SECONDS);
             when(clientDetails.scope()).thenReturn(RAW_CLIENT_SCOPES);
@@ -109,6 +114,7 @@ class AuthorizationCodeGranterTest {
             when(tokenRequest.clientId()).thenReturn(RAW_CLIENT_ID);
             when(tokenRequest.code()).thenReturn(RAW_CODE);
             when(tokenRequest.redirectURI()).thenReturn(REDIRECT_URI);
+            when(tokenRequest.state()).thenReturn(STATE);
 
             when(authorizationCode.getCode()).thenReturn(CODE);
             when(authorizationCode.getClientId()).thenReturn(CLIENT_ID);
@@ -198,7 +204,8 @@ class AuthorizationCodeGranterTest {
                     tokenGranter.createAccessToken(clientDetails, tokenRequest);
                     verify(authorizationCode, times(1)).validateWithAuthorizationRequest(requestCaptor.capture());
                     assertEquals(REDIRECT_URI, requestCaptor.getValue().redirectURI());
-                    assertEquals(RAW_CLIENT_ID, requestCaptor.getValue().clientId());
+                    assertEquals(RAW_AUTH_CLIENT_ID, requestCaptor.getValue().clientId());
+                    assertEquals(STATE, requestCaptor.getValue().state());
                 }
 
                 @Test

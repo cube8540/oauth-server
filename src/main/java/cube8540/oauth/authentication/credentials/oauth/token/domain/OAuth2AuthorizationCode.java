@@ -91,7 +91,11 @@ public class OAuth2AuthorizationCode extends AbstractAggregateRoot<OAuth2Authori
 
     public void validateWithAuthorizationRequest(AuthorizationRequest request) {
         if (expirationDateTime.isBefore(LocalDateTime.now(clock))) {
-            throw InvalidGrantException.invalidGrant("authorization code is expired");
+            throw InvalidGrantException.invalidGrant("Authorization code is expired");
+        }
+
+        if (state != null && !state.equals(request.state())) {
+            throw InvalidGrantException.invalidGrant("State is not matched");
         }
 
         if (!redirectURI.equals(request.redirectURI())) {
@@ -99,7 +103,7 @@ public class OAuth2AuthorizationCode extends AbstractAggregateRoot<OAuth2Authori
         }
 
         if (!clientId.equals(new OAuth2ClientId(request.clientId()))) {
-            throw InvalidClientException.invalidClient("client id mismatch");
+            throw InvalidClientException.invalidClient("Client id mismatch");
         }
     }
 }
