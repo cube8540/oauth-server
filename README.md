@@ -56,6 +56,7 @@ http://localhost:8080/oauth/token?grant_type=authorization_code
 | client_secret | Optional  | String | 클라이언트 패스워드. BasicAuth 사용시 생략될 수 있습니다.          |
 | state         | Optional  | String | 권한 서버로 부터 받은 state 값. 받지 않았을시 생략 할 수 있습니다. |
 | scope         | Optional  | String | /oauth/authorize 호출시 입력 되었던 스코프 입니다.               |
+
 위 요청을 통해 아래와 같이 Access Token 을 발급 받을 수 있습니다.
 ```json
 {
@@ -86,6 +87,7 @@ http://localhost:8080/oauth/token?grant_type=password
 | username      | Required  | String | 자원 소유자의 아이디                                                                                            |
 | password      | Required  | String | 자원 소유자의 패스워드                                                                                          |
 | scope         | Optional  | String | 인증 후 얻을 스코프 입니다. 스코프는 여러개를 요청할 수 있으며 공백으로 구별 합니다. 생략될시 모든 스코프를 얻습니다. |
+
 위 요청으로 아래와 같이 Access Token 을 발급 받을 수 있습니다.
 ```json
 {
@@ -112,6 +114,7 @@ http://localhost:8080/oauth/token?grant_type=client_credentials
 | client_id     | Optional  | String | 클라이언트 아이디. BasicAuth 사용시 생략될 수 있습니다.                                                           |
 | client_secret | Optional  | String | 클라이언트 패스워드. BasicAuth 사용시 생략될 수 있습니다.                                                         |
 | scope         | Optional  | String | 인증 후 얻을 스코프 입니다. 스코프는 여러개를 요청할 수 있으며 공백으로 구별 합니다. 생략될시 모든 스코프를 얻습니다. |
+
 위 요청으로 아래와 같이 Access Token 을 발급 받을 수 있습니다.
 ```json
 {
@@ -140,6 +143,7 @@ http://localhost:8080/oauth/token?grant_type=refresh_token
 | client_id     | Optional  | String | 클라이언트 아이디. BasicAuth 사용시 생략될 수 있습니다.                                                           |
 | client_secret | Optional  | String | 클라이언트 패스워드. BasicAuth 사용시 생략될 수 있습니다.                                                         |
 | scope         | Optional  | String | 인증 후 얻을 스코프 입니다. 스코프는 여러개를 요청할 수 있으며 공백으로 구별 합니다. 기존의 스코프를 얻습니다.        |
+
 위 요청으로 아래와 같이 Access Token 을 발급 받을 수 있습니다.
 ```json
 {
