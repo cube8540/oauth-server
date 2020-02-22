@@ -1,15 +1,22 @@
 package cube8540.oauth.authentication.credentials.oauth.client.domain;
 
+import cube8540.oauth.authentication.credentials.oauth.client.error.ClientAuthorizationException;
+import cube8540.oauth.authentication.credentials.oauth.client.error.ClientInvalidException;
 import cube8540.oauth.authentication.credentials.oauth.converter.AuthorizationGrantTypeConverter;
 import cube8540.oauth.authentication.credentials.oauth.converter.RedirectUriConverter;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
+import cube8540.oauth.authentication.users.domain.UserEmail;
+import cube8540.validator.core.Validator;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.annotations.Target;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.springframework.data.domain.AbstractAggregateRoot;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 
 import javax.persistence.AttributeOverride;
@@ -43,30 +50,37 @@ public class OAuth2Client extends AbstractAggregateRoot<OAuth2Client> {
     @AttributeOverride(name = "value", column = @Column(name = "client_id", length = 32))
     private OAuth2ClientId clientId;
 
-    @Embedded
-    @Target(OAuth2ClientDefaultSecret.class)
-    @AttributeOverride(name = "secret", column = @Column(name = "client_secret", length = 64, nullable = false))
-    private OAuth2ClientSecret secret;
+    @Column(name = "client_secret", length = 64, nullable = false)
+    private String secret;
 
+    @Setter
     @Column(name = "client_name", length = 32, nullable = false)
     private String clientName;
 
     @ElementCollection
+    @Fetch(FetchMode.JOIN)
     @Column(name = "redirect_uri", length = 128, nullable = false)
     @CollectionTable(name = "oauth2_client_redirect_uri", joinColumns = @JoinColumn(name = "client_id", nullable = false))
     @Convert(converter = RedirectUriConverter.class)
     private Set<URI> redirectURI;
 
     @ElementCollection
+    @Fetch(FetchMode.JOIN)
     @Column(name = "grant_type", length = 32, nullable = false)
     @CollectionTable(name = "oauth2_client_grant_type", joinColumns = @JoinColumn(name = "client_id", nullable = false))
     @Convert(converter = AuthorizationGrantTypeConverter.class)
     private Set<AuthorizationGrantType> grantType;
 
     @ElementCollection
+    @Fetch(FetchMode.JOIN)
     @CollectionTable(name = "oauth2_client_scope", joinColumns = @JoinColumn(name = "client_id", nullable = false))
     @AttributeOverride(name = "value", column = @Column(name = "scope_id", length = 32, nullable = false))
     private Set<OAuth2ScopeId> scope;
+
+    @Setter
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "oauth2_client_owner", nullable = false, length = 128))
+    private UserEmail owner;
 
     @Column(name = "access_token_validity", nullable = false)
     private Duration accessTokenValidity;
@@ -74,14 +88,15 @@ public class OAuth2Client extends AbstractAggregateRoot<OAuth2Client> {
     @Column(name = "refresh_token_validity", nullable = false)
     private Duration refreshTokenValidity;
 
-    public OAuth2Client(String clientId, String secret, String clientName, OAuth2ClientSecretEncoder encoder) {
+    public OAuth2Client(String clientId, String secret) {
         this.clientId = new OAuth2ClientId(clientId);
-        this.secret = new OAuth2ClientDefaultSecret(secret);
-        this.clientName = clientName;
+        this.secret = secret;
         this.accessTokenValidity = DEFAULT_ACCESS_TOKEN_VALIDITY;
         this.refreshTokenValidity = DEFAULT_REFRESH_TOKEN_VALIDITY;
+    }
 
-        this.secret = this.secret.encrypted(encoder);
+    public void encrypted(PasswordEncoder encoder) {
+        this.secret = encoder.encode(this.secret);
     }
 
     public void addRedirectURI(URI uri) {
@@ -118,5 +133,22 @@ public class OAuth2Client extends AbstractAggregateRoot<OAuth2Client> {
     public void removeScope(OAuth2ScopeId scope) {
         Optional.ofNullable(this.scope)
                 .ifPresent(scopes -> scopes.remove(scope));
+    }
+
+    public void validate(OAuth2ClientValidatePolicy policy) {
+        Validator.of(this).registerRule(policy.clientIdRule())
+                .registerRule(policy.secretRule())
+                .registerRule(policy.ownerRule())
+                .registerRule(policy.clientNameRule())
+                .registerRule(policy.grantTypeRule())
+                .registerRule(policy.scopeRule())
+                .getResult().hasErrorThrows(ClientInvalidException::new);
+    }
+
+    public void changeSecret(String existsSecret, String changeSecret, PasswordEncoder encoder) {
+        if (!encoder.matches(existsSecret, secret)) {
+            throw ClientAuthorizationException.invalidPassword("Exists secret is not matched");
+        }
+        this.secret = changeSecret;
     }
 }

@@ -2,6 +2,7 @@ package cube8540.oauth.authentication.credentials.oauth;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.springframework.security.oauth2.core.AuthorizationGrantType;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -23,6 +24,8 @@ public final class OAuth2Utils {
         public static final String REFRESH_TOKEN = "refresh_token";
 
         public static final String CODE = "code";
+
+        public static final String STATE = "state";
 
         public static final String REDIRECT_URI = "redirect_uri";
 
@@ -75,6 +78,13 @@ public final class OAuth2Utils {
         public static final String EXPIRATION = "exp";
     }
 
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    public static final class ErrorMessageKey {
+        public static final String ERROR = "error";
+
+        public static final String DESCRIPTION = "error_description";
+    }
+
     public static Set<String> extractScopes(String value) {
         Set<String> result = new HashSet<>();
         if (value != null && value.trim().length() > 0) {
@@ -82,6 +92,25 @@ public final class OAuth2Utils {
             result.addAll(Arrays.asList(scopes));
         }
         return result;
+    }
+
+    public static AuthorizationGrantType extractGrantType(String value) {
+        if (value.equalsIgnoreCase(AuthorizationGrantType.AUTHORIZATION_CODE.getValue())) {
+            return AuthorizationGrantType.AUTHORIZATION_CODE;
+        }
+        if (value.equalsIgnoreCase(AuthorizationGrantType.PASSWORD.getValue())) {
+            return AuthorizationGrantType.PASSWORD;
+        }
+        if (value.equalsIgnoreCase(AuthorizationGrantType.CLIENT_CREDENTIALS.getValue())) {
+            return AuthorizationGrantType.CLIENT_CREDENTIALS;
+        }
+        if (value.equalsIgnoreCase(AuthorizationGrantType.REFRESH_TOKEN.getValue())) {
+            return AuthorizationGrantType.REFRESH_TOKEN;
+        }
+        if (value.equalsIgnoreCase(AuthorizationGrantType.IMPLICIT.getValue())) {
+            return AuthorizationGrantType.IMPLICIT;
+        }
+        throw new IllegalArgumentException("Unknowns authorization grant type");
     }
 
 }

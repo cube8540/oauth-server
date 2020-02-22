@@ -1,27 +1,60 @@
 package cube8540.oauth.authentication.credentials.oauth.scope.application;
 
+import cube8540.oauth.authentication.credentials.authority.domain.AuthorityCode;
 import cube8540.oauth.authentication.credentials.oauth.scope.OAuth2ScopeDetails;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2Scope;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeRepository;
+import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeValidationPolicy;
+import cube8540.oauth.authentication.credentials.oauth.scope.error.ScopeErrorCodes;
+import cube8540.oauth.authentication.credentials.oauth.scope.error.ScopeNotFoundException;
+import cube8540.oauth.authentication.credentials.oauth.scope.error.ScopeRegisterException;
+import cube8540.validator.core.ValidationRule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.AdditionalAnswers.returnsFirstArg;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @DisplayName("기본 스코프 디테일 서비스 테스트")
 class DefaultScopeDetailsServiceTest {
+
+    private static final String RAW_SCOPE_ID = "SCOPE";
+    private static final OAuth2ScopeId SCOPE_ID = new OAuth2ScopeId(RAW_SCOPE_ID);
+
+    private static final String DESCRIPTION = "DESCRIPTION";
+    private static final String MODIFY_DESCRIPTION = "MODIFY-DESCRIPTION";
+
+    private static final Set<AuthorityCode> AUTHORITIES = new HashSet<>(Arrays.asList(new AuthorityCode("AUTH-CODE-1"), new AuthorityCode("AUTH-CODE-2"),new AuthorityCode("AUTH-CODE-3")));
+    private static final List<AuthorityCode> NEW_AUTHORITIES = Arrays.asList(new AuthorityCode("NEW-AUTH-1"), new AuthorityCode("NEW-AUTH-2"), new AuthorityCode("NEW-AUTH-3"));
+    private static final List<AuthorityCode> REMOVE_AUTHORITIES = Arrays.asList(new AuthorityCode("REMOVE-AUTH-1"), new AuthorityCode("REMOVE-AUTH-2"), new AuthorityCode("REMOVE-AUTH-3"));
+    private static final List<String> RAW_AUTHORITIES = AUTHORITIES.stream().map(AuthorityCode::getValue).collect(Collectors.toList());
+    private static final List<String> RAW_NEW_AUTHORITIES = NEW_AUTHORITIES.stream().map(AuthorityCode::getValue).collect(Collectors.toList());
+    private static final List<String> RAW_REMOVE_AUTHORITIES = REMOVE_AUTHORITIES.stream().map(AuthorityCode::getValue).collect(Collectors.toList());
 
     private OAuth2ScopeRepository repository;
     private DefaultScopeDetailsService service;
@@ -35,17 +68,6 @@ class DefaultScopeDetailsServiceTest {
     @Nested
     @DisplayName("스코프 상세 검색")
     class LookupScopes {
-
-        private Collection<OAuth2Scope> scopes;
-
-        @BeforeEach
-        void setup() {
-            this.scopes = new ArrayList<>();
-
-            this.scopes.add(mock(OAuth2Scope.class));
-            this.scopes.add(mock(OAuth2Scope.class));
-            this.scopes.add(mock(OAuth2Scope.class));
-        }
 
         @Nested
         @DisplayName("검색 결과가 없을시")
@@ -67,38 +89,291 @@ class DefaultScopeDetailsServiceTest {
                 assertEquals(Collections.emptyList(), results);
             }
         }
+    }
+
+    @Nested
+    @DisplayName("새 스코프 등록")
+    class RegisterNewScope {
+        private OAuth2ScopeRegisterRequest request;
+
+        @BeforeEach
+        void setup() {
+            this.request = new OAuth2ScopeRegisterRequest(RAW_SCOPE_ID, DESCRIPTION, RAW_AUTHORITIES);
+        }
 
         @Nested
-        @DisplayName("검색 결과가 1개 이상일시")
-        class WhenSearchResultIsNotEmpty {
-
-            private Collection<String> parameters = Arrays.asList("SCOPE-1", "SCOPE-2", "SCOPE-3");
-            private List<OAuth2Scope> SCOPES = Arrays.asList(
-                    mocking("SCOPE-1", "DESCRIPTION-1"),
-                    mocking("SCOPE-2", "DESCRIPTION-2"),
-                    mocking("SCOPE-3", "DESCRIPTION-3"));
+        @DisplayName("저장소에 이미 저장되어 있는 스코프 일시")
+        class WhenExistingScopeInRepository {
 
             @BeforeEach
             void setup() {
-                List<OAuth2ScopeId> scopeIdParameters = this.parameters.stream().map(OAuth2ScopeId::new).collect(Collectors.toList());
-                when(repository.findByIdIn(scopeIdParameters)).thenReturn(SCOPES);
+                when(repository.countById(SCOPE_ID)).thenReturn(1L);
             }
 
             @Test
-            @DisplayName("저장소 스코프의 정보를 반환해야 한다.")
-            void shouldReturnsScopeDetails() {
-                Collection<OAuth2ScopeDetails> results = service.loadScopeDetailsByScopeIds(parameters);
-
-                Collection<OAuth2ScopeDetails> expected = SCOPES.stream().map(DetailsOAuth2ScopeDetails::new).collect(Collectors.toList());
-                assertEquals(expected, results);
+            @DisplayName("ScopeRegisterException이 발생해야 한다.")
+            void shouldThrowScopeRegisterException() {
+                assertThrows(ScopeRegisterException.class, () -> service.registerNewScope(request));
             }
 
-            private OAuth2Scope mocking(String id, String description) {
-                OAuth2Scope scope = mock(OAuth2Scope.class);
+            @Test
+            @DisplayName("에러 코드는 EXISTS_IDENTIFIER 이어야 한다.")
+            void shouldErrorCodeIsExistsIdentifier() {
+                ScopeRegisterException e = assertThrows(ScopeRegisterException.class, () -> service.registerNewScope(request));
+                assertEquals(ScopeErrorCodes.EXISTS_IDENTIFIER, e.getCode());
+            }
+        }
 
-                when(scope.getId()).thenReturn(new OAuth2ScopeId(id));
-                when(scope.getDescription()).thenReturn(description);
-                return scope;
+        @Nested
+        @DisplayName("저장소에 없는 스코프일시")
+        class WhenNotExistingScopeId {
+
+            private ValidationRule<OAuth2Scope> scopeIdRule;
+            private ValidationRule<OAuth2Scope> accessibleRule;
+
+            @BeforeEach
+            @SuppressWarnings("unchecked")
+            void setup() {
+                OAuth2ScopeValidationPolicy policy = mock(OAuth2ScopeValidationPolicy.class);
+
+                this.scopeIdRule = mock(ValidationRule.class);
+                this.accessibleRule = mock(ValidationRule.class);
+
+                when(policy.scopeIdRule()).thenReturn(scopeIdRule);
+                when(policy.accessibleRule()).thenReturn(accessibleRule);
+
+                when(scopeIdRule.isValid(any())).thenReturn(true);
+                when(accessibleRule.isValid(any())).thenReturn(true);
+
+                when(repository.countById(SCOPE_ID)).thenReturn(0L);
+                doAnswer(returnsFirstArg()).when(repository).save(isA(OAuth2Scope.class));
+
+                service.setValidationPolicy(policy);
+            }
+
+            @Test
+            @DisplayName("요청 받은 스코프 아이디의 유효성을 검사 후 저장 해야 한다.")
+            void shouldSaveScopeIdAfterValidation() {
+                ArgumentCaptor<OAuth2Scope> scopeCaptor = ArgumentCaptor.forClass(OAuth2Scope.class);
+                InOrder inOrder = inOrder(scopeIdRule, repository);
+
+                service.registerNewScope(request);
+                inOrder.verify(scopeIdRule, times(1)).isValid(scopeCaptor.capture());
+                inOrder.verify(repository, times(1)).save(scopeCaptor.capture());
+                assertEquals(scopeCaptor.getAllValues().get(0), scopeCaptor.getAllValues().get(1));
+                assertEquals(SCOPE_ID, scopeCaptor.getValue().getId());
+            }
+
+            @Test
+            @DisplayName("요청 받은 스코프 설명을 저장해야 한다.")
+            void shouldSaveScopeDescription() {
+                ArgumentCaptor<OAuth2Scope> scopeCaptor = ArgumentCaptor.forClass(OAuth2Scope.class);
+
+                service.registerNewScope(request);
+                verify(repository, times(1)).save(scopeCaptor.capture());
+                assertEquals(DESCRIPTION, scopeCaptor.getValue().getDescription());
+            }
+
+            @Nested
+            @DisplayName("요청 받은 접근 권한이 null일시")
+            class WhenRequestingAccessibleAuthorityIsNull {
+
+                private OAuth2ScopeRegisterRequest request;
+
+                @BeforeEach
+                void setup() {
+                    this.request = new OAuth2ScopeRegisterRequest(RAW_SCOPE_ID, DESCRIPTION, null);
+                }
+
+                @Test
+                @DisplayName("스코프에 저장소를 저장하지 않아야 한다.")
+                void shouldNotSaveAccessibleAuthority() {
+                    ArgumentCaptor<OAuth2Scope> scopeCaptor = ArgumentCaptor.forClass(OAuth2Scope.class);
+
+                    service.registerNewScope(request);
+                    verify(repository, times(1)).save(scopeCaptor.capture());
+                    assertNull(scopeCaptor.getValue().getAccessibleAuthority());
+                }
+            }
+
+            @Test
+            @DisplayName("요청 받은 접근 권한을 유효성 검사 후 저장해야 한다.")
+            void shouldSaveAccessibleAuthorityAfterValidation() {
+                ArgumentCaptor<OAuth2Scope> scopeCaptor = ArgumentCaptor.forClass(OAuth2Scope.class);
+                InOrder inOrder = inOrder(accessibleRule, repository);
+
+                service.registerNewScope(request);
+                inOrder.verify(accessibleRule, times(1)).isValid(scopeCaptor.capture());
+                inOrder.verify(repository, times(1)).save(scopeCaptor.capture());
+                assertEquals(scopeCaptor.getAllValues().get(0), scopeCaptor.getAllValues().get(1));
+                assertEquals(AUTHORITIES, scopeCaptor.getValue().getAccessibleAuthority());
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("스코프 수정")
+    class ModifyScope {
+        private OAuth2ScopeModifyRequest request;
+
+        @BeforeEach
+        void setup() {
+            this.request = new OAuth2ScopeModifyRequest(MODIFY_DESCRIPTION, RAW_REMOVE_AUTHORITIES, RAW_NEW_AUTHORITIES);
+        }
+
+        @Nested
+        @DisplayName("수정할 스코프가 저장소에 저장되어 있지 않을시")
+        class WhenModifyScopeNotRegisteredInRepository {
+
+            @BeforeEach
+            void setup() {
+                when(repository.findById(SCOPE_ID)).thenReturn(Optional.empty());
+            }
+
+            @Test
+            @DisplayName("ScopeNotFoundException이 발생해야 한다.")
+            void shouldThrowsScopeNotFoundException() {
+                assertThrows(ScopeNotFoundException.class, () -> service.modifyScope(RAW_SCOPE_ID, request));
+            }
+        }
+
+        @Nested
+        @DisplayName("수정할 스코프가 저장소에 저장되어 있을시")
+        class WhenModifyScopeRegisteredInRepository {
+
+            private OAuth2Scope scope;
+            private OAuth2ScopeValidationPolicy policy;
+
+            @BeforeEach
+            void setup() {
+                this.scope = mock(OAuth2Scope.class);
+                this.policy = mock(OAuth2ScopeValidationPolicy.class);
+
+                when(scope.getId()).thenReturn(SCOPE_ID);
+                when(scope.getDescription()).thenReturn(DESCRIPTION);
+                when(scope.getAccessibleAuthority()).thenReturn(AUTHORITIES);
+                when(repository.findById(SCOPE_ID)).thenReturn(Optional.of(scope));
+
+                doAnswer(returnsFirstArg()).when(repository).save(isA(OAuth2Scope.class));
+
+                service.setValidationPolicy(policy);
+            }
+
+            @Test
+            @DisplayName("요청 받은 권한 설명으로 변경 후 저장해야 한다.")
+            void shouldChangeDescriptionToRequestingDescription() {
+                InOrder inOrder = inOrder(scope, repository);
+
+                service.modifyScope(RAW_SCOPE_ID, request);
+                inOrder.verify(scope, times(1)).setDescription(MODIFY_DESCRIPTION);
+                inOrder.verify(repository, times(1)).save(scope);
+            }
+
+            @Nested
+            @DisplayName("삭제할 접근 권한이 null일시")
+            class WhenRequestingRemoveAuthorityIsNull {
+
+                private OAuth2ScopeModifyRequest request;
+
+                @BeforeEach
+                void setup() {
+                    this.request = new OAuth2ScopeModifyRequest(MODIFY_DESCRIPTION, null, RAW_NEW_AUTHORITIES);
+                }
+
+                @Test
+                @DisplayName("스코프에서 접근 권한을 삭제하지 않아야 한다.")
+                void shouldNotRemoveAuthorityInScope() {
+                    service.modifyScope(RAW_SCOPE_ID, this.request);
+
+                    verify(scope, never()).removeAccessibleAuthority(any());
+                }
+            }
+
+            @Nested
+            @DisplayName("추가할 접근 권한이 null일시")
+            class WhenRequestingNewAuthorityIsNull {
+
+                private OAuth2ScopeModifyRequest request;
+
+                @BeforeEach
+                void setup() {
+                    this.request = new OAuth2ScopeModifyRequest(MODIFY_DESCRIPTION, RAW_REMOVE_AUTHORITIES, null);
+                }
+
+                @Test
+                @DisplayName("스코프에서 접근 권한을 추가하지 않아야 한다.")
+                void shouldNotAddAuthorityInScope() {
+                    service.modifyScope(RAW_SCOPE_ID, request);
+
+                    verify(scope, never()).addAccessibleAuthority(any());
+                }
+            }
+
+            @Test
+            @DisplayName("삭제할 접근 권한을 삭제하고 새 접근 권한을 저장 한 후 유효성을 검사해야 한다.")
+            void shouldValidationAfterRemoveRequestingRemoveAuthorityAndAddRequestingNewAuthority() {
+                InOrder inOrder = inOrder(scope, repository);
+
+                service.modifyScope(RAW_SCOPE_ID, request);
+                REMOVE_AUTHORITIES.forEach(authority -> inOrder.verify(scope, times(1)).removeAccessibleAuthority(authority));
+                NEW_AUTHORITIES.forEach(authority -> inOrder.verify(scope, times(1)).addAccessibleAuthority(authority));
+                inOrder.verify(scope, times(1)).validate(policy);
+            }
+
+            @Test
+            @DisplayName("스코프의 유효성을 검사 한 후 저장소에 저장해야 한다.")
+            void shouldSaveInRepositoryAfterValidation() {
+                InOrder inOrder = inOrder(scope, repository);
+
+                service.modifyScope(RAW_SCOPE_ID, request);
+                inOrder.verify(scope, times(1)).validate(policy);
+                inOrder.verify(repository, times(1)).save(scope);
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("스코프 삭제")
+    class RemoveScope {
+
+        @Nested
+        @DisplayName("삭제할 스코프가 저장소에 저장되어 있지 않을시")
+        class WhenRemoveScopeNotRegisteredInRepository {
+
+            @BeforeEach
+            void setup() {
+                when(repository.findById(SCOPE_ID)).thenReturn(Optional.empty());
+            }
+
+            @Test
+            @DisplayName("ScopeNotFoundException이 발생해야 한다.")
+            void shouldThrowScopeNotFoundException() {
+                assertThrows(ScopeNotFoundException.class, () -> service.removeScope(RAW_SCOPE_ID));
+            }
+        }
+
+        @Nested
+        @DisplayName("삭제할 스코프가 저장소에 저장되어 있을시")
+        class WhenRemoveScopeRegisteredInRepository {
+
+            private OAuth2Scope scope;
+
+            @BeforeEach
+            void setup() {
+                this.scope = mock(OAuth2Scope.class);
+
+                when(scope.getId()).thenReturn(SCOPE_ID);
+                when(scope.getDescription()).thenReturn(DESCRIPTION);
+                when(scope.getAccessibleAuthority()).thenReturn(AUTHORITIES);
+                when(repository.findById(SCOPE_ID)).thenReturn(Optional.of(scope));
+            }
+
+            @Test
+            @DisplayName("검색된 스코프를 저장소에서 삭제해야 한다.")
+            void shouldRemoveSearchedScope() {
+                service.removeScope(RAW_SCOPE_ID);
+
+                verify(repository, times(1)).delete(scope);
             }
         }
     }

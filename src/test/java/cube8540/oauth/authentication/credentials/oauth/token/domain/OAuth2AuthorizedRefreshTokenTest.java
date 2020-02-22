@@ -84,7 +84,7 @@ class OAuth2AuthorizedRefreshTokenTest {
                 Clock clock = Clock.fixed(EXPIRATION.plusNanos(1).toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
 
                 refreshToken = new OAuth2AuthorizedRefreshToken(tokenIdGenerator, EXPIRATION, accessToken);
-                refreshToken.setClock(clock);
+                OAuth2AuthorizedRefreshToken.setClock(clock);
             }
 
             @Test
@@ -103,7 +103,7 @@ class OAuth2AuthorizedRefreshTokenTest {
                 Clock clock = Clock.fixed(EXPIRATION.minusNanos(1).toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
 
                 refreshToken = new OAuth2AuthorizedRefreshToken(tokenIdGenerator, EXPIRATION, accessToken);
-                refreshToken.setClock(clock);
+                OAuth2AuthorizedRefreshToken.setClock(clock);
             }
 
             @Test
@@ -129,7 +129,7 @@ class OAuth2AuthorizedRefreshTokenTest {
 
                 Clock clock = Clock.fixed(EXPIRATION.plusNanos(1).toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
                 this.refreshToken = new OAuth2AuthorizedRefreshToken(tokenIdGenerator, EXPIRATION, accessToken);
-                this.refreshToken.setClock(clock);
+                OAuth2AuthorizedRefreshToken.setClock(clock);
             }
 
             @Test
@@ -152,7 +152,7 @@ class OAuth2AuthorizedRefreshTokenTest {
 
                 Clock clock = Clock.fixed(EXPIRATION.minusSeconds(expiresIn).toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
                 this.refreshToken = new OAuth2AuthorizedRefreshToken(tokenIdGenerator, EXPIRATION, accessToken);
-                this.refreshToken.setClock(clock);
+                OAuth2AuthorizedRefreshToken.setClock(clock);
             }
 
 

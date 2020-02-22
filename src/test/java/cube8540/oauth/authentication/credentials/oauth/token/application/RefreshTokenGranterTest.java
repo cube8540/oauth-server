@@ -4,6 +4,7 @@ import cube8540.oauth.authentication.credentials.oauth.OAuth2RequestValidator;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2TokenRequest;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
+import cube8540.oauth.authentication.credentials.oauth.error.InvalidClientException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidGrantException;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenRepository;
@@ -19,6 +20,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
+import org.springframework.security.oauth2.core.OAuth2Error;
+import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
@@ -119,7 +122,7 @@ class RefreshTokenGranterTest {
             tokenGranter.setTokenRequestValidator(validator);
 
             Clock clock = Clock.fixed(TOKEN_CREATED_DATETIME.toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
-            tokenGranter.setClock(clock);
+            AbstractOAuth2TokenGranter.setClock(clock);
         }
 
         @Nested
@@ -136,6 +139,14 @@ class RefreshTokenGranterTest {
             void shouldThrowsInvalidGrantException() {
                 InvalidGrantException e = assertThrows(InvalidGrantException.class, () -> tokenGranter.createAccessToken(clientDetails, tokenRequest));
                 assertEquals("invalid refresh token", e.getMessage());
+            }
+
+            @Test
+            @DisplayName("에러 코드는 INVALID_GRANT 이어야 한다.")
+            void shouldErrorCodeIsInvalidGrant() {
+                OAuth2Error error = assertThrows(InvalidGrantException.class, () -> tokenGranter.createAccessToken(clientDetails, tokenRequest))
+                        .getError();
+                assertEquals(OAuth2ErrorCodes.INVALID_GRANT, error.getErrorCode());
             }
         }
 
@@ -186,17 +197,25 @@ class RefreshTokenGranterTest {
             }
 
             @Test
-            @DisplayName("InvalidGrantException이 발생해야 한다.")
-            void shouldThrowsInvalidGrantException() {
-                InvalidGrantException e = assertThrows(InvalidGrantException.class, () -> tokenGranter.createAccessToken(clientDetails, tokenRequest));
+            @DisplayName("InvalidClientException이 발생해야 한다.")
+            void shouldThrowsInvalidClientException() {
+                InvalidClientException e = assertThrows(InvalidClientException.class, () -> tokenGranter.createAccessToken(clientDetails, tokenRequest));
                 assertEquals("invalid refresh token", e.getMessage());
             }
 
             @Test
             @DisplayName("검색된 리플레시 토큰을 삭제하지 않아야 한다.")
             void shouldNotRemoveRefreshToken() {
-                assertThrows(InvalidGrantException.class, () -> tokenGranter.createAccessToken(clientDetails, tokenRequest));
+                assertThrows(InvalidClientException.class, () -> tokenGranter.createAccessToken(clientDetails, tokenRequest));
                 verify(refreshTokenRepository, never()).delete(any());
+            }
+
+            @Test
+            @DisplayName("에러 코드는 INVALID_CLIENT 이어야 한다.")
+            void shouldErrorCodeIsInvalidClient() {
+                OAuth2Error error = assertThrows(InvalidClientException.class, () -> tokenGranter.createAccessToken(clientDetails, tokenRequest))
+                        .getError();
+                assertEquals(OAuth2ErrorCodes.INVALID_CLIENT, error.getErrorCode());
             }
         }
 
@@ -237,6 +256,14 @@ class RefreshTokenGranterTest {
                 @DisplayName("InvalidGrantException 예외가 발생해야 한다.")
                 void shouldThrowsInvalidGrantException() {
                     assertThrows(InvalidGrantException.class, () -> tokenGranter.createAccessToken(clientDetails, tokenRequest));
+                }
+
+                @Test
+                @DisplayName("에러 코드는 INVALID_SCOPE 이어야 한다.")
+                void shouldErrorCodeIsInvalidScope() {
+                    OAuth2Error error = assertThrows(InvalidGrantException.class, () -> tokenGranter.createAccessToken(clientDetails, tokenRequest))
+                            .getError();
+                    assertEquals(OAuth2ErrorCodes.INVALID_SCOPE, error.getErrorCode());
                 }
             }
 

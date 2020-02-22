@@ -22,7 +22,7 @@ public class ClientCredentialsTokenGranter extends AbstractOAuth2TokenGranter {
     @Override
     public OAuth2AuthorizedAccessToken createAccessToken(OAuth2ClientDetails clientDetails, OAuth2TokenRequest tokenRequest) {
         if (!getTokenRequestValidator().validateScopes(clientDetails, tokenRequest.scopes())) {
-            throw new InvalidGrantException("cannot grant scopes");
+            throw InvalidGrantException.invalidScope("cannot grant scopes");
         }
 
         OAuth2AuthorizedAccessToken accessToken = OAuth2AuthorizedAccessToken.builder(getTokenIdGenerator())

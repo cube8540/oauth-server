@@ -4,6 +4,7 @@ import cube8540.oauth.authentication.credentials.oauth.OAuth2Utils;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
 import cube8540.oauth.authentication.credentials.oauth.client.provider.ClientCredentialsToken;
+import cube8540.oauth.authentication.credentials.oauth.error.AbstractOAuth2AuthenticationException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidClientException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidRequestException;
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTranslator;
@@ -18,8 +19,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
+import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 
 import java.security.Principal;
 import java.util.Map;
@@ -40,15 +41,12 @@ class OAuth2TokenIntrospectionEndpointTest {
     private static final OAuth2ClientId CLIENT_ID = new OAuth2ClientId(RAW_CLIENT_ID);
 
     private OAuth2AccessTokenReadService service;
-    private OAuth2AccessTokenIntrospectionConverter converter;
     private OAuth2TokenIntrospectionEndpoint endpoint;
 
     @BeforeEach
     void setup() {
         this.service = mock(OAuth2AccessTokenReadService.class);
-        this.converter = mock(OAuth2AccessTokenIntrospectionConverter.class);
         this.endpoint = new OAuth2TokenIntrospectionEndpoint(service);
-        this.endpoint.setConverter(converter);
     }
 
     @Nested
@@ -70,6 +68,14 @@ class OAuth2TokenIntrospectionEndpointTest {
             @DisplayName("InvalidRequestException이 발생해야 한다.")
             void shouldThrowsInvalidRequestException() {
                 assertThrows(InvalidRequestException.class, () -> endpoint.introspection(principal, null));
+            }
+
+            @Test
+            @DisplayName("에러 코드는 INVALID_REQUIEST 이어야 한다.")
+            void shouldErrorCodeIsInvalidRequest() {
+                OAuth2Error error = assertThrows(InvalidRequestException.class, () -> endpoint.introspection(principal, null))
+                        .getError();
+                assertEquals(OAuth2ErrorCodes.INVALID_REQUEST, error.getErrorCode());
             }
         }
 
@@ -115,25 +121,32 @@ class OAuth2TokenIntrospectionEndpointTest {
         @DisplayName("인증 객체의 클라이언트 아이디와 검색된 엑세스 토큰의 아이디가 다를시")
         class WhenAuthenticationClientIdAndAccessTokenIdAreDifferent {
             private ClientCredentialsToken clientCredentialsToken;
-            private OAuth2ClientDetails clientDetails;
-            private OAuth2AccessTokenDetails accessToken;
 
             @BeforeEach
             void setup() {
                 this.clientCredentialsToken = mock(ClientCredentialsToken.class);
-                this.clientDetails = mock(OAuth2ClientDetails.class);
-                this.accessToken = mock(OAuth2AccessTokenDetails.class);
 
-                when(service.readAccessToken(TOKEN_VALUE)).thenReturn(this.accessToken);
+                OAuth2ClientDetails clientDetails = mock(OAuth2ClientDetails.class);
+                OAuth2AccessTokenDetails accessToken = mock(OAuth2AccessTokenDetails.class);
+
+                when(service.readAccessToken(TOKEN_VALUE)).thenReturn(accessToken);
                 when(this.clientCredentialsToken.getPrincipal()).thenReturn(clientDetails);
-                when(this.clientDetails.clientId()).thenReturn("DIFFERENT_CLIENT_ID");
-                when(this.accessToken.clientId()).thenReturn(CLIENT_ID);
+                when(clientDetails.clientId()).thenReturn("DIFFERENT_CLIENT_ID");
+                when(accessToken.clientId()).thenReturn(CLIENT_ID);
             }
 
             @Test
             @DisplayName("InvalidClientException이 발생해야 한다.")
             void shouldThrowsInvalidClientException() {
                 assertThrows(InvalidClientException.class, () -> endpoint.introspection(this.clientCredentialsToken, TOKEN_VALUE));
+            }
+
+            @Test
+            @DisplayName("에러 코드는 INVALID_CLIENT 이어야 한다.")
+            void shouldErrorCodeIsInvalidClient() {
+                OAuth2Error error = assertThrows(InvalidClientException.class, () -> endpoint.introspection(this.clientCredentialsToken, TOKEN_VALUE))
+                        .getError();
+                assertEquals(OAuth2ErrorCodes.INVALID_CLIENT, error.getErrorCode());
             }
         }
 
@@ -174,14 +187,13 @@ class OAuth2TokenIntrospectionEndpointTest {
         @Nested
         @DisplayName("OAuth2AccessTokenRegistrationException 관련 에러 발생시")
         class WhenThrowsOAuth2AccessTokenRegistrationException {
-            private OAuth2ExceptionTranslator exceptionTranslator;
             private OAuth2AccessTokenRegistrationException exception;
             private ResponseEntity<OAuth2Error> responseEntity;
 
             @BeforeEach
             @SuppressWarnings("unchecked")
             void setup() {
-                this.exceptionTranslator = mock(OAuth2ExceptionTranslator.class);
+                OAuth2ExceptionTranslator exceptionTranslator = mock(OAuth2ExceptionTranslator.class);
                 this.exception = mock(OAuth2AccessTokenRegistrationException.class);
                 this.responseEntity = mock(ResponseEntity.class);
 
@@ -206,15 +218,14 @@ class OAuth2TokenIntrospectionEndpointTest {
         @Nested
         @DisplayName("OAuth2AuthenticationException 관련 에러 발생시")
         class WhenThrowsOAuth2AuthenticationException {
-            private OAuth2ExceptionTranslator exceptionTranslator;
-            private OAuth2AuthenticationException exception;
+            private AbstractOAuth2AuthenticationException exception;
             private ResponseEntity<OAuth2Error> responseEntity;
 
             @BeforeEach
             @SuppressWarnings("unchecked")
             void setup() {
-                this.exceptionTranslator = mock(OAuth2ExceptionTranslator.class);
-                this.exception = mock(OAuth2AuthenticationException.class);
+                OAuth2ExceptionTranslator exceptionTranslator = mock(OAuth2ExceptionTranslator.class);
+                this.exception = mock(AbstractOAuth2AuthenticationException.class);
                 this.responseEntity = mock(ResponseEntity.class);
 
                 when(exceptionTranslator.translate(exception)).thenReturn(responseEntity);
@@ -259,6 +270,53 @@ class OAuth2TokenIntrospectionEndpointTest {
                 Map<String, Boolean> result = endpoint.handleServerException(exception);
 
                 assertFalse(result.get(OAuth2Utils.AccessTokenIntrospectionKey.ACTIVE));
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("토큰 유저 정보")
+    class ReadUserInfo {
+
+        @Nested
+        @DisplayName("인증 객체의 타입이 ClientCredetialsToken이 아닐시")
+        class WhenAuthenticationTypeNotClientCredentialsToken {
+            private UsernamePasswordAuthenticationToken token;
+
+            @BeforeEach
+            void setup() {
+                this.token = mock(UsernamePasswordAuthenticationToken.class);
+            }
+
+            @Test
+            @DisplayName("InsufficientAuthenticationException이 발생해야 한다.")
+            void shouldInsufficientAuthenticationException() {
+                assertThrows(InsufficientAuthenticationException.class, () -> endpoint.userInfo(token, TOKEN_VALUE));
+            }
+        }
+
+        @Nested
+        @DisplayName("요청 받은 Token이 null일시")
+        class WhenRequestingTokenIsNull {
+            private ClientCredentialsToken credentialsToken;
+
+            @BeforeEach
+            void setup() {
+                this.credentialsToken = mock(ClientCredentialsToken.class);
+            }
+
+            @Test
+            @DisplayName("InvalidRequestException이 발생해야 한다.")
+            void shouldThrowsInvalidRequestException() {
+                assertThrows(InvalidRequestException.class, () -> endpoint.userInfo(credentialsToken, null));
+            }
+
+            @Test
+            @DisplayName("에러 코드는 INVALID_REQUEST 이어야 한다.")
+            void shouldErrorCodeIsInvalidRequest() {
+                OAuth2Error error = assertThrows(InvalidRequestException.class, () -> endpoint.userInfo(credentialsToken, null))
+                        .getError();
+                assertEquals(OAuth2ErrorCodes.INVALID_REQUEST, error.getErrorCode());
             }
         }
     }

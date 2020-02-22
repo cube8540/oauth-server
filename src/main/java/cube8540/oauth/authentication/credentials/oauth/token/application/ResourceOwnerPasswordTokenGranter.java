@@ -5,6 +5,7 @@ import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetail
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidGrantException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidRequestException;
+import cube8540.oauth.authentication.credentials.oauth.error.UserDeniedAuthorizationException;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenRepository;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedAccessToken;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2TokenIdGenerator;
@@ -29,10 +30,10 @@ public class ResourceOwnerPasswordTokenGranter extends AbstractOAuth2TokenGrante
     @Override
     public OAuth2AuthorizedAccessToken createAccessToken(OAuth2ClientDetails clientDetails, OAuth2TokenRequest tokenRequest) {
         if (tokenRequest.username() == null || tokenRequest.password() == null) {
-            throw new InvalidRequestException("username, password is required");
+            throw InvalidRequestException.invalidRequest("username, password is required");
         }
         if (!getTokenRequestValidator().validateScopes(clientDetails, tokenRequest.scopes())) {
-            throw new InvalidGrantException("cannot grant scopes");
+            throw InvalidGrantException.invalidScope("cannot grant scopes");
         }
         Authentication authentication = authentication(tokenRequest);
         OAuth2AuthorizedAccessToken accessToken = OAuth2AuthorizedAccessToken.builder(getTokenIdGenerator())
@@ -52,7 +53,7 @@ public class ResourceOwnerPasswordTokenGranter extends AbstractOAuth2TokenGrante
                     new UsernamePasswordAuthenticationToken(tokenRequest.username(), tokenRequest.password());
             return authenticationManager.authenticate(usernamePasswordToken);
         } catch (BadCredentialsException | AccountStatusException e) {
-            throw new InvalidGrantException(e.getMessage());
+            throw new UserDeniedAuthorizationException(e.getMessage());
         }
     }
 }

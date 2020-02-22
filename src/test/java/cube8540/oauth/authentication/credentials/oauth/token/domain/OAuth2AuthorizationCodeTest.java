@@ -2,18 +2,17 @@ package cube8540.oauth.authentication.credentials.oauth.token.domain;
 
 import cube8540.oauth.authentication.credentials.oauth.AuthorizationRequest;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
-import cube8540.oauth.authentication.credentials.oauth.error.AuthorizationCodeExpiredException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidClientException;
+import cube8540.oauth.authentication.credentials.oauth.error.InvalidGrantException;
 import cube8540.oauth.authentication.credentials.oauth.error.RedirectMismatchException;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
-import cube8540.oauth.authentication.credentials.oauth.token.domain.AuthorizationCode;
-import cube8540.oauth.authentication.credentials.oauth.token.domain.AuthorizationCodeGenerator;
-import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizationCode;
 import cube8540.oauth.authentication.users.domain.UserEmail;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.oauth2.core.OAuth2Error;
+import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 
 import java.net.URI;
 import java.time.Clock;
@@ -48,7 +47,8 @@ class OAuth2AuthorizationCodeTest {
     private static final String RAW_REDIRECT_URI = "http://localhost";
     private static final URI REDIRECT_URI = URI.create(RAW_REDIRECT_URI);
 
-    private static final LocalDateTime EXPIRATION_DATETIME = LocalDateTime.of(2020, 1, 29, 22, 45);
+    private static final LocalDateTime NOW = LocalDateTime.of(2020, 2, 8, 23, 22);
+    private static final LocalDateTime EXPIRATION_DATETIME = NOW.plusMinutes(5);
 
     private static final Set<String> SCOPES = new HashSet<>(Arrays.asList("SCOPE-1", "SCOPE-2", "SCOPE-3"));
 
@@ -57,6 +57,33 @@ class OAuth2AuthorizationCodeTest {
     @BeforeEach
     void setup() {
         this.codeGenerator = mock(AuthorizationCodeGenerator.class);
+    }
+
+    @Nested
+    @DisplayName("새 인가 코드 생성")
+    class CreateNewCode {
+        private OAuth2AuthorizationCode code;
+
+        @BeforeEach
+        void setup() {
+            Clock createdClock = Clock.fixed(NOW.toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
+            OAuth2AuthorizationCode.setClock(createdClock);
+
+            when(codeGenerator.generate()).thenReturn(CODE);
+            this.code = new OAuth2AuthorizationCode(codeGenerator);
+        }
+
+        @Test
+        @DisplayName("생성기에서 반환된 코드를 저장해야 한다.")
+        void shouldSaveCodeCreatedByGenerator() {
+            assertEquals(CODE, code.getCode());
+        }
+
+        @Test
+        @DisplayName("만료일은 현재시간으로 부터 + 5분 이어야 한다.")
+        void shouldExpirationDateTimeIsNowPlus5Minute() {
+            assertEquals(EXPIRATION_DATETIME, code.getExpirationDateTime());
+        }
     }
 
     @Nested
@@ -76,7 +103,7 @@ class OAuth2AuthorizationCodeTest {
             when(request.requestScopes()).thenReturn(SCOPES);
             when(codeGenerator.generate()).thenReturn(CODE);
 
-            this.code = new OAuth2AuthorizationCode(codeGenerator, EXPIRATION_DATETIME);
+            this.code = new OAuth2AuthorizationCode(codeGenerator);
         }
 
         @Test
@@ -145,16 +172,60 @@ class OAuth2AuthorizationCodeTest {
 
             @BeforeEach
             void setup() {
-                this.code = new OAuth2AuthorizationCode(codeGenerator, EXPIRATION_DATETIME);
+                Clock createdClock = Clock.fixed(NOW.toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
+                OAuth2AuthorizationCode.setClock(createdClock);
+
+                this.code = new OAuth2AuthorizationCode(codeGenerator);
 
                 Clock clock = Clock.fixed(EXPIRATION_DATETIME.plusNanos(1).toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
-                this.code.setClock(clock);
+                OAuth2AuthorizationCode.setClock(clock);
             }
 
             @Test
-            @DisplayName("AuthorizationCodeExpiredException이 발생해야 한다.")
-            void shouldThrowsAuthorizationCodeExpiredException() {
-                assertThrows(AuthorizationCodeExpiredException.class, () -> code.validateWithAuthorizationRequest(savedRequest));
+            @DisplayName("InvalidGrantException이 발생해야 한다.")
+            void shouldThrowsInvalidGrantException() {
+                assertThrows(InvalidGrantException.class, () -> code.validateWithAuthorizationRequest(savedRequest));
+            }
+
+            @Test
+            @DisplayName("에러 코드는 INVALID_GRANT 이어야 한다.")
+            void shouldErrorCodeIsInvalidGrant() {
+                OAuth2Error error = assertThrows(InvalidGrantException.class, () -> code.validateWithAuthorizationRequest(savedRequest))
+                        .getError();
+                assertEquals(OAuth2ErrorCodes.INVALID_GRANT, error.getErrorCode());
+            }
+        }
+
+        @Nested
+        @DisplayName("State 값이 일치 하지 않을시")
+        class WhenStateMismatch {
+            private AuthorizationRequest request;
+            private OAuth2AuthorizationCode code;
+
+            @BeforeEach
+            void setup() {
+                this.request = mock(AuthorizationRequest.class);
+                this.code = new OAuth2AuthorizationCode(codeGenerator);
+
+                this.code.setAuthorizationRequest(savedRequest);
+                when(request.state()).thenReturn("NOT MATCHED STATE");
+
+                Clock clock = Clock.fixed(EXPIRATION_DATETIME.minusNanos(1).toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
+                OAuth2AuthorizationCode.setClock(clock);
+            }
+
+            @Test
+            @DisplayName("InvalidGrantException이 발생해야 한다.")
+            void shouldThrowsInvalidGrantException() {
+                assertThrows(InvalidGrantException.class, () -> code.validateWithAuthorizationRequest(request));
+            }
+
+            @Test
+            @DisplayName("에러 코드는 INVALID_GRANT 이어야 한다.")
+            void shouldErrorCodeIsInvalidGrant() {
+                OAuth2Error error = assertThrows(InvalidGrantException.class, () -> code.validateWithAuthorizationRequest(request))
+                        .getError();
+                assertEquals(OAuth2ErrorCodes.INVALID_GRANT, error.getErrorCode());
             }
         }
 
@@ -167,13 +238,14 @@ class OAuth2AuthorizationCodeTest {
             @BeforeEach
             void setup() {
                 this.request = mock(AuthorizationRequest.class);
-                this.code = new OAuth2AuthorizationCode(codeGenerator, EXPIRATION_DATETIME);
+                this.code = new OAuth2AuthorizationCode(codeGenerator);
 
                 this.code.setAuthorizationRequest(savedRequest);
+                when(request.state()).thenReturn(STATE);
                 when(request.redirectURI()).thenReturn(URI.create("http://mismach-uri.info"));
 
                 Clock clock = Clock.fixed(EXPIRATION_DATETIME.minusNanos(1).toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
-                this.code.setClock(clock);
+                OAuth2AuthorizationCode.setClock(clock);
             }
 
             @Test
@@ -192,20 +264,29 @@ class OAuth2AuthorizationCodeTest {
             @BeforeEach
             void setup() {
                 this.request = mock(AuthorizationRequest.class);
-                this.code = new OAuth2AuthorizationCode(codeGenerator, EXPIRATION_DATETIME);
+                this.code = new OAuth2AuthorizationCode(codeGenerator);
 
                 this.code.setAuthorizationRequest(savedRequest);
                 when(request.redirectURI()).thenReturn(REDIRECT_URI);
+                when(request.state()).thenReturn(STATE);
                 when(request.clientId()).thenReturn("MISMATCH-CLIENT-ID");
 
                 Clock clock = Clock.fixed(EXPIRATION_DATETIME.minusNanos(1).toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
-                this.code.setClock(clock);
+                OAuth2AuthorizationCode.setClock(clock);
             }
 
             @Test
             @DisplayName("InvalidClientException이 발생해야 한다.")
             void shouldThrowsInvalidClientException() {
                 assertThrows(InvalidClientException.class, () -> this.code.validateWithAuthorizationRequest(request));
+            }
+
+            @Test
+            @DisplayName("에러 코드는 INVALID_CLIENT 이어야 한다.")
+            void shouldErrorCodeIsInvalidClient() {
+                OAuth2Error error = assertThrows(InvalidClientException.class, () -> this.code.validateWithAuthorizationRequest(request))
+                        .getError();
+                assertEquals(OAuth2ErrorCodes.INVALID_CLIENT, error.getErrorCode());
             }
         }
 
@@ -217,15 +298,19 @@ class OAuth2AuthorizationCodeTest {
 
             @BeforeEach
             void setup() {
+                Clock createdClock = Clock.fixed(NOW.toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
+                OAuth2AuthorizationCode.setClock(createdClock);
+
                 this.request = mock(AuthorizationRequest.class);
-                this.code = new OAuth2AuthorizationCode(codeGenerator, EXPIRATION_DATETIME);
+                this.code = new OAuth2AuthorizationCode(codeGenerator);
 
                 this.code.setAuthorizationRequest(savedRequest);
+                when(request.state()).thenReturn(STATE);
                 when(request.redirectURI()).thenReturn(REDIRECT_URI);
                 when(request.clientId()).thenReturn(RAW_CLIENT_ID);
 
                 Clock clock = Clock.fixed(EXPIRATION_DATETIME.minusNanos(1).toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
-                this.code.setClock(clock);
+                OAuth2AuthorizationCode.setClock(clock);
             }
 
             @Test

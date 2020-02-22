@@ -1,9 +1,9 @@
 package cube8540.oauth.authentication.credentials.oauth.client;
 
-import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientRegistrationException;
+import cube8540.oauth.authentication.credentials.oauth.client.error.ClientNotFoundException;
 
 public interface OAuth2ClientDetailsService {
 
-    OAuth2ClientDetails loadClientDetailsByClientId(String clientId) throws OAuth2ClientRegistrationException;
+    OAuth2ClientDetails loadClientDetailsByClientId(String clientId) throws ClientNotFoundException;
 
 }

@@ -1,0 +1,23 @@
+.scopes {
+    padding: .5rem 1.2rem;
+    border: 1px solid #ced4da;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+.scopes > .scope {
+    margin: 10px 0;
+    display: flex;
+    flex-direction: row;
+}
+
+.buttons {
+    margin-top: 10px;
+    text-align: right;
+}
+
+button {
+    width: 105px;
+    margin-left: 10px;
+}

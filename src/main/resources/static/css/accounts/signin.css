@@ -1,0 +1,14 @@
+.forgot-password {
+    width: 50%;
+    margin-left: auto;
+    text-align: right;
+}
+
+.remember-me {
+    display: flex;
+    align-items: center;
+}
+
+.remember-me > input[type=checkbox] {
+    margin: 0 8px 0 0;
+}

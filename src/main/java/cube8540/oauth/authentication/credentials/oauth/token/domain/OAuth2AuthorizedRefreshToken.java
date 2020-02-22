@@ -29,6 +29,10 @@ import java.time.LocalDateTime;
 @Table(name = "oauth2_refresh_token")
 public class OAuth2AuthorizedRefreshToken extends AbstractAggregateRoot<OAuth2AuthorizedRefreshToken> {
 
+    @Transient
+    @Setter(AccessLevel.PROTECTED)
+    private static Clock clock = AuthenticationApplication.DEFAULT_CLOCK;
+
     @EmbeddedId
     @AttributeOverride(name = "value", column = @Column(name = "token_id", length = 32))
     private OAuth2TokenId tokenId;
@@ -38,10 +42,6 @@ public class OAuth2AuthorizedRefreshToken extends AbstractAggregateRoot<OAuth2Au
 
     @OneToOne(fetch = FetchType.EAGER)
     private OAuth2AuthorizedAccessToken accessToken;
-
-    @Transient
-    @Setter(AccessLevel.PROTECTED)
-    private Clock clock = Clock.system(AuthenticationApplication.DEFAULT_TIME_ZONE.toZoneId());
 
     public OAuth2AuthorizedRefreshToken(OAuth2TokenIdGenerator tokenIdGenerator, LocalDateTime expiration, OAuth2AuthorizedAccessToken accessToken) {
         this.tokenId = tokenIdGenerator.generateTokenValue();

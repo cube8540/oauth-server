@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="kr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>404 NOT FOUND</title>
+
+    <link rel="stylesheet" type="text/css" th:href="@{/css/reset.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{/css/commons.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{/css/error/error-commons.css}">
+</head>
+<body>
+    <div class="container content-align-center">
+        <div class="content-box">
+            <span class="code" th:text="${status}"></span>
+            <span class="message">Not Found</span>
+            <span class="help">페이지를 찾을 수 없습니다</span>
+        </div>
+    </div>
+</body>
+</html>

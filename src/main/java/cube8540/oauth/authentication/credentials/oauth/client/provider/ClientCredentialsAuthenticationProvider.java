@@ -2,7 +2,7 @@ package cube8540.oauth.authentication.credentials.oauth.client.provider;
 
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetailsService;
-import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientNotFoundException;
+import cube8540.oauth.authentication.credentials.oauth.client.error.ClientNotFoundException;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
@@ -25,15 +25,17 @@ public class ClientCredentialsAuthenticationProvider implements AuthenticationPr
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         try {
-            OAuth2ClientDetails client = service.loadClientDetailsByClientId(authentication.getPrincipal().toString());
+            if (authentication.getPrincipal() == null || authentication.getCredentials() == null) {
+                throw new BadCredentialsException("principal and credentials is required");
+            }
 
+            OAuth2ClientDetails client = service.loadClientDetailsByClientId(authentication.getPrincipal().toString());
             String givenSecret = authentication.getCredentials().toString();
             if (!encoder.matches(givenSecret, client.clientSecret())) {
                 throw new BadCredentialsException("secret does not match stored value");
             }
-
             return new ClientCredentialsToken(client, authentication.getCredentials(), Collections.emptyList());
-        } catch (OAuth2ClientNotFoundException e) {
+        } catch (ClientNotFoundException e) {
             throw new BadCredentialsException(e.getMessage());
         } catch (BadCredentialsException | InternalAuthenticationServiceException e) {
             throw e;

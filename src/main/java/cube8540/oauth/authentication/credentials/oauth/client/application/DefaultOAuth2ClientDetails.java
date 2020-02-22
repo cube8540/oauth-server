@@ -1,40 +1,70 @@
 package cube8540.oauth.authentication.credentials.oauth.client.application;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2Client;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
+import cube8540.oauth.authentication.users.domain.UserEmail;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Singular;
 import lombok.ToString;
 import org.springframework.security.core.CredentialsContainer;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 
 import java.net.URI;
+import java.time.Duration;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Getter
+@Builder
 @ToString
 @EqualsAndHashCode
+@AllArgsConstructor
 public class DefaultOAuth2ClientDetails implements OAuth2ClientDetails, CredentialsContainer {
 
     private String clientId;
+
+    @JsonIgnore
     private String clientSecret;
+
     private String clientName;
+
+    @Singular("registeredRedirectURI")
     private Set<URI> registeredRedirectURI;
+
+    @Singular("authorizedGrantType")
     private Set<AuthorizationGrantType> authorizedGrantType;
+
+    @Singular("scope")
     private Set<String> scope;
+
+    private String owner;
+
     private Integer accessTokenValiditySeconds;
+
     private Integer refreshTokenValiditySeconds;
 
-    public DefaultOAuth2ClientDetails(OAuth2Client client) {
-        this.clientId = client.getClientId().getValue();
-        this.clientSecret = client.getSecret().getSecret();
-        this.clientName = client.getClientName();
-        this.registeredRedirectURI = Collections.unmodifiableSet(client.getRedirectURI());
-        this.authorizedGrantType = Collections.unmodifiableSet(client.getGrantType());
-        this.scope = client.getScope().stream().map(OAuth2ScopeId::getValue).collect(Collectors.toUnmodifiableSet());
-        this.accessTokenValiditySeconds = Double.valueOf(client.getAccessTokenValidity().toSeconds()).intValue();
-        this.refreshTokenValiditySeconds = Double.valueOf(client.getRefreshTokenValidity().toSeconds()).intValue();
+    public static DefaultOAuth2ClientDetails of(OAuth2Client client) {
+        Set<String> scope = Optional.ofNullable(client.getScope()).orElse(Collections.emptySet())
+                .stream().map(OAuth2ScopeId::getValue).collect(Collectors.toSet());
+        Long tokenValidity = Optional.ofNullable(client.getAccessTokenValidity()).map(Duration::toSeconds).orElse(0L);
+        Long refreshValidity = Optional.ofNullable(client.getRefreshTokenValidity()).map(Duration::toSeconds).orElse(0L);
+
+        return builder().clientId(client.getClientId().getValue())
+                .clientSecret(client.getSecret())
+                .clientName(client.getClientName())
+                .owner(Optional.ofNullable(client.getOwner()).map(UserEmail::getValue).orElse(null))
+                .scope(scope)
+                .accessTokenValiditySeconds(Double.valueOf(tokenValidity).intValue())
+                .refreshTokenValiditySeconds(Double.valueOf(refreshValidity).intValue())
+                .registeredRedirectURI(Optional.ofNullable(client.getRedirectURI()).orElse(Collections.emptySet()))
+                .authorizedGrantType(Optional.ofNullable(client.getGrantType()).orElse(Collections.emptySet())).build();
     }
 
     @Override
@@ -65,6 +95,11 @@ public class DefaultOAuth2ClientDetails implements OAuth2ClientDetails, Credenti
     @Override
     public Set<String> scope() {
         return scope;
+    }
+
+    @Override
+    public String owner() {
+        return owner;
     }
 
     @Override

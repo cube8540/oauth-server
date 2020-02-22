@@ -7,6 +7,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.oauth2.core.OAuth2Error;
+import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 
 import java.net.URI;
 import java.util.HashSet;
@@ -15,6 +17,7 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
 @DisplayName("기본 리다이렉트 주소 Resolver 클래스 테스트")
@@ -113,6 +116,15 @@ class DefaultRedirectResolverTest {
                 @DisplayName("InvalidRequestException이 발생해야 한다.")
                 void shouldThrowsInvalidRequestException() {
                     assertThrows(InvalidRequestException.class, () -> resolver.resolveRedirectURI(null, clientDetails));
+                }
+
+                @Test
+                @DisplayName("에러 코드는 INVALID_REQUEST 이어야 한다.")
+                void shouldErrorCodeIsInvalidRequest() {
+                    OAuth2Error error = assertThrows(InvalidRequestException.class, () -> resolver.resolveRedirectURI(null, clientDetails))
+                            .getError();
+
+                    assertEquals(OAuth2ErrorCodes.INVALID_REQUEST, error.getErrorCode());
                 }
             }
 

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="kr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>OAuth Approval Error</title>
+
+    <link rel="stylesheet" type="text/css" th:href="@{/css/reset.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{/css/commons.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{/css/error/error-commons.css}">
+</head>
+<body>
+    <div class="container content-align-center">
+        <div class="content-box">
+            <span class="code">?!</span>
+            <span class="message" th:text="${error.errorCode}"></span>
+            <span class="help" th:text="${error.description}"></span>
+        </div>
+    </div>
+</body>
+</html>

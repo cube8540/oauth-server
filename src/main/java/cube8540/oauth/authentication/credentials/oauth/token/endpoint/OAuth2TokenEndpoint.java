@@ -5,12 +5,13 @@ import cube8540.oauth.authentication.credentials.oauth.OAuth2TokenRequest;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2Utils;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.client.provider.ClientCredentialsToken;
-import cube8540.oauth.authentication.credentials.oauth.error.DefaultOAuth2ExceptionTranslator;
+import cube8540.oauth.authentication.credentials.oauth.error.AbstractOAuth2AuthenticationException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidGrantException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidRequestException;
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTranslator;
 import cube8540.oauth.authentication.credentials.oauth.token.OAuth2AccessTokenDetails;
 import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2AccessTokenGrantService;
+import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenRevokeService;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +22,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
-import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -36,13 +37,15 @@ import java.util.Map;
 public class OAuth2TokenEndpoint {
 
     private final OAuth2AccessTokenGrantService tokenGrantService;
+    private final OAuth2TokenRevokeService tokenRevokeService;
 
     @Setter
-    private OAuth2ExceptionTranslator exceptionTranslator = new DefaultOAuth2ExceptionTranslator();
+    private OAuth2ExceptionTranslator exceptionTranslator = new OAuth2ExceptionTranslator();
 
     @Autowired
-    public OAuth2TokenEndpoint(OAuth2AccessTokenGrantService tokenGrantService) {
+    public OAuth2TokenEndpoint(OAuth2AccessTokenGrantService tokenGrantService, OAuth2TokenRevokeService tokenRevokeService) {
         this.tokenGrantService = tokenGrantService;
+        this.tokenRevokeService = tokenRevokeService;
     }
 
     @PostMapping(value = "/oauth/token")
@@ -57,17 +60,30 @@ public class OAuth2TokenEndpoint {
         }
 
         if (requestMap.get(OAuth2Utils.TokenRequestKey.GRANT_TYPE) == null) {
-            throw new InvalidRequestException("grant type required");
+            throw InvalidRequestException.invalidRequest("grant type is required");
         }
 
         if (requestMap.get(OAuth2Utils.TokenRequestKey.GRANT_TYPE)
                 .equalsIgnoreCase(AuthorizationGrantType.IMPLICIT.getValue())) {
-            throw new InvalidGrantException("implicit grant type not supported");
+            throw InvalidGrantException.unsupportedGrantType("implicit grant type not supported");
         }
 
         OAuth2TokenRequest tokenRequest = new DefaultOAuth2TokenRequest(requestMap);
         OAuth2AccessTokenDetails token = tokenGrantService.grant((OAuth2ClientDetails) clientCredentialsToken.getPrincipal(), tokenRequest);
         return createAccessTokenResponse(token);
+    }
+
+    @DeleteMapping(value = "/oauth/token")
+    public ResponseEntity<OAuth2AccessTokenDetails> revokeAccessToken(Principal principal, @RequestParam(required =  false) String token) {
+        if (!(principal instanceof ClientCredentialsToken)) {
+            throw new InsufficientAuthenticationException("this is no client authentication");
+        }
+        if (token == null) {
+            throw InvalidRequestException.invalidRequest("Token is required");
+        }
+
+        OAuth2AccessTokenDetails accessToken = tokenRevokeService.revoke(token);
+        return createAccessTokenResponse(accessToken);
     }
 
     @ExceptionHandler(Exception.class)
@@ -78,8 +94,8 @@ public class OAuth2TokenEndpoint {
         return exceptionTranslator.translate(e);
     }
 
-    @ExceptionHandler(OAuth2AuthenticationException.class)
-    public ResponseEntity<OAuth2Error> handleException(OAuth2AuthenticationException e) {
+    @ExceptionHandler(AbstractOAuth2AuthenticationException.class)
+    public ResponseEntity<OAuth2Error> handleException(AbstractOAuth2AuthenticationException e) {
         if (log.isWarnEnabled()) {
             log.warn("Handling error: {}, {}", e.getClass(), e.getMessage());
         }

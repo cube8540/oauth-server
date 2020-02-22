@@ -16,6 +16,8 @@ import lombok.Singular;
 import lombok.ToString;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.springframework.data.domain.AbstractAggregateRoot;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 
@@ -57,6 +59,10 @@ import java.util.Set;
 @DynamicUpdate
 public class OAuth2AuthorizedAccessToken extends AbstractAggregateRoot<OAuth2AuthorizedAccessToken> {
 
+    @Transient
+    @Setter(AccessLevel.PROTECTED)
+    private static Clock clock = AuthenticationApplication.DEFAULT_CLOCK;
+
     @EmbeddedId
     @AttributeOverride(name = "value", column = @Column(name = "token_id", length = 32))
     private OAuth2TokenId tokenId;
@@ -71,6 +77,7 @@ public class OAuth2AuthorizedAccessToken extends AbstractAggregateRoot<OAuth2Aut
 
     @Singular("scope")
     @ElementCollection
+    @Fetch(FetchMode.JOIN)
     @CollectionTable(name = "oauth2_token_scope", joinColumns = @JoinColumn(name = "token_id", nullable = false))
     @AttributeOverride(name = "value", column = @Column(name = "scope_id", length = 32, nullable = false))
     private Set<OAuth2ScopeId> scope;
@@ -82,20 +89,17 @@ public class OAuth2AuthorizedAccessToken extends AbstractAggregateRoot<OAuth2Aut
     @Convert(converter = AuthorizationGrantTypeConverter.class)
     private AuthorizationGrantType tokenGrantType;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "accessToken")
+    @Fetch(FetchMode.JOIN)
     @JoinColumn(name = "access_token_id")
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "accessToken")
     private OAuth2AuthorizedRefreshToken refreshToken;
 
     @ElementCollection
+    @Fetch(FetchMode.JOIN)
     @JoinTable(name = "oauth2_access_token_additional_information", joinColumns = @JoinColumn(name = "token_id"))
     @MapKeyColumn(name = "info_key")
     @Column(name = "info_value", length = 128)
     private Map<String, String> additionalInformation;
-
-    @Transient
-    @Builder.Default
-    @Setter(AccessLevel.PROTECTED)
-    private Clock clock = Clock.system(AuthenticationApplication.DEFAULT_TIME_ZONE.toZoneId());
 
     public static OAuth2AuthorizedAccessTokenBuilder builder(OAuth2TokenIdGenerator tokenIdGenerator) {
         return new OAuth2AuthorizedAccessTokenBuilder()

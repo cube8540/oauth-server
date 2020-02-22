@@ -7,13 +7,12 @@ import cube8540.oauth.authentication.credentials.oauth.OAuth2RequestValidator;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2Utils;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetailsService;
-import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientRegistrationException;
-import cube8540.oauth.authentication.credentials.oauth.error.DefaultOAuth2ExceptionTranslator;
+import cube8540.oauth.authentication.credentials.oauth.client.error.ClientNotFoundException;
+import cube8540.oauth.authentication.credentials.oauth.error.AbstractOAuth2AuthenticationException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidGrantException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidRequestException;
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTranslator;
 import cube8540.oauth.authentication.credentials.oauth.error.RedirectMismatchException;
-import cube8540.oauth.authentication.credentials.oauth.error.UnsupportedResponseTypeException;
 import cube8540.oauth.authentication.credentials.oauth.scope.OAuth2ScopeDetails;
 import cube8540.oauth.authentication.credentials.oauth.scope.OAuth2ScopeDetailsService;
 import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2AuthorizationCodeGenerator;
@@ -21,11 +20,11 @@ import cube8540.oauth.authentication.credentials.oauth.token.domain.Authorizatio
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationResponseType;
 import org.springframework.stereotype.Controller;
@@ -63,7 +62,7 @@ public class AuthorizationEndpoint {
     private static final String DEFAULT_FORWARD_PREFIX = "forward:";
 
     public static final String DEFAULT_ERROR_PAGE = "/oauth/error";
-    public static final String DEFAULT_APPROVAL_PAGE = "/oauth/approval";
+    public static final String DEFAULT_APPROVAL_PAGE = DEFAULT_FORWARD_PREFIX + "/oauth/approval";
 
     private final OAuth2ClientDetailsService clientDetailsService;
 
@@ -75,11 +74,11 @@ public class AuthorizationEndpoint {
     private SessionAttributeStore sessionAttributeStore = new DefaultSessionAttributeStore();
 
     @Setter
-    private OAuth2ExceptionTranslator exceptionTranslator = new DefaultOAuth2ExceptionTranslator();
+    private OAuth2ExceptionTranslator exceptionTranslator = new OAuth2ExceptionTranslator();
 
-    private String errorPage = DEFAULT_FORWARD_PREFIX + DEFAULT_ERROR_PAGE;
+    private String errorPage = DEFAULT_ERROR_PAGE;
 
-    private String approvalPage = DEFAULT_FORWARD_PREFIX + DEFAULT_APPROVAL_PAGE;
+    private String approvalPage = DEFAULT_APPROVAL_PAGE;
 
     @Setter
     private RedirectResolver redirectResolver = new DefaultRedirectResolver();
@@ -91,7 +90,7 @@ public class AuthorizationEndpoint {
     private OAuth2RequestValidator requestValidator = new DefaultOAuth2RequestValidator();
 
     @Autowired
-    public AuthorizationEndpoint(OAuth2ClientDetailsService clientDetailsService,
+    public AuthorizationEndpoint(@Qualifier("defaultOAuth2ClientDetailsService") OAuth2ClientDetailsService clientDetailsService,
                                  OAuth2ScopeDetailsService scopeDetailsService,
                                  OAuth2AuthorizationCodeGenerator codeGenerator) {
         this.clientDetailsService = clientDetailsService;
@@ -106,15 +105,18 @@ public class AuthorizationEndpoint {
         }
 
         AuthorizationRequest authorizationRequest = new DefaultAuthorizationRequest(parameters, principal);
-        if (!OAuth2AuthorizationResponseType.CODE.equals(authorizationRequest.responseType())) {
-            throw new UnsupportedResponseTypeException("unsupported response type");
+        if (authorizationRequest.responseType() == null) {
+            throw InvalidRequestException.invalidRequest("response_type is required");
+        }
+        if (!authorizationRequest.responseType().equals(OAuth2AuthorizationResponseType.CODE)) {
+            throw InvalidRequestException.unsupportedResponseType("unsupported response type");
         }
 
         OAuth2ClientDetails clientDetails = clientDetailsService.loadClientDetailsByClientId(parameters.get(OAuth2Utils.AuthorizationRequestKey.CLIENT_ID));
         URI redirectURI = redirectResolver.resolveRedirectURI(parameters.get(OAuth2Utils.AuthorizationRequestKey.REDIRECT_URI), clientDetails);
         authorizationRequest.setRedirectURI(redirectURI);
         if (!requestValidator.validateScopes(clientDetails, authorizationRequest.requestScopes())) {
-            throw new InvalidGrantException("cannot grant scope");
+            throw InvalidGrantException.invalidScope("cannot grant scope");
         }
         authorizationRequest.setRequestScopes(extractRequestScope(clientDetails, authorizationRequest));
 
@@ -134,7 +136,7 @@ public class AuthorizationEndpoint {
 
             AuthorizationRequest originalAuthorizationRequest = (AuthorizationRequest) model.get(AUTHORIZATION_REQUEST_ATTRIBUTE);
             if (originalAuthorizationRequest == null) {
-                throw new InvalidRequestException("Cannot approval uninitialized authorization request");
+                throw InvalidRequestException.invalidRequest("Cannot approval uninitialized authorization request");
             }
 
             AuthorizationRequest authorizationRequest = new DefaultAuthorizationRequest(originalAuthorizationRequest);
@@ -153,16 +155,16 @@ public class AuthorizationEndpoint {
         }
     }
 
-    @ExceptionHandler(OAuth2ClientRegistrationException.class)
-    public ModelAndView handleClientRegistrationException(OAuth2ClientRegistrationException e, ServletWebRequest webRequest) {
+    @ExceptionHandler(ClientNotFoundException.class)
+    public ModelAndView handleClientRegistrationException(ClientNotFoundException e, ServletWebRequest webRequest) {
         if (log.isWarnEnabled()) {
             log.warn("Handling error client registration exception : {}, {}", e.getClass().getName(), e.getMessage());
         }
         return handleException(e, webRequest);
     }
 
-    @ExceptionHandler(OAuth2AuthenticationException.class)
-    public ModelAndView handleOAuth2AuthenticationException(OAuth2AuthenticationException e, ServletWebRequest webRequest) {
+    @ExceptionHandler(AbstractOAuth2AuthenticationException.class)
+    public ModelAndView handleOAuth2AuthenticationException(AbstractOAuth2AuthenticationException e, ServletWebRequest webRequest) {
         if (log.isWarnEnabled()) {
             log.warn("Handling error : {}, {}", e.getClass().getName(), e.getMessage());
         }
@@ -191,7 +193,7 @@ public class AuthorizationEndpoint {
         ResponseEntity<OAuth2Error> responseEntity = exceptionTranslator.translate(e);
         webRequest.getResponse().setStatus(responseEntity.getStatusCode().value());
 
-        if (e instanceof OAuth2ClientRegistrationException || e instanceof RedirectMismatchException) {
+        if (e instanceof ClientNotFoundException || e instanceof RedirectMismatchException) {
             return new ModelAndView(errorPage, Collections.singletonMap("error", responseEntity.getBody()));
         }
 

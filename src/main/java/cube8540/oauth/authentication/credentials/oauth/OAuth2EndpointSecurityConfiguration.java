@@ -1,26 +1,24 @@
 package cube8540.oauth.authentication.credentials.oauth;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetailsService;
 import cube8540.oauth.authentication.credentials.oauth.client.provider.ClientCredentialsAuthenticationProvider;
 import cube8540.oauth.authentication.credentials.oauth.client.provider.ClientCredentialsEndpointFilter;
-import cube8540.oauth.authentication.credentials.oauth.error.DefaultOAuth2ExceptionTranslator;
 import cube8540.oauth.authentication.credentials.oauth.error.DefaultOauth2ExceptionResponseRenderer;
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2AuthenticationExceptionEntryPoint;
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionResponseRenderer;
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTranslator;
+import cube8540.oauth.authentication.credentials.oauth.token.application.AuthorizationCodeTokenGranter;
+import cube8540.oauth.authentication.credentials.oauth.token.application.ClientCredentialsTokenGranter;
+import cube8540.oauth.authentication.credentials.oauth.token.application.CompositeOAuth2AccessTokenGranter;
 import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2AccessTokenGrantService;
 import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2AuthorizationCodeConsumer;
+import cube8540.oauth.authentication.credentials.oauth.token.application.RefreshTokenGranter;
+import cube8540.oauth.authentication.credentials.oauth.token.application.ResourceOwnerPasswordTokenGranter;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenRepository;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2RefreshTokenRepository;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2TokenIdGenerator;
-import cube8540.oauth.authentication.credentials.oauth.token.application.AuthorizationCodeTokenGranter;
-import cube8540.oauth.authentication.credentials.oauth.token.application.ClientCredentialsTokenGranter;
 import cube8540.oauth.authentication.credentials.oauth.token.infra.DefaultTokenIdGenerator;
-import cube8540.oauth.authentication.credentials.oauth.token.application.CompositeOAuth2AccessTokenGranter;
-import cube8540.oauth.authentication.credentials.oauth.token.application.RefreshTokenGranter;
-import cube8540.oauth.authentication.credentials.oauth.token.application.ResourceOwnerPasswordTokenGranter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -36,13 +34,16 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.security.web.context.NullSecurityContextRepository;
+import org.springframework.web.cors.CorsConfiguration;
+
+import javax.annotation.PostConstruct;
 
 @Order(1)
 @EnableWebSecurity
 public class OAuth2EndpointSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
-    @Setter(onMethod_ = @Autowired)
+    @Setter(onMethod_ = {@Autowired, @Qualifier("defaultOAuth2ClientDetailsService")})
     private OAuth2ClientDetailsService clientDetailsService;
 
     @Setter(onMethod_ = @Autowired)
@@ -60,13 +61,16 @@ public class OAuth2EndpointSecurityConfiguration extends WebSecurityConfigurerAd
     @Setter(onMethod_= @Autowired)
     private PasswordEncoder passwordEncoder;
 
+    @Setter(onMethod_ = {@Autowired, @Qualifier("escapeObjectMapper")})
+    private ObjectMapper objectMapper;
+
     @Setter
     private OAuth2AuthenticationExceptionEntryPoint oAuth2AuthenticationExceptionEntryPoint;
 
-    public OAuth2EndpointSecurityConfiguration() throws HttpMediaTypeNotSupportedException {
-        ObjectMapper objectMapper = new ObjectMapper().setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
+    @PostConstruct
+    public void initialize() throws Exception {
         MappingJackson2HttpMessageConverter messageConverter = new MappingJackson2HttpMessageConverter(objectMapper);
-        OAuth2ExceptionTranslator translator = new DefaultOAuth2ExceptionTranslator();
+        OAuth2ExceptionTranslator translator = new OAuth2ExceptionTranslator();
         OAuth2ExceptionResponseRenderer renderer = new DefaultOauth2ExceptionResponseRenderer(messageConverter);
 
         this.oAuth2AuthenticationExceptionEntryPoint = new OAuth2AuthenticationExceptionEntryPoint(translator, renderer);
@@ -81,21 +85,25 @@ public class OAuth2EndpointSecurityConfiguration extends WebSecurityConfigurerAd
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.requestMatchers()
-                .antMatchers("/oauth/token", "/oauth/token_info")
+                .antMatchers("/oauth/token", "/oauth/token_info", "/oauth/user_info")
                 .and()
             .authorizeRequests()
                 .anyRequest().authenticated()
                 .and()
             .addFilterBefore(tokenEndpointClientCredentialsFilter(), UsernamePasswordAuthenticationFilter.class)
+            .securityContext()
+                .securityContextRepository(new NullSecurityContextRepository())
+                .and()
             .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.NEVER)
                 .and()
-            .csrf().disable();
+            .csrf().disable()
+            .cors().configurationSource(request -> new CorsConfiguration().applyPermitDefaultValues());
     }
 
     @Bean
     public ClientCredentialsEndpointFilter tokenEndpointClientCredentialsFilter() throws Exception {
-        ClientCredentialsEndpointFilter filter = new ClientCredentialsEndpointFilter("/oauth/token**");
+        ClientCredentialsEndpointFilter filter = new ClientCredentialsEndpointFilter("/oauth/**");
         filter.setEntryPoint(oAuth2AuthenticationExceptionEntryPoint);
         filter.setAuthenticationManager(authenticationManagerBean());
         return filter;

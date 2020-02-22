@@ -19,6 +19,8 @@ public interface OAuth2ClientDetails {
 
     Set<String> scope();
 
+    String owner();
+
     Integer accessTokenValiditySeconds();
 
     Integer refreshTokenValiditySeconds();

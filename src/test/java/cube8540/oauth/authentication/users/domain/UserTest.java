@@ -1,11 +1,16 @@
 package cube8540.oauth.authentication.users.domain;
 
 import cube8540.oauth.authentication.credentials.authority.domain.AuthorityCode;
+import cube8540.oauth.authentication.users.error.UserAuthorizationException;
+import cube8540.oauth.authentication.users.error.UserErrorCodes;
+import cube8540.oauth.authentication.users.error.UserInvalidException;
 import cube8540.validator.core.ValidationError;
+import cube8540.validator.core.ValidationRule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -24,97 +29,104 @@ import static org.mockito.Mockito.when;
 class UserTest {
 
     private static final String RAW_EMAIL = "email@email.com";
-    private static final String NOT_ALLOWED_RAW_EMAIL = "email";
-    private static final UserEmail EMAIL = new UserEmail(RAW_EMAIL);
 
-    private static final String RAW_PASSWORD = "Password1234!@#$";
-    private static final String RAW_CHANGE_PASSWORD = "ChangePassword1234!@#$";
-    private static final String NOT_ALLOWED_RAW_PASSWORD = "password";
-    private static final String RAW_ENCRYPTED_PASSWORD = "$2a$10$MrsAcjEPfD4ktbWEb13SBu.lE2OfGWZ2NPqgUoSTeWA7bvh9.k3WC";
-    private static final String RAW_CHANGE_ENCRYPTED_PASSWORD = "$2y$10$zMSWRQlgsLcgzD4OuId7l.T2OlqDtpayXbyqWuXIJ7R3BmKC26Bju";
-    private static final UserPassword PASSWORD = new UserRawPassword(RAW_PASSWORD);
-    private static final UserPassword CHANGE_PASSWORD = new UserRawPassword(RAW_CHANGE_PASSWORD);
-    private static final UserPassword ENCRYPTED_PASSWORD = new UserEncryptedPassword(RAW_ENCRYPTED_PASSWORD);
-    private static final UserPassword CHANGE_ENCRYPTED_PASSWORD =  new UserEncryptedPassword(RAW_CHANGE_ENCRYPTED_PASSWORD);
+    private static final String PASSWORD = "Password1234!@#$";
+    private static final String CHANGE_PASSWORD = "ChangePassword1234!@#$";
+    private static final String ENCRYPTED_PASSWORD = "$2a$10$MrsAcjEPfD4ktbWEb13SBu.lE2OfGWZ2NPqgUoSTeWA7bvh9.k3WC";
+    private static final String CHANGE_ENCRYPTED_PASSWORD = "$2y$10$zMSWRQlgsLcgzD4OuId7l.T2OlqDtpayXbyqWuXIJ7R3BmKC26Bju";
 
-    private UserPasswordEncoder encoder;
+    private PasswordEncoder encoder;
     private UserCredentialsKeyGenerator keyGenerator;
+
+    private User user;
 
     @BeforeEach
     void setup() {
-        this.encoder = mock(UserPasswordEncoder.class);
+        this.encoder = mock(PasswordEncoder.class);
         this.keyGenerator = mock(UserCredentialsKeyGenerator.class);
+        this.user = new User(RAW_EMAIL, PASSWORD);
 
-        when(encoder.encode(RAW_PASSWORD)).thenReturn(RAW_ENCRYPTED_PASSWORD);
-        when(encoder.matches(ENCRYPTED_PASSWORD, PASSWORD)).thenReturn(Boolean.TRUE);
-        when(encoder.encode(RAW_CHANGE_PASSWORD)).thenReturn(RAW_CHANGE_ENCRYPTED_PASSWORD);
-        when(encoder.matches(CHANGE_ENCRYPTED_PASSWORD, CHANGE_PASSWORD)).thenReturn(Boolean.TRUE);
+        when(encoder.encode(PASSWORD)).thenReturn(ENCRYPTED_PASSWORD);
+        when(encoder.matches(PASSWORD, ENCRYPTED_PASSWORD)).thenReturn(Boolean.TRUE);
+        when(encoder.encode(CHANGE_PASSWORD)).thenReturn(CHANGE_ENCRYPTED_PASSWORD);
+        when(encoder.matches(CHANGE_PASSWORD, CHANGE_ENCRYPTED_PASSWORD)).thenReturn(Boolean.TRUE);
     }
 
     @Nested
-    @DisplayName("유저 계정 생성")
-    class InitializeUser {
+    @DisplayName("유효성 검사")
+    class Validation {
 
-        @Nested
-        @DisplayName("허용되지 않은 이메일로 유저를 생성시")
-        class WhenCreateWithNotAllowedEmail {
+        private UserValidationPolicy policy;
 
-            @Test
-            @DisplayName("UserInvalidException이 발생해야 한다.")
-            void shouldThrowsUserInvalidException() {
-                assertThrows(UserInvalidException.class, () -> new User(NOT_ALLOWED_RAW_EMAIL, RAW_PASSWORD, encoder));
-            }
+        ValidationRule<User> emailValidation;
+        ValidationRule<User> passwordValidation;
 
-            @Test
-            @DisplayName("이메일 관련된 에러가 포함되어야 한다.")
-            void shouldContainsEmailErrorMessage() {
-                ValidationError emailErrors = new ValidationError(UserEmailValidationRule.PROPERTY, UserEmailValidationRule.MESSAGE);
-                UserInvalidException exception = assertThrows(UserInvalidException.class, () -> new User(NOT_ALLOWED_RAW_EMAIL, RAW_PASSWORD, encoder));
+        @BeforeEach
+        @SuppressWarnings("unchecked")
+        void setup() {
+            this.policy = mock(UserValidationPolicy.class);
+            this.emailValidation = mock(ValidationRule.class);
+            this.passwordValidation = mock(ValidationRule.class);
 
-                assertTrue(exception.getErrors().contains(emailErrors));
-            }
+            when(policy.emailRule()).thenReturn(emailValidation);
+            when(policy.passwordRule()).thenReturn(passwordValidation);
         }
 
         @Nested
-        @DisplayName("허용되지 않은 패스워드로 유저 생성시")
-        class WhenCreateWithNotAllowedPassword {
-
-            @Test
-            @DisplayName("UserInvalidException이 발생해야 한다.")
-            void shouldThrowsUserInvalidException() {
-                assertThrows(UserInvalidException.class, () -> new User(RAW_EMAIL, NOT_ALLOWED_RAW_PASSWORD, encoder));
-            }
-
-            @Test
-            @DisplayName("패스워드 관련된 에러가 포함되어야 한다.")
-            void shouldContainsPasswordErrorMessage() {
-                ValidationError passwordErrors = new ValidationError(UserPasswordValidationRule.PROPERTY, UserPasswordValidationRule.MESSAGE);
-                UserInvalidException exception = assertThrows(UserInvalidException.class, () -> new User(RAW_EMAIL, NOT_ALLOWED_RAW_PASSWORD, encoder));
-
-                assertTrue(exception.getErrors().contains(passwordErrors));
-            }
-        }
-
-        @Nested
-        @DisplayName("허용되는 매개변수로 유저 생성시")
-        class WhenCreateWithAllowedArgs {
-            private User user;
+        @DisplayName("허용된 이메일이 아닐시")
+        class WhenUserEmailNotAllowed {
+            private ValidationError emailError;
 
             @BeforeEach
             void setup() {
-                this.user = new User(RAW_EMAIL, RAW_PASSWORD, encoder);
+                this.emailError = new ValidationError("EMAIL", "INVALID EMAIL");
+
+                when(emailValidation.isValid(user)).thenReturn(false);
+                when(emailValidation.error()).thenReturn(emailError);
+                when(passwordValidation.isValid(user)).thenReturn(true);
             }
 
             @Test
-            @DisplayName("생성자에서 받은 이메일을 저장해야 한다.")
-            void shouldSaveGiveConstructorEmail() {
-                assertEquals(EMAIL, user.getEmail());
+            @DisplayName("UserInvalidException이 발생해야 한다.")
+            void shouldThrowsUserInvalidException() {
+                assertThrows(UserInvalidException.class, () -> user.validation(policy));
             }
 
             @Test
-            @DisplayName("생성자에서 받은 패스워드를 암호화 하여 저장해야 한다.")
-            void shouldSaveGivePasswordEncrypting() {
-                assertEquals(ENCRYPTED_PASSWORD, user.getPassword());
+            @DisplayName("이메일 유효성에 관련된 에러가 포함되어 있어야 한다.")
+            void shouldContainsEmailErrorMessage() {
+                UserInvalidException exception = assertThrows(UserInvalidException.class, () -> user.validation(policy));
+
+                assertTrue(exception.getErrors().contains(emailError));
+            }
+        }
+
+        @Nested
+        @DisplayName("허용된 패스워드가 아닐시")
+        class WhenUserPasswordNotAllowed {
+            private ValidationError passwordError;
+
+            @BeforeEach
+            void setup() {
+                this.passwordError = new ValidationError("PASSWORD", "INVALID PASSWORD");
+
+                when(emailValidation.isValid(user)).thenReturn(true);
+                when(passwordValidation.isValid(user)).thenReturn(false);
+                when(passwordValidation.error()).thenReturn(passwordError);
+            }
+
+            @Test
+            @DisplayName("UserInvalidException이 발생해야 한다.")
+            void shouldThrowsUserInvalidException() {
+                assertThrows(UserInvalidException.class, () -> user.validation(policy));
+            }
+
+            @Test
+            @DisplayName("패스워드 유효성 관련된 에러가 포함되어 있어야 한다.")
+            void shouldContainsPasswordErrorMessage() {
+                UserInvalidException exception = assertThrows(UserInvalidException.class, () -> user.validation(policy));
+
+                assertTrue(exception.getErrors().contains(passwordError));
             }
         }
     }
@@ -123,56 +135,45 @@ class UserTest {
     @DisplayName("패스워드 변경")
     class ChangePassword {
 
-        private User user;
-
-        @BeforeEach
-        void setup() {
-            this.user = new User(RAW_EMAIL, RAW_PASSWORD, encoder);
-        }
-
-        @Nested
-        @DisplayName("유효하지 않은 패스워드로 변경시")
-        class WhenNotAllowedPassword {
-
-            @Test
-            @DisplayName("UserInvalidException이 발생해야 한다.")
-            void shouldThrowsUserInvalidException() {
-                assertThrows(UserInvalidException.class, () -> user.changePassword(RAW_PASSWORD, NOT_ALLOWED_RAW_PASSWORD, encoder));
-            }
-
-            @Test
-            @DisplayName("패스워드 관련 에러가 포함되어야 한다.")
-            void shouldContainsPasswordErrorMessage() {
-                UserInvalidException exception = assertThrows(UserInvalidException.class,
-                        () -> user.changePassword(RAW_PASSWORD, NOT_ALLOWED_RAW_PASSWORD, encoder));
-                ValidationError passwordError = new ValidationError(UserPasswordValidationRule.PROPERTY, UserPasswordValidationRule.MESSAGE);
-                assertTrue(exception.getErrors().contains(passwordError));
-            }
-        }
-
         @Nested
         @DisplayName("이전에 사용하던 패스워드와 일치하지 않을시")
         class WhenNotMatchedExistingPassword {
 
+            @BeforeEach
+            void setup() {
+                when(encoder.matches(PASSWORD, PASSWORD)).thenReturn(false);
+            }
+
             @Test
-            @DisplayName("UserNotMatchedException이 발생해야 한다.")
-            void shouldThrowsUserNotMatchedException() {
-                assertThrows(UserNotMatchedException.class,
-                        () -> user.changePassword("NOT MATCHED PASSWORD 1", RAW_CHANGE_PASSWORD, encoder));
-                assertThrows(UserNotMatchedException.class,
-                        () -> user.changePassword("NOT MATCHED PASSWORD 2", RAW_CHANGE_PASSWORD, encoder));
+            @DisplayName("UserAuthorizationException이 발생해야 한다.")
+            void shouldThrowsUserAuthorizationException() {
+                assertThrows(UserAuthorizationException.class,
+                        () -> user.changePassword(PASSWORD, CHANGE_PASSWORD, encoder));
+            }
+
+            @Test
+            @DisplayName("에러 코드는 INVALID_PASSWORD 이어야 한다.")
+            void shouldErrorCodeIsInvalidPassword() {
+                UserAuthorizationException e = assertThrows(UserAuthorizationException.class,
+                        () -> user.changePassword(PASSWORD, CHANGE_PASSWORD, encoder));
+                assertEquals(UserErrorCodes.INVALID_PASSWORD, e.getCode());
             }
         }
 
         @Nested
-        @DisplayName("이전에 사용하던 패스워드가 일치하며, 유효한 패스워드로 패스워드 변경시")
-        class WhenExistingPasswordMatchedAndAllowedPassword {
+        @DisplayName("이전에 사용하던 패스워드가 일치할시")
+        class WhenExistingPasswordMatched {
+
+            @BeforeEach
+            void setup() {
+                when(encoder.matches(PASSWORD, PASSWORD)).thenReturn(true);
+            }
 
             @Test
-            @DisplayName("인자로 받은 변경될 패스워드를 암호화 하여 저장하여야 한다.")
-            void shouldSaveGivenPasswordEncrypted() {
-                user.changePassword(RAW_PASSWORD, RAW_CHANGE_PASSWORD, encoder);
-                assertEquals(CHANGE_ENCRYPTED_PASSWORD, user.getPassword());
+            @DisplayName("인자로 받은 변경될 패스워드를 저장하여야 한다.")
+            void shouldSaveGivenPassword() {
+                user.changePassword(PASSWORD, CHANGE_PASSWORD, encoder);
+                assertEquals(CHANGE_PASSWORD, user.getPassword());
             }
         }
     }
@@ -180,14 +181,11 @@ class UserTest {
     @Nested
     @DisplayName("패스워드 분실")
     class ForgotPassword {
-
-        private User user;
         private UserCredentialsKey key;
 
         @BeforeEach
         void setup() {
             this.key = mock(UserCredentialsKey.class);
-            this.user = new User(RAW_EMAIL, RAW_PASSWORD, encoder);
 
             when(keyGenerator.generateKey()).thenReturn(key);
         }
@@ -204,13 +202,11 @@ class UserTest {
     @DisplayName("패스워드 초기화")
     class ResetPassword {
 
-        private User user;
         private UserCredentialsKey key;
 
         @BeforeEach
         void setup() {
             this.key = mock(UserCredentialsKey.class);
-            this.user = new User(RAW_EMAIL, RAW_PASSWORD, encoder);
 
             when(keyGenerator.generateKey()).thenReturn(key);
         }
@@ -220,9 +216,16 @@ class UserTest {
         class WhenKeyNotGenerated {
 
             @Test
-            @DisplayName("UserNotMatchedException이 발생해야 한다.")
-            void shouldThrowsUserNotMatchedException() {
-                assertThrows(UserNotMatchedException.class, () -> user.resetPassword("KEY", RAW_CHANGE_PASSWORD, encoder));
+            @DisplayName("UserAuthorizationException이 발생해야 한다.")
+            void shouldThrowsUserAuthorizationException() {
+                assertThrows(UserAuthorizationException.class, () -> user.resetPassword("KEY", CHANGE_PASSWORD));
+            }
+
+            @Test
+            @DisplayName("에러 코드는 INVALID_KEY 이어야 한다.")
+            void shouldErrorCodeIsInvalidKey() {
+                UserAuthorizationException e = assertThrows(UserAuthorizationException.class, () -> user.resetPassword("KEY", CHANGE_PASSWORD));
+                assertEquals(UserErrorCodes.INVALID_KEY, e.getCode());
             }
         }
 
@@ -238,9 +241,16 @@ class UserTest {
             }
 
             @Test
-            @DisplayName("UserNotMatchedException이 발생해야 한다.")
-            void shouldThrowsUserNotMatchedException() {
-                assertThrows(UserNotMatchedException.class, () -> user.resetPassword("KEY", RAW_CHANGE_PASSWORD, encoder));
+            @DisplayName("UserAuthorizationException이 발생해야 한다.")
+            void shouldThrowsUserAuthorizationException() {
+                assertThrows(UserAuthorizationException.class, () -> user.resetPassword("KEY", CHANGE_PASSWORD));
+            }
+
+            @Test
+            @DisplayName("에러 코드는 INVALID_KEY 이어야 한다.")
+            void shouldErrorCodeIsInvalidKey() {
+                UserAuthorizationException e = assertThrows(UserAuthorizationException.class, () -> user.resetPassword("KEY", CHANGE_PASSWORD));
+                assertEquals(UserErrorCodes.INVALID_KEY, e.getCode());
             }
         }
 
@@ -256,15 +266,22 @@ class UserTest {
             }
 
             @Test
-            @DisplayName("UserExpiredException이 발생해야 한다.")
-            void shouldThrowsUserExpiredException() {
-                assertThrows(UserExpiredException.class, () -> user.resetPassword("KEY", RAW_CHANGE_PASSWORD, encoder));
+            @DisplayName("UserAuthorizationException이 발생해야 한다.")
+            void shouldThrowsUserAuthorizationException() {
+                assertThrows(UserAuthorizationException.class, () -> user.resetPassword("KEY", CHANGE_PASSWORD));
+            }
+
+            @Test
+            @DisplayName("에러 코드는 KEY_EXPIRED 이어야 한다.")
+            void shouldErrorCodeIsKeyExpired() {
+                UserAuthorizationException e = assertThrows(UserAuthorizationException.class, () -> user.resetPassword("KEY", CHANGE_PASSWORD));
+                assertEquals(UserErrorCodes.KEY_EXPIRED, e.getCode());
             }
         }
 
         @Nested
-        @DisplayName("변경할 패스워드가 유효하지 않을시")
-        class WhenNotAllowedPassword {
+        @DisplayName("패스워드 인증키가 옳바를시")
+        class WhenKeyMatched {
 
             private String matchedKey = "KEY";
 
@@ -276,36 +293,16 @@ class UserTest {
             }
 
             @Test
-            @DisplayName("UserInvalidException이 발생해야 한다.")
-            void shouldThrowsUserInvalidException() {
-                assertThrows(UserInvalidException.class, () -> user.resetPassword(matchedKey, NOT_ALLOWED_RAW_PASSWORD, encoder));
-            }
-        }
-
-        @Nested
-        @DisplayName("키가 매칭되며 변경될 패스워드가 유효할시")
-        class WhenKeyMatchedAndAllowedPassword {
-
-            private String matchedKey = "KEY";
-
-            @BeforeEach
-            void setup() {
-                user.forgotPassword(keyGenerator);
-
-                when(key.matches(matchedKey)).thenReturn(UserKeyMatchedResult.MATCHED);
-            }
-
-            @Test
-            @DisplayName("인자로 받은 변경될 패스워드를 암호화 하여 저장하여야 한다.")
-            void shouldSaveGivenPasswordEncrypted() {
-                user.resetPassword(matchedKey, RAW_CHANGE_PASSWORD, encoder);
-                assertEquals(CHANGE_ENCRYPTED_PASSWORD, user.getPassword());
+            @DisplayName("인자로 받은 변경될 패스워드를 저장하여야 한다.")
+            void shouldSaveGivenPassword() {
+                user.resetPassword(matchedKey, CHANGE_PASSWORD);
+                assertEquals(CHANGE_PASSWORD, user.getPassword());
             }
 
             @Test
             @DisplayName("패스워드 인증키를 null로 변경한다.")
             void shouldPasswordCredentialsKeySetNull() {
-                user.resetPassword(matchedKey, RAW_CHANGE_PASSWORD, encoder);
+                user.resetPassword(matchedKey, CHANGE_PASSWORD);
                 assertNull(user.getPasswordCredentialsKey());
             }
         }
@@ -315,13 +312,11 @@ class UserTest {
     @DisplayName("계정 인증키 할당")
     class GeneratedCredentialsKey {
 
-        private User user;
         private UserCredentialsKey key;
 
         @BeforeEach
         void setup() {
             this.key = mock(UserCredentialsKey.class);
-            this.user = new User(RAW_EMAIL, RAW_PASSWORD, encoder);
 
             when(keyGenerator.generateKey()).thenReturn(key);
         }
@@ -341,13 +336,12 @@ class UserTest {
         @Nested
         @DisplayName("이미 인증 받은 계정일시")
         class WhenAlreadyCertificationAccount {
-            private Collection<AuthorityCode> authorityCodes;
 
             @BeforeEach
             void setup() {
                 when(key.matches(any())).thenReturn(UserKeyMatchedResult.MATCHED);
 
-                this.authorityCodes = new HashSet<>(Arrays.asList(
+                Collection<AuthorityCode> authorityCodes = new HashSet<>(Arrays.asList(
                         new AuthorityCode("CODE1"),
                         new AuthorityCode("CODE2"),
                         new AuthorityCode("CODE3")));
@@ -356,9 +350,16 @@ class UserTest {
             }
 
             @Test
-            @DisplayName("UserCertificationException이 발생해야 한다.")
-            void shouldThrowsUserCertificationException() {
-                assertThrows(UserAlreadyCertificationException.class, () -> user.generateCredentialsKey(keyGenerator));
+            @DisplayName("UserAuthorizationException아 발생해야 한다.")
+            void shouldThrowsUserAuthorizationException() {
+                assertThrows(UserAuthorizationException.class, () -> user.generateCredentialsKey(keyGenerator));
+            }
+
+            @Test
+            @DisplayName("에러 코드는 ALREADY_CREDENTIALS 이어야 한다.")
+            void shouldErrorCodeIsAlreadyCredentials() {
+                UserAuthorizationException e = assertThrows(UserAuthorizationException.class, () -> user.generateCredentialsKey(keyGenerator));
+                assertEquals(UserErrorCodes.ALREADY_CREDENTIALS, e.getCode());
             }
         }
 
@@ -387,13 +388,11 @@ class UserTest {
     @DisplayName("계정 인증")
     class CredentialsAccount {
 
-        private User user;
         private UserCredentialsKey key;
 
         @BeforeEach
         void setup() {
             this.key = mock(UserCredentialsKey.class);
-            this.user = new User(RAW_EMAIL, RAW_PASSWORD, encoder);
         }
 
         @Nested
@@ -401,9 +400,16 @@ class UserTest {
         class WhenKeyNotGenerated {
 
             @Test
-            @DisplayName("UserNotMatchedException이 발생해야 한다.")
-            void shouldThrowsUserNotMatchedException() {
-                assertThrows(UserNotMatchedException.class, () -> user.credentials("KEY", Collections.emptyList()));
+            @DisplayName("UserAuthorizationException이 발생해야 한다.")
+            void shouldThrowsUserAuthorizationException() {
+                assertThrows(UserAuthorizationException.class, () -> user.credentials("KEY", Collections.emptyList()));
+            }
+
+            @Test
+            @DisplayName("에러 코드는 INVALID_KEY 이어야 한다.")
+            void shouldErrorCodeIsInvalidKey() {
+                UserAuthorizationException e = assertThrows(UserAuthorizationException.class, () -> user.credentials("KEY", Collections.emptyList()));
+                assertEquals(UserErrorCodes.INVALID_KEY, e.getCode());
             }
         }
 
@@ -419,9 +425,16 @@ class UserTest {
             }
 
             @Test
-            @DisplayName("UserNotMatchedException이 발생해야 한다.")
-            void shouldThrowsUserNotMatchedException() {
-                assertThrows(UserNotMatchedException.class, () -> user.credentials("KEY", Collections.emptyList()));
+            @DisplayName("UserAuthorizationException이 발생해야 한다.")
+            void shouldThrowsUserAuthorizationException() {
+                assertThrows(UserAuthorizationException.class, () -> user.credentials("KEY", Collections.emptyList()));
+            }
+
+            @Test
+            @DisplayName("에러 코드는 INVALID_KEY 이어야 한다.")
+            void shouldErrorCodeIsInvalidKey() {
+                UserAuthorizationException e = assertThrows(UserAuthorizationException.class, () -> user.credentials("KEY", Collections.emptyList()));
+                assertEquals(UserErrorCodes.INVALID_KEY, e.getCode());
             }
         }
 
@@ -438,9 +451,16 @@ class UserTest {
             }
 
             @Test
-            @DisplayName("UserExpiredException이 발생해야 한다.")
-            void shouldThrowsUserExpiredException() {
-                assertThrows(UserExpiredException.class, () -> user.credentials("KEY", Collections.emptyList()));
+            @DisplayName("UserAuthorizationException이 발생해야 한다.")
+            void shouldThrowsUserAuthorizationException() {
+                assertThrows(UserAuthorizationException.class, () -> user.credentials("KEY", Collections.emptyList()));
+            }
+
+            @Test
+            @DisplayName("에러 코드는 KEY_EXPIRED 이어야 한다.")
+            void shouldErrorCodeIsKeyExpired() {
+                UserAuthorizationException e = assertThrows(UserAuthorizationException.class, () -> user.credentials("KEY", Collections.emptyList()));
+                assertEquals(UserErrorCodes.KEY_EXPIRED, e.getCode());
             }
         }
 
@@ -475,6 +495,19 @@ class UserTest {
                 user.credentials(matchedKey, authorityCodes);
                 assertNull(user.getCredentialsKey());
             }
+        }
+    }
+
+    @Nested
+    @DisplayName("패스워드 암호화")
+    class PasswordEncrypting {
+
+        @Test
+        @DisplayName("패스워드를 암호화하여 저장해야 한다.")
+        void shouldSaveEncryptedPassword() {
+            user.encrypted(encoder);
+
+            assertEquals(ENCRYPTED_PASSWORD, user.getPassword());
         }
     }
 }

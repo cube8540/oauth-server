@@ -1,6 +1,8 @@
 package cube8540.oauth.authentication.users.domain;
 
 import cube8540.oauth.authentication.credentials.authority.domain.AuthorityCode;
+import cube8540.oauth.authentication.users.error.UserAuthorizationException;
+import cube8540.oauth.authentication.users.error.UserInvalidException;
 import cube8540.validator.core.Validator;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -10,9 +12,9 @@ import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.Target;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.domain.AbstractAggregateRoot;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.persistence.AttributeOverride;
 import javax.persistence.AttributeOverrides;
@@ -44,10 +46,8 @@ public class User extends AbstractAggregateRoot<User> {
     @AttributeOverride(name = "value", column = @Column(name = "email", length = 128))
     private UserEmail email;
 
-    @Embedded
-    @Target(value = UserEncryptedPassword.class)
-    @AttributeOverride(name = "password", column = @Column(name = "password", length = 64, nullable = false))
-    private UserPassword password;
+    @Column(name = "password", length = 64, nullable = false)
+    private String password;
 
     @Embedded
     @AttributeOverrides(value = {
@@ -77,38 +77,40 @@ public class User extends AbstractAggregateRoot<User> {
     @Column(name = "last_updated_at", nullable = false)
     private LocalDateTime lastUpdatedAt;
 
-    public User(String email, String password, UserPasswordEncoder encoder) {
+    public User(String email, String password) {
         this.email = new UserEmail(email);
-        this.password = new UserRawPassword(password);
+        this.password = password;
+        registerEvent(new UserRegisterEvent(this.email));
+    }
 
-        Validator.of(this).registerRule(new UserEmailValidationRule())
-                .registerRule(new UserPasswordValidationRule())
+    public void validation(UserValidationPolicy policy) {
+        Validator.of(this).registerRule(policy.emailRule())
+                .registerRule(policy.passwordRule())
                 .getResult().hasErrorThrows(UserInvalidException::new);
-        encrypted(encoder);
-        registerEvent(new UserCreatedEvent(this.email));
     }
 
     public void generateCredentialsKey(UserCredentialsKeyGenerator keyGenerator) {
         if (this.authorities != null && !this.authorities.isEmpty()) {
-            throw new UserAlreadyCertificationException("this account is already certification");
+            throw UserAuthorizationException.alreadyCredentials("This account is already certification");
         }
         this.credentialsKey = keyGenerator.generateKey();
+        registerEvent(new UserGeneratedCredentialsKeyEvent(email, credentialsKey));
     }
 
     public void credentials(String credentialsKey, Collection<AuthorityCode> authorities) {
         UserKeyMatchedResult matchedResult = Optional.ofNullable(this.credentialsKey)
                 .map(key -> key.matches(credentialsKey))
-                .orElseThrow(() -> new UserNotMatchedException("key is not matched"));
+                .orElseThrow(() -> UserAuthorizationException.invalidKey("Key is not matched"));
         assertMatchedResult(matchedResult);
         this.authorities = new HashSet<>(authorities);
         this.credentialsKey = null;
     }
 
-    public void changePassword(String existsPassword, String changePassword, UserPasswordEncoder encoder) {
-        if (!encoder.matches(password, new UserRawPassword(existsPassword))) {
-            throw new UserNotMatchedException("existing password is not matched");
+    public void changePassword(String existsPassword, String changePassword, PasswordEncoder encoder) {
+        if (!encoder.matches(existsPassword, password)) {
+            throw UserAuthorizationException.invalidPassword("Existing password is not matched");
         }
-        changePassword(changePassword, encoder);
+        this.password = changePassword;
     }
 
     public void forgotPassword(UserCredentialsKeyGenerator keyGenerator) {
@@ -116,31 +118,24 @@ public class User extends AbstractAggregateRoot<User> {
         registerEvent(new UserGeneratedPasswordCredentialsKeyEvent(email, passwordCredentialsKey));
     }
 
-    public void resetPassword(String passwordCredentialsKey, String changePassword, UserPasswordEncoder encoder) {
+    public void resetPassword(String passwordCredentialsKey, String changePassword) {
         UserKeyMatchedResult matchedResult = Optional.ofNullable(this.passwordCredentialsKey)
                 .map(key -> key.matches(passwordCredentialsKey))
-                .orElseThrow(() -> new UserNotMatchedException("key is not matched"));
+                .orElseThrow(() -> UserAuthorizationException.invalidKey("Key is not matched"));
         assertMatchedResult(matchedResult);
-        changePassword(changePassword, encoder);
+        this.password = changePassword;
         this.passwordCredentialsKey = null;
     }
 
-    private void changePassword(String changePassword, UserPasswordEncoder encoder) {
-        this.password = new UserRawPassword(changePassword);
-        Validator.of(this).registerRule(new UserPasswordValidationRule())
-                .getResult().hasErrorThrows(UserInvalidException::new);
-        encrypted(encoder);
-    }
-
-    private void encrypted(UserPasswordEncoder encoder) {
-        this.password = this.password.encrypted(encoder);
+    public void encrypted(PasswordEncoder encoder) {
+        this.password = encoder.encode(this.password);
     }
 
     private void assertMatchedResult(UserKeyMatchedResult matchedResult) {
         if (matchedResult.equals(UserKeyMatchedResult.NOT_MATCHED)) {
-            throw new UserNotMatchedException("key is not matched");
+            throw UserAuthorizationException.invalidKey("Key is not matched");
         } else if (matchedResult.equals(UserKeyMatchedResult.EXPIRED)) {
-            throw new UserExpiredException("key is expired");
+            throw UserAuthorizationException.keyExpired("Key is expired");
         }
     }
 }

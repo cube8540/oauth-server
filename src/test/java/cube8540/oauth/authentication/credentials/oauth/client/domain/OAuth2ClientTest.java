@@ -1,10 +1,16 @@
 package cube8540.oauth.authentication.credentials.oauth.client.domain;
 
+import cube8540.oauth.authentication.credentials.oauth.client.error.ClientAuthorizationException;
+import cube8540.oauth.authentication.credentials.oauth.client.error.ClientErrorCodes;
+import cube8540.oauth.authentication.credentials.oauth.client.error.ClientInvalidException;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
+import cube8540.validator.core.ValidationError;
+import cube8540.validator.core.ValidationRule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 
 import java.net.URI;
@@ -12,6 +18,7 @@ import java.net.URI;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -24,16 +31,7 @@ class OAuth2ClientTest {
 
     private static final String RAW_SECRET = "SECRET";
     private static final String RAW_ENCODING_SECRET = "ENCODING-SECRET";
-
-    private static final String CLIENT_NAME = "CLIENT_NAME";
-
-    private OAuth2ClientSecretEncoder encoder;
-
-    @BeforeEach
-    void setup() {
-        this.encoder = mock(OAuth2ClientSecretEncoder.class);
-        when(encoder.encode(RAW_SECRET)).thenReturn(RAW_ENCODING_SECRET);
-    }
+    private static final String RAW_CHANGE_SECRET = "CHANGE-SECRET";
 
     @Nested
     @DisplayName("OAuth2 클라이언트 생성")
@@ -43,7 +41,7 @@ class OAuth2ClientTest {
 
         @BeforeEach
         void setup() {
-            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET, CLIENT_NAME, encoder);
+            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET);
         }
 
         @Test
@@ -53,15 +51,9 @@ class OAuth2ClientTest {
         }
 
         @Test
-        @DisplayName("인자로 받은 클라이언트 패스워드를 암호화 하여 저장해야 한다.")
-        void shouldSaveEncryptedGivenSecret() {
-            assertEquals(RAW_ENCODING_SECRET, client.getSecret().getSecret());
-        }
-
-        @Test
-        @DisplayName("인자로 받은 클라이언트명을 저장해야 한다.")
-        void shouldSaveGivenClientName() {
-            assertEquals(CLIENT_NAME, client.getClientName());
+        @DisplayName("인자로 받은 클라이언트 패스워드를 저장해야 한다.")
+        void shouldSaveGivenSecret() {
+            assertEquals(RAW_SECRET, client.getSecret());
         }
 
         @Test
@@ -85,7 +77,7 @@ class OAuth2ClientTest {
 
         @BeforeEach
         void setup() {
-            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET, CLIENT_NAME, encoder);
+            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET);
         }
 
         @Nested
@@ -139,7 +131,7 @@ class OAuth2ClientTest {
 
         @BeforeEach
         void setup() {
-            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET, CLIENT_NAME, encoder);
+            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET);
         }
 
         @Nested
@@ -178,7 +170,7 @@ class OAuth2ClientTest {
 
         @BeforeEach
         void setup() {
-            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET, CLIENT_NAME, encoder);
+            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET);
         }
 
         @Nested
@@ -231,7 +223,7 @@ class OAuth2ClientTest {
 
         @BeforeEach
         void setup() {
-            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET, CLIENT_NAME, encoder);
+            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET);
         }
 
         @Nested
@@ -272,7 +264,7 @@ class OAuth2ClientTest {
         @BeforeEach
         void setup(){
             this.newScope = new OAuth2ScopeId("SCOPE-1");
-            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET, CLIENT_NAME, encoder);
+            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET);
         }
 
         @Nested
@@ -333,7 +325,7 @@ class OAuth2ClientTest {
         @BeforeEach
         void setup() {
             this.scope = new OAuth2ScopeId("SCOPE-1");
-            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET, CLIENT_NAME, encoder);
+            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET);
         }
 
         @Nested
@@ -361,6 +353,316 @@ class OAuth2ClientTest {
             void shouldRemoveGivenGrantType() {
                 client.removeScope(scope);
                 assertFalse(client.getScope().contains(scope));
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("클라이언트 패스워드 암호화")
+    class SecretEncrypting {
+        private OAuth2Client client;
+        private PasswordEncoder passwordEncoder;
+
+        @BeforeEach
+        void setup() {
+            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET);
+            this.passwordEncoder = mock(PasswordEncoder.class);
+
+            when(passwordEncoder.encode(RAW_SECRET)).thenReturn(RAW_ENCODING_SECRET);
+        }
+
+        @Test
+        @DisplayName("클라이언트 패스워드를 암호화 하여 저장해야 한다.")
+        void shouldSaveEncryptedClientSecret() {
+            client.encrypted(passwordEncoder);
+
+            assertEquals(RAW_ENCODING_SECRET, client.getSecret());
+        }
+    }
+
+    @Nested
+    @DisplayName("클라이언트 유효성 채크")
+    class ClientValidation {
+        private OAuth2Client client;
+
+        private OAuth2ClientValidatePolicy policy;
+
+        private ValidationRule<OAuth2Client> clientIdRule;
+        private ValidationRule<OAuth2Client> secretRule;
+        private ValidationRule<OAuth2Client> clientNameRule;
+        private ValidationRule<OAuth2Client> grantTypeRule;
+        private ValidationRule<OAuth2Client> scopeRule;
+        private ValidationRule<OAuth2Client> ownerRule;
+
+        @BeforeEach
+        @SuppressWarnings("unchecked")
+        void setup() {
+            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET);
+
+            this.policy = mock(OAuth2ClientValidatePolicy.class);
+            this.clientIdRule = mock(ValidationRule.class);
+            this.secretRule = mock(ValidationRule.class);
+            this.clientNameRule = mock(ValidationRule.class);
+            this.grantTypeRule = mock(ValidationRule.class);
+            this.scopeRule = mock(ValidationRule.class);
+            this.ownerRule = mock(ValidationRule.class);
+
+            when(policy.clientIdRule()).thenReturn(clientIdRule);
+            when(policy.secretRule()).thenReturn(secretRule);
+            when(policy.clientNameRule()).thenReturn(clientNameRule);
+            when(policy.grantTypeRule()).thenReturn(grantTypeRule);
+            when(policy.scopeRule()).thenReturn(scopeRule);
+            when(policy.ownerRule()).thenReturn(ownerRule);
+        }
+
+        @Nested
+        @DisplayName("클라이언트 아이디가 유효하지 않을시")
+        class WhenClientIdIsNotAllowed {
+            private ValidationError clientIdError;
+
+            @BeforeEach
+            void setup() {
+                this.clientIdError = new ValidationError("clientId", "invalid client id");
+
+                when(clientIdRule.isValid(client)).thenReturn(false);
+                when(secretRule.isValid(client)).thenReturn(true);
+                when(clientNameRule.isValid(client)).thenReturn(true);
+                when(grantTypeRule.isValid(client)).thenReturn(true);
+                when(scopeRule.isValid(client)).thenReturn(true);
+                when(ownerRule.isValid(client)).thenReturn(true);
+                when(clientIdRule.error()).thenReturn(clientIdError);
+            }
+
+            @Test
+            @DisplayName("ClientInvalidException이 발생해야 한다.")
+            void shouldThrowsClientInvalidException() {
+                assertThrows(ClientInvalidException.class, () -> client.validate(policy));
+            }
+
+            @Test
+            @DisplayName("클라이언트 아이디 유효성에 관련된 에러가 포함되어야 한다.")
+            void shouldContainsClientIdErrorMessage() {
+                ClientInvalidException exception = assertThrows(ClientInvalidException.class, () -> client.validate(policy));
+                assertTrue(exception.getErrors().contains(clientIdError));
+            }
+        }
+
+        @Nested
+        @DisplayName("클라이언트 패스워드가 유효하지 않을시")
+        class WhenClientSecretIsNotAllowed {
+            private ValidationError passwordError;
+
+            @BeforeEach
+            void setup() {
+                this.passwordError = new ValidationError("secret", "invalid secret");
+
+                when(clientIdRule.isValid(client)).thenReturn(true);
+                when(secretRule.isValid(client)).thenReturn(false);
+                when(clientNameRule.isValid(client)).thenReturn(true);
+                when(grantTypeRule.isValid(client)).thenReturn(true);
+                when(scopeRule.isValid(client)).thenReturn(true);
+                when(ownerRule.isValid(client)).thenReturn(true);
+                when(secretRule.error()).thenReturn(passwordError);
+            }
+
+            @Test
+            @DisplayName("ClientInvalidException이 발생해야 한다.")
+            void shouldThrowsClientInvalidException() {
+                assertThrows(ClientInvalidException.class, () -> client.validate(policy));
+            }
+
+            @Test
+            @DisplayName("클라이언트 패스워드 유효성에 관련된 에러가 포함되어야 한다.")
+            void shouldContainsSecretErrorMessage() {
+                ClientInvalidException exception = assertThrows(ClientInvalidException.class, () -> client.validate(policy));
+                assertTrue(exception.getErrors().contains(passwordError));
+            }
+        }
+
+        @Nested
+        @DisplayName("클라이언트명이 유효하지 않을시")
+        class WhenClientNameIsNotAllowed {
+            private ValidationError nameError;
+
+            @BeforeEach
+            void setup() {
+                this.nameError = new ValidationError("clientName", "invalid client name");
+
+                when(clientIdRule.isValid(client)).thenReturn(true);
+                when(secretRule.isValid(client)).thenReturn(true);
+                when(clientNameRule.isValid(client)).thenReturn(false);
+                when(grantTypeRule.isValid(client)).thenReturn(true);
+                when(scopeRule.isValid(client)).thenReturn(true);
+                when(ownerRule.isValid(client)).thenReturn(true);
+                when(clientNameRule.error()).thenReturn(nameError);
+            }
+
+            @Test
+            @DisplayName("ClientInvalidException이 발생해야 한다.")
+            void shouldThrowsClientInvalidException() {
+                assertThrows(ClientInvalidException.class, () -> client.validate(policy));
+            }
+
+            @Test
+            @DisplayName("클라이언트명 유효성에 관련된 에러가 포함되어야 한다.")
+            void shouldContainsNameErrorMessage() {
+                ClientInvalidException exception = assertThrows(ClientInvalidException.class, () -> client.validate(policy));
+                assertTrue(exception.getErrors().contains(nameError));
+            }
+        }
+
+        @Nested
+        @DisplayName("클라이언트 인가 방식이 유효하지 않을시")
+        class WhenClientAuthorizationGrantTypeIsNotAllowed {
+            private ValidationError grantError;
+
+            @BeforeEach
+            void setup() {
+                this.grantError = new ValidationError("grantType", "invalid grant type");
+
+                when(clientIdRule.isValid(client)).thenReturn(true);
+                when(secretRule.isValid(client)).thenReturn(true);
+                when(clientNameRule.isValid(client)).thenReturn(true);
+                when(grantTypeRule.isValid(client)).thenReturn(false);
+                when(scopeRule.isValid(client)).thenReturn(true);
+                when(ownerRule.isValid(client)).thenReturn(true);
+                when(grantTypeRule.error()).thenReturn(grantError);
+            }
+
+            @Test
+            @DisplayName("ClientInvalidException이 발생해야 한다.")
+            void shouldThrowsClientInvalidException() {
+                assertThrows(ClientInvalidException.class, () -> client.validate(policy));
+            }
+
+            @Test
+            @DisplayName("클라이언트 인가 유효성에 관련된 에러가 포함되어야 한다.")
+            void shouldContainsClientAuthorizationGrantErrorMessage() {
+                ClientInvalidException exception = assertThrows(ClientInvalidException.class, () -> client.validate(policy));
+                assertTrue(exception.getErrors().contains(grantError));
+            }
+        }
+
+        @Nested
+        @DisplayName("클라이언트 스코프가 유효하지 않을시")
+        class WhenClientScopeIsNotAllowed {
+            private ValidationError scopeError;
+
+            @BeforeEach
+            void setup() {
+                this.scopeError = new ValidationError("scope", "invalid scope");
+
+                when(clientIdRule.isValid(client)).thenReturn(true);
+                when(secretRule.isValid(client)).thenReturn(true);
+                when(clientNameRule.isValid(client)).thenReturn(true);
+                when(grantTypeRule.isValid(client)).thenReturn(true);
+                when(scopeRule.isValid(client)).thenReturn(false);
+                when(ownerRule.isValid(client)).thenReturn(true);
+                when(scopeRule.error()).thenReturn(scopeError);
+            }
+
+            @Test
+            @DisplayName("ClientInvalidException이 발생해야 한다.")
+            void shouldThrowsClientInvalidException() {
+                assertThrows(ClientInvalidException.class, () -> client.validate(policy));
+            }
+
+            @Test
+            @DisplayName("클라이언트 스코프 유효성에 관련된 에러가 포함되어야 한다.")
+            void shouldContainsScopeErrorMessage() {
+                ClientInvalidException exception = assertThrows(ClientInvalidException.class, () -> client.validate(policy));
+                assertTrue(exception.getErrors().contains(scopeError));
+            }
+        }
+
+        @Nested
+        @DisplayName("클라이언트 소유자가 유효하지 않을시")
+        class WhenClientOwnerIsNotAllowed {
+            private ValidationError ownerError;
+
+            @BeforeEach
+            void setup() {
+                this.ownerError = new ValidationError("owner", "invalid owner");
+
+                when(clientIdRule.isValid(client)).thenReturn(true);
+                when(secretRule.isValid(client)).thenReturn(true);
+                when(clientNameRule.isValid(client)).thenReturn(true);
+                when(grantTypeRule.isValid(client)).thenReturn(true);
+                when(scopeRule.isValid(client)).thenReturn(true);
+                when(ownerRule.isValid(client)).thenReturn(false);
+                when(ownerRule.error()).thenReturn(ownerError);
+            }
+
+            @Test
+            @DisplayName("ClientInvalidException이 발생해야 한다.")
+            void shouldThrowsClientInvalidException() {
+                assertThrows(ClientInvalidException.class, () -> client.validate(policy));
+            }
+
+            @Test
+            @DisplayName("클라이언트 소유자의 유효성에 관련된 에러가 포함되어야 한다.")
+            void shouldContainsScopeErrorMessage() {
+                ClientInvalidException exception = assertThrows(ClientInvalidException.class, () -> client.validate(policy));
+                assertTrue(exception.getErrors().contains(ownerError));
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("클라이언트 패스워드 변경")
+    class ClientChangeSecret {
+
+        private OAuth2Client client;
+
+        @BeforeEach
+        void setup() {
+            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET);
+        }
+
+        @Nested
+        @DisplayName("이전에 사용하던 패스워드가 서로 일치 하지 않을시")
+        class WhenExistsPasswordIsNotMatched {
+            private PasswordEncoder passwordEncoder;
+
+            @BeforeEach
+            void setup() {
+                this.passwordEncoder = mock(PasswordEncoder.class);
+
+                when(passwordEncoder.matches(RAW_SECRET, RAW_SECRET)).thenReturn(false);
+            }
+
+            @Test
+            @DisplayName("ClientAuthorizationException이 발생해야 한다.")
+            void shouldThrowsClientAuthorizationException() {
+                assertThrows(ClientAuthorizationException.class, () -> client.changeSecret(RAW_SECRET, RAW_CHANGE_SECRET, passwordEncoder));
+            }
+
+            @Test
+            @DisplayName("에러 코드는 INVALID_PASSWORD 이어야 한다.")
+            void shouldErrorCodeIsInvalidPassword() {
+                ClientAuthorizationException e = assertThrows(ClientAuthorizationException.class, () -> client.changeSecret(RAW_SECRET, RAW_CHANGE_SECRET, passwordEncoder));
+                assertEquals(ClientErrorCodes.INVALID_PASSWORD, e.getCode());
+            }
+        }
+
+        @Nested
+        @DisplayName("이전에 사용하던 패스워드가 서로 일치할시")
+        class WhenExistsPasswordMatched {
+            private PasswordEncoder passwordEncoder;
+
+            @BeforeEach
+            void setup() {
+                this.passwordEncoder = mock(PasswordEncoder.class);
+
+                when(passwordEncoder.matches(RAW_SECRET, RAW_SECRET)).thenReturn(true);
+            }
+
+            @Test
+            @DisplayName("요청 받은 패스워드로 클라이언트의 패스워드를 변경해야 한다.")
+            void shouldChangeSecretWithRequestingSecret() {
+                client.changeSecret(RAW_SECRET, RAW_CHANGE_SECRET, passwordEncoder);
+
+                assertEquals(RAW_CHANGE_SECRET, client.getSecret());
             }
         }
     }
