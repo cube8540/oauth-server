@@ -1,6 +1,7 @@
 package cube8540.oauth.authentication.credentials.oauth.scope.domain;
 
 import cube8540.oauth.authentication.credentials.authority.domain.AuthorityCode;
+import cube8540.oauth.authentication.credentials.oauth.scope.error.ScopeInvalidException;
 import cube8540.validator.core.Validator;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -22,7 +23,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.Table;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Getter
 @ToString
@@ -75,6 +75,6 @@ public class OAuth2Scope extends AbstractAggregateRoot<OAuth2Scope> {
     public void validate(OAuth2ScopeValidationPolicy policy) {
         Validator.of(this).registerRule(policy.scopeIdRule())
                 .registerRule(policy.accessibleRule())
-                .getResult().hasErrorThrows(OAuth2ScopeInvalidException::new);
+                .getResult().hasErrorThrows(ScopeInvalidException::new);
     }
 }

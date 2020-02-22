@@ -5,12 +5,11 @@ import cube8540.oauth.authentication.credentials.oauth.scope.OAuth2ScopeDetails;
 import cube8540.oauth.authentication.credentials.oauth.scope.application.OAuth2ScopeManagementService;
 import cube8540.oauth.authentication.credentials.oauth.scope.application.OAuth2ScopeModifyRequest;
 import cube8540.oauth.authentication.credentials.oauth.scope.application.OAuth2ScopeRegisterRequest;
-import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeAlreadyExistsException;
-import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeInvalidException;
-import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeNotFoundException;
-import cube8540.oauth.authentication.message.ErrorResponseMessage;
+import cube8540.oauth.authentication.credentials.oauth.scope.error.ScopeExceptionTranslator;
+import cube8540.oauth.authentication.error.ErrorMessage;
 import cube8540.oauth.authentication.message.ResponseMessage;
 import cube8540.oauth.authentication.message.SuccessResponseMessage;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -31,6 +30,9 @@ public class ScopeManagementAPIEndpoint {
 
     private final OAuth2ScopeManagementService managementService;
     private final OAuth2AccessibleScopeDetailsService accessibleScopeDetailsService;
+
+    @Setter
+    private ScopeExceptionTranslator translator = new ScopeExceptionTranslator();
 
     @Autowired
     public ScopeManagementAPIEndpoint(OAuth2ScopeManagementService managementService, OAuth2AccessibleScopeDetailsService accessibleScopeDetailsService) {
@@ -70,21 +72,8 @@ public class ScopeManagementAPIEndpoint {
         return new ResponseEntity<>(message, message.getStatus());
     }
 
-    @ExceptionHandler(OAuth2ScopeAlreadyExistsException.class)
-    public ResponseEntity<ResponseMessage> handleException(OAuth2ScopeAlreadyExistsException e) {
-        ResponseMessage message = ErrorResponseMessage.conflict(e.getMessage());
-        return new ResponseEntity<>(message, message.getStatus());
-    }
-
-    @ExceptionHandler(OAuth2ScopeInvalidException.class)
-    public ResponseEntity<ResponseMessage> handleException(OAuth2ScopeInvalidException e) {
-        ResponseMessage message = ErrorResponseMessage.badRequest(e.getErrors());
-        return new ResponseEntity<>(message, message.getStatus());
-    }
-
-    @ExceptionHandler(OAuth2ScopeNotFoundException.class)
-    public ResponseEntity<ResponseMessage> handleException(OAuth2ScopeNotFoundException e) {
-        ResponseMessage message = ErrorResponseMessage.notfound(e.getMessage());
-        return new ResponseEntity<>(message, message.getStatus());
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorMessage<?>> handle(Exception e) {
+        return translator.translate(e);
     }
 }

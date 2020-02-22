@@ -3,11 +3,12 @@ package cube8540.oauth.authentication.credentials.oauth.scope.application;
 import cube8540.oauth.authentication.credentials.authority.domain.AuthorityCode;
 import cube8540.oauth.authentication.credentials.oauth.scope.OAuth2ScopeDetails;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2Scope;
-import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeAlreadyExistsException;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
-import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeNotFoundException;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeRepository;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeValidationPolicy;
+import cube8540.oauth.authentication.credentials.oauth.scope.error.ScopeErrorCodes;
+import cube8540.oauth.authentication.credentials.oauth.scope.error.ScopeNotFoundException;
+import cube8540.oauth.authentication.credentials.oauth.scope.error.ScopeRegisterException;
 import cube8540.validator.core.ValidationRule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -110,9 +111,16 @@ class DefaultScopeDetailsServiceTest {
             }
 
             @Test
-            @DisplayName("OAuth2ScopeAlreadyExistsException이 발생해야 한다.")
-            void shouldThrowOAuth2ScopeAlreadyExistsException() {
-                assertThrows(OAuth2ScopeAlreadyExistsException.class, () -> service.registerNewScope(request));
+            @DisplayName("ScopeRegisterException이 발생해야 한다.")
+            void shouldThrowScopeRegisterException() {
+                assertThrows(ScopeRegisterException.class, () -> service.registerNewScope(request));
+            }
+
+            @Test
+            @DisplayName("에러 코드는 EXISTS_IDENTIFIER 이어야 한다.")
+            void shouldErrorCodeIsExistsIdentifier() {
+                ScopeRegisterException e = assertThrows(ScopeRegisterException.class, () -> service.registerNewScope(request));
+                assertEquals(ScopeErrorCodes.EXISTS_IDENTIFIER, e.getCode());
             }
         }
 
@@ -223,9 +231,9 @@ class DefaultScopeDetailsServiceTest {
             }
 
             @Test
-            @DisplayName("OAuth2ScopeNotFoundException이 발생해야 한다.")
-            void shouldThrowsOAuth2ScopeNotFoundException() {
-                assertThrows(OAuth2ScopeNotFoundException.class, () -> service.modifyScope(RAW_SCOPE_ID, request));
+            @DisplayName("ScopeNotFoundException이 발생해야 한다.")
+            void shouldThrowsScopeNotFoundException() {
+                assertThrows(ScopeNotFoundException.class, () -> service.modifyScope(RAW_SCOPE_ID, request));
             }
         }
 
@@ -338,9 +346,9 @@ class DefaultScopeDetailsServiceTest {
             }
 
             @Test
-            @DisplayName("OAuth2ScopeNotFoundException이 발생해야 한다.")
-            void shouldThrowOAuth2ScopeNotFoundException() {
-                assertThrows(OAuth2ScopeNotFoundException.class, () -> service.removeScope(RAW_SCOPE_ID));
+            @DisplayName("ScopeNotFoundException이 발생해야 한다.")
+            void shouldThrowScopeNotFoundException() {
+                assertThrows(ScopeNotFoundException.class, () -> service.removeScope(RAW_SCOPE_ID));
             }
         }
 
