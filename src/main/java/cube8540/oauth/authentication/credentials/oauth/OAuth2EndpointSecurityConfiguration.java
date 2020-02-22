@@ -37,6 +37,7 @@ import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.context.NullSecurityContextRepository;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.cors.CorsConfiguration;
 
 @Order(1)
 @EnableWebSecurity
@@ -93,7 +94,8 @@ public class OAuth2EndpointSecurityConfiguration extends WebSecurityConfigurerAd
             .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.NEVER)
                 .and()
-            .csrf().disable();
+            .csrf().disable()
+            .cors().configurationSource(request -> new CorsConfiguration().applyPermitDefaultValues());
     }
 
     @Bean
