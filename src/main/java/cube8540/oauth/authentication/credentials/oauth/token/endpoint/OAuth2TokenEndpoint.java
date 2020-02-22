@@ -11,6 +11,7 @@ import cube8540.oauth.authentication.credentials.oauth.error.InvalidRequestExcep
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTranslator;
 import cube8540.oauth.authentication.credentials.oauth.token.OAuth2AccessTokenDetails;
 import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2AccessTokenGrantService;
+import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenRevokeService;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.OAuth2Error;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -35,13 +37,15 @@ import java.util.Map;
 public class OAuth2TokenEndpoint {
 
     private final OAuth2AccessTokenGrantService tokenGrantService;
+    private final OAuth2TokenRevokeService tokenRevokeService;
 
     @Setter
     private OAuth2ExceptionTranslator exceptionTranslator = new OAuth2ExceptionTranslator();
 
     @Autowired
-    public OAuth2TokenEndpoint(OAuth2AccessTokenGrantService tokenGrantService) {
+    public OAuth2TokenEndpoint(OAuth2AccessTokenGrantService tokenGrantService, OAuth2TokenRevokeService tokenRevokeService) {
         this.tokenGrantService = tokenGrantService;
+        this.tokenRevokeService = tokenRevokeService;
     }
 
     @PostMapping(value = "/oauth/token")
@@ -67,6 +71,19 @@ public class OAuth2TokenEndpoint {
         OAuth2TokenRequest tokenRequest = new DefaultOAuth2TokenRequest(requestMap);
         OAuth2AccessTokenDetails token = tokenGrantService.grant((OAuth2ClientDetails) clientCredentialsToken.getPrincipal(), tokenRequest);
         return createAccessTokenResponse(token);
+    }
+
+    @DeleteMapping(value = "/oauth/token")
+    public ResponseEntity<OAuth2AccessTokenDetails> revokeAccessToken(Principal principal, @RequestParam(required =  false) String token) {
+        if (!(principal instanceof ClientCredentialsToken)) {
+            throw new InsufficientAuthenticationException("this is no client authentication");
+        }
+        if (token == null) {
+            throw InvalidRequestException.invalidRequest("Token is required");
+        }
+
+        OAuth2AccessTokenDetails accessToken = tokenRevokeService.revoke(token);
+        return createAccessTokenResponse(accessToken);
     }
 
     @ExceptionHandler(Exception.class)

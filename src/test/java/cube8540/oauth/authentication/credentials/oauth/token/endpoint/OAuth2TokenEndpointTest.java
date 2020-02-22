@@ -5,11 +5,12 @@ import cube8540.oauth.authentication.credentials.oauth.OAuth2Utils;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.client.provider.ClientCredentialsToken;
 import cube8540.oauth.authentication.credentials.oauth.error.AbstractOAuth2AuthenticationException;
-import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTranslator;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidGrantException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidRequestException;
+import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTranslator;
 import cube8540.oauth.authentication.credentials.oauth.token.OAuth2AccessTokenDetails;
 import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2AccessTokenGrantService;
+import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenRevokeService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -17,7 +18,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.http.CacheControl;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
@@ -62,12 +62,14 @@ class OAuth2TokenEndpointTest {
     private static final Set<String> SCOPES = new HashSet<>(Arrays.asList("SCOPE-1", "SCOPE-2", "SCOPE-3"));
 
     private OAuth2AccessTokenGrantService grantService;
+    private OAuth2TokenRevokeService revokeService;
     private OAuth2TokenEndpoint endpoint;
 
     @BeforeEach
     void setup() {
         this.grantService = mock(OAuth2AccessTokenGrantService.class);
-        this.endpoint = new OAuth2TokenEndpoint(grantService);
+        this.revokeService = mock(OAuth2TokenRevokeService.class);
+        this.endpoint = new OAuth2TokenEndpoint(grantService, revokeService);
     }
 
     @Nested
@@ -76,14 +78,14 @@ class OAuth2TokenEndpointTest {
 
         private ClientCredentialsToken clientCredentialsToken;
         private OAuth2ClientDetails clientDetails;
-        private OAuth2AccessTokenDetails tokenDetails;
         private Map<String, String> requestMap;
 
         @BeforeEach
         void setup() {
+            OAuth2AccessTokenDetails tokenDetails = mock(OAuth2AccessTokenDetails.class);
+
             this.clientCredentialsToken = mock(ClientCredentialsToken.class);
             this.clientDetails = mock(OAuth2ClientDetails.class);
-            this.tokenDetails = mock(OAuth2AccessTokenDetails.class);
             this.requestMap = new HashMap<>();
 
             this.requestMap.put(OAuth2Utils.TokenRequestKey.GRANT_TYPE, GRANT_TYPE);
@@ -285,14 +287,6 @@ class OAuth2TokenEndpointTest {
         }
 
         @Test
-        @DisplayName("HTTP 상태 코드는 200이어야 한다.")
-        void shouldHttpStatusCode200() {
-            ResponseEntity<OAuth2AccessTokenDetails> result = endpoint.grantNewAccessToken(clientCredentialsToken, requestMap);
-
-            assertEquals(HttpStatus.OK, result.getStatusCode());
-        }
-
-        @Test
         @DisplayName("헤더의 Cache-Control 옵션은 no-store어야 한다.")
         void shouldHeaderCacheControlIsNoStore() {
             ResponseEntity<OAuth2AccessTokenDetails> result = endpoint.grantNewAccessToken(clientCredentialsToken, requestMap);
@@ -315,13 +309,65 @@ class OAuth2TokenEndpointTest {
 
             assertEquals(MediaType.APPLICATION_JSON, result.getHeaders().getContentType());
         }
+    }
+
+    @Nested
+    @DisplayName("토큰 삭제")
+    class RevokeToken {
+        private ClientCredentialsToken credentialsToken;
+
+        @BeforeEach
+        void setup() {
+            this.credentialsToken = mock(ClientCredentialsToken.class);
+        }
+
+        @Nested
+        @DisplayName("인증 객체의 타입이 ClientCredetialsToken이 아닐시")
+        class WhenAuthenticationTypeNotClientCredentialsToken {
+            private UsernamePasswordAuthenticationToken token;
+
+            @BeforeEach
+            void setup() {
+                this.token = mock(UsernamePasswordAuthenticationToken.class);
+            }
+
+            @Test
+            @DisplayName("InsufficientAuthenticationException이 발생해야 한다.")
+            void shouldInsufficientAuthenticationException() {
+                assertThrows(InsufficientAuthenticationException.class, () -> endpoint.revokeAccessToken(token, ""));
+            }
+        }
+
+        @Nested
+        @DisplayName("요청 받은 Token이 null일시")
+        class WhenRequestingTokenIsNull {
+            private ClientCredentialsToken credentialsToken;
+
+            @BeforeEach
+            void setup() {
+                this.credentialsToken = mock(ClientCredentialsToken.class);
+            }
+
+            @Test
+            @DisplayName("InvalidRequestException이 발생해야 한다.")
+            void shouldThrowsInvalidRequestException() {
+                assertThrows(InvalidRequestException.class, () -> endpoint.revokeAccessToken(credentialsToken, null));
+            }
+
+            @Test
+            @DisplayName("에러 코드는 INVALID_REQUEST 이어야 한다.")
+            void shouldErrorCodeIsInvalidRequest() {
+                OAuth2Error error = assertThrows(InvalidRequestException.class, () -> endpoint.revokeAccessToken(credentialsToken, null))
+                        .getError();
+                assertEquals(OAuth2ErrorCodes.INVALID_REQUEST, error.getErrorCode());
+            }
+        }
 
         @Test
-        @DisplayName("생성된 엑세스 토큰을 반환해야 한다.")
-        void shouldReturnsCreatedAccessToken() {
-            ResponseEntity<OAuth2AccessTokenDetails> result = endpoint.grantNewAccessToken(clientCredentialsToken, requestMap);
-
-            assertEquals(tokenDetails, result.getBody());
+        @DisplayName("요청 받은 토큰을 삭제해야 한다.")
+        void shouldRemoveRequestingToken() {
+            endpoint.revokeAccessToken(credentialsToken, "TOKEN");
+            verify(revokeService, times(1)).revoke("TOKEN");
         }
     }
 

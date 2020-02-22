@@ -28,7 +28,10 @@ dependencies {
     implementation 'org.mariadb.jdbc:mariadb-java-client:2.5.2'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.security:spring-security-oauth2-resource-server:5.2.1.RELEASE'
+    implementation 'org.apache.commons:commons-text:1.8'
+    implementation 'com.navercorp.lucy:lucy-xss:1.6.3'
     compile 'cube8540.validator:validator-core:1.1.1'
+    implementation 'com.navercorp.lucy:lucy-xss-servlet:2.0.1'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation('org.springframework.boot:spring-boot-starter-test') {

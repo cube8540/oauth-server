@@ -13,6 +13,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 
 import java.time.LocalDateTime;
@@ -24,9 +27,12 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @DisplayName("기본 토큰 부여 서비스 테스트")
@@ -54,13 +60,14 @@ class DefaultOAuth2AccessTokenReadServiceTest {
     private static final boolean IS_EXPIRED = true;
 
     private OAuth2AccessTokenRepository accessTokenRepository;
-
+    private UserDetailsService userDetailsService;
     private DefaultOAuth2AccessTokenReadService service;
 
     @BeforeEach
     void setup() {
         this.accessTokenRepository = mock(OAuth2AccessTokenRepository.class);
-        this.service = new DefaultOAuth2AccessTokenReadService(accessTokenRepository);
+        this.userDetailsService = mock(UserDetailsService.class);
+        this.service = new DefaultOAuth2AccessTokenReadService(accessTokenRepository, userDetailsService);
     }
 
     @Nested
@@ -168,6 +175,73 @@ class DefaultOAuth2AccessTokenReadServiceTest {
 
                         assertNull(accessToken.additionalInformation());
                     }
+                }
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("엑세스 토큰의 유저 검색")
+    class ReadAccessTokenUser {
+
+        @Nested
+        @DisplayName("검색하려는 엑세스 토큰의 저장소에 저장되어 있지 않을시")
+        class WhenReadAccessTokenIsNotRegisteredInRepository {
+
+            @BeforeEach
+            void setup() {
+                when(accessTokenRepository.findById(TOKEN_ID)).thenReturn(Optional.empty());
+            }
+
+            @Test
+            @DisplayName("OAuth2AccessTokenNotFoundException이 발생해야 한다.")
+            void shouldThrowsOAuth2AccessTokenNotFoundException() {
+                assertThrows(OAuth2AccessTokenNotFoundException.class, () -> service.readAccessTokenUser(RAW_TOKEN_ID));
+            }
+        }
+
+        @Nested
+        @DisplayName("검색하려는 엑세스 토큰이 저장소에 저장되어 있을시")
+        class WhenReadAccessTokenIsRegisteredInRepository {
+            private UserDetails userDetails;
+
+            @BeforeEach
+            void setup() {
+                OAuth2AuthorizedAccessToken token = mock(OAuth2AuthorizedAccessToken.class);
+                this.userDetails = mock(UserDetails.class);
+
+                when(token.getEmail()).thenReturn(EMAIL);
+                when(accessTokenRepository.findById(TOKEN_ID)).thenReturn(Optional.of(token));
+                when(userDetailsService.loadUserByUsername(RAW_EMAIL)).thenReturn(userDetails);
+            }
+
+            @Test
+            @DisplayName("토큰의 소유자를 검색하여 반환 해야 한다.")
+            void shouldReturnAccessTokenOwner() {
+                UserDetails user = service.readAccessTokenUser(RAW_TOKEN_ID);
+                assertEquals(userDetails, user);
+            }
+
+            @Nested
+            @DisplayName("검색된 유저 객체가 CredentialsContainer 를 구현하고 있을시")
+            class WhenUserDetailsObjectImplementCredentialsContainer {
+                private User userDetails;
+
+                @BeforeEach
+                void setup() {
+                    OAuth2AuthorizedAccessToken token = mock(OAuth2AuthorizedAccessToken.class);
+                    this.userDetails = mock(User.class);
+
+                    when(token.getEmail()).thenReturn(EMAIL);
+                    when(accessTokenRepository.findById(TOKEN_ID)).thenReturn(Optional.of(token));
+                    when(userDetailsService.loadUserByUsername(RAW_EMAIL)).thenReturn(userDetails);
+                }
+
+                @Test
+                @DisplayName("검색된 유저 객체에서 민감한 정보는 삭제해야 한다.")
+                void shouldErasedCredentials() {
+                    service.readAccessTokenUser(RAW_TOKEN_ID);
+                    verify(userDetails, times(1)).eraseCredentials();
                 }
             }
         }

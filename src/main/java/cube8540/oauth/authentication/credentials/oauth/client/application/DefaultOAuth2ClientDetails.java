@@ -58,6 +58,7 @@ public class DefaultOAuth2ClientDetails implements OAuth2ClientDetails, Credenti
 
         return builder().clientId(client.getClientId().getValue())
                 .clientSecret(client.getSecret())
+                .clientName(client.getClientName())
                 .owner(Optional.ofNullable(client.getOwner()).map(UserEmail::getValue).orElse(null))
                 .scope(scope)
                 .accessTokenValiditySeconds(Double.valueOf(tokenValidity).intValue())

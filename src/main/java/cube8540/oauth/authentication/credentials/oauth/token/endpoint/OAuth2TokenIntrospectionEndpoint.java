@@ -15,8 +15,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -64,6 +66,19 @@ public class OAuth2TokenIntrospectionEndpoint {
         }
 
         return converter.convertAccessToken(accessToken);
+    }
+
+    @GetMapping(value = "/oauth/user_info")
+    public UserDetails userInfo(Principal principal, @RequestParam(required = false) String token) {
+        if (token == null) {
+            throw InvalidRequestException.invalidRequest("access token is required");
+        }
+
+        if (!(principal instanceof ClientCredentialsToken)) {
+            throw new InsufficientAuthenticationException("this is no client authentication");
+        }
+
+        return service.readAccessTokenUser(token);
     }
 
     @ExceptionHandler(OAuth2AccessTokenRegistrationException.class)

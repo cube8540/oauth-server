@@ -5,10 +5,10 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetailsService;
 import cube8540.oauth.authentication.credentials.oauth.client.provider.ClientCredentialsAuthenticationProvider;
 import cube8540.oauth.authentication.credentials.oauth.client.provider.ClientCredentialsEndpointFilter;
-import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTranslator;
 import cube8540.oauth.authentication.credentials.oauth.error.DefaultOauth2ExceptionResponseRenderer;
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2AuthenticationExceptionEntryPoint;
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionResponseRenderer;
+import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTranslator;
 import cube8540.oauth.authentication.credentials.oauth.token.application.AuthorizationCodeTokenGranter;
 import cube8540.oauth.authentication.credentials.oauth.token.application.ClientCredentialsTokenGranter;
 import cube8540.oauth.authentication.credentials.oauth.token.application.CompositeOAuth2AccessTokenGranter;
@@ -80,7 +80,7 @@ public class OAuth2EndpointSecurityConfiguration extends WebSecurityConfigurerAd
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.requestMatchers()
-                .antMatchers("/oauth/token", "/oauth/token_info")
+                .antMatchers("/oauth/token", "/oauth/token_info", "/oauth/user_info")
                 .and()
             .authorizeRequests()
                 .anyRequest().authenticated()
@@ -94,7 +94,7 @@ public class OAuth2EndpointSecurityConfiguration extends WebSecurityConfigurerAd
 
     @Bean
     public ClientCredentialsEndpointFilter tokenEndpointClientCredentialsFilter() throws Exception {
-        ClientCredentialsEndpointFilter filter = new ClientCredentialsEndpointFilter("/oauth/token**");
+        ClientCredentialsEndpointFilter filter = new ClientCredentialsEndpointFilter("/oauth/**");
         filter.setEntryPoint(oAuth2AuthenticationExceptionEntryPoint);
         filter.setAuthenticationManager(authenticationManagerBean());
         return filter;
