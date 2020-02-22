@@ -1,5 +1,8 @@
 package cube8540.oauth.authentication.credentials.authority.error;
 
+import lombok.Getter;
+
+@Getter
 public class AuthorityNotFoundException extends RuntimeException {
 
     private String code;
@@ -8,13 +11,5 @@ public class AuthorityNotFoundException extends RuntimeException {
     public AuthorityNotFoundException(String description) {
         this.code = AuthorityErrorCodes.NOT_FOUND;
         this.description = description;
-    }
-
-    public String getCode() {
-        return code;
-    }
-
-    public String getDescription() {
-        return description;
     }
 }
