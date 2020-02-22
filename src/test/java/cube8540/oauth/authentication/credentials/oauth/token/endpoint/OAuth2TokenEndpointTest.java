@@ -24,6 +24,7 @@ import org.springframework.security.authentication.InsufficientAuthenticationExc
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.OAuth2Error;
+import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 
 import java.net.URI;
 import java.util.Arrays;
@@ -118,6 +119,14 @@ class OAuth2TokenEndpointTest {
             void shouldThrowsInvalidRequestException() {
                 assertThrows(InvalidRequestException.class, () -> endpoint.grantNewAccessToken(clientCredentials, badRequestMap));
             }
+
+            @Test
+            @DisplayName("에러 코드는 INVALID_REQUIEST 이어야 한다.")
+            void shouldErrorCodeIsInvalidRequest() {
+                OAuth2Error error = assertThrows(InvalidRequestException.class, () -> endpoint.grantNewAccessToken(clientCredentials, badRequestMap))
+                        .getError();
+                assertEquals(OAuth2ErrorCodes.INVALID_REQUEST, error.getErrorCode());
+            }
         }
 
         @Nested
@@ -140,6 +149,14 @@ class OAuth2TokenEndpointTest {
             @DisplayName("InvalidGrantException이 발생해야 한다.")
             void shouldThrowsInvalidGrantException() {
                 assertThrows(InvalidGrantException.class, () -> endpoint.grantNewAccessToken(clientCredentials, badRequestMap));
+            }
+
+            @Test
+            @DisplayName("에러 코드는 UNSUPPORTED_GRANT_TYPE 이어야 한다.")
+            void shouldErrorCodeIsUnsupportedGrantType() {
+                OAuth2Error error = assertThrows(InvalidGrantException.class, () -> endpoint.grantNewAccessToken(clientCredentials, badRequestMap))
+                        .getError();
+                assertEquals(OAuth2ErrorCodes.UNSUPPORTED_GRANT_TYPE, error.getErrorCode());
             }
         }
 

@@ -33,15 +33,15 @@ public class AuthorizationCodeTokenGranter extends AbstractOAuth2TokenGranter {
     @Override
     public OAuth2AuthorizedAccessToken createAccessToken(OAuth2ClientDetails clientDetails, OAuth2TokenRequest tokenRequest) {
         OAuth2AuthorizationCode authorizationCode = authorizationCodeConsumer.consume(new AuthorizationCode(tokenRequest.code()))
-                .orElseThrow(() -> new InvalidRequestException("authorization code not found"));
+                .orElseThrow(() -> InvalidRequestException.invalidRequest("authorization code not found"));
 
         Set<String> authorizationCodeScope = Optional.ofNullable(authorizationCode.getApprovedScopes())
                 .orElse(Collections.emptySet()).stream().map(OAuth2ScopeId::getValue).collect(Collectors.toSet());
         if (authorizationCodeScope.isEmpty()) {
-            throw new InvalidGrantException("scope cannot not be empty");
+            throw InvalidGrantException.invalidScope("cannot not grant empty scope");
         }
         if (!getTokenRequestValidator().validateScopes(clientDetails, authorizationCodeScope)) {
-            throw new InvalidGrantException("cannot grant scopes");
+            throw InvalidGrantException.invalidScope("cannot grant scope");
         }
         authorizationCode.validateWithAuthorizationRequest(new AuthorizationCodeRequest(tokenRequest));
         OAuth2AuthorizedAccessToken accessToken = OAuth2AuthorizedAccessToken.builder(getTokenIdGenerator())

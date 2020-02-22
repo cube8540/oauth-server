@@ -13,7 +13,7 @@ public class DefaultRedirectResolver implements RedirectResolver {
             return clientDetails.registeredRedirectURI().iterator().next();
         }
         if (redirectURI == null) {
-            throw new InvalidRequestException("redirect uri is required");
+            throw InvalidRequestException.invalidRequest("redirect uri is required");
         }
         URI requestingURI = URI.create(redirectURI);
         if (clientDetails.registeredRedirectURI().contains(requestingURI)) {

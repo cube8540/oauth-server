@@ -11,7 +11,6 @@ import cube8540.oauth.authentication.credentials.oauth.error.InvalidGrantExcepti
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidRequestException;
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTranslator;
 import cube8540.oauth.authentication.credentials.oauth.error.RedirectMismatchException;
-import cube8540.oauth.authentication.credentials.oauth.error.UnsupportedResponseTypeException;
 import cube8540.oauth.authentication.credentials.oauth.scope.OAuth2ScopeDetails;
 import cube8540.oauth.authentication.credentials.oauth.scope.OAuth2ScopeDetailsService;
 import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2AuthorizationCodeGenerator;
@@ -184,9 +183,18 @@ class AuthorizationEndpointTest {
                 }
 
                 @Test
-                @DisplayName("UnsupportedResponseTypeException이 발생해야 한다.")
+                @DisplayName("InvalidRequestException이 발생해야 한다.")
                 void shouldThrowsUnsupportedResponseTypeException() {
-                    assertThrows(UnsupportedResponseTypeException.class, () -> endpoint.authorize(parameter, model, principal));
+                    assertThrows(InvalidRequestException.class, () -> endpoint.authorize(parameter, model, principal));
+                }
+
+                @Test
+                @DisplayName("에러 코드는 INVALID_REQUEST 이어야 한다.")
+                void shouldErrorCodeIsUnsupportedResponseType() {
+                    OAuth2Error error = assertThrows(InvalidRequestException.class, () -> endpoint.authorize(parameter, model, principal))
+                            .getError();
+
+                    assertEquals(OAuth2ErrorCodes.INVALID_REQUEST, error.getErrorCode());
                 }
 
             }
@@ -205,9 +213,18 @@ class AuthorizationEndpointTest {
                 }
 
                 @Test
-                @DisplayName("UnsupportedResponseTypeException이 발생해야 한다.")
-                void shouldThrowsSupportedResponseTypeException() {
-                    assertThrows(UnsupportedResponseTypeException.class, () -> endpoint.authorize(parameter, model, principal));
+                @DisplayName("InvalidRequestException이 발생해야 한다.")
+                void shouldThrowsUnsupportedResponseTypeException() {
+                    assertThrows(InvalidRequestException.class, () -> endpoint.authorize(parameter, model, principal));
+                }
+
+                @Test
+                @DisplayName("에러 코드는 UNSUPPORTED_RESPONSE_TYPE 이어야 한다.")
+                void shouldErrorCodeIsUnsupportedResponseType() {
+                    OAuth2Error error = assertThrows(InvalidRequestException.class, () -> endpoint.authorize(parameter, model, principal))
+                            .getError();
+
+                    assertEquals(OAuth2ErrorCodes.UNSUPPORTED_RESPONSE_TYPE, error.getErrorCode());
                 }
             }
 
@@ -270,6 +287,14 @@ class AuthorizationEndpointTest {
                     @DisplayName("InvalidGrantException이 발생해야 한다.")
                     void shouldThrowsInvalidGrantException() {
                         assertThrows(InvalidGrantException.class, () -> endpoint.authorize(parameter, model, principal));
+                    }
+
+                    @Test
+                    @DisplayName("에러 코드는 INVALID_SCOPE 이어야 한다.")
+                    void shouldErrorCodeIsInvalidScope() {
+                        OAuth2Error error = assertThrows(InvalidGrantException.class, () -> endpoint.authorize(parameter, model, principal))
+                                .getError();
+                        assertEquals(OAuth2ErrorCodes.INVALID_SCOPE, error.getErrorCode());
                     }
 
                     @AfterEach
@@ -468,6 +493,14 @@ class AuthorizationEndpointTest {
             @DisplayName("InvalidRequestException이 발생해야 한다.")
             void shouldThrowsInvalidRequestException() {
                 assertThrows(InvalidRequestException.class, () -> endpoint.approval(approvalParameter, model, sessionStatus, principal));
+            }
+
+            @Test
+            @DisplayName("에러 코드는 INVALID_REQUIEST 이어야 한다.")
+            void shouldErrorCodeIsInvalidRequest() {
+                OAuth2Error error = assertThrows(InvalidRequestException.class, () -> endpoint.approval(approvalParameter, model, sessionStatus, principal))
+                        .getError();
+                assertEquals(OAuth2ErrorCodes.INVALID_REQUEST, error.getErrorCode());
             }
         }
 

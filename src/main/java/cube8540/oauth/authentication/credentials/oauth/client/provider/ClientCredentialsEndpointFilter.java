@@ -1,6 +1,6 @@
 package cube8540.oauth.authentication.credentials.oauth.client.provider;
 
-import cube8540.oauth.authentication.credentials.oauth.error.BadClientCredentialsException;
+import cube8540.oauth.authentication.credentials.oauth.error.InvalidClientException;
 import lombok.Setter;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
@@ -46,7 +46,7 @@ public class ClientCredentialsEndpointFilter extends AbstractAuthenticationProce
         setAuthenticationSuccessHandler((request, response, authentication) -> {});
         setAuthenticationFailureHandler((request, response, exception) -> {
             if (exception instanceof BadCredentialsException) {
-                exception = new BadClientCredentialsException(exception.getMessage());
+                exception = InvalidClientException.unauthorizedClient(exception.getMessage());
             }
             entryPoint.commence(request, response, exception);
         });

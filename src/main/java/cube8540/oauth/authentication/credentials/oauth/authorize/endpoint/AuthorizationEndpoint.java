@@ -9,11 +9,10 @@ import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetail
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetailsService;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientRegistrationException;
 import cube8540.oauth.authentication.credentials.oauth.error.AbstractOAuth2AuthenticationException;
-import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTranslator;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidGrantException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidRequestException;
+import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTranslator;
 import cube8540.oauth.authentication.credentials.oauth.error.RedirectMismatchException;
-import cube8540.oauth.authentication.credentials.oauth.error.UnsupportedResponseTypeException;
 import cube8540.oauth.authentication.credentials.oauth.scope.OAuth2ScopeDetails;
 import cube8540.oauth.authentication.credentials.oauth.scope.OAuth2ScopeDetailsService;
 import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2AuthorizationCodeGenerator;
@@ -106,15 +105,18 @@ public class AuthorizationEndpoint {
         }
 
         AuthorizationRequest authorizationRequest = new DefaultAuthorizationRequest(parameters, principal);
-        if (!OAuth2AuthorizationResponseType.CODE.equals(authorizationRequest.responseType())) {
-            throw new UnsupportedResponseTypeException("unsupported response type");
+        if (authorizationRequest.responseType() == null) {
+            throw InvalidRequestException.invalidRequest("response_type is required");
+        }
+        if (!authorizationRequest.responseType().equals(OAuth2AuthorizationResponseType.CODE)) {
+            throw InvalidRequestException.unsupportedResponseType("unsupported response type");
         }
 
         OAuth2ClientDetails clientDetails = clientDetailsService.loadClientDetailsByClientId(parameters.get(OAuth2Utils.AuthorizationRequestKey.CLIENT_ID));
         URI redirectURI = redirectResolver.resolveRedirectURI(parameters.get(OAuth2Utils.AuthorizationRequestKey.REDIRECT_URI), clientDetails);
         authorizationRequest.setRedirectURI(redirectURI);
         if (!requestValidator.validateScopes(clientDetails, authorizationRequest.requestScopes())) {
-            throw new InvalidGrantException("cannot grant scope");
+            throw InvalidGrantException.invalidScope("cannot grant scope");
         }
         authorizationRequest.setRequestScopes(extractRequestScope(clientDetails, authorizationRequest));
 
@@ -134,7 +136,7 @@ public class AuthorizationEndpoint {
 
             AuthorizationRequest originalAuthorizationRequest = (AuthorizationRequest) model.get(AUTHORIZATION_REQUEST_ATTRIBUTE);
             if (originalAuthorizationRequest == null) {
-                throw new InvalidRequestException("Cannot approval uninitialized authorization request");
+                throw InvalidRequestException.invalidRequest("Cannot approval uninitialized authorization request");
             }
 
             AuthorizationRequest authorizationRequest = new DefaultAuthorizationRequest(originalAuthorizationRequest);

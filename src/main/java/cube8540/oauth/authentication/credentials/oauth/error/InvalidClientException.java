@@ -7,8 +7,16 @@ public class InvalidClientException extends AbstractOAuth2AuthenticationExceptio
 
     private static final int HTTP_STATUS_CODE = 401;
 
-    public InvalidClientException(String message) {
-        super(HTTP_STATUS_CODE, new OAuth2Error(OAuth2ErrorCodes.INVALID_CLIENT, message, null));
+    private InvalidClientException(String errorCode, String message) {
+        super(HTTP_STATUS_CODE, new OAuth2Error(errorCode, message, null));
+    }
+
+    public static InvalidClientException invalidClient(String message) {
+        return new InvalidClientException(OAuth2ErrorCodes.INVALID_CLIENT, message);
+    }
+
+    public static InvalidClientException unauthorizedClient(String message) {
+        return new InvalidClientException(OAuth2ErrorCodes.UNAUTHORIZED_CLIENT, message);
     }
 
 }

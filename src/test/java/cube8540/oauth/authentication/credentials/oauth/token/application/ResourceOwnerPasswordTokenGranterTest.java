@@ -6,6 +6,7 @@ import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetail
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidGrantException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidRequestException;
+import cube8540.oauth.authentication.credentials.oauth.error.UserDeniedAuthorizationException;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenRepository;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedAccessToken;
@@ -24,6 +25,8 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
+import org.springframework.security.oauth2.core.OAuth2Error;
+import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
@@ -129,6 +132,14 @@ class ResourceOwnerPasswordTokenGranterTest {
             void shouldInvalidRequestException() {
                 assertThrows(InvalidRequestException.class, () -> tokenGranter.createAccessToken(clientDetails, tokenRequest));
             }
+
+            @Test
+            @DisplayName("에러 코드는 INVALID_REQUIEST 이어야 한다.")
+            void shouldErrorCodeIsInvalidRequest() {
+                OAuth2Error error = assertThrows(InvalidRequestException.class, () -> tokenGranter.createAccessToken(clientDetails, tokenRequest))
+                        .getError();
+                assertEquals(OAuth2ErrorCodes.INVALID_REQUEST, error.getErrorCode());
+            }
         }
 
         @Nested
@@ -145,6 +156,14 @@ class ResourceOwnerPasswordTokenGranterTest {
             void shouldInvalidRequestException() {
                 assertThrows(InvalidRequestException.class, () -> tokenGranter.createAccessToken(clientDetails, tokenRequest));
             }
+
+            @Test
+            @DisplayName("에러 코드는 INVALID_REQUIEST 이어야 한다.")
+            void shouldErrorCodeIsInvalidRequest() {
+                OAuth2Error error = assertThrows(InvalidRequestException.class, () -> tokenGranter.createAccessToken(clientDetails, tokenRequest))
+                        .getError();
+                assertEquals(OAuth2ErrorCodes.INVALID_REQUEST, error.getErrorCode());
+            }
         }
 
         @Nested
@@ -160,6 +179,14 @@ class ResourceOwnerPasswordTokenGranterTest {
             @DisplayName("InvalidGrantExcetpion이 발생해야 한다.")
             void shouldThrowsInvalidGrantException() {
                 assertThrows(InvalidGrantException.class, () -> tokenGranter.createAccessToken(clientDetails, tokenRequest));
+            }
+
+            @Test
+            @DisplayName("에러 코드는 INVALID_SCOPE 이어야 한다.")
+            void shouldErrorCodeIsInvalidScope() {
+                OAuth2Error error = assertThrows(InvalidGrantException.class, () -> tokenGranter.createAccessToken(clientDetails, tokenRequest))
+                        .getError();
+                assertEquals(OAuth2ErrorCodes.INVALID_SCOPE, error.getErrorCode());
             }
         }
 
@@ -204,9 +231,9 @@ class ResourceOwnerPasswordTokenGranterTest {
                 }
 
                 @Test
-                @DisplayName("InvalidGrantException이 발생해야 한다.")
-                void shouldInvalidGrantException() {
-                    assertThrows(InvalidGrantException.class, () -> tokenGranter.createAccessToken(clientDetails, tokenRequest));
+                @DisplayName("UserDeniedAuthorizationException이 발생해야 한다.")
+                void shouldUserDeniedAuthorizationException() {
+                    assertThrows(UserDeniedAuthorizationException.class, () -> tokenGranter.createAccessToken(clientDetails, tokenRequest));
                 }
             }
 
@@ -220,9 +247,9 @@ class ResourceOwnerPasswordTokenGranterTest {
                 }
 
                 @Test
-                @DisplayName("InvalidGrantException이 발생해야 한다.")
-                void shouldInvalidGrantException() {
-                    assertThrows(InvalidGrantException.class, () -> tokenGranter.createAccessToken(clientDetails, tokenRequest));
+                @DisplayName("UserDeniedAuthorizationException이 발생해야 한다.")
+                void shouldUserDeniedAuthorizationException() {
+                    assertThrows(UserDeniedAuthorizationException.class, () -> tokenGranter.createAccessToken(clientDetails, tokenRequest));
                 }
             }
 

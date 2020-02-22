@@ -24,7 +24,7 @@ public class CompositeOAuth2AccessTokenGranter implements OAuth2AccessTokenGrant
     @Override
     public OAuth2AccessTokenDetails grant(OAuth2ClientDetails clientDetails, OAuth2TokenRequest tokenRequest) {
         if (tokenGranterMap.get(tokenRequest.grantType()) == null) {
-            throw new InvalidGrantException("not supported grant type");
+            throw InvalidGrantException.unsupportedGrantType("unsupported grant type");
         }
 
         return tokenGranterMap.get(tokenRequest.grantType()).grant(clientDetails, tokenRequest);

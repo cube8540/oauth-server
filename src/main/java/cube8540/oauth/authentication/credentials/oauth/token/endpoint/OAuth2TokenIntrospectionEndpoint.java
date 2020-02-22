@@ -4,9 +4,9 @@ import cube8540.oauth.authentication.credentials.oauth.OAuth2Utils;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.client.provider.ClientCredentialsToken;
 import cube8540.oauth.authentication.credentials.oauth.error.AbstractOAuth2AuthenticationException;
-import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTranslator;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidClientException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidRequestException;
+import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTranslator;
 import cube8540.oauth.authentication.credentials.oauth.token.OAuth2AccessTokenDetails;
 import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2AccessTokenReadService;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenRegistrationException;
@@ -45,7 +45,7 @@ public class OAuth2TokenIntrospectionEndpoint {
     @PostMapping(value = "/oauth/token_info")
     public Map<String, Object> introspection(Principal principal, @RequestParam(required = false) String token) {
         if (token == null) {
-            throw new InvalidRequestException("token is required");
+            throw InvalidRequestException.invalidRequest("access token is required");
         }
 
         if (!(principal instanceof ClientCredentialsToken)) {
@@ -60,7 +60,7 @@ public class OAuth2TokenIntrospectionEndpoint {
         OAuth2AccessTokenDetails accessToken = service.readAccessToken(token);
         OAuth2ClientDetails clientDetails = (OAuth2ClientDetails) clientCredentials.getPrincipal();
         if (!accessToken.clientId().getValue().equals(clientDetails.clientId())) {
-            throw new InvalidClientException("client and access token client is different");
+            throw InvalidClientException.invalidClient("client and access token client is different");
         }
 
         return converter.convertAccessToken(accessToken);

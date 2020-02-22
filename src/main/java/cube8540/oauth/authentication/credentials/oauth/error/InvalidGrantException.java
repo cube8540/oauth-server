@@ -7,8 +7,19 @@ public class InvalidGrantException extends AbstractOAuth2AuthenticationException
 
     private static final int HTTP_STATUS_CODE = 400;
 
-    public InvalidGrantException(String message) {
-        super(HTTP_STATUS_CODE, new OAuth2Error(OAuth2ErrorCodes.INVALID_GRANT, message, null));
+    protected InvalidGrantException(String errorCode, String message) {
+        super(HTTP_STATUS_CODE, new OAuth2Error(errorCode, message, null));
     }
 
+    public static InvalidGrantException invalidGrant(String message) {
+        return new InvalidGrantException(OAuth2ErrorCodes.INVALID_GRANT, message);
+    }
+
+    public static InvalidGrantException invalidScope(String message) {
+        return new InvalidGrantException(OAuth2ErrorCodes.INVALID_SCOPE, message);
+    }
+
+    public static InvalidGrantException unsupportedGrantType(String message) {
+        return new InvalidGrantException(OAuth2ErrorCodes.UNSUPPORTED_GRANT_TYPE, message);
+    }
 }

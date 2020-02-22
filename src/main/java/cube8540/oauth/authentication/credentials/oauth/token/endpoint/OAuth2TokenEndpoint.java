@@ -6,9 +6,9 @@ import cube8540.oauth.authentication.credentials.oauth.OAuth2Utils;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.client.provider.ClientCredentialsToken;
 import cube8540.oauth.authentication.credentials.oauth.error.AbstractOAuth2AuthenticationException;
-import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTranslator;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidGrantException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidRequestException;
+import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTranslator;
 import cube8540.oauth.authentication.credentials.oauth.token.OAuth2AccessTokenDetails;
 import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2AccessTokenGrantService;
 import lombok.Setter;
@@ -56,12 +56,12 @@ public class OAuth2TokenEndpoint {
         }
 
         if (requestMap.get(OAuth2Utils.TokenRequestKey.GRANT_TYPE) == null) {
-            throw new InvalidRequestException("grant type required");
+            throw InvalidRequestException.invalidRequest("grant type is required");
         }
 
         if (requestMap.get(OAuth2Utils.TokenRequestKey.GRANT_TYPE)
                 .equalsIgnoreCase(AuthorizationGrantType.IMPLICIT.getValue())) {
-            throw new InvalidGrantException("implicit grant type not supported");
+            throw InvalidGrantException.unsupportedGrantType("implicit grant type not supported");
         }
 
         OAuth2TokenRequest tokenRequest = new DefaultOAuth2TokenRequest(requestMap);

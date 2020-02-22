@@ -9,6 +9,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
+import org.springframework.security.oauth2.core.OAuth2Error;
+import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -48,6 +50,14 @@ class CompositeOAuth2AccessTokenGranterTest {
             @DisplayName("InvalidGrantException이 발생해야 한다.")
             void shouldThrowsInvalidGrantException() {
                 assertThrows(InvalidGrantException.class, () -> accessTokenGranter.grant(clientDetails, tokenRequest));
+            }
+
+            @Test
+            @DisplayName("에러 코드는 UNSUPPORTED_GRANT_TYPE 이어야 한다.")
+            void shouldErrorCodeIsUnsupportedGrantType() {
+                OAuth2Error error = assertThrows(InvalidGrantException.class, () -> accessTokenGranter.grant(clientDetails, tokenRequest))
+                        .getError();
+                assertEquals(OAuth2ErrorCodes.UNSUPPORTED_GRANT_TYPE, error.getErrorCode());
             }
         }
 
