@@ -77,7 +77,7 @@ public class AuthorizationCodeTokenGranter extends AbstractOAuth2TokenGranter {
 
         @Override
         public String state() {
-            return null;
+            return tokenRequest.state();
         }
 
         @Override

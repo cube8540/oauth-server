@@ -66,6 +66,8 @@ class AuthorizationCodeGranterTest {
 
     private static final LocalDateTime TOKEN_CREATED_DATETIME = LocalDateTime.of(2020, 1, 29, 22, 57);
 
+    private static final String STATE = "REQUESTED_STATE";
+
     private static final Integer ACCESS_TOKEN_VALIDITY_SECONDS = 600;
     private static final Integer REFRESH_TOKEN_VALIDITY_SECONDS = 6000;
 
@@ -112,6 +114,7 @@ class AuthorizationCodeGranterTest {
             when(tokenRequest.clientId()).thenReturn(RAW_CLIENT_ID);
             when(tokenRequest.code()).thenReturn(RAW_CODE);
             when(tokenRequest.redirectURI()).thenReturn(REDIRECT_URI);
+            when(tokenRequest.state()).thenReturn(STATE);
 
             when(authorizationCode.getCode()).thenReturn(CODE);
             when(authorizationCode.getClientId()).thenReturn(CLIENT_ID);
@@ -202,6 +205,7 @@ class AuthorizationCodeGranterTest {
                     verify(authorizationCode, times(1)).validateWithAuthorizationRequest(requestCaptor.capture());
                     assertEquals(REDIRECT_URI, requestCaptor.getValue().redirectURI());
                     assertEquals(RAW_AUTH_CLIENT_ID, requestCaptor.getValue().clientId());
+                    assertEquals(STATE, requestCaptor.getValue().state());
                 }
 
                 @Test

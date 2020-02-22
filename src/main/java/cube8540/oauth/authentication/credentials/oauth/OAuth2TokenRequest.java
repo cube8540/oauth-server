@@ -19,6 +19,8 @@ public interface OAuth2TokenRequest {
 
     String code();
 
+    String state();
+
     URI redirectURI();
 
     Set<String> scopes();
