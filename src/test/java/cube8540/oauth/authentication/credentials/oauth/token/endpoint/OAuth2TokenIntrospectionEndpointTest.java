@@ -273,4 +273,51 @@ class OAuth2TokenIntrospectionEndpointTest {
             }
         }
     }
+
+    @Nested
+    @DisplayName("토큰 유저 정보")
+    class ReadUserInfo {
+
+        @Nested
+        @DisplayName("인증 객체의 타입이 ClientCredetialsToken이 아닐시")
+        class WhenAuthenticationTypeNotClientCredentialsToken {
+            private UsernamePasswordAuthenticationToken token;
+
+            @BeforeEach
+            void setup() {
+                this.token = mock(UsernamePasswordAuthenticationToken.class);
+            }
+
+            @Test
+            @DisplayName("InsufficientAuthenticationException이 발생해야 한다.")
+            void shouldInsufficientAuthenticationException() {
+                assertThrows(InsufficientAuthenticationException.class, () -> endpoint.userInfo(token, TOKEN_VALUE));
+            }
+        }
+
+        @Nested
+        @DisplayName("요청 받은 Token이 null일시")
+        class WhenRequestingTokenIsNull {
+            private ClientCredentialsToken credentialsToken;
+
+            @BeforeEach
+            void setup() {
+                this.credentialsToken = mock(ClientCredentialsToken.class);
+            }
+
+            @Test
+            @DisplayName("InvalidRequestException이 발생해야 한다.")
+            void shouldThrowsInvalidRequestException() {
+                assertThrows(InvalidRequestException.class, () -> endpoint.userInfo(credentialsToken, null));
+            }
+
+            @Test
+            @DisplayName("에러 코드는 INVALID_REQUEST 이어야 한다.")
+            void shouldErrorCodeIsInvalidRequest() {
+                OAuth2Error error = assertThrows(InvalidRequestException.class, () -> endpoint.userInfo(credentialsToken, null))
+                        .getError();
+                assertEquals(OAuth2ErrorCodes.INVALID_REQUEST, error.getErrorCode());
+            }
+        }
+    }
 }
