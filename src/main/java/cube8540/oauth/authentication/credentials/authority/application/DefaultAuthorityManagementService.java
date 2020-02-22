@@ -41,7 +41,7 @@ public class DefaultAuthorityManagementService implements AuthorityManagementSer
     @Override
     public AuthorityDetails registerAuthority(AuthorityRegisterRequest registerRequest) {
         if (countAuthority(registerRequest.getCode()) > 0){
-            throw AuthorityRegisterException.alreadyExistsId(registerRequest.getCode() + " is already exists");
+            throw AuthorityRegisterException.existsIdentifier(registerRequest.getCode() + " is already exists");
         }
 
         Authority authority = new Authority(registerRequest.getCode(), registerRequest.getDescription());

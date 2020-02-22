@@ -1,5 +1,8 @@
 package cube8540.oauth.authentication.credentials.oauth.client.domain;
 
+import cube8540.oauth.authentication.credentials.oauth.client.error.ClientAuthorizationException;
+import cube8540.oauth.authentication.credentials.oauth.client.error.ClientErrorCodes;
+import cube8540.oauth.authentication.credentials.oauth.client.error.ClientInvalidException;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import cube8540.validator.core.ValidationError;
 import cube8540.validator.core.ValidationRule;
@@ -629,9 +632,16 @@ class OAuth2ClientTest {
             }
 
             @Test
-            @DisplayName("ClientNotMatchedException이 발생해야 한다.")
-            void shouldThrowsClientNotMatchedException() {
-                assertThrows(ClientNotMatchedException.class, () -> client.changeSecret(RAW_SECRET, RAW_CHANGE_SECRET, passwordEncoder));
+            @DisplayName("ClientAuthorizationException이 발생해야 한다.")
+            void shouldThrowsClientAuthorizationException() {
+                assertThrows(ClientAuthorizationException.class, () -> client.changeSecret(RAW_SECRET, RAW_CHANGE_SECRET, passwordEncoder));
+            }
+
+            @Test
+            @DisplayName("에러 코드는 INVALID_PASSWORD 이어야 한다.")
+            void shouldErrorCodeIsInvalidPassword() {
+                ClientAuthorizationException e = assertThrows(ClientAuthorizationException.class, () -> client.changeSecret(RAW_SECRET, RAW_CHANGE_SECRET, passwordEncoder));
+                assertEquals(ClientErrorCodes.INVALID_PASSWORD, e.getCode());
             }
         }
 

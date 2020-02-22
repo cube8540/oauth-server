@@ -2,13 +2,13 @@ package cube8540.oauth.authentication.credentials.oauth.client.application;
 
 import cube8540.oauth.authentication.credentials.oauth.OAuth2Utils;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
-import cube8540.oauth.authentication.credentials.oauth.client.domain.ClientOwnerNotMatchedException;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2Client;
-import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientAlreadyExistsException;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
-import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientNotFoundException;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientRepository;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientValidatePolicy;
+import cube8540.oauth.authentication.credentials.oauth.client.error.ClientAuthorizationException;
+import cube8540.oauth.authentication.credentials.oauth.client.error.ClientNotFoundException;
+import cube8540.oauth.authentication.credentials.oauth.client.error.ClientRegisterException;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import cube8540.oauth.authentication.users.domain.UserEmail;
 import lombok.Setter;
@@ -48,7 +48,7 @@ public class DefaultOAuth2ClientManagementService extends DefaultOAuth2ClientDet
     @Transactional
     public OAuth2ClientDetails registerNewClient(OAuth2ClientRegisterRequest registerRequest) {
         if (getRepository().countByClientId(new OAuth2ClientId(registerRequest.getClientId())) > 0) {
-            throw new OAuth2ClientAlreadyExistsException(registerRequest.getClientId() + " is exists");
+            throw ClientRegisterException.existsIdentifier(registerRequest.getClientId() + " is exists");
         }
         OAuth2Client client = new OAuth2Client(registerRequest.getClientId(), registerRequest.getSecret());
 
@@ -70,10 +70,10 @@ public class DefaultOAuth2ClientManagementService extends DefaultOAuth2ClientDet
     @Transactional
     public OAuth2ClientDetails modifyClient(String clientId, OAuth2ClientModifyRequest modifyRequest) {
         OAuth2Client client = getRepository().findByClientId(new OAuth2ClientId(clientId))
-                .orElseThrow(() -> new OAuth2ClientNotFoundException(clientId + " is not found"));
+                .orElseThrow(() -> new ClientNotFoundException(clientId + " is not found"));
         UserEmail authenticated = new UserEmail(SecurityContextHolder.getContext().getAuthentication().getName());
         if (!client.getOwner().equals(authenticated)) {
-            throw new ClientOwnerNotMatchedException("owner and authenticated user not matched");
+            throw ClientAuthorizationException.invalidOwner("owner and authenticated user not matched");
         }
         client.setClientName(modifyRequest.getClientName());
         Optional.ofNullable(modifyRequest.getRemoveRedirectUris())
@@ -97,11 +97,11 @@ public class DefaultOAuth2ClientManagementService extends DefaultOAuth2ClientDet
     @Transactional
     public OAuth2ClientDetails changeSecret(String clientId, OAuth2ChangeSecretRequest changeRequest) {
         OAuth2Client client = getRepository().findByClientId(new OAuth2ClientId(clientId))
-                .orElseThrow(() -> new OAuth2ClientNotFoundException(clientId + " is not found"));
+                .orElseThrow(() -> new ClientNotFoundException(clientId + " is not found"));
 
         UserEmail authenticated = new UserEmail(SecurityContextHolder.getContext().getAuthentication().getName());
         if (!client.getOwner().equals(authenticated)) {
-            throw new ClientOwnerNotMatchedException("owner and authenticated user not matched");
+            throw ClientAuthorizationException.invalidOwner("owner and authenticated user not matched");
         }
 
         client.changeSecret(changeRequest.getExistsSecret(), changeRequest.getNewSecret(), passwordEncoder);
@@ -115,11 +115,11 @@ public class DefaultOAuth2ClientManagementService extends DefaultOAuth2ClientDet
     @Transactional
     public OAuth2ClientDetails removeClient(String clientId) {
         OAuth2Client client = getRepository().findByClientId(new OAuth2ClientId(clientId))
-                .orElseThrow(() -> new OAuth2ClientNotFoundException(clientId + " is not found"));
+                .orElseThrow(() -> new ClientNotFoundException(clientId + " is not found"));
 
         UserEmail authenticated = new UserEmail(SecurityContextHolder.getContext().getAuthentication().getName());
         if (!client.getOwner().equals(authenticated)) {
-            throw new ClientOwnerNotMatchedException("owner and authenticated user not matched");
+            throw ClientAuthorizationException.invalidOwner("owner and authenticated user not matched");
         }
 
         getRepository().delete(client);

@@ -116,7 +116,7 @@ class DefaultAuthorityManagementServiceTest {
             @DisplayName("에러 코드는 ALREADY_EXISTS_ID 이어야 한다.")
             void shouldErrorCodeIsAlreadyExistsId() {
                 AuthorityRegisterException error = assertThrows(AuthorityRegisterException.class, () -> service.registerAuthority(request));
-                assertEquals(AuthorityErrorCodes.ALREADY_EXISTS_ID, error.getCode());
+                assertEquals(AuthorityErrorCodes.EXISTS_IDENTIFIER, error.getCode());
             }
         }
 

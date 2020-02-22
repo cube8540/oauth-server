@@ -5,7 +5,7 @@ import cube8540.oauth.authentication.credentials.oauth.OAuth2RequestValidator;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2Utils;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetailsService;
-import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientRegistrationException;
+import cube8540.oauth.authentication.credentials.oauth.client.error.ClientNotFoundException;
 import cube8540.oauth.authentication.credentials.oauth.error.AbstractOAuth2AuthenticationException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidGrantException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidRequestException;
@@ -756,7 +756,7 @@ class AuthorizationEndpointTest {
                     @BeforeEach
                     void setup() {
                         when(clientDetailsService.loadClientDetailsByClientId(storedClientId))
-                                .thenThrow(new OAuth2ClientRegistrationException("TEST"));
+                                .thenThrow(new ClientNotFoundException("TEST"));
                     }
 
                     @Test
@@ -934,7 +934,7 @@ class AuthorizationEndpointTest {
                     @BeforeEach
                     void setup() {
                         when(clientDetailsService.loadClientDetailsByClientId(storedClientId))
-                                .thenThrow(new OAuth2ClientRegistrationException("TEST"));
+                                .thenThrow(new ClientNotFoundException("TEST"));
                     }
 
                     @Test
@@ -1086,7 +1086,7 @@ class AuthorizationEndpointTest {
         @Nested
         @DisplayName("OAuth 클라이언트 인증 예외 발생시")
         class WhenThrowsClientAuthenticationException {
-            private OAuth2ClientRegistrationException clientRegistrationException;
+            private ClientNotFoundException clientRegistrationException;
             private ServletWebRequest servletWebRequest;
             private HttpServletResponse servletResponse;
 
@@ -1100,7 +1100,7 @@ class AuthorizationEndpointTest {
                 OAuth2ExceptionTranslator exceptionTranslator = mock(OAuth2ExceptionTranslator.class);
                 ResponseEntity<OAuth2Error> oAuth2ErrorResponseEntity = new ResponseEntity<>(oAuth2Error, HttpStatus.UNAUTHORIZED);
 
-                this.clientRegistrationException = new OAuth2ClientRegistrationException("TEST");
+                this.clientRegistrationException = new ClientNotFoundException("TEST");
                 this.servletResponse = mock(HttpServletResponse.class);
                 this.servletWebRequest = new ServletWebRequest(servletRequest, servletResponse);
 
@@ -1185,7 +1185,7 @@ class AuthorizationEndpointTest {
                     @BeforeEach
                     void setup() {
                         when(clientDetailsService.loadClientDetailsByClientId(storedClientId))
-                                .thenThrow(new OAuth2ClientRegistrationException("TEST"));
+                                .thenThrow(new ClientNotFoundException("TEST"));
                     }
 
                     @Test
@@ -1363,7 +1363,7 @@ class AuthorizationEndpointTest {
                     @BeforeEach
                     void setup() {
                         when(clientDetailsService.loadClientDetailsByClientId(storedClientId))
-                                .thenThrow(new OAuth2ClientRegistrationException("TEST"));
+                                .thenThrow(new ClientNotFoundException("TEST"));
                     }
 
                     @Test

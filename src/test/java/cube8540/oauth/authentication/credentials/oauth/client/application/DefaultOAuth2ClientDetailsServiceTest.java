@@ -3,8 +3,8 @@ package cube8540.oauth.authentication.credentials.oauth.client.application;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetailsService;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2Client;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
-import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientNotFoundException;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientRepository;
+import cube8540.oauth.authentication.credentials.oauth.client.error.ClientNotFoundException;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import cube8540.oauth.authentication.users.domain.UserEmail;
 import org.junit.jupiter.api.BeforeEach;
@@ -84,7 +84,7 @@ class DefaultOAuth2ClientDetailsServiceTest {
             @Test
             @DisplayName("OAuth2ClientNotFoundException이 발생해야 한다.")
             void shouldThrowsClientNotFoundException() {
-                assertThrows(OAuth2ClientNotFoundException.class, () -> service.loadClientDetailsByClientId(RAW_CLIENT_ID));
+                assertThrows(ClientNotFoundException.class, () -> service.loadClientDetailsByClientId(RAW_CLIENT_ID));
             }
         }
     }

@@ -1,6 +1,6 @@
 package cube8540.oauth.authentication.credentials.oauth.error;
 
-import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientRegistrationException;
+import cube8540.oauth.authentication.credentials.oauth.client.error.ClientNotFoundException;
 import cube8540.oauth.authentication.error.ExceptionTranslator;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
@@ -17,7 +17,7 @@ public class OAuth2ExceptionTranslator implements ExceptionTranslator<OAuth2Erro
             return createResponseEntity(((AbstractOAuth2AuthenticationException) exception));
         } else if (exception instanceof HttpRequestMethodNotSupportedException) {
             return createResponseEntity(new MethodNotAllowedException(exception.getMessage()));
-        } else if (exception instanceof OAuth2ClientRegistrationException) {
+        } else if (exception instanceof ClientNotFoundException) {
             return createResponseEntity(new ClientAuthenticationException(exception.getMessage()));
         } else {
             return createResponseEntity(new ServerErrorException(exception.getMessage()));

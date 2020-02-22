@@ -7,7 +7,7 @@ import cube8540.oauth.authentication.credentials.oauth.OAuth2RequestValidator;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2Utils;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetailsService;
-import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientRegistrationException;
+import cube8540.oauth.authentication.credentials.oauth.client.error.ClientNotFoundException;
 import cube8540.oauth.authentication.credentials.oauth.error.AbstractOAuth2AuthenticationException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidGrantException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidRequestException;
@@ -155,8 +155,8 @@ public class AuthorizationEndpoint {
         }
     }
 
-    @ExceptionHandler(OAuth2ClientRegistrationException.class)
-    public ModelAndView handleClientRegistrationException(OAuth2ClientRegistrationException e, ServletWebRequest webRequest) {
+    @ExceptionHandler(ClientNotFoundException.class)
+    public ModelAndView handleClientRegistrationException(ClientNotFoundException e, ServletWebRequest webRequest) {
         if (log.isWarnEnabled()) {
             log.warn("Handling error client registration exception : {}, {}", e.getClass().getName(), e.getMessage());
         }
@@ -193,7 +193,7 @@ public class AuthorizationEndpoint {
         ResponseEntity<OAuth2Error> responseEntity = exceptionTranslator.translate(e);
         webRequest.getResponse().setStatus(responseEntity.getStatusCode().value());
 
-        if (e instanceof OAuth2ClientRegistrationException || e instanceof RedirectMismatchException) {
+        if (e instanceof ClientNotFoundException || e instanceof RedirectMismatchException) {
             return new ModelAndView(errorPage, Collections.singletonMap("error", responseEntity.getBody()));
         }
 

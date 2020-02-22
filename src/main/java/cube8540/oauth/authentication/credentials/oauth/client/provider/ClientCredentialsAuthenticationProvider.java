@@ -2,7 +2,7 @@ package cube8540.oauth.authentication.credentials.oauth.client.provider;
 
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetailsService;
-import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientNotFoundException;
+import cube8540.oauth.authentication.credentials.oauth.client.error.ClientNotFoundException;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
@@ -35,7 +35,7 @@ public class ClientCredentialsAuthenticationProvider implements AuthenticationPr
                 throw new BadCredentialsException("secret does not match stored value");
             }
             return new ClientCredentialsToken(client, authentication.getCredentials(), Collections.emptyList());
-        } catch (OAuth2ClientNotFoundException e) {
+        } catch (ClientNotFoundException e) {
             throw new BadCredentialsException(e.getMessage());
         } catch (BadCredentialsException | InternalAuthenticationServiceException e) {
             throw e;

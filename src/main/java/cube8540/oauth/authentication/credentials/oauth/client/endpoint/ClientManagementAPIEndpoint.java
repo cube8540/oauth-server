@@ -5,13 +5,8 @@ import cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2
 import cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientManagementService;
 import cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientModifyRequest;
 import cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientRegisterRequest;
-import cube8540.oauth.authentication.credentials.oauth.client.domain.ClientInvalidException;
-import cube8540.oauth.authentication.credentials.oauth.client.domain.ClientNotMatchedException;
-import cube8540.oauth.authentication.credentials.oauth.client.domain.ClientOwnerNotMatchedException;
-import cube8540.oauth.authentication.credentials.oauth.client.domain.InvalidAuthorizationGrantTypeException;
-import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientAlreadyExistsException;
-import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientNotFoundException;
-import cube8540.oauth.authentication.message.ErrorResponseMessage;
+import cube8540.oauth.authentication.credentials.oauth.client.error.ClientExceptionTranslator;
+import cube8540.oauth.authentication.error.ErrorMessage;
 import cube8540.oauth.authentication.message.ResponseMessage;
 import cube8540.oauth.authentication.message.SuccessResponseMessage;
 import lombok.Setter;
@@ -37,6 +32,9 @@ public class ClientManagementAPIEndpoint {
     private static final int DEFAULT_CLIENT_PAGE_SIZE = 10;
 
     private final OAuth2ClientManagementService service;
+
+    @Setter
+    private ClientExceptionTranslator translator = new ClientExceptionTranslator();
 
     @Setter
     private int clientPageSize;
@@ -96,39 +94,8 @@ public class ClientManagementAPIEndpoint {
         return new ResponseEntity<>(message, message.getStatus());
     }
 
-    @ExceptionHandler(ClientInvalidException.class)
-    public ResponseEntity<ResponseMessage> handle(ClientInvalidException e) {
-        ResponseMessage message = ErrorResponseMessage.badRequest(e.getErrors());
-        return new ResponseEntity<>(message, message.getStatus());
-    }
-
-    @ExceptionHandler(ClientNotMatchedException.class)
-    public ResponseEntity<ResponseMessage> handle(ClientNotMatchedException e) {
-        ResponseMessage message = ErrorResponseMessage.conflict(e.getMessage());
-        return new ResponseEntity<>(message, message.getStatus());
-    }
-
-    @ExceptionHandler(ClientOwnerNotMatchedException.class)
-    public ResponseEntity<ResponseMessage> handle(ClientOwnerNotMatchedException e) {
-        ResponseMessage message = ErrorResponseMessage.forbidden(e.getMessage());
-        return new ResponseEntity<>(message, message.getStatus());
-    }
-
-    @ExceptionHandler(InvalidAuthorizationGrantTypeException.class)
-    public ResponseEntity<ResponseMessage> handle(InvalidAuthorizationGrantTypeException e) {
-        ResponseMessage message = ErrorResponseMessage.badRequest(e.getMessage());
-        return new ResponseEntity<>(message, message.getStatus());
-    }
-
-    @ExceptionHandler(OAuth2ClientAlreadyExistsException.class)
-    public ResponseEntity<ResponseMessage> handle(OAuth2ClientAlreadyExistsException e) {
-        ResponseMessage message = ErrorResponseMessage.conflict(e.getMessage());
-        return new ResponseEntity<>(message, message.getStatus());
-    }
-
-    @ExceptionHandler(OAuth2ClientNotFoundException.class)
-    public ResponseEntity<ResponseMessage> handle(OAuth2ClientNotFoundException e) {
-        ResponseMessage message = ErrorResponseMessage.notfound(e.getMessage());
-        return new ResponseEntity<>(message, message.getStatus());
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorMessage<?>> handle(Exception e) {
+        return translator.translate(e);
     }
 }

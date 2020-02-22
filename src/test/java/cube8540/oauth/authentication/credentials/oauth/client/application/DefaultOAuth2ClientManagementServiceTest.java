@@ -1,12 +1,13 @@
 package cube8540.oauth.authentication.credentials.oauth.client.application;
 
-import cube8540.oauth.authentication.credentials.oauth.client.domain.ClientOwnerNotMatchedException;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2Client;
-import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientAlreadyExistsException;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
-import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientNotFoundException;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientRepository;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientValidatePolicy;
+import cube8540.oauth.authentication.credentials.oauth.client.error.ClientAuthorizationException;
+import cube8540.oauth.authentication.credentials.oauth.client.error.ClientErrorCodes;
+import cube8540.oauth.authentication.credentials.oauth.client.error.ClientNotFoundException;
+import cube8540.oauth.authentication.credentials.oauth.client.error.ClientRegisterException;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import cube8540.oauth.authentication.users.domain.UserEmail;
 import cube8540.validator.core.ValidationRule;
@@ -140,9 +141,16 @@ class DefaultOAuth2ClientManagementServiceTest {
             }
 
             @Test
-            @DisplayName("ClientAlreadyExistsException이 발생해야 한다.")
-            void shouldThrowsClientAlreadyExistsException() {
-                assertThrows(OAuth2ClientAlreadyExistsException.class, () -> service.registerNewClient(request));
+            @DisplayName("ClientRegisterException이 발생해야 한다.")
+            void shouldThrowsClientRegisterException() {
+                assertThrows(ClientRegisterException.class, () -> service.registerNewClient(request));
+            }
+
+            @Test
+            @DisplayName("에러 코드는 EXISTS_IDENTIFIER 이어야 한다.")
+            void shouldErrorCodeIsExistsIdentifier() {
+                ClientRegisterException e = assertThrows(ClientRegisterException.class, () -> service.registerNewClient(request));
+                assertEquals(ClientErrorCodes.EXISTS_IDENTIFIER, e.getCode());
             }
         }
 
@@ -377,9 +385,9 @@ class DefaultOAuth2ClientManagementServiceTest {
             }
 
             @Test
-            @DisplayName("OAuth2ClientNotFoundException이 발생해야 한다.")
-            void shouldThrowsOAuth2ClientNotFoundException() {
-                assertThrows(OAuth2ClientNotFoundException.class, () -> service.modifyClient(RAW_CLIENT_ID, modifyRequest));
+            @DisplayName("ClientNotFoundException이 발생해야 한다.")
+            void shouldThrowsClientNotFoundException() {
+                assertThrows(ClientNotFoundException.class, () -> service.modifyClient(RAW_CLIENT_ID, modifyRequest));
             }
         }
 
@@ -421,9 +429,16 @@ class DefaultOAuth2ClientManagementServiceTest {
                 }
 
                 @Test
-                @DisplayName("ClientOwnerNotMatchedException이 발생해야 한다.")
-                void shouldThrowsClientOwnerNotMatchedException() {
-                    assertThrows(ClientOwnerNotMatchedException.class, () -> service.modifyClient(RAW_CLIENT_ID, modifyRequest));
+                @DisplayName("ClientAuthorizationException이 발생해야 한다.")
+                void shouldThrowsClientAuthorizationException() {
+                    assertThrows(ClientAuthorizationException.class, () -> service.modifyClient(RAW_CLIENT_ID, modifyRequest));
+                }
+
+                @Test
+                @DisplayName("에러 코드는 INVALID_OWNER 이어야 한다.")
+                void shouldErrorCodeIsInvalidOwner() {
+                    ClientAuthorizationException e = assertThrows(ClientAuthorizationException.class, () -> service.modifyClient(RAW_CLIENT_ID, modifyRequest));
+                    assertEquals(ClientErrorCodes.INVALID_OWNER, e.getCode());
                 }
             }
 
@@ -636,9 +651,9 @@ class DefaultOAuth2ClientManagementServiceTest {
             }
 
             @Test
-            @DisplayName("OAuth2ClientNotFoundException이 발생해야 한다.")
-            void shouldThrowsOAuth2ClientNotFoundException() {
-                assertThrows(OAuth2ClientNotFoundException.class, () -> service.changeSecret(RAW_CLIENT_ID, changeRequest));
+            @DisplayName("ClientNotFoundException이 발생해야 한다.")
+            void shouldThrowsClientNotFoundException() {
+                assertThrows(ClientNotFoundException.class, () -> service.changeSecret(RAW_CLIENT_ID, changeRequest));
             }
         }
 
@@ -660,9 +675,16 @@ class DefaultOAuth2ClientManagementServiceTest {
                 }
 
                 @Test
-                @DisplayName("ClientOwnerNotMatchedException이 발생해야 한다.")
-                void shouldThrowsClientOwnerNotMatchedException() {
-                    assertThrows(ClientOwnerNotMatchedException.class, () -> service.changeSecret(RAW_CLIENT_ID, changeRequest));
+                @DisplayName("ClientAuthorizationException이 발생해야 한다.")
+                void shouldThrowsClientAuthorizationException() {
+                    assertThrows(ClientAuthorizationException.class, () -> service.changeSecret(RAW_CLIENT_ID, changeRequest));
+                }
+
+                @Test
+                @DisplayName("에러 코드는 INVALID_OWNER 이어야 한다.")
+                void shouldErrorCodeIsInvalidOwner() {
+                    ClientAuthorizationException e = assertThrows(ClientAuthorizationException.class, () -> service.changeSecret(RAW_CLIENT_ID, changeRequest));
+                    assertEquals(ClientErrorCodes.INVALID_OWNER, e.getCode());
                 }
             }
 
@@ -732,9 +754,9 @@ class DefaultOAuth2ClientManagementServiceTest {
             }
 
             @Test
-            @DisplayName("OAuth2ClientNotFoundException이 발생해야 한다.")
-            void shouldThrowsOAuth2ClientNotFoundException() {
-                assertThrows(OAuth2ClientNotFoundException.class, () -> service.removeClient(RAW_CLIENT_ID));
+            @DisplayName("ClientNotFoundException이 발생해야 한다.")
+            void shouldThrowsClientNotFoundException() {
+                assertThrows(ClientNotFoundException.class, () -> service.removeClient(RAW_CLIENT_ID));
             }
         }
 
@@ -756,9 +778,16 @@ class DefaultOAuth2ClientManagementServiceTest {
                 }
 
                 @Test
-                @DisplayName("ClientOwnerNotMatchedException이 발생해야 한다.")
-                void shouldThrowsClientOwnerNotMatchedException() {
-                    assertThrows(ClientOwnerNotMatchedException.class, () -> service.removeClient(RAW_CLIENT_ID));
+                @DisplayName("ClientAuthorizationException이 발생해야 한다.")
+                void shouldThrowsClientAuthorizationException() {
+                    assertThrows(ClientAuthorizationException.class, () -> service.removeClient(RAW_CLIENT_ID));
+                }
+
+                @Test
+                @DisplayName("에러 코드는 INVALID_OWNER 이어야 한다.")
+                void shouldErrorCodesIsInvalidOwner() {
+                    ClientAuthorizationException e = assertThrows(ClientAuthorizationException.class, () -> service.removeClient(RAW_CLIENT_ID));
+                    assertEquals(ClientErrorCodes.INVALID_OWNER, e.getCode());
                 }
             }
 

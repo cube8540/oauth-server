@@ -2,7 +2,7 @@ package cube8540.oauth.authentication.credentials.oauth.client.provider;
 
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetailsService;
-import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientNotFoundException;
+import cube8540.oauth.authentication.credentials.oauth.client.error.ClientNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -86,7 +86,7 @@ class ClientCredentialsAuthenticationProviderTest {
 
             @BeforeEach
             void setup() {
-                when(service.loadClientDetailsByClientId(any())).thenThrow(new OAuth2ClientNotFoundException("client not found"));
+                when(service.loadClientDetailsByClientId(any())).thenThrow(new ClientNotFoundException("client not found"));
             }
 
             @Test
