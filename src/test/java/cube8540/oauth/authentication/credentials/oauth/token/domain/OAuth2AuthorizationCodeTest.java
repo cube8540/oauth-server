@@ -197,6 +197,39 @@ class OAuth2AuthorizationCodeTest {
         }
 
         @Nested
+        @DisplayName("State 값이 일치 하지 않을시")
+        class WhenStateMismatch {
+            private AuthorizationRequest request;
+            private OAuth2AuthorizationCode code;
+
+            @BeforeEach
+            void setup() {
+                this.request = mock(AuthorizationRequest.class);
+                this.code = new OAuth2AuthorizationCode(codeGenerator);
+
+                this.code.setAuthorizationRequest(savedRequest);
+                when(request.state()).thenReturn("NOT MATCHED STATE");
+
+                Clock clock = Clock.fixed(EXPIRATION_DATETIME.minusNanos(1).toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
+                OAuth2AuthorizationCode.setClock(clock);
+            }
+
+            @Test
+            @DisplayName("InvalidGrantException이 발생해야 한다.")
+            void shouldThrowsInvalidGrantException() {
+                assertThrows(InvalidGrantException.class, () -> code.validateWithAuthorizationRequest(request));
+            }
+
+            @Test
+            @DisplayName("에러 코드는 INVALID_GRANT 이어야 한다.")
+            void shouldErrorCodeIsInvalidGrant() {
+                OAuth2Error error = assertThrows(InvalidGrantException.class, () -> code.validateWithAuthorizationRequest(request))
+                        .getError();
+                assertEquals(OAuth2ErrorCodes.INVALID_GRANT, error.getErrorCode());
+            }
+        }
+
+        @Nested
         @DisplayName("리다이렉트 주소가 일치하지 않을시")
         class WhenRedirectUriMismatch {
             private AuthorizationRequest request;
@@ -208,6 +241,7 @@ class OAuth2AuthorizationCodeTest {
                 this.code = new OAuth2AuthorizationCode(codeGenerator);
 
                 this.code.setAuthorizationRequest(savedRequest);
+                when(request.state()).thenReturn(STATE);
                 when(request.redirectURI()).thenReturn(URI.create("http://mismach-uri.info"));
 
                 Clock clock = Clock.fixed(EXPIRATION_DATETIME.minusNanos(1).toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
@@ -234,6 +268,7 @@ class OAuth2AuthorizationCodeTest {
 
                 this.code.setAuthorizationRequest(savedRequest);
                 when(request.redirectURI()).thenReturn(REDIRECT_URI);
+                when(request.state()).thenReturn(STATE);
                 when(request.clientId()).thenReturn("MISMATCH-CLIENT-ID");
 
                 Clock clock = Clock.fixed(EXPIRATION_DATETIME.minusNanos(1).toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
@@ -270,6 +305,7 @@ class OAuth2AuthorizationCodeTest {
                 this.code = new OAuth2AuthorizationCode(codeGenerator);
 
                 this.code.setAuthorizationRequest(savedRequest);
+                when(request.state()).thenReturn(STATE);
                 when(request.redirectURI()).thenReturn(REDIRECT_URI);
                 when(request.clientId()).thenReturn(RAW_CLIENT_ID);
 
