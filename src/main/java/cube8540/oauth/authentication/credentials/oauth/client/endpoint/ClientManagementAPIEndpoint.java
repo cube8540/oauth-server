@@ -7,8 +7,6 @@ import cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2
 import cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientRegisterRequest;
 import cube8540.oauth.authentication.credentials.oauth.client.error.ClientExceptionTranslator;
 import cube8540.oauth.authentication.error.ErrorMessage;
-import cube8540.oauth.authentication.message.ResponseMessage;
-import cube8540.oauth.authentication.message.SuccessResponseMessage;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -25,6 +23,9 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Collections;
+import java.util.Map;
 
 @RestController
 public class ClientManagementAPIEndpoint {
@@ -46,52 +47,36 @@ public class ClientManagementAPIEndpoint {
     }
 
     @GetMapping(value = "/api/clients/attributes/{clientId}")
-    public ResponseEntity<ResponseMessage> countClientId(@PathVariable("clientId") String clientId) {
+    public Map<String, Long> countClientId(@PathVariable("clientId") String clientId) {
         long count = service.countClient(clientId);
-
-        ResponseMessage message = SuccessResponseMessage.ok(count);
-        return new ResponseEntity<>(message, message.getStatus());
+        return Collections.singletonMap("count", count);
     }
 
     @GetMapping(value = "/api/clients")
-    public ResponseEntity<ResponseMessage> clients(@RequestParam(value = "page", required = false) Integer page) {
+    public Page<OAuth2ClientDetails> clients(@RequestParam(value = "page", required = false) Integer page) {
         Pageable pageable = PageRequest.of(page == null ? 0 : page, clientPageSize);
 
-        Page<OAuth2ClientDetails> clients = service.loadClientDetails(pageable);
-        ResponseMessage message = SuccessResponseMessage.ok(clients);
-        return new ResponseEntity<>(message, message.getStatus());
+        return service.loadClientDetails(pageable);
     }
 
     @PostMapping(value = "/api/clients")
-    public ResponseEntity<ResponseMessage> registerNewClient(@RequestBody OAuth2ClientRegisterRequest registerRequest) {
-        OAuth2ClientDetails client = service.registerNewClient(registerRequest);
-
-        ResponseMessage message = SuccessResponseMessage.ok(client);
-        return new ResponseEntity<>(message, message.getStatus());
+    public OAuth2ClientDetails registerNewClient(@RequestBody OAuth2ClientRegisterRequest registerRequest) {
+        return service.registerNewClient(registerRequest);
     }
 
     @PutMapping(value = "/api/clients/{clientId}")
-    public ResponseEntity<ResponseMessage> modifyClient(@PathVariable("clientId") String clientId, @RequestBody OAuth2ClientModifyRequest modifyRequest) {
-        OAuth2ClientDetails client = service.modifyClient(clientId, modifyRequest);
-
-        ResponseMessage message = SuccessResponseMessage.ok(client);
-        return new ResponseEntity<>(message, message.getStatus());
+    public OAuth2ClientDetails modifyClient(@PathVariable("clientId") String clientId, @RequestBody OAuth2ClientModifyRequest modifyRequest) {
+        return service.modifyClient(clientId, modifyRequest);
     }
 
     @PutMapping(value = "/api/clients/{clientId}/attributes/secret")
-    public ResponseEntity<ResponseMessage> changeSecret(@PathVariable("clientId") String clientId, @RequestBody OAuth2ChangeSecretRequest changeRequest) {
-        OAuth2ClientDetails client = service.changeSecret(clientId, changeRequest);
-
-        ResponseMessage message = SuccessResponseMessage.ok(client);
-        return new ResponseEntity<>(message, message.getStatus());
+    public OAuth2ClientDetails changeSecret(@PathVariable("clientId") String clientId, @RequestBody OAuth2ChangeSecretRequest changeRequest) {
+        return service.changeSecret(clientId, changeRequest);
     }
 
     @DeleteMapping(value = "/api/clients/{clientId}")
-    public ResponseEntity<ResponseMessage> removeClient(@PathVariable("clientId") String clientId) {
-        OAuth2ClientDetails client = service.removeClient(clientId);
-
-        ResponseMessage message = SuccessResponseMessage.ok(client);
-        return new ResponseEntity<>(message, message.getStatus());
+    public OAuth2ClientDetails removeClient(@PathVariable("clientId") String clientId) {
+        return service.removeClient(clientId);
     }
 
     @ExceptionHandler(Exception.class)

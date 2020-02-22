@@ -1,8 +1,6 @@
 package cube8540.oauth.authentication.users.endpoint;
 
 import cube8540.oauth.authentication.error.ErrorMessage;
-import cube8540.oauth.authentication.message.ResponseMessage;
-import cube8540.oauth.authentication.message.SuccessResponseMessage;
 import cube8540.oauth.authentication.users.application.UserManagementService;
 import cube8540.oauth.authentication.users.application.UserProfile;
 import cube8540.oauth.authentication.users.application.UserRegisterRequest;
@@ -16,6 +14,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Collections;
+import java.util.Map;
 
 @RestController
 public class UserManagementAPIEndpoint {
@@ -31,19 +32,14 @@ public class UserManagementAPIEndpoint {
     }
 
     @PostMapping(value = "/api/accounts")
-    public ResponseEntity<ResponseMessage> registerUserAccounts(@RequestBody UserRegisterRequest registerRequest) {
-        UserProfile registerUser = service.registerUser(registerRequest);
-
-        ResponseMessage message = SuccessResponseMessage.created(registerUser);
-        return new ResponseEntity<>(message, message.getStatus());
+    public UserProfile registerUserAccounts(@RequestBody UserRegisterRequest registerRequest) {
+        return service.registerUser(registerRequest);
     }
 
     @GetMapping(value = "/api/accounts/attributes/email")
-    public ResponseEntity<ResponseMessage> countAccountEmail(@RequestParam("email") String email) {
+    public Map<String, Long> countAccountEmail(@RequestParam("email") String email) {
         long count = service.countUser(email);
-
-        ResponseMessage message = SuccessResponseMessage.ok(count);
-        return new ResponseEntity<>(message, message.getStatus());
+        return Collections.singletonMap("count", count);
     }
 
     @ExceptionHandler(Exception.class)

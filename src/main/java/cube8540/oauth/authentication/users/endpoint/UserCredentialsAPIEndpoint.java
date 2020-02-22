@@ -1,8 +1,6 @@
 package cube8540.oauth.authentication.users.endpoint;
 
 import cube8540.oauth.authentication.error.ErrorMessage;
-import cube8540.oauth.authentication.message.ResponseMessage;
-import cube8540.oauth.authentication.message.SuccessResponseMessage;
 import cube8540.oauth.authentication.users.application.UserCredentialsService;
 import cube8540.oauth.authentication.users.application.UserProfile;
 import cube8540.oauth.authentication.users.error.UserExceptionTranslator;
@@ -29,11 +27,8 @@ public class UserCredentialsAPIEndpoint {
     }
 
     @PutMapping(value = "/api/accounts/credentials/{email}")
-    public ResponseEntity<ResponseMessage> credentials(@PathVariable("email") String email, @RequestParam String credentialsKey) {
-        UserProfile credentialsUser = service.accountCredentials(email, credentialsKey);
-
-        SuccessResponseMessage<UserProfile> message = SuccessResponseMessage.ok(credentialsUser);
-        return new ResponseEntity<>(message, message.getStatus());
+    public UserProfile credentials(@PathVariable("email") String email, @RequestParam String credentialsKey) {
+        return service.accountCredentials(email, credentialsKey);
     }
 
     @ExceptionHandler(Exception.class)
