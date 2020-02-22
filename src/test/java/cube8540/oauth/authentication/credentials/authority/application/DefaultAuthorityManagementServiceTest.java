@@ -1,10 +1,11 @@
 package cube8540.oauth.authentication.credentials.authority.application;
 
 import cube8540.oauth.authentication.credentials.authority.domain.Authority;
-import cube8540.oauth.authentication.credentials.authority.domain.AuthorityAlreadyException;
 import cube8540.oauth.authentication.credentials.authority.domain.AuthorityCode;
-import cube8540.oauth.authentication.credentials.authority.domain.AuthorityNotFoundException;
 import cube8540.oauth.authentication.credentials.authority.domain.AuthorityRepository;
+import cube8540.oauth.authentication.credentials.authority.error.AuthorityErrorCodes;
+import cube8540.oauth.authentication.credentials.authority.error.AuthorityNotFoundException;
+import cube8540.oauth.authentication.credentials.authority.error.AuthorityRegisterException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -106,9 +107,16 @@ class DefaultAuthorityManagementServiceTest {
             }
 
             @Test
-            @DisplayName("AuthorityAlreadyException이 발생해야 한다.")
-            void shouldThrowsAuthorityAlreadyException() {
-                assertThrows(AuthorityAlreadyException.class, () -> service.registerAuthority(request));
+            @DisplayName("AuthorityRegistrationException이 발생해야 한다.")
+            void shouldThrowAuthorityRegistrationException() {
+                assertThrows(AuthorityRegisterException.class, () -> service.registerAuthority(request));
+            }
+
+            @Test
+            @DisplayName("에러 코드는 ALREADY_EXISTS_ID 이어야 한다.")
+            void shouldErrorCodeIsAlreadyExistsId() {
+                AuthorityRegisterException error = assertThrows(AuthorityRegisterException.class, () -> service.registerAuthority(request));
+                assertEquals(AuthorityErrorCodes.ALREADY_EXISTS_ID, error.getCode());
             }
         }
 

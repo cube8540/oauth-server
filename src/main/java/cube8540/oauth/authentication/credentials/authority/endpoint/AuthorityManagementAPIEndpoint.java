@@ -4,12 +4,11 @@ import cube8540.oauth.authentication.credentials.authority.AuthorityDetails;
 import cube8540.oauth.authentication.credentials.authority.application.AuthorityManagementService;
 import cube8540.oauth.authentication.credentials.authority.application.AuthorityModifyRequest;
 import cube8540.oauth.authentication.credentials.authority.application.AuthorityRegisterRequest;
-import cube8540.oauth.authentication.credentials.authority.domain.AuthorityAlreadyException;
-import cube8540.oauth.authentication.credentials.authority.domain.AuthorityNotFoundException;
-import cube8540.oauth.authentication.message.ErrorResponseMessage;
-import cube8540.oauth.authentication.message.ResponseMessage;
-import cube8540.oauth.authentication.message.SuccessResponseMessage;
+import cube8540.oauth.authentication.credentials.authority.error.AuthorityExceptionTranslator;
+import cube8540.oauth.authentication.error.ErrorMessage;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -22,11 +21,16 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
 
 @RestController
 public class AuthorityManagementAPIEndpoint {
 
     private final AuthorityManagementService service;
+
+    @Setter
+    private AuthorityExceptionTranslator translator = new AuthorityExceptionTranslator();
 
     @Autowired
     public AuthorityManagementAPIEndpoint(AuthorityManagementService service) {
@@ -34,62 +38,55 @@ public class AuthorityManagementAPIEndpoint {
     }
 
     @GetMapping(value = "/api/authorities/attributes/code")
-    public ResponseEntity<ResponseMessage> countingAuthorityCode(@RequestParam("code") String authorityCode) {
+    public ResponseEntity<Map<String, Long>> countingAuthorityCode(@RequestParam("code") String authorityCode) {
         long count = service.countAuthority(authorityCode);
 
-        ResponseMessage message = SuccessResponseMessage.ok(count);
-        return new ResponseEntity<>(message, message.getStatus());
+        Map<String, Long> message = Collections.singletonMap("count", count);
+        return createResponse(message);
     }
 
     @GetMapping(value = "/api/authorities/{code}")
-    public ResponseEntity<ResponseMessage> getAuthorityDetails(@PathVariable("code") String authorityCode) {
+    public ResponseEntity<AuthorityDetails> getAuthorityDetails(@PathVariable("code") String authorityCode) {
         AuthorityDetails authority = service.getAuthority(authorityCode);
 
-        ResponseMessage message = SuccessResponseMessage.ok(authority);
-        return new ResponseEntity<>(message, message.getStatus());
+        return createResponse(authority);
     }
 
     @GetMapping(value = "/api/authorities")
-    public ResponseEntity<ResponseMessage> getAuthorities() {
+    public ResponseEntity<Map<String, Collection<AuthorityDetails>>> getAuthorities() {
         Collection<AuthorityDetails> authorities = service.getAuthorities();
 
-        ResponseMessage message = SuccessResponseMessage.ok(authorities);
-        return new ResponseEntity<>(message, message.getStatus());
+        Map<String, Collection<AuthorityDetails>> message = Collections.singletonMap("authorities", authorities);
+        return createResponse(message);
     }
 
     @PostMapping(value = "/api/authorities")
-    public ResponseEntity<ResponseMessage> registerAuthority(@RequestBody AuthorityRegisterRequest registerRequest) {
+    public ResponseEntity<AuthorityDetails> registerAuthority(@RequestBody AuthorityRegisterRequest registerRequest) {
         AuthorityDetails authority = service.registerAuthority(registerRequest);
 
-        ResponseMessage message = SuccessResponseMessage.created(authority);
-        return new ResponseEntity<>(message, message.getStatus());
+        return createResponse(authority);
     }
 
     @PutMapping(value = "/api/authorities/{code}")
-    public ResponseEntity<ResponseMessage> modifyAuthority(@PathVariable("code") String code, @RequestBody AuthorityModifyRequest modifyRequest) {
+    public ResponseEntity<AuthorityDetails> modifyAuthority(@PathVariable("code") String code, @RequestBody AuthorityModifyRequest modifyRequest) {
         AuthorityDetails authority = service.modifyAuthority(code, modifyRequest);
 
-        ResponseMessage message = SuccessResponseMessage.ok(authority);
-        return new ResponseEntity<>(message, message.getStatus());
+        return createResponse(authority);
     }
 
     @DeleteMapping(value = "/api/authorities/{code}")
-    public ResponseEntity<ResponseMessage> removeAuthority(@PathVariable("code") String code) {
+    public ResponseEntity<AuthorityDetails> removeAuthority(@PathVariable("code") String code) {
         AuthorityDetails authority = service.removeAuthority(code);
 
-        ResponseMessage message = SuccessResponseMessage.ok(authority);
-        return new ResponseEntity<>(message, message.getStatus());
+        return createResponse(authority);
     }
 
-    @ExceptionHandler(AuthorityAlreadyException.class)
-    public ResponseEntity<ResponseMessage> handle(AuthorityAlreadyException e) {
-        ResponseMessage message = ErrorResponseMessage.conflict(e.getMessage());
-        return new ResponseEntity<>(message, message.getStatus());
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorMessage<?>> handle(Exception e) {
+        return translator.translate(e);
     }
 
-    @ExceptionHandler(AuthorityNotFoundException.class)
-    public ResponseEntity<ResponseMessage> handle(AuthorityNotFoundException e) {
-        ResponseMessage message = ErrorResponseMessage.notfound(e.getMessage());
-        return new ResponseEntity<>(message, message.getStatus());
+    private <T> ResponseEntity<T> createResponse(T response) {
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

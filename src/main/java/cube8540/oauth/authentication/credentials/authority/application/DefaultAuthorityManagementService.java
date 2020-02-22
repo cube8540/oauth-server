@@ -2,10 +2,10 @@ package cube8540.oauth.authentication.credentials.authority.application;
 
 import cube8540.oauth.authentication.credentials.authority.AuthorityDetails;
 import cube8540.oauth.authentication.credentials.authority.domain.Authority;
-import cube8540.oauth.authentication.credentials.authority.domain.AuthorityAlreadyException;
 import cube8540.oauth.authentication.credentials.authority.domain.AuthorityCode;
-import cube8540.oauth.authentication.credentials.authority.domain.AuthorityNotFoundException;
 import cube8540.oauth.authentication.credentials.authority.domain.AuthorityRepository;
+import cube8540.oauth.authentication.credentials.authority.error.AuthorityNotFoundException;
+import cube8540.oauth.authentication.credentials.authority.error.AuthorityRegisterException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -41,7 +41,7 @@ public class DefaultAuthorityManagementService implements AuthorityManagementSer
     @Override
     public AuthorityDetails registerAuthority(AuthorityRegisterRequest registerRequest) {
         if (countAuthority(registerRequest.getCode()) > 0){
-            throw new AuthorityAlreadyException(registerRequest.getCode() + " is already exists");
+            throw AuthorityRegisterException.alreadyExistsId(registerRequest.getCode() + " is already exists");
         }
 
         Authority authority = new Authority(registerRequest.getCode(), registerRequest.getDescription());
