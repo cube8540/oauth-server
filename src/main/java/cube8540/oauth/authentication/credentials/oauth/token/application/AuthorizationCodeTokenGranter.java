@@ -43,7 +43,7 @@ public class AuthorizationCodeTokenGranter extends AbstractOAuth2TokenGranter {
         if (!getTokenRequestValidator().validateScopes(clientDetails, authorizationCodeScope)) {
             throw InvalidGrantException.invalidScope("cannot grant scope");
         }
-        authorizationCode.validateWithAuthorizationRequest(new AuthorizationCodeRequest(tokenRequest));
+        authorizationCode.validateWithAuthorizationRequest(new AuthorizationCodeRequest(clientDetails, tokenRequest));
         OAuth2AuthorizedAccessToken accessToken = OAuth2AuthorizedAccessToken.builder(getTokenIdGenerator())
                 .expiration(extractTokenExpiration(clientDetails))
                 .client(authorizationCode.getClientId())
@@ -57,15 +57,17 @@ public class AuthorizationCodeTokenGranter extends AbstractOAuth2TokenGranter {
 
     private static class AuthorizationCodeRequest implements AuthorizationRequest {
 
+        private OAuth2ClientDetails clientDetails;
         private OAuth2TokenRequest tokenRequest;
 
-        private AuthorizationCodeRequest(OAuth2TokenRequest tokenRequest) {
+        private AuthorizationCodeRequest(OAuth2ClientDetails clientDetails, OAuth2TokenRequest tokenRequest) {
+            this.clientDetails = clientDetails;
             this.tokenRequest = tokenRequest;
         }
 
         @Override
         public String clientId() {
-            return tokenRequest.clientId();
+            return clientDetails.clientId();
         }
 
         @Override

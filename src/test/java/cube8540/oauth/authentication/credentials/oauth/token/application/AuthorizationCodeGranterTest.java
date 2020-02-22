@@ -58,6 +58,8 @@ class AuthorizationCodeGranterTest {
     private static final String RAW_CLIENT_ID = "CLIENT-ID";
     private static final OAuth2ClientId CLIENT_ID = new OAuth2ClientId(RAW_CLIENT_ID);
 
+    private static final String RAW_AUTH_CLIENT_ID = "AUTH-CLIENT-ID";
+
     private static final URI REDIRECT_URI = URI.create("http://localhost:8080");
 
     private static final UserEmail STORED_EMAIL = new UserEmail("email@email.com");
@@ -102,6 +104,7 @@ class AuthorizationCodeGranterTest {
             this.tokenRequest = mock(OAuth2TokenRequest.class);
             this.authorizationCode = mock(OAuth2AuthorizationCode.class);
 
+            when(clientDetails.clientId()).thenReturn(RAW_AUTH_CLIENT_ID);
             when(clientDetails.accessTokenValiditySeconds()).thenReturn(ACCESS_TOKEN_VALIDITY_SECONDS);
             when(clientDetails.refreshTokenValiditySeconds()).thenReturn(REFRESH_TOKEN_VALIDITY_SECONDS);
             when(clientDetails.scope()).thenReturn(RAW_CLIENT_SCOPES);
@@ -198,7 +201,7 @@ class AuthorizationCodeGranterTest {
                     tokenGranter.createAccessToken(clientDetails, tokenRequest);
                     verify(authorizationCode, times(1)).validateWithAuthorizationRequest(requestCaptor.capture());
                     assertEquals(REDIRECT_URI, requestCaptor.getValue().redirectURI());
-                    assertEquals(RAW_CLIENT_ID, requestCaptor.getValue().clientId());
+                    assertEquals(RAW_AUTH_CLIENT_ID, requestCaptor.getValue().clientId());
                 }
 
                 @Test
