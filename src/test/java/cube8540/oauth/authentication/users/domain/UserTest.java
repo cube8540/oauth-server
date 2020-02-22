@@ -1,6 +1,9 @@
 package cube8540.oauth.authentication.users.domain;
 
 import cube8540.oauth.authentication.credentials.authority.domain.AuthorityCode;
+import cube8540.oauth.authentication.users.error.UserAuthorizationException;
+import cube8540.oauth.authentication.users.error.UserErrorCodes;
+import cube8540.oauth.authentication.users.error.UserInvalidException;
 import cube8540.validator.core.ValidationError;
 import cube8540.validator.core.ValidationRule;
 import org.junit.jupiter.api.BeforeEach;
@@ -142,10 +145,18 @@ class UserTest {
             }
 
             @Test
-            @DisplayName("UserNotMatchedException이 발생해야 한다.")
-            void shouldThrowsUserNotMatchedException() {
-                assertThrows(UserNotMatchedException.class,
+            @DisplayName("UserAuthorizationException이 발생해야 한다.")
+            void shouldThrowsUserAuthorizationException() {
+                assertThrows(UserAuthorizationException.class,
                         () -> user.changePassword(PASSWORD, CHANGE_PASSWORD, encoder));
+            }
+
+            @Test
+            @DisplayName("에러 코드는 INVALID_PASSWORD 이어야 한다.")
+            void shouldErrorCodeIsInvalidPassword() {
+                UserAuthorizationException e = assertThrows(UserAuthorizationException.class,
+                        () -> user.changePassword(PASSWORD, CHANGE_PASSWORD, encoder));
+                assertEquals(UserErrorCodes.INVALID_PASSWORD, e.getCode());
             }
         }
 
@@ -205,9 +216,16 @@ class UserTest {
         class WhenKeyNotGenerated {
 
             @Test
-            @DisplayName("UserNotMatchedException이 발생해야 한다.")
-            void shouldThrowsUserNotMatchedException() {
-                assertThrows(UserNotMatchedException.class, () -> user.resetPassword("KEY", CHANGE_PASSWORD));
+            @DisplayName("UserAuthorizationException이 발생해야 한다.")
+            void shouldThrowsUserAuthorizationException() {
+                assertThrows(UserAuthorizationException.class, () -> user.resetPassword("KEY", CHANGE_PASSWORD));
+            }
+
+            @Test
+            @DisplayName("에러 코드는 INVALID_KEY 이어야 한다.")
+            void shouldErrorCodeIsInvalidKey() {
+                UserAuthorizationException e = assertThrows(UserAuthorizationException.class, () -> user.resetPassword("KEY", CHANGE_PASSWORD));
+                assertEquals(UserErrorCodes.INVALID_KEY, e.getCode());
             }
         }
 
@@ -223,9 +241,16 @@ class UserTest {
             }
 
             @Test
-            @DisplayName("UserNotMatchedException이 발생해야 한다.")
-            void shouldThrowsUserNotMatchedException() {
-                assertThrows(UserNotMatchedException.class, () -> user.resetPassword("KEY", CHANGE_PASSWORD));
+            @DisplayName("UserAuthorizationException이 발생해야 한다.")
+            void shouldThrowsUserAuthorizationException() {
+                assertThrows(UserAuthorizationException.class, () -> user.resetPassword("KEY", CHANGE_PASSWORD));
+            }
+
+            @Test
+            @DisplayName("에러 코드는 INVALID_KEY 이어야 한다.")
+            void shouldErrorCodeIsInvalidKey() {
+                UserAuthorizationException e = assertThrows(UserAuthorizationException.class, () -> user.resetPassword("KEY", CHANGE_PASSWORD));
+                assertEquals(UserErrorCodes.INVALID_KEY, e.getCode());
             }
         }
 
@@ -241,9 +266,16 @@ class UserTest {
             }
 
             @Test
-            @DisplayName("UserExpiredException이 발생해야 한다.")
-            void shouldThrowsUserExpiredException() {
-                assertThrows(UserExpiredException.class, () -> user.resetPassword("KEY", CHANGE_PASSWORD));
+            @DisplayName("UserAuthorizationException이 발생해야 한다.")
+            void shouldThrowsUserAuthorizationException() {
+                assertThrows(UserAuthorizationException.class, () -> user.resetPassword("KEY", CHANGE_PASSWORD));
+            }
+
+            @Test
+            @DisplayName("에러 코드는 KEY_EXPIRED 이어야 한다.")
+            void shouldErrorCodeIsKeyExpired() {
+                UserAuthorizationException e = assertThrows(UserAuthorizationException.class, () -> user.resetPassword("KEY", CHANGE_PASSWORD));
+                assertEquals(UserErrorCodes.KEY_EXPIRED, e.getCode());
             }
         }
 
@@ -318,9 +350,16 @@ class UserTest {
             }
 
             @Test
-            @DisplayName("UserCertificationException이 발생해야 한다.")
-            void shouldThrowsUserCertificationException() {
-                assertThrows(UserAlreadyCertificationException.class, () -> user.generateCredentialsKey(keyGenerator));
+            @DisplayName("UserAuthorizationException아 발생해야 한다.")
+            void shouldThrowsUserAuthorizationException() {
+                assertThrows(UserAuthorizationException.class, () -> user.generateCredentialsKey(keyGenerator));
+            }
+
+            @Test
+            @DisplayName("에러 코드는 ALREADY_CREDENTIALS 이어야 한다.")
+            void shouldErrorCodeIsAlreadyCredentials() {
+                UserAuthorizationException e = assertThrows(UserAuthorizationException.class, () -> user.generateCredentialsKey(keyGenerator));
+                assertEquals(UserErrorCodes.ALREADY_CREDENTIALS, e.getCode());
             }
         }
 
@@ -361,9 +400,16 @@ class UserTest {
         class WhenKeyNotGenerated {
 
             @Test
-            @DisplayName("UserNotMatchedException이 발생해야 한다.")
-            void shouldThrowsUserNotMatchedException() {
-                assertThrows(UserNotMatchedException.class, () -> user.credentials("KEY", Collections.emptyList()));
+            @DisplayName("UserAuthorizationException이 발생해야 한다.")
+            void shouldThrowsUserAuthorizationException() {
+                assertThrows(UserAuthorizationException.class, () -> user.credentials("KEY", Collections.emptyList()));
+            }
+
+            @Test
+            @DisplayName("에러 코드는 INVALID_KEY 이어야 한다.")
+            void shouldErrorCodeIsInvalidKey() {
+                UserAuthorizationException e = assertThrows(UserAuthorizationException.class, () -> user.credentials("KEY", Collections.emptyList()));
+                assertEquals(UserErrorCodes.INVALID_KEY, e.getCode());
             }
         }
 
@@ -379,9 +425,16 @@ class UserTest {
             }
 
             @Test
-            @DisplayName("UserNotMatchedException이 발생해야 한다.")
-            void shouldThrowsUserNotMatchedException() {
-                assertThrows(UserNotMatchedException.class, () -> user.credentials("KEY", Collections.emptyList()));
+            @DisplayName("UserAuthorizationException이 발생해야 한다.")
+            void shouldThrowsUserAuthorizationException() {
+                assertThrows(UserAuthorizationException.class, () -> user.credentials("KEY", Collections.emptyList()));
+            }
+
+            @Test
+            @DisplayName("에러 코드는 INVALID_KEY 이어야 한다.")
+            void shouldErrorCodeIsInvalidKey() {
+                UserAuthorizationException e = assertThrows(UserAuthorizationException.class, () -> user.credentials("KEY", Collections.emptyList()));
+                assertEquals(UserErrorCodes.INVALID_KEY, e.getCode());
             }
         }
 
@@ -398,9 +451,16 @@ class UserTest {
             }
 
             @Test
-            @DisplayName("UserExpiredException이 발생해야 한다.")
-            void shouldThrowsUserExpiredException() {
-                assertThrows(UserExpiredException.class, () -> user.credentials("KEY", Collections.emptyList()));
+            @DisplayName("UserAuthorizationException이 발생해야 한다.")
+            void shouldThrowsUserAuthorizationException() {
+                assertThrows(UserAuthorizationException.class, () -> user.credentials("KEY", Collections.emptyList()));
+            }
+
+            @Test
+            @DisplayName("에러 코드는 KEY_EXPIRED 이어야 한다.")
+            void shouldErrorCodeIsKeyExpired() {
+                UserAuthorizationException e = assertThrows(UserAuthorizationException.class, () -> user.credentials("KEY", Collections.emptyList()));
+                assertEquals(UserErrorCodes.KEY_EXPIRED, e.getCode());
             }
         }
 

@@ -4,11 +4,9 @@ import cube8540.oauth.authentication.credentials.authority.AuthorityDetails;
 import cube8540.oauth.authentication.credentials.authority.application.AuthorityManagementService;
 import cube8540.oauth.authentication.credentials.authority.application.AuthorityModifyRequest;
 import cube8540.oauth.authentication.credentials.authority.application.AuthorityRegisterRequest;
-import cube8540.oauth.authentication.credentials.authority.domain.AuthorityAlreadyException;
-import cube8540.oauth.authentication.credentials.authority.domain.AuthorityNotFoundException;
-import cube8540.oauth.authentication.message.ErrorResponseMessage;
-import cube8540.oauth.authentication.message.ResponseMessage;
-import cube8540.oauth.authentication.message.SuccessResponseMessage;
+import cube8540.oauth.authentication.credentials.authority.error.AuthorityExceptionTranslator;
+import cube8540.oauth.authentication.error.ErrorMessage;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -22,11 +20,16 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
 
 @RestController
 public class AuthorityManagementAPIEndpoint {
 
     private final AuthorityManagementService service;
+
+    @Setter
+    private AuthorityExceptionTranslator translator = new AuthorityExceptionTranslator();
 
     @Autowired
     public AuthorityManagementAPIEndpoint(AuthorityManagementService service) {
@@ -34,62 +37,41 @@ public class AuthorityManagementAPIEndpoint {
     }
 
     @GetMapping(value = "/api/authorities/attributes/code")
-    public ResponseEntity<ResponseMessage> countingAuthorityCode(@RequestParam("code") String authorityCode) {
+    public Map<String, Long> countingAuthorityCode(@RequestParam("code") String authorityCode) {
         long count = service.countAuthority(authorityCode);
 
-        ResponseMessage message = SuccessResponseMessage.ok(count);
-        return new ResponseEntity<>(message, message.getStatus());
+        return Collections.singletonMap("count", count);
     }
 
     @GetMapping(value = "/api/authorities/{code}")
-    public ResponseEntity<ResponseMessage> getAuthorityDetails(@PathVariable("code") String authorityCode) {
-        AuthorityDetails authority = service.getAuthority(authorityCode);
-
-        ResponseMessage message = SuccessResponseMessage.ok(authority);
-        return new ResponseEntity<>(message, message.getStatus());
+    public AuthorityDetails getAuthorityDetails(@PathVariable("code") String authorityCode) {
+        return service.getAuthority(authorityCode);
     }
 
     @GetMapping(value = "/api/authorities")
-    public ResponseEntity<ResponseMessage> getAuthorities() {
+    public Map<String, Collection<AuthorityDetails>> getAuthorities() {
         Collection<AuthorityDetails> authorities = service.getAuthorities();
 
-        ResponseMessage message = SuccessResponseMessage.ok(authorities);
-        return new ResponseEntity<>(message, message.getStatus());
+        return Collections.singletonMap("authorities", authorities);
     }
 
     @PostMapping(value = "/api/authorities")
-    public ResponseEntity<ResponseMessage> registerAuthority(@RequestBody AuthorityRegisterRequest registerRequest) {
-        AuthorityDetails authority = service.registerAuthority(registerRequest);
-
-        ResponseMessage message = SuccessResponseMessage.created(authority);
-        return new ResponseEntity<>(message, message.getStatus());
+    public AuthorityDetails registerAuthority(@RequestBody AuthorityRegisterRequest registerRequest) {
+        return service.registerAuthority(registerRequest);
     }
 
     @PutMapping(value = "/api/authorities/{code}")
-    public ResponseEntity<ResponseMessage> modifyAuthority(@PathVariable("code") String code, @RequestBody AuthorityModifyRequest modifyRequest) {
-        AuthorityDetails authority = service.modifyAuthority(code, modifyRequest);
-
-        ResponseMessage message = SuccessResponseMessage.ok(authority);
-        return new ResponseEntity<>(message, message.getStatus());
+    public AuthorityDetails modifyAuthority(@PathVariable("code") String code, @RequestBody AuthorityModifyRequest modifyRequest) {
+        return service.modifyAuthority(code, modifyRequest);
     }
 
     @DeleteMapping(value = "/api/authorities/{code}")
-    public ResponseEntity<ResponseMessage> removeAuthority(@PathVariable("code") String code) {
-        AuthorityDetails authority = service.removeAuthority(code);
-
-        ResponseMessage message = SuccessResponseMessage.ok(authority);
-        return new ResponseEntity<>(message, message.getStatus());
+    public AuthorityDetails removeAuthority(@PathVariable("code") String code) {
+        return service.removeAuthority(code);
     }
 
-    @ExceptionHandler(AuthorityAlreadyException.class)
-    public ResponseEntity<ResponseMessage> handle(AuthorityAlreadyException e) {
-        ResponseMessage message = ErrorResponseMessage.conflict(e.getMessage());
-        return new ResponseEntity<>(message, message.getStatus());
-    }
-
-    @ExceptionHandler(AuthorityNotFoundException.class)
-    public ResponseEntity<ResponseMessage> handle(AuthorityNotFoundException e) {
-        ResponseMessage message = ErrorResponseMessage.notfound(e.getMessage());
-        return new ResponseEntity<>(message, message.getStatus());
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorMessage<?>> handle(Exception e) {
+        return translator.translate(e);
     }
 }

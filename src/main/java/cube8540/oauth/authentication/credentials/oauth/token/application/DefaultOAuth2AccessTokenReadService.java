@@ -27,6 +27,6 @@ public class DefaultOAuth2AccessTokenReadService implements OAuth2AccessTokenRea
         if (accessToken.isExpired()) {
             throw new OAuth2AccessTokenExpiredException("[" + tokenValue + "] is expired");
         }
-        return new DefaultAccessTokenDetails(accessToken);
+        return DefaultAccessTokenDetails.of(accessToken);
     }
 }

@@ -4,9 +4,10 @@ import cube8540.oauth.authentication.credentials.oauth.OAuth2TokenRequest;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2Utils;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.client.provider.ClientCredentialsToken;
+import cube8540.oauth.authentication.credentials.oauth.error.AbstractOAuth2AuthenticationException;
+import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTranslator;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidGrantException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidRequestException;
-import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTranslator;
 import cube8540.oauth.authentication.credentials.oauth.token.OAuth2AccessTokenDetails;
 import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2AccessTokenGrantService;
 import org.junit.jupiter.api.AfterEach;
@@ -22,8 +23,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
-import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
+import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 
 import java.net.URI;
 import java.util.Arrays;
@@ -118,6 +119,14 @@ class OAuth2TokenEndpointTest {
             void shouldThrowsInvalidRequestException() {
                 assertThrows(InvalidRequestException.class, () -> endpoint.grantNewAccessToken(clientCredentials, badRequestMap));
             }
+
+            @Test
+            @DisplayName("에러 코드는 INVALID_REQUIEST 이어야 한다.")
+            void shouldErrorCodeIsInvalidRequest() {
+                OAuth2Error error = assertThrows(InvalidRequestException.class, () -> endpoint.grantNewAccessToken(clientCredentials, badRequestMap))
+                        .getError();
+                assertEquals(OAuth2ErrorCodes.INVALID_REQUEST, error.getErrorCode());
+            }
         }
 
         @Nested
@@ -140,6 +149,14 @@ class OAuth2TokenEndpointTest {
             @DisplayName("InvalidGrantException이 발생해야 한다.")
             void shouldThrowsInvalidGrantException() {
                 assertThrows(InvalidGrantException.class, () -> endpoint.grantNewAccessToken(clientCredentials, badRequestMap));
+            }
+
+            @Test
+            @DisplayName("에러 코드는 UNSUPPORTED_GRANT_TYPE 이어야 한다.")
+            void shouldErrorCodeIsUnsupportedGrantType() {
+                OAuth2Error error = assertThrows(InvalidGrantException.class, () -> endpoint.grantNewAccessToken(clientCredentials, badRequestMap))
+                        .getError();
+                assertEquals(OAuth2ErrorCodes.UNSUPPORTED_GRANT_TYPE, error.getErrorCode());
             }
         }
 
@@ -164,12 +181,11 @@ class OAuth2TokenEndpointTest {
         @DisplayName("인증 객체의 주체가 OAuth2ClientDetails가 아닐시")
         class WhenPrincipalIsNotOAuth2ClientDetails {
             private ClientCredentialsToken clientCredentialsToken;
-            private Object object;
 
             @BeforeEach
             void setup() {
                 this.clientCredentialsToken = mock(ClientCredentialsToken.class);
-                this.object = new Object();
+                Object object = new Object();
 
                 when(this.clientCredentialsToken.getPrincipal()).thenReturn(object);
             }
@@ -327,11 +343,11 @@ class OAuth2TokenEndpointTest {
         @Nested
         @DisplayName("OAuth2AuthenticationException 관련 에러 발생시")
         class WhenThrowsOAuth2AuthenticationException {
-            private OAuth2AuthenticationException exception;
+            private AbstractOAuth2AuthenticationException exception;
 
             @BeforeEach
             void setup() {
-                this.exception = mock(OAuth2AuthenticationException.class);
+                this.exception = mock(AbstractOAuth2AuthenticationException.class);
 
                 when(translator.translate(exception)).thenReturn(responseEntity);
             }
@@ -356,7 +372,7 @@ class OAuth2TokenEndpointTest {
 
             @BeforeEach
             void setup() {
-                this.exception = mock(OAuth2AuthenticationException.class);
+                this.exception = mock(AbstractOAuth2AuthenticationException.class);
 
                 when(translator.translate(exception)).thenReturn(responseEntity);
             }

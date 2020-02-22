@@ -2,23 +2,14 @@ package cube8540.oauth.authentication.credentials.authority.application;
 
 import cube8540.oauth.authentication.credentials.authority.AuthorityDetails;
 import cube8540.oauth.authentication.credentials.authority.domain.Authority;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.Value;
 
-@Getter
-@ToString
-@EqualsAndHashCode
+@Value
 public class DefaultAuthorityDetails implements AuthorityDetails {
 
     private String code;
 
     private String description;
-
-    public DefaultAuthorityDetails(Authority authority) {
-        this.code = authority.getCode().getValue();
-        this.description = authority.getDescription();
-    }
 
     @Override
     public String code() {
@@ -28,5 +19,9 @@ public class DefaultAuthorityDetails implements AuthorityDetails {
     @Override
     public String description() {
         return description;
+    }
+
+    public static DefaultAuthorityDetails of(Authority authority) {
+        return new DefaultAuthorityDetails(authority.getCode().getValue(), authority.getDescription());
     }
 }

@@ -1,20 +1,21 @@
 package cube8540.oauth.authentication.credentials.oauth.error;
 
-import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 
-public abstract class AbstractOAuth2AuthenticationException extends OAuth2AuthenticationException {
+public abstract class AbstractOAuth2AuthenticationException extends AuthenticationException {
 
+    private OAuth2Error error;
     private int statusCode;
 
     public AbstractOAuth2AuthenticationException(int statusCode, OAuth2Error error) {
-        super(error);
+        super(error.getDescription());
+        this.error = error;
         this.statusCode = statusCode;
     }
 
-    public AbstractOAuth2AuthenticationException(int statusCode, OAuth2Error error, Throwable cause) {
-        super(error, cause);
-        this.statusCode = statusCode;
+    public OAuth2Error getError() {
+        return error;
     }
 
     public int getStatusCode() {
@@ -26,9 +27,9 @@ public abstract class AbstractOAuth2AuthenticationException extends OAuth2Authen
         StringBuilder builder = new StringBuilder();
         String delimiter = ", ";
 
-        builder.append("error=\"").append(getError().getErrorCode()).append("\"");
+        builder.append("error=\"").append(error.getErrorCode()).append("\"");
 
-        String errorMessage = getError().getDescription();
+        String errorMessage = error.getDescription();
         if (errorMessage != null) {
             builder.append(delimiter).append("error_description=\"").append(errorMessage).append("\"");
         }

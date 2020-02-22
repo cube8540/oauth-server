@@ -1,6 +1,7 @@
 package cube8540.oauth.authentication.credentials.oauth.scope.domain;
 
 import cube8540.oauth.authentication.credentials.authority.domain.AuthorityCode;
+import cube8540.oauth.authentication.credentials.oauth.scope.error.ScopeInvalidException;
 import cube8540.validator.core.ValidationError;
 import cube8540.validator.core.ValidationRule;
 import org.junit.jupiter.api.BeforeEach;
@@ -280,15 +281,15 @@ class OAuth2ScopeTest {
             }
 
             @Test
-            @DisplayName("OAuth2ScopeInvalidException이 발생해야 한다.")
-            void shouldThrowOauth2ScopeInvalidException() {
-                assertThrows(OAuth2ScopeInvalidException.class, () -> scope.validate(policy));
+            @DisplayName("ScopeInvalidException이 발생해야 한다.")
+            void shouldThrowScopeInvalidException() {
+                assertThrows(ScopeInvalidException.class, () -> scope.validate(policy));
             }
 
             @Test
             @DisplayName("스코프 아이디 유효성에 관련된 에러가 포함되어야 한다.")
             void shouldContainsScopeIdErrorMessage() {
-                OAuth2ScopeInvalidException exception = assertThrows(OAuth2ScopeInvalidException.class, () -> scope.validate(policy));
+                ScopeInvalidException exception = assertThrows(ScopeInvalidException.class, () -> scope.validate(policy));
                 assertTrue(exception.getErrors().contains(error));
             }
         }
@@ -308,15 +309,15 @@ class OAuth2ScopeTest {
             }
 
             @Test
-            @DisplayName("OAuth2ScopeInvalidException이 발생해야 한다.")
-            void shouldThrowOauth2ScopeInvalidException() {
-                assertThrows(OAuth2ScopeInvalidException.class, () -> scope.validate(policy));
+            @DisplayName("ScopeInvalidException이 발생해야 한다.")
+            void shouldThrowScopeInvalidException() {
+                assertThrows(ScopeInvalidException.class, () -> scope.validate(policy));
             }
 
             @Test
             @DisplayName("스코프 접근 권한 유효성에 관련된 에러가 포함되어야 한다.")
             void shouldContainsAccessibleAuthorityErrorMessage() {
-                OAuth2ScopeInvalidException exception = assertThrows(OAuth2ScopeInvalidException.class, () -> scope.validate(policy));
+                ScopeInvalidException exception = assertThrows(ScopeInvalidException.class, () -> scope.validate(policy));
                 assertTrue(exception.getErrors().contains(error));
             }
         }

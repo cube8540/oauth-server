@@ -1,14 +1,16 @@
 package cube8540.oauth.authentication.users.endpoint;
 
-import cube8540.oauth.authentication.message.ResponseMessage;
-import cube8540.oauth.authentication.message.SuccessResponseMessage;
+import cube8540.oauth.authentication.error.ErrorMessage;
 import cube8540.oauth.authentication.users.application.ChangePasswordRequest;
 import cube8540.oauth.authentication.users.application.ResetPasswordRequest;
 import cube8540.oauth.authentication.users.application.UserPasswordService;
 import cube8540.oauth.authentication.users.application.UserProfile;
+import cube8540.oauth.authentication.users.error.UserExceptionTranslator;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,32 +24,31 @@ public class UserPasswordAPIEndpoint {
 
     private final UserPasswordService service;
 
+    @Setter
+    private UserExceptionTranslator translator = new UserExceptionTranslator();
+
     @Autowired
     public UserPasswordAPIEndpoint(UserPasswordService service) {
         this.service = service;
     }
 
     @PutMapping(value = "/api/accounts/attributes/password")
-    public ResponseEntity<ResponseMessage> changePassword(Principal principal, @RequestBody ChangePasswordRequest changeRequest) {
-        UserProfile user = service.changePassword(principal, changeRequest);
-
-        ResponseMessage message = SuccessResponseMessage.ok(user);
-        return new ResponseEntity<>(message, message.getStatus());
+    public UserProfile changePassword(Principal principal, @RequestBody ChangePasswordRequest changeRequest) {
+        return service.changePassword(principal, changeRequest);
     }
 
     @DeleteMapping(value = "/api/accounts/attributes/password")
-    public ResponseEntity<ResponseMessage> forgotPassword(@RequestParam String email) {
-        UserProfile user = service.forgotPassword(email);
-
-        ResponseMessage message = SuccessResponseMessage.ok(user);
-        return new ResponseEntity<>(message, message.getStatus());
+    public UserProfile forgotPassword(@RequestParam String email) {
+        return service.forgotPassword(email);
     }
 
     @PostMapping(value = "/api/accounts/attributes/password")
-    public ResponseEntity<ResponseMessage> resetPassword(@RequestBody ResetPasswordRequest resetPasswordRequest) {
-        UserProfile user = service.resetPassword(resetPasswordRequest);
+    public UserProfile resetPassword(@RequestBody ResetPasswordRequest resetPasswordRequest) {
+        return service.resetPassword(resetPasswordRequest);
+    }
 
-        ResponseMessage message = SuccessResponseMessage.ok(user);
-        return new ResponseEntity<>(message, message.getStatus());
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorMessage<?>> handle(Exception e) {
+        return translator.translate(e);
     }
 }

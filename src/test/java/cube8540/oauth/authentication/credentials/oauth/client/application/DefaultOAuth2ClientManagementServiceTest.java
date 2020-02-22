@@ -1,13 +1,13 @@
 package cube8540.oauth.authentication.credentials.oauth.client.application;
 
-import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
-import cube8540.oauth.authentication.credentials.oauth.client.domain.ClientOwnerNotMatchedException;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2Client;
-import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientAlreadyExistsException;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
-import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientNotFoundException;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientRepository;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientValidatePolicy;
+import cube8540.oauth.authentication.credentials.oauth.client.error.ClientAuthorizationException;
+import cube8540.oauth.authentication.credentials.oauth.client.error.ClientErrorCodes;
+import cube8540.oauth.authentication.credentials.oauth.client.error.ClientNotFoundException;
+import cube8540.oauth.authentication.credentials.oauth.client.error.ClientRegisterException;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import cube8540.oauth.authentication.users.domain.UserEmail;
 import cube8540.validator.core.ValidationRule;
@@ -17,10 +17,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -126,61 +122,6 @@ class DefaultOAuth2ClientManagementServiceTest {
     }
 
     @Nested
-    @DisplayName("클라이언트 리스트 검색")
-    class LoadClientDetails {
-        private Pageable pageable;
-        private List<OAuth2Client> clients;
-
-        @BeforeEach
-        void setup() {
-            int size = (int) (Math.random() * 100);
-            int page = (int) (Math.random() * size);
-            this.pageable = PageRequest.of(page, size);
-            this.clients = Arrays.asList(mocking("CLIENT-1"), mocking("CLIENT-2"), mocking("CLIENT-3"));
-            Page<OAuth2Client> pageClient = new PageImpl<>(clients, pageable, clients.size());
-
-            Authentication authentication = mock(Authentication.class);
-            when(authentication.getName()).thenReturn(RAW_OWNER);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-            when(repository.findByOwner(OWNER, pageable)).thenReturn(pageClient);
-        }
-
-        @Test
-        @DisplayName("인증 받은 유저의 클라이언트 정보를 검색해야 한다.")
-        void shouldSearchAuthenticationUsersClient() {
-            service.loadClientDetails(pageable);
-
-            verify(repository, times(1)).findByOwner(OWNER, pageable);
-        }
-
-        @Test
-        @DisplayName("저장소의 클라이언트 정보를 반환해야 한다.")
-        void shouldReturnsRepositoryPage() {
-            Page<OAuth2ClientDetails> pages = service.loadClientDetails(pageable);
-
-            List<OAuth2ClientDetails> expected = clients.stream()
-                    .map(DefaultOAuth2ClientDetails::new).collect(Collectors.toList());
-            assertEquals(expected, pages.getContent());
-        }
-
-        private OAuth2Client mocking(String clientId) {
-            OAuth2Client client = mock(OAuth2Client.class);
-
-            when(client.getClientId()).thenReturn(new OAuth2ClientId(clientId));
-            when(client.getSecret()).thenReturn(SECRET);
-            when(client.getClientName()).thenReturn(CLIENT_NAME);
-            when(client.getRedirectURI()).thenReturn(REDIRECT_URIS);
-            when(client.getGrantType()).thenReturn(GRANT_TYPES);
-            when(client.getScope()).thenReturn(SCOPES);
-            when(client.getOwner()).thenReturn(OWNER);
-            when(client.getAccessTokenValidity()).thenReturn(ACCESS_TOKEN_VALIDITY);
-            when(client.getRefreshTokenValidity()).thenReturn(REFRESH_TOKEN_VALIDITY);
-
-            return client;
-        }
-    }
-
-    @Nested
     @DisplayName("새 클라이언트 추가")
     class RegisterNewClient {
         private OAuth2ClientRegisterRequest request;
@@ -200,9 +141,16 @@ class DefaultOAuth2ClientManagementServiceTest {
             }
 
             @Test
-            @DisplayName("ClientAlreadyExistsException이 발생해야 한다.")
-            void shouldThrowsClientAlreadyExistsException() {
-                assertThrows(OAuth2ClientAlreadyExistsException.class, () -> service.registerNewClient(request));
+            @DisplayName("ClientRegisterException이 발생해야 한다.")
+            void shouldThrowsClientRegisterException() {
+                assertThrows(ClientRegisterException.class, () -> service.registerNewClient(request));
+            }
+
+            @Test
+            @DisplayName("에러 코드는 EXISTS_IDENTIFIER 이어야 한다.")
+            void shouldErrorCodeIsExistsIdentifier() {
+                ClientRegisterException e = assertThrows(ClientRegisterException.class, () -> service.registerNewClient(request));
+                assertEquals(ClientErrorCodes.EXISTS_IDENTIFIER, e.getCode());
             }
         }
 
@@ -403,48 +351,6 @@ class DefaultOAuth2ClientManagementServiceTest {
                 verify(repository, times(1)).save(clientCaptor.capture());
                 assertEquals(REDIRECT_URIS, clientCaptor.getValue().getRedirectURI());
             }
-
-            @Test
-            @DisplayName("저장된 클라이언트의 아이디를 반환해야 한다.")
-            void shouldReturnsSaveClientId() {
-                OAuth2ClientDetails client = service.registerNewClient(request);
-                assertEquals(RAW_CLIENT_ID, client.clientId());
-            }
-
-            @Test
-            @DisplayName("저장된 클라이언트명의 아이디를 반환해야 한다.")
-            void shouldReturnsSaveClientName() {
-                OAuth2ClientDetails client = service.registerNewClient(request);
-                assertEquals(CLIENT_NAME, client.clientName());
-            }
-
-            @Test
-            @DisplayName("저장된 클라이언트 리다이렉트 URI를 반환해야 한다.")
-            void shouldReturnsSaveClientRedirectUris() {
-                OAuth2ClientDetails client = service.registerNewClient(request);
-                assertEquals(REDIRECT_URIS, client.registeredRedirectURI());
-            }
-
-            @Test
-            @DisplayName("저장된 클라이언트의 인증 부여 방식을 반환해야 한다.")
-            void shouldReturnsSaveClientGrantType() {
-                OAuth2ClientDetails client = service.registerNewClient(request);
-                assertEquals(GRANT_TYPES, client.authorizedGrantType());
-            }
-
-            @Test
-            @DisplayName("저장된 클라이언트의 스코프를 반환해야 한다.")
-            void shouldReturnSaveClientScopes() {
-                OAuth2ClientDetails client = service.registerNewClient(request);
-                assertEquals(new HashSet<>(RAW_SCOPES), client.scope());
-            }
-
-            @Test
-            @DisplayName("저장된 클라이언트의 소유자를 반환해야 한다.")
-            void shouldReturnSaveClientOwner() {
-                OAuth2ClientDetails client = service.registerNewClient(request);
-                assertEquals(RAW_OWNER, client.owner());
-            }
         }
     }
 
@@ -479,9 +385,9 @@ class DefaultOAuth2ClientManagementServiceTest {
             }
 
             @Test
-            @DisplayName("OAuth2ClientNotFoundException이 발생해야 한다.")
-            void shouldThrowsOAuth2ClientNotFoundException() {
-                assertThrows(OAuth2ClientNotFoundException.class, () -> service.modifyClient(RAW_CLIENT_ID, modifyRequest));
+            @DisplayName("ClientNotFoundException이 발생해야 한다.")
+            void shouldThrowsClientNotFoundException() {
+                assertThrows(ClientNotFoundException.class, () -> service.modifyClient(RAW_CLIENT_ID, modifyRequest));
             }
         }
 
@@ -523,9 +429,16 @@ class DefaultOAuth2ClientManagementServiceTest {
                 }
 
                 @Test
-                @DisplayName("ClientOwnerNotMatchedException이 발생해야 한다.")
-                void shouldThrowsClientOwnerNotMatchedException() {
-                    assertThrows(ClientOwnerNotMatchedException.class, () -> service.modifyClient(RAW_CLIENT_ID, modifyRequest));
+                @DisplayName("ClientAuthorizationException이 발생해야 한다.")
+                void shouldThrowsClientAuthorizationException() {
+                    assertThrows(ClientAuthorizationException.class, () -> service.modifyClient(RAW_CLIENT_ID, modifyRequest));
+                }
+
+                @Test
+                @DisplayName("에러 코드는 INVALID_OWNER 이어야 한다.")
+                void shouldErrorCodeIsInvalidOwner() {
+                    ClientAuthorizationException e = assertThrows(ClientAuthorizationException.class, () -> service.modifyClient(RAW_CLIENT_ID, modifyRequest));
+                    assertEquals(ClientErrorCodes.INVALID_OWNER, e.getCode());
                 }
             }
 
@@ -694,48 +607,6 @@ class DefaultOAuth2ClientManagementServiceTest {
                 inOrder.verify(client, times(1)).validate(policy);
                 inOrder.verify(repository, times(1)).save(client);
             }
-
-            @Test
-            @DisplayName("저장된 클라이언트의 아이디를 반환해야 한다.")
-            void shouldReturnsSaveClientId() {
-                OAuth2ClientDetails client = service.modifyClient(RAW_CLIENT_ID, modifyRequest);
-                assertEquals(RAW_CLIENT_ID, client.clientId());
-            }
-
-            @Test
-            @DisplayName("저장된 클라이언트명의 아이디를 반환해야 한다.")
-            void shouldReturnsSaveClientName() {
-                OAuth2ClientDetails client = service.modifyClient(RAW_CLIENT_ID, modifyRequest);
-                assertEquals(MODIFY_CLIENT_NAME, client.clientName());
-            }
-
-            @Test
-            @DisplayName("저장된 클라이언트 리다이렉트 URI를 반환해야 한다.")
-            void shouldReturnsSaveClientRedirectUris() {
-                OAuth2ClientDetails client = service.modifyClient(RAW_CLIENT_ID, modifyRequest);
-                assertEquals(NEW_REDIRECT_URIS, client.registeredRedirectURI());
-            }
-
-            @Test
-            @DisplayName("저장된 클라이언트의 인증 부여 방식을 반환해야 한다.")
-            void shouldReturnsSaveClientGrantType() {
-                OAuth2ClientDetails client = service.modifyClient(RAW_CLIENT_ID, modifyRequest);
-                assertEquals(NEW_GRANT_TYPES, client.authorizedGrantType());
-            }
-
-            @Test
-            @DisplayName("저장된 클라이언트의 스코프를 반환해야 한다.")
-            void shouldReturnSaveClientScopes() {
-                OAuth2ClientDetails client = service.modifyClient(RAW_CLIENT_ID, modifyRequest);
-                assertEquals(new HashSet<>(RAW_NEW_SCOPES), client.scope());
-            }
-
-            @Test
-            @DisplayName("저장된 클라이언트의 소유자를 반환해야 한다.")
-            void shouldReturnSaveClientOwner() {
-                OAuth2ClientDetails client = service.modifyClient(RAW_CLIENT_ID, modifyRequest);
-                assertEquals(RAW_OWNER, client.owner());
-            }
         }
     }
 
@@ -780,9 +651,9 @@ class DefaultOAuth2ClientManagementServiceTest {
             }
 
             @Test
-            @DisplayName("OAuth2ClientNotFoundException이 발생해야 한다.")
-            void shouldThrowsOAuth2ClientNotFoundException() {
-                assertThrows(OAuth2ClientNotFoundException.class, () -> service.changeSecret(RAW_CLIENT_ID, changeRequest));
+            @DisplayName("ClientNotFoundException이 발생해야 한다.")
+            void shouldThrowsClientNotFoundException() {
+                assertThrows(ClientNotFoundException.class, () -> service.changeSecret(RAW_CLIENT_ID, changeRequest));
             }
         }
 
@@ -804,9 +675,16 @@ class DefaultOAuth2ClientManagementServiceTest {
                 }
 
                 @Test
-                @DisplayName("ClientOwnerNotMatchedException이 발생해야 한다.")
-                void shouldThrowsClientOwnerNotMatchedException() {
-                    assertThrows(ClientOwnerNotMatchedException.class, () -> service.changeSecret(RAW_CLIENT_ID, changeRequest));
+                @DisplayName("ClientAuthorizationException이 발생해야 한다.")
+                void shouldThrowsClientAuthorizationException() {
+                    assertThrows(ClientAuthorizationException.class, () -> service.changeSecret(RAW_CLIENT_ID, changeRequest));
+                }
+
+                @Test
+                @DisplayName("에러 코드는 INVALID_OWNER 이어야 한다.")
+                void shouldErrorCodeIsInvalidOwner() {
+                    ClientAuthorizationException e = assertThrows(ClientAuthorizationException.class, () -> service.changeSecret(RAW_CLIENT_ID, changeRequest));
+                    assertEquals(ClientErrorCodes.INVALID_OWNER, e.getCode());
                 }
             }
 
@@ -838,48 +716,6 @@ class DefaultOAuth2ClientManagementServiceTest {
                 service.changeSecret(RAW_CLIENT_ID, changeRequest);
                 inOrder.verify(client, times(1)).encrypted(passwordEncoder);
                 inOrder.verify(repository, times(1)).save(client);
-            }
-
-            @Test
-            @DisplayName("저장된 클라이언트의 아이디를 반환해야 한다.")
-            void shouldReturnsSaveClientId() {
-                OAuth2ClientDetails client = service.changeSecret(RAW_CLIENT_ID, changeRequest);
-                assertEquals(RAW_CLIENT_ID, client.clientId());
-            }
-
-            @Test
-            @DisplayName("저장된 클라이언트명의 아이디를 반환해야 한다.")
-            void shouldReturnsSaveClientName() {
-                OAuth2ClientDetails client = service.changeSecret(RAW_CLIENT_ID, changeRequest);
-                assertEquals(CLIENT_NAME, client.clientName());
-            }
-
-            @Test
-            @DisplayName("저장된 클라이언트 리다이렉트 URI를 반환해야 한다.")
-            void shouldReturnsSaveClientRedirectUris() {
-                OAuth2ClientDetails client = service.changeSecret(RAW_CLIENT_ID, changeRequest);
-                assertEquals(REDIRECT_URIS, client.registeredRedirectURI());
-            }
-
-            @Test
-            @DisplayName("저장된 클라이언트의 인증 부여 방식을 반환해야 한다.")
-            void shouldReturnsSaveClientGrantType() {
-                OAuth2ClientDetails client = service.changeSecret(RAW_CLIENT_ID, changeRequest);
-                assertEquals(GRANT_TYPES, client.authorizedGrantType());
-            }
-
-            @Test
-            @DisplayName("저장된 클라이언트의 스코프를 반환해야 한다.")
-            void shouldReturnSaveClientScopes() {
-                OAuth2ClientDetails client = service.changeSecret(RAW_CLIENT_ID, changeRequest);
-                assertEquals(new HashSet<>(RAW_SCOPES), client.scope());
-            }
-
-            @Test
-            @DisplayName("저장된 클라이언트의 소유자를 반환해야 한다.")
-            void shouldReturnSaveClientOwner() {
-                OAuth2ClientDetails client = service.changeSecret(RAW_CLIENT_ID, changeRequest);
-                assertEquals(RAW_OWNER, client.owner());
             }
         }
     }
@@ -918,9 +754,9 @@ class DefaultOAuth2ClientManagementServiceTest {
             }
 
             @Test
-            @DisplayName("OAuth2ClientNotFoundException이 발생해야 한다.")
-            void shouldThrowsOAuth2ClientNotFoundException() {
-                assertThrows(OAuth2ClientNotFoundException.class, () -> service.removeClient(RAW_CLIENT_ID));
+            @DisplayName("ClientNotFoundException이 발생해야 한다.")
+            void shouldThrowsClientNotFoundException() {
+                assertThrows(ClientNotFoundException.class, () -> service.removeClient(RAW_CLIENT_ID));
             }
         }
 
@@ -942,9 +778,16 @@ class DefaultOAuth2ClientManagementServiceTest {
                 }
 
                 @Test
-                @DisplayName("ClientOwnerNotMatchedException이 발생해야 한다.")
-                void shouldThrowsClientOwnerNotMatchedException() {
-                    assertThrows(ClientOwnerNotMatchedException.class, () -> service.removeClient(RAW_CLIENT_ID));
+                @DisplayName("ClientAuthorizationException이 발생해야 한다.")
+                void shouldThrowsClientAuthorizationException() {
+                    assertThrows(ClientAuthorizationException.class, () -> service.removeClient(RAW_CLIENT_ID));
+                }
+
+                @Test
+                @DisplayName("에러 코드는 INVALID_OWNER 이어야 한다.")
+                void shouldErrorCodesIsInvalidOwner() {
+                    ClientAuthorizationException e = assertThrows(ClientAuthorizationException.class, () -> service.removeClient(RAW_CLIENT_ID));
+                    assertEquals(ClientErrorCodes.INVALID_OWNER, e.getCode());
                 }
             }
 
@@ -954,48 +797,6 @@ class DefaultOAuth2ClientManagementServiceTest {
                 service.removeClient(RAW_CLIENT_ID);
 
                 verify(repository, times(1)).delete(client);
-            }
-
-            @Test
-            @DisplayName("삭제된 클라이언트의 아이디를 반환해야 한다.")
-            void shouldReturnsDeleteClientId() {
-                OAuth2ClientDetails client = service.removeClient(RAW_CLIENT_ID);
-                assertEquals(RAW_CLIENT_ID, client.clientId());
-            }
-
-            @Test
-            @DisplayName("삭제된 클라이언트명의 아이디를 반환해야 한다.")
-            void shouldReturnsDeleteClientName() {
-                OAuth2ClientDetails client = service.removeClient(RAW_CLIENT_ID);
-                assertEquals(CLIENT_NAME, client.clientName());
-            }
-
-            @Test
-            @DisplayName("삭제된 클라이언트 리다이렉트 URI를 반환해야 한다.")
-            void shouldReturnsDeleteClientRedirectUris() {
-                OAuth2ClientDetails client = service.removeClient(RAW_CLIENT_ID);
-                assertEquals(REDIRECT_URIS, client.registeredRedirectURI());
-            }
-
-            @Test
-            @DisplayName("삭제된 클라이언트의 인증 부여 방식을 반환해야 한다.")
-            void shouldReturnsDeleteClientGrantType() {
-                OAuth2ClientDetails client = service.removeClient(RAW_CLIENT_ID);
-                assertEquals(GRANT_TYPES, client.authorizedGrantType());
-            }
-
-            @Test
-            @DisplayName("삭제된 클라이언트의 스코프를 반환해야 한다.")
-            void shouldReturnDeleteClientScopes() {
-                OAuth2ClientDetails client = service.removeClient(RAW_CLIENT_ID);
-                assertEquals(new HashSet<>(RAW_SCOPES), client.scope());
-            }
-
-            @Test
-            @DisplayName("삭제된 클라이언트의 소유자를 반환해야 한다.")
-            void shouldReturnDeleteClientOwner() {
-                OAuth2ClientDetails client = service.removeClient(RAW_CLIENT_ID);
-                assertEquals(RAW_OWNER, client.owner());
             }
         }
     }

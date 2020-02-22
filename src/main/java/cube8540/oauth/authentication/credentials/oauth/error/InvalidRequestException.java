@@ -7,20 +7,16 @@ public class InvalidRequestException extends AbstractOAuth2AuthenticationExcepti
 
     private static final int HTTP_STATUS_CODE = 400;
 
-    public InvalidRequestException() {
-        super(HTTP_STATUS_CODE, new OAuth2Error(OAuth2ErrorCodes.INVALID_REQUEST), null);
+    private InvalidRequestException(String errorCode, String description) {
+        super(HTTP_STATUS_CODE, new OAuth2Error(errorCode, description, null));
     }
 
-    public InvalidRequestException(String message) {
-        super(HTTP_STATUS_CODE, new OAuth2Error(OAuth2ErrorCodes.INVALID_REQUEST, message, null));
+    public static InvalidRequestException invalidRequest(String message) {
+        return new InvalidRequestException(OAuth2ErrorCodes.INVALID_REQUEST, message);
     }
 
-    public InvalidRequestException(Throwable cause) {
-        super(HTTP_STATUS_CODE, new OAuth2Error(OAuth2ErrorCodes.INVALID_REQUEST), cause);
-    }
-
-    public InvalidRequestException(String message, Throwable cause) {
-        super(HTTP_STATUS_CODE, new OAuth2Error(OAuth2ErrorCodes.INVALID_REQUEST, message, null), cause);
+    public static InvalidRequestException unsupportedResponseType(String message) {
+        return new InvalidRequestException(OAuth2ErrorCodes.UNSUPPORTED_RESPONSE_TYPE, message);
     }
 
 }

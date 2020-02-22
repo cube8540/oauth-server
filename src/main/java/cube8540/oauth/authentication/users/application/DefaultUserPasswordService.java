@@ -4,9 +4,9 @@ import cube8540.oauth.authentication.users.domain.User;
 import cube8540.oauth.authentication.users.domain.UserCredentialsKeyGenerator;
 import cube8540.oauth.authentication.users.domain.UserEmail;
 import cube8540.oauth.authentication.users.domain.UserKeyMatchedResult;
-import cube8540.oauth.authentication.users.domain.UserNotFoundException;
 import cube8540.oauth.authentication.users.domain.UserRepository;
 import cube8540.oauth.authentication.users.domain.UserValidationPolicy;
+import cube8540.oauth.authentication.users.error.UserNotFoundException;
 import cube8540.oauth.authentication.users.infra.DefaultUserCredentialsKeyGenerator;
 import cube8540.oauth.authentication.users.infra.DefaultUserValidationPolicy;
 import lombok.Setter;
@@ -46,7 +46,7 @@ public class DefaultUserPasswordService implements UserPasswordService {
         user.validation(validationPolicy);
         user.encrypted(encoder);
 
-        return new UserProfile(repository.save(user));
+        return UserProfile.of(repository.save(user));
     }
 
     @Override
@@ -55,7 +55,7 @@ public class DefaultUserPasswordService implements UserPasswordService {
         User user = repository.findByEmail(new UserEmail(email))
                 .orElseThrow(() -> new UserNotFoundException(email + " user not found"));
         user.forgotPassword(keyGenerator);
-        return new UserProfile(repository.save(user));
+        return UserProfile.of(repository.save(user));
     }
 
     @Override
@@ -76,6 +76,6 @@ public class DefaultUserPasswordService implements UserPasswordService {
         user.validation(validationPolicy);
         user.encrypted(encoder);
 
-        return new UserProfile(repository.save(user));
+        return UserProfile.of(repository.save(user));
     }
 }

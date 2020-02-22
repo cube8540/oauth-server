@@ -1,6 +1,8 @@
 package cube8540.oauth.authentication.users.domain;
 
 import cube8540.oauth.authentication.credentials.authority.domain.AuthorityCode;
+import cube8540.oauth.authentication.users.error.UserAuthorizationException;
+import cube8540.oauth.authentication.users.error.UserInvalidException;
 import cube8540.validator.core.Validator;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -89,7 +91,7 @@ public class User extends AbstractAggregateRoot<User> {
 
     public void generateCredentialsKey(UserCredentialsKeyGenerator keyGenerator) {
         if (this.authorities != null && !this.authorities.isEmpty()) {
-            throw new UserAlreadyCertificationException("this account is already certification");
+            throw UserAuthorizationException.alreadyCredentials("This account is already certification");
         }
         this.credentialsKey = keyGenerator.generateKey();
         registerEvent(new UserGeneratedCredentialsKeyEvent(email, credentialsKey));
@@ -98,7 +100,7 @@ public class User extends AbstractAggregateRoot<User> {
     public void credentials(String credentialsKey, Collection<AuthorityCode> authorities) {
         UserKeyMatchedResult matchedResult = Optional.ofNullable(this.credentialsKey)
                 .map(key -> key.matches(credentialsKey))
-                .orElseThrow(() -> new UserNotMatchedException("key is not matched"));
+                .orElseThrow(() -> UserAuthorizationException.invalidKey("Key is not matched"));
         assertMatchedResult(matchedResult);
         this.authorities = new HashSet<>(authorities);
         this.credentialsKey = null;
@@ -106,7 +108,7 @@ public class User extends AbstractAggregateRoot<User> {
 
     public void changePassword(String existsPassword, String changePassword, PasswordEncoder encoder) {
         if (!encoder.matches(existsPassword, password)) {
-            throw new UserNotMatchedException("existing password is not matched");
+            throw UserAuthorizationException.invalidPassword("Existing password is not matched");
         }
         this.password = changePassword;
     }
@@ -119,7 +121,7 @@ public class User extends AbstractAggregateRoot<User> {
     public void resetPassword(String passwordCredentialsKey, String changePassword) {
         UserKeyMatchedResult matchedResult = Optional.ofNullable(this.passwordCredentialsKey)
                 .map(key -> key.matches(passwordCredentialsKey))
-                .orElseThrow(() -> new UserNotMatchedException("key is not matched"));
+                .orElseThrow(() -> UserAuthorizationException.invalidKey("Key is not matched"));
         assertMatchedResult(matchedResult);
         this.password = changePassword;
         this.passwordCredentialsKey = null;
@@ -131,9 +133,9 @@ public class User extends AbstractAggregateRoot<User> {
 
     private void assertMatchedResult(UserKeyMatchedResult matchedResult) {
         if (matchedResult.equals(UserKeyMatchedResult.NOT_MATCHED)) {
-            throw new UserNotMatchedException("key is not matched");
+            throw UserAuthorizationException.invalidKey("Key is not matched");
         } else if (matchedResult.equals(UserKeyMatchedResult.EXPIRED)) {
-            throw new UserExpiredException("key is expired");
+            throw UserAuthorizationException.keyExpired("Key is expired");
         }
     }
 }

@@ -198,13 +198,5 @@ class CompositionAuthorizationCodeServiceTest {
             verify(codeRepository, times(1)).save(codeArgumentCaptor.capture());
             assertEquals(EMAIL, codeArgumentCaptor.getValue().getEmail());
         }
-
-        @Test
-        @DisplayName("저장소에 저장된 인증코드를 반환해야 한다.")
-        void shouldReturnsAuthorizationCode() {
-            AuthorizationCode code = codeService.generateNewAuthorizationCode(authorizationRequest);
-
-            assertEquals(CODE, code);
-        }
     }
 }

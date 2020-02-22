@@ -4,8 +4,8 @@ import cube8540.oauth.authentication.AuthenticationApplication;
 import cube8540.oauth.authentication.credentials.oauth.AuthorizationRequest;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
 import cube8540.oauth.authentication.credentials.oauth.converter.RedirectUriConverter;
-import cube8540.oauth.authentication.credentials.oauth.error.AuthorizationCodeExpiredException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidClientException;
+import cube8540.oauth.authentication.credentials.oauth.error.InvalidGrantException;
 import cube8540.oauth.authentication.credentials.oauth.error.RedirectMismatchException;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import cube8540.oauth.authentication.users.domain.UserEmail;
@@ -91,7 +91,7 @@ public class OAuth2AuthorizationCode extends AbstractAggregateRoot<OAuth2Authori
 
     public void validateWithAuthorizationRequest(AuthorizationRequest request) {
         if (expirationDateTime.isBefore(LocalDateTime.now(clock))) {
-            throw new AuthorizationCodeExpiredException("authorization code is expired");
+            throw InvalidGrantException.invalidGrant("authorization code is expired");
         }
 
         if (!redirectURI.equals(request.redirectURI())) {
@@ -99,7 +99,7 @@ public class OAuth2AuthorizationCode extends AbstractAggregateRoot<OAuth2Authori
         }
 
         if (!clientId.equals(new OAuth2ClientId(request.clientId()))) {
-            throw new InvalidClientException("client id mismatch");
+            throw InvalidClientException.invalidClient("client id mismatch");
         }
     }
 }

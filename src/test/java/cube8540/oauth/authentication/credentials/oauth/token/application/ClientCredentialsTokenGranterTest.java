@@ -16,6 +16,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
+import org.springframework.security.oauth2.core.OAuth2Error;
+import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
@@ -105,6 +107,14 @@ class ClientCredentialsTokenGranterTest {
             @DisplayName("InvalidGrantException이 발생해야 한다.")
             void shouldThrowsInvalidGrantException() {
                 assertThrows(InvalidGrantException.class, () -> tokenGranter.createAccessToken(clientDetails, tokenRequest));
+            }
+
+            @Test
+            @DisplayName("에러 코드는 INVALID_SCOPE 이어야 한다.")
+            void shouldErrorCodeIsInvalidScope() {
+                OAuth2Error error = assertThrows(InvalidGrantException.class, () -> tokenGranter.createAccessToken(clientDetails, tokenRequest))
+                        .getError();
+                assertEquals(OAuth2ErrorCodes.INVALID_SCOPE, error.getErrorCode());
             }
         }
 

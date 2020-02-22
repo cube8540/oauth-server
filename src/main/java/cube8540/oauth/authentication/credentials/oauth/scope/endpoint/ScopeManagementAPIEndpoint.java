@@ -5,12 +5,9 @@ import cube8540.oauth.authentication.credentials.oauth.scope.OAuth2ScopeDetails;
 import cube8540.oauth.authentication.credentials.oauth.scope.application.OAuth2ScopeManagementService;
 import cube8540.oauth.authentication.credentials.oauth.scope.application.OAuth2ScopeModifyRequest;
 import cube8540.oauth.authentication.credentials.oauth.scope.application.OAuth2ScopeRegisterRequest;
-import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeAlreadyExistsException;
-import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeInvalidException;
-import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeNotFoundException;
-import cube8540.oauth.authentication.message.ErrorResponseMessage;
-import cube8540.oauth.authentication.message.ResponseMessage;
-import cube8540.oauth.authentication.message.SuccessResponseMessage;
+import cube8540.oauth.authentication.credentials.oauth.scope.error.ScopeExceptionTranslator;
+import cube8540.oauth.authentication.error.ErrorMessage;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -25,12 +22,17 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
 
 @RestController
 public class ScopeManagementAPIEndpoint {
 
     private final OAuth2ScopeManagementService managementService;
     private final OAuth2AccessibleScopeDetailsService accessibleScopeDetailsService;
+
+    @Setter
+    private ScopeExceptionTranslator translator = new ScopeExceptionTranslator();
 
     @Autowired
     public ScopeManagementAPIEndpoint(OAuth2ScopeManagementService managementService, OAuth2AccessibleScopeDetailsService accessibleScopeDetailsService) {
@@ -39,52 +41,29 @@ public class ScopeManagementAPIEndpoint {
     }
 
     @GetMapping(value = "/api/scopes")
-    public ResponseEntity<ResponseMessage> scopes(@AuthenticationPrincipal Authentication authentication) {
+    public Map<String, Collection<OAuth2ScopeDetails>> scopes(@AuthenticationPrincipal Authentication authentication) {
         Collection<OAuth2ScopeDetails> scopes = accessibleScopeDetailsService.readAccessibleScopes(authentication);
 
-        ResponseMessage message = SuccessResponseMessage.ok(scopes);
-        return new ResponseEntity<>(message, message.getStatus());
+        return Collections.singletonMap("scopes", scopes);
     }
 
     @PostMapping(value = "/api/scopes")
-    public ResponseEntity<ResponseMessage> registerNewScopes(@RequestBody OAuth2ScopeRegisterRequest registerRequest) {
-        OAuth2ScopeDetails scope = managementService.registerNewScope(registerRequest);
-
-        ResponseMessage message = SuccessResponseMessage.ok(scope);
-        return new ResponseEntity<>(message, message.getStatus());
+    public OAuth2ScopeDetails registerNewScopes(@RequestBody OAuth2ScopeRegisterRequest registerRequest) {
+        return managementService.registerNewScope(registerRequest);
     }
 
     @PutMapping(value = "/api/scopes/{id}")
-    public ResponseEntity<ResponseMessage> modifyScope(@PathVariable("id") String id, @RequestBody OAuth2ScopeModifyRequest modifyRequest) {
-        OAuth2ScopeDetails scope = managementService.modifyScope(id, modifyRequest);
-
-        ResponseMessage message = SuccessResponseMessage.ok(scope);
-        return new ResponseEntity<>(message, message.getStatus());
+    public OAuth2ScopeDetails modifyScope(@PathVariable("id") String id, @RequestBody OAuth2ScopeModifyRequest modifyRequest) {
+        return managementService.modifyScope(id, modifyRequest);
     }
 
     @DeleteMapping(value = "/api/scopes/{id}")
-    public ResponseEntity<ResponseMessage> removeScope(@PathVariable("id") String id) {
-        OAuth2ScopeDetails scope = managementService.removeScope(id);
-
-        ResponseMessage message = SuccessResponseMessage.ok(scope);
-        return new ResponseEntity<>(message, message.getStatus());
+    public OAuth2ScopeDetails removeScope(@PathVariable("id") String id) {
+        return managementService.removeScope(id);
     }
 
-    @ExceptionHandler(OAuth2ScopeAlreadyExistsException.class)
-    public ResponseEntity<ResponseMessage> handleException(OAuth2ScopeAlreadyExistsException e) {
-        ResponseMessage message = ErrorResponseMessage.conflict(e.getMessage());
-        return new ResponseEntity<>(message, message.getStatus());
-    }
-
-    @ExceptionHandler(OAuth2ScopeInvalidException.class)
-    public ResponseEntity<ResponseMessage> handleException(OAuth2ScopeInvalidException e) {
-        ResponseMessage message = ErrorResponseMessage.badRequest(e.getErrors());
-        return new ResponseEntity<>(message, message.getStatus());
-    }
-
-    @ExceptionHandler(OAuth2ScopeNotFoundException.class)
-    public ResponseEntity<ResponseMessage> handleException(OAuth2ScopeNotFoundException e) {
-        ResponseMessage message = ErrorResponseMessage.notfound(e.getMessage());
-        return new ResponseEntity<>(message, message.getStatus());
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorMessage<?>> handle(Exception e) {
+        return translator.translate(e);
     }
 }

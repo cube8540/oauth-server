@@ -2,10 +2,10 @@ package cube8540.oauth.authentication.credentials.authority.application;
 
 import cube8540.oauth.authentication.credentials.authority.AuthorityDetails;
 import cube8540.oauth.authentication.credentials.authority.domain.Authority;
-import cube8540.oauth.authentication.credentials.authority.domain.AuthorityAlreadyException;
 import cube8540.oauth.authentication.credentials.authority.domain.AuthorityCode;
-import cube8540.oauth.authentication.credentials.authority.domain.AuthorityNotFoundException;
 import cube8540.oauth.authentication.credentials.authority.domain.AuthorityRepository;
+import cube8540.oauth.authentication.credentials.authority.error.AuthorityNotFoundException;
+import cube8540.oauth.authentication.credentials.authority.error.AuthorityRegisterException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,26 +29,26 @@ public class DefaultAuthorityManagementService implements AuthorityManagementSer
 
     @Override
     public AuthorityDetails getAuthority(String code) {
-        return repository.findById(new AuthorityCode(code)).map(DefaultAuthorityDetails::new)
+        return repository.findById(new AuthorityCode(code)).map(DefaultAuthorityDetails::of)
                 .orElseThrow(() -> new AuthorityNotFoundException(code + " is not found"));
     }
 
     @Override
     public Collection<AuthorityDetails> getAuthorities() {
-        return repository.findAll().stream().map(DefaultAuthorityDetails::new).collect(Collectors.toList());
+        return repository.findAll().stream().map(DefaultAuthorityDetails::of).collect(Collectors.toList());
     }
 
     @Override
     public AuthorityDetails registerAuthority(AuthorityRegisterRequest registerRequest) {
         if (countAuthority(registerRequest.getCode()) > 0){
-            throw new AuthorityAlreadyException(registerRequest.getCode() + " is already exists");
+            throw AuthorityRegisterException.existsIdentifier(registerRequest.getCode() + " is already exists");
         }
 
         Authority authority = new Authority(registerRequest.getCode(), registerRequest.getDescription());
         if (registerRequest.isBasic()) {
             authority.settingBasicAuthority();
         }
-        return new DefaultAuthorityDetails(repository.save(authority));
+        return DefaultAuthorityDetails.of(repository.save(authority));
     }
 
     @Override
@@ -61,7 +61,7 @@ public class DefaultAuthorityManagementService implements AuthorityManagementSer
         } else {
             authority.settingNotBasicAuthority();
         }
-        return new DefaultAuthorityDetails(repository.save(authority));
+        return DefaultAuthorityDetails.of(repository.save(authority));
     }
 
     @Override
@@ -69,6 +69,6 @@ public class DefaultAuthorityManagementService implements AuthorityManagementSer
         Authority authority = repository.findById(new AuthorityCode(code))
                 .orElseThrow(() -> new AuthorityNotFoundException(code + " is not found"));
         repository.delete(authority);
-        return new DefaultAuthorityDetails(authority);
+        return DefaultAuthorityDetails.of(authority);
     }
 }

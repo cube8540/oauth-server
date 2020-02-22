@@ -1,5 +1,7 @@
 package cube8540.oauth.authentication.credentials.oauth.client.domain;
 
+import cube8540.oauth.authentication.credentials.oauth.client.error.ClientAuthorizationException;
+import cube8540.oauth.authentication.credentials.oauth.client.error.ClientInvalidException;
 import cube8540.oauth.authentication.credentials.oauth.converter.AuthorizationGrantTypeConverter;
 import cube8540.oauth.authentication.credentials.oauth.converter.RedirectUriConverter;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
@@ -140,7 +142,7 @@ public class OAuth2Client extends AbstractAggregateRoot<OAuth2Client> {
 
     public void changeSecret(String existsSecret, String changeSecret, PasswordEncoder encoder) {
         if (!encoder.matches(existsSecret, secret)) {
-            throw new ClientNotMatchedException("Exists secret is not matched");
+            throw ClientAuthorizationException.invalidPassword("Exists secret is not matched");
         }
         this.secret = changeSecret;
     }

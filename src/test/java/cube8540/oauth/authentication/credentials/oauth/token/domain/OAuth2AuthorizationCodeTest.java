@@ -2,8 +2,8 @@ package cube8540.oauth.authentication.credentials.oauth.token.domain;
 
 import cube8540.oauth.authentication.credentials.oauth.AuthorizationRequest;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
-import cube8540.oauth.authentication.credentials.oauth.error.AuthorizationCodeExpiredException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidClientException;
+import cube8540.oauth.authentication.credentials.oauth.error.InvalidGrantException;
 import cube8540.oauth.authentication.credentials.oauth.error.RedirectMismatchException;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import cube8540.oauth.authentication.users.domain.UserEmail;
@@ -11,6 +11,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.oauth2.core.OAuth2Error;
+import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 
 import java.net.URI;
 import java.time.Clock;
@@ -180,9 +182,17 @@ class OAuth2AuthorizationCodeTest {
             }
 
             @Test
-            @DisplayName("AuthorizationCodeExpiredException이 발생해야 한다.")
-            void shouldThrowsAuthorizationCodeExpiredException() {
-                assertThrows(AuthorizationCodeExpiredException.class, () -> code.validateWithAuthorizationRequest(savedRequest));
+            @DisplayName("InvalidGrantException이 발생해야 한다.")
+            void shouldThrowsInvalidGrantException() {
+                assertThrows(InvalidGrantException.class, () -> code.validateWithAuthorizationRequest(savedRequest));
+            }
+
+            @Test
+            @DisplayName("에러 코드는 INVALID_GRANT 이어야 한다.")
+            void shouldErrorCodeIsInvalidGrant() {
+                OAuth2Error error = assertThrows(InvalidGrantException.class, () -> code.validateWithAuthorizationRequest(savedRequest))
+                        .getError();
+                assertEquals(OAuth2ErrorCodes.INVALID_GRANT, error.getErrorCode());
             }
         }
 
@@ -234,6 +244,14 @@ class OAuth2AuthorizationCodeTest {
             @DisplayName("InvalidClientException이 발생해야 한다.")
             void shouldThrowsInvalidClientException() {
                 assertThrows(InvalidClientException.class, () -> this.code.validateWithAuthorizationRequest(request));
+            }
+
+            @Test
+            @DisplayName("에러 코드는 INVALID_CLIENT 이어야 한다.")
+            void shouldErrorCodeIsInvalidClient() {
+                OAuth2Error error = assertThrows(InvalidClientException.class, () -> this.code.validateWithAuthorizationRequest(request))
+                        .getError();
+                assertEquals(OAuth2ErrorCodes.INVALID_CLIENT, error.getErrorCode());
             }
         }
 

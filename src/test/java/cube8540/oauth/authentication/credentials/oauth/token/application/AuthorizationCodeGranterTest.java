@@ -22,6 +22,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
+import org.springframework.security.oauth2.core.OAuth2Error;
+import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 
 import java.net.URI;
 import java.time.Clock;
@@ -131,6 +133,12 @@ class AuthorizationCodeGranterTest {
             void shouldThrowsInvalidRequestException() {
                 assertThrows(InvalidRequestException.class, () -> tokenGranter.createAccessToken(clientDetails, tokenRequest));
             }
+
+            @Test
+            @DisplayName("에러 코드는 INVALID_REQUIEST 이어야 한다.")
+            void shouldErrorCodeIsInvalidRequest() {
+                assertThrows(InvalidRequestException.class, () -> tokenGranter.createAccessToken(clientDetails, tokenRequest));
+            }
         }
 
         @Nested
@@ -162,6 +170,14 @@ class AuthorizationCodeGranterTest {
                 @DisplayName("InvalidGrantException이 발생해야 한다.")
                 void shouldThrowsInvalidGrantException() {
                     assertThrows(InvalidGrantException.class, () -> tokenGranter.createAccessToken(clientDetails, tokenRequest));
+                }
+
+                @Test
+                @DisplayName("에러 코드는 INVALID_SCOPE 이어야 한다.")
+                void shouldErrorCodeIsInvalidScope() {
+                    OAuth2Error error = assertThrows(InvalidGrantException.class, () -> tokenGranter.createAccessToken(clientDetails, tokenRequest))
+                            .getError();
+                    assertEquals(OAuth2ErrorCodes.INVALID_SCOPE, error.getErrorCode());
                 }
             }
 
@@ -265,6 +281,14 @@ class AuthorizationCodeGranterTest {
                         assertThrows(InvalidGrantException.class, () -> tokenGranter.createAccessToken(clientDetails, tokenRequest));
                     }
 
+                    @Test
+                    @DisplayName("에러 코드는 INVALID_SCOPE 이어야 한다.")
+                    void shouldErrorCodeIsInvalidScope() {
+                        OAuth2Error error = assertThrows(InvalidGrantException.class, () -> tokenGranter.createAccessToken(clientDetails, tokenRequest))
+                                .getError();
+                        assertEquals(OAuth2ErrorCodes.INVALID_SCOPE, error.getErrorCode());
+                    }
+
                     @AfterEach
                     void after() {
                         when(authorizationCode.getApprovedScopes()).thenReturn(STORED_SCOPES);
@@ -286,6 +310,16 @@ class AuthorizationCodeGranterTest {
                     void shouldThrowsInvalidGrantException() {
                         assertThrows(InvalidGrantException.class, () -> tokenGranter.createAccessToken(clientDetails, tokenRequest));
                     }
+
+                    @Test
+                    @DisplayName("에러 코드는 INVALID_SCOPE 이어야 한다.")
+                    void shouldErrorCodeIsInvalidScope() {
+                        OAuth2Error error = assertThrows(InvalidGrantException.class, () -> tokenGranter.createAccessToken(clientDetails, tokenRequest))
+                                .getError();
+                        assertEquals(OAuth2ErrorCodes.INVALID_SCOPE, error.getErrorCode());
+                    }
+
+                    @Test
 
                     @AfterEach
                     void after() {

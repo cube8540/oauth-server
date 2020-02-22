@@ -5,8 +5,8 @@ import cube8540.oauth.authentication.credentials.authority.domain.AuthorityCode;
 import cube8540.oauth.authentication.users.domain.User;
 import cube8540.oauth.authentication.users.domain.UserCredentialsKeyGenerator;
 import cube8540.oauth.authentication.users.domain.UserEmail;
-import cube8540.oauth.authentication.users.domain.UserNotFoundException;
 import cube8540.oauth.authentication.users.domain.UserRepository;
+import cube8540.oauth.authentication.users.error.UserNotFoundException;
 import cube8540.oauth.authentication.users.infra.DefaultUserCredentialsKeyGenerator;
 import lombok.Setter;
 import org.springframework.stereotype.Service;
@@ -36,7 +36,7 @@ public class DefaultUserCredentialsService implements UserCredentialsService {
                 .orElseThrow(() -> new UserNotFoundException(email + " user not found"));
 
         user.generateCredentialsKey(keyGenerator);
-        return new UserProfile(repository.save(user));
+        return UserProfile.of(repository.save(user));
     }
 
     @Override
@@ -47,6 +47,6 @@ public class DefaultUserCredentialsService implements UserCredentialsService {
         List<AuthorityCode> authorityCodes = authorityService.getBasicAuthority();
 
         user.credentials(credentialsKey, authorityCodes);
-        return new UserProfile(repository.save(user));
+        return UserProfile.of(repository.save(user));
     }
 }

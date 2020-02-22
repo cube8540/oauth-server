@@ -5,11 +5,10 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetailsService;
 import cube8540.oauth.authentication.credentials.oauth.client.provider.ClientCredentialsAuthenticationProvider;
 import cube8540.oauth.authentication.credentials.oauth.client.provider.ClientCredentialsEndpointFilter;
-import cube8540.oauth.authentication.credentials.oauth.error.DefaultOAuth2ExceptionTranslator;
+import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTranslator;
 import cube8540.oauth.authentication.credentials.oauth.error.DefaultOauth2ExceptionResponseRenderer;
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2AuthenticationExceptionEntryPoint;
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionResponseRenderer;
-import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTranslator;
 import cube8540.oauth.authentication.credentials.oauth.token.application.AuthorizationCodeTokenGranter;
 import cube8540.oauth.authentication.credentials.oauth.token.application.ClientCredentialsTokenGranter;
 import cube8540.oauth.authentication.credentials.oauth.token.application.CompositeOAuth2AccessTokenGranter;
@@ -66,7 +65,7 @@ public class OAuth2EndpointSecurityConfiguration extends WebSecurityConfigurerAd
     public OAuth2EndpointSecurityConfiguration() throws HttpMediaTypeNotSupportedException {
         ObjectMapper objectMapper = new ObjectMapper().setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
         MappingJackson2HttpMessageConverter messageConverter = new MappingJackson2HttpMessageConverter(objectMapper);
-        OAuth2ExceptionTranslator translator = new DefaultOAuth2ExceptionTranslator();
+        OAuth2ExceptionTranslator translator = new OAuth2ExceptionTranslator();
         OAuth2ExceptionResponseRenderer renderer = new DefaultOauth2ExceptionResponseRenderer(messageConverter);
 
         this.oAuth2AuthenticationExceptionEntryPoint = new OAuth2AuthenticationExceptionEntryPoint(translator, renderer);

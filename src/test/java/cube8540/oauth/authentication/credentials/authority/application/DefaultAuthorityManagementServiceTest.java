@@ -1,11 +1,11 @@
 package cube8540.oauth.authentication.credentials.authority.application;
 
-import cube8540.oauth.authentication.credentials.authority.AuthorityDetails;
 import cube8540.oauth.authentication.credentials.authority.domain.Authority;
-import cube8540.oauth.authentication.credentials.authority.domain.AuthorityAlreadyException;
 import cube8540.oauth.authentication.credentials.authority.domain.AuthorityCode;
-import cube8540.oauth.authentication.credentials.authority.domain.AuthorityNotFoundException;
 import cube8540.oauth.authentication.credentials.authority.domain.AuthorityRepository;
+import cube8540.oauth.authentication.credentials.authority.error.AuthorityErrorCodes;
+import cube8540.oauth.authentication.credentials.authority.error.AuthorityNotFoundException;
+import cube8540.oauth.authentication.credentials.authority.error.AuthorityRegisterException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -13,11 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -91,68 +87,6 @@ class DefaultAuthorityManagementServiceTest {
                 assertThrows(AuthorityNotFoundException.class, () -> service.getAuthority(RAW_CODE));
             }
         }
-
-        @Nested
-        @DisplayName("저장소에 권한이 있을시")
-        class AuthorityFound {
-
-            @BeforeEach
-            void setup() {
-                Authority authority = mock(Authority.class);
-
-                when(authority.getCode()).thenReturn(CODE);
-                when(authority.getDescription()).thenReturn(DESCRIPTION);
-                when(repository.findById(CODE)).thenReturn(Optional.of(authority));
-            }
-
-            @Test
-            @DisplayName("검색된 권한의 코드를 반환 해야한다.")
-            void shouldReturnsAuthorityCode() {
-                AuthorityDetails authorityDetails = service.getAuthority(RAW_CODE);
-
-                assertEquals(RAW_CODE, authorityDetails.code());
-            }
-
-            @Test
-            @DisplayName("검색된 권한의 설명을 반환해야 한다.")
-            void shouldReturnsAuthorityDescription() {
-                AuthorityDetails authorityDetails =service.getAuthority(RAW_CODE);
-
-                assertEquals(DESCRIPTION, authorityDetails.description());
-            }
-        }
-    }
-
-    @Nested
-    @DisplayName("모든 권한 검색")
-    class GetAllAuthority {
-
-        private List<Authority> authorities;
-
-        @BeforeEach
-        void setup() {
-            this.authorities = Arrays.asList(mocking("CODE-1", "D-1"),
-                    mocking("CODE-2", "D-2"), mocking("CODE-3", "D-3"));
-
-            when(repository.findAll()).thenReturn(authorities);
-        }
-
-        @Test
-        @DisplayName("저장소에서 검색된 권한의 정보를 반환해야 한다.")
-        void shouldReturnsRepositoryAuthorities() {
-            Collection<AuthorityDetails> authorityDetails = service.getAuthorities();
-
-            Collection<AuthorityDetails> expected = authorities.stream().map(DefaultAuthorityDetails::new).collect(Collectors.toList());
-            assertEquals(expected, authorityDetails);
-        }
-
-        private Authority mocking(String code, String description) {
-            Authority authority = mock(Authority.class);
-
-            when(authority.getCode()).thenReturn(new AuthorityCode(code));
-            when(authority.getDescription()).thenReturn(description);
-            return authority;
-        }
     }
 
     @Nested
@@ -173,9 +107,16 @@ class DefaultAuthorityManagementServiceTest {
             }
 
             @Test
-            @DisplayName("AuthorityAlreadyException이 발생해야 한다.")
-            void shouldThrowsAuthorityAlreadyException() {
-                assertThrows(AuthorityAlreadyException.class, () -> service.registerAuthority(request));
+            @DisplayName("AuthorityRegistrationException이 발생해야 한다.")
+            void shouldThrowAuthorityRegistrationException() {
+                assertThrows(AuthorityRegisterException.class, () -> service.registerAuthority(request));
+            }
+
+            @Test
+            @DisplayName("에러 코드는 ALREADY_EXISTS_ID 이어야 한다.")
+            void shouldErrorCodeIsAlreadyExistsId() {
+                AuthorityRegisterException error = assertThrows(AuthorityRegisterException.class, () -> service.registerAuthority(request));
+                assertEquals(AuthorityErrorCodes.EXISTS_IDENTIFIER, error.getCode());
             }
         }
 
@@ -211,22 +152,6 @@ class DefaultAuthorityManagementServiceTest {
                 service.registerAuthority(request);
                 verify(repository, times(1)).save(authorityCaptor.capture());
                 assertEquals(DESCRIPTION, authorityCaptor.getValue().getDescription());
-            }
-
-            @Test
-            @DisplayName("저장된 권한의 코드를 반환해야 한다.")
-            void shouldReturnsRegisteredAuthorityCode() {
-                AuthorityDetails authorityDetails = service.registerAuthority(request);
-
-                assertEquals(RAW_CODE, authorityDetails.code());
-            }
-
-            @Test
-            @DisplayName("저장된 권한의 설명을 반환해야 한다.")
-            void shouldReturnsRegisteredAuthorityDescription() {
-                AuthorityDetails authorityDetails = service.registerAuthority(request);
-
-                assertEquals(DESCRIPTION, authorityDetails.description());
             }
 
             @Nested
@@ -404,22 +329,6 @@ class DefaultAuthorityManagementServiceTest {
                     inOrder.verify(repository, times(1)).save(authority);
                 }
             }
-
-            @Test
-            @DisplayName("수정된 권한의 코드를 반환해야 한다.")
-            void shouldReturnsModifiedAuthorityCode() {
-                AuthorityDetails authorityDetails = service.modifyAuthority(RAW_CODE, request);
-
-                assertEquals(RAW_CODE, authorityDetails.code());
-            }
-
-            @Test
-            @DisplayName("수정된 권한의 설명을 반환 해야한다.")
-            void shouldReturnsModifiedAuthorityDescription() {
-                AuthorityDetails authorityDetails = service.modifyAuthority(RAW_CODE, request);
-
-                assertEquals(MODIFY_DESCRIPTION, authorityDetails.description());
-            }
         }
     }
 
@@ -463,20 +372,6 @@ class DefaultAuthorityManagementServiceTest {
             void shouldRemoveSearchedAuthority() {
                 service.removeAuthority(RAW_CODE);
                 verify(repository, times(1)).delete(authority);
-            }
-
-            @Test
-            @DisplayName("삭제한 권한의 코드를 반환해야 한다.")
-            void shouldReturnsRemoveAuthorityCode() {
-                AuthorityDetails authorityDetails = service.removeAuthority(RAW_CODE);
-                assertEquals(RAW_CODE, authorityDetails.code());
-            }
-
-            @Test
-            @DisplayName("삭제한 권한의 설명을 반환해야 한다.")
-            void shouldReturnsREmoveAuthorityDescription() {
-                AuthorityDetails authorityDetails = service.removeAuthority(RAW_CODE);
-                assertEquals(DESCRIPTION, authorityDetails.description());
             }
         }
     }

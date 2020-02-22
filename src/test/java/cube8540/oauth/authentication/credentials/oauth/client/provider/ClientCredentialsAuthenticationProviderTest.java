@@ -2,7 +2,7 @@ package cube8540.oauth.authentication.credentials.oauth.client.provider;
 
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetailsService;
-import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientNotFoundException;
+import cube8540.oauth.authentication.credentials.oauth.client.error.ClientNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -86,7 +86,43 @@ class ClientCredentialsAuthenticationProviderTest {
 
             @BeforeEach
             void setup() {
-                when(service.loadClientDetailsByClientId(any())).thenThrow(new OAuth2ClientNotFoundException("client not found"));
+                when(service.loadClientDetailsByClientId(any())).thenThrow(new ClientNotFoundException("client not found"));
+            }
+
+            @Test
+            @DisplayName("BadCredentialsExeption이 발생해야 한다.")
+            void shouldThrowsBadCredentialsException() {
+                assertThrows(BadCredentialsException.class, () -> provider.authenticate(token));
+            }
+        }
+
+        @Nested
+        @DisplayName("클라이언트 아이디가 null일시")
+        class WhenPrincipalIsNull {
+
+            private ClientCredentialsToken token;
+
+            @BeforeEach
+            void setup() {
+                this.token = new ClientCredentialsToken(null, CLIENT_SECRET);
+            }
+
+            @Test
+            @DisplayName("BadCredentialsExeption이 발생해야 한다.")
+            void shouldThrowsBadCredentialsException() {
+                assertThrows(BadCredentialsException.class, () -> provider.authenticate(token));
+            }
+        }
+
+        @Nested
+        @DisplayName("클라이언트 패스워드가 null일시")
+        class WhenCredentialsIsNull {
+
+            private ClientCredentialsToken token;
+
+            @BeforeEach
+            void setup() {
+                this.token = new ClientCredentialsToken(CLIENT_ID, null);
             }
 
             @Test
