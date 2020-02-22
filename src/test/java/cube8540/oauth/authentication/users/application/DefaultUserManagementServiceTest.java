@@ -1,11 +1,12 @@
 package cube8540.oauth.authentication.users.application;
 
 import cube8540.oauth.authentication.users.domain.User;
-import cube8540.oauth.authentication.users.domain.UserAlreadyExistsException;
 import cube8540.oauth.authentication.users.domain.UserEmail;
-import cube8540.oauth.authentication.users.domain.UserNotFoundException;
 import cube8540.oauth.authentication.users.domain.UserRepository;
 import cube8540.oauth.authentication.users.domain.UserValidationPolicy;
+import cube8540.oauth.authentication.users.error.UserErrorCodes;
+import cube8540.oauth.authentication.users.error.UserNotFoundException;
+import cube8540.oauth.authentication.users.error.UserRegisterException;
 import cube8540.validator.core.ValidationRule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -115,9 +116,16 @@ class DefaultUserManagementServiceTest {
             }
 
             @Test
-            @DisplayName("UserAlreadyExistsException이 발생해야 한다.")
-            void shouldThrowsUserAlreadyExistsException() {
-                assertThrows(UserAlreadyExistsException.class, () -> service.registerUser(registerRequest));
+            @DisplayName("UserRegisterException이 발생해야 한다.")
+            void shouldThrowsUserRegisterException() {
+                assertThrows(UserRegisterException.class, () -> service.registerUser(registerRequest));
+            }
+
+            @Test
+            @DisplayName("에러 코드는 EXISTS_IDENTIFIER 이어야 한다.")
+            void shouldErrorCodeIsExistsIdentifier() {
+                UserRegisterException e = assertThrows(UserRegisterException.class, () -> service.registerUser(registerRequest));
+                assertEquals(UserErrorCodes.EXISTS_IDENTIFIER, e.getCode());
             }
         }
 

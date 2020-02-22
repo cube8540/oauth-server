@@ -1,12 +1,16 @@
 package cube8540.oauth.authentication.users.endpoint;
 
+import cube8540.oauth.authentication.error.ErrorMessage;
 import cube8540.oauth.authentication.message.ResponseMessage;
 import cube8540.oauth.authentication.message.SuccessResponseMessage;
 import cube8540.oauth.authentication.users.application.UserManagementService;
 import cube8540.oauth.authentication.users.application.UserProfile;
 import cube8540.oauth.authentication.users.application.UserRegisterRequest;
+import cube8540.oauth.authentication.users.error.UserExceptionTranslator;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,6 +21,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserManagementAPIEndpoint {
 
     private final UserManagementService service;
+
+    @Setter
+    private UserExceptionTranslator translator = new UserExceptionTranslator();
 
     @Autowired
     public UserManagementAPIEndpoint(UserManagementService service) {
@@ -37,5 +44,10 @@ public class UserManagementAPIEndpoint {
 
         ResponseMessage message = SuccessResponseMessage.ok(count);
         return new ResponseEntity<>(message, message.getStatus());
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorMessage<?>> handle(Exception e) {
+        return translator.translate(e);
     }
 }
