@@ -97,6 +97,42 @@ class ClientCredentialsAuthenticationProviderTest {
         }
 
         @Nested
+        @DisplayName("클라이언트 아이디가 null일시")
+        class WhenPrincipalIsNull {
+
+            private ClientCredentialsToken token;
+
+            @BeforeEach
+            void setup() {
+                this.token = new ClientCredentialsToken(null, CLIENT_SECRET);
+            }
+
+            @Test
+            @DisplayName("BadCredentialsExeption이 발생해야 한다.")
+            void shouldThrowsBadCredentialsException() {
+                assertThrows(BadCredentialsException.class, () -> provider.authenticate(token));
+            }
+        }
+
+        @Nested
+        @DisplayName("클라이언트 패스워드가 null일시")
+        class WhenCredentialsIsNull {
+
+            private ClientCredentialsToken token;
+
+            @BeforeEach
+            void setup() {
+                this.token = new ClientCredentialsToken(CLIENT_ID, null);
+            }
+
+            @Test
+            @DisplayName("BadCredentialsExeption이 발생해야 한다.")
+            void shouldThrowsBadCredentialsException() {
+                assertThrows(BadCredentialsException.class, () -> provider.authenticate(token));
+            }
+        }
+
+        @Nested
         @DisplayName("인증을 요청한 클라이언트의 정보를 찾을 수 있을시")
         class WhenClientFound {
             private OAuth2ClientDetails details;
