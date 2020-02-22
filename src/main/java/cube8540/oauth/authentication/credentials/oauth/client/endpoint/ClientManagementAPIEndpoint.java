@@ -46,8 +46,8 @@ public class ClientManagementAPIEndpoint {
         this.clientPageSize = DEFAULT_CLIENT_PAGE_SIZE;
     }
 
-    @GetMapping(value = "/api/clients/attributes/{clientId}")
-    public Map<String, Long> countClientId(@PathVariable("clientId") String clientId) {
+    @GetMapping(value = "/api/clients/attributes/clientId")
+    public Map<String, Long> countClientId(@RequestParam String clientId) {
         long count = service.countClient(clientId);
         return Collections.singletonMap("count", count);
     }
