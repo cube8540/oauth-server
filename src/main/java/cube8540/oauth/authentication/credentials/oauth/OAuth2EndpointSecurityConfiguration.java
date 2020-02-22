@@ -35,6 +35,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.context.NullSecurityContextRepository;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 
 @Order(1)
@@ -86,6 +87,9 @@ public class OAuth2EndpointSecurityConfiguration extends WebSecurityConfigurerAd
                 .anyRequest().authenticated()
                 .and()
             .addFilterBefore(tokenEndpointClientCredentialsFilter(), UsernamePasswordAuthenticationFilter.class)
+            .securityContext()
+                .securityContextRepository(new NullSecurityContextRepository())
+                .and()
             .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.NEVER)
                 .and()
