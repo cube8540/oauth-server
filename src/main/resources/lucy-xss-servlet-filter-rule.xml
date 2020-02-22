@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+    <defenders>
+        <defender>
+            <name>xssPreventerDefender</name>
+            <class>com.navercorp.lucy.security.xss.servletfilter.defender.XssPreventerDefender</class>
+        </defender>
+    </defenders>
+    <default>
+        <defender>xssPreventerDefender</defender>
+    </default>
+</config>
