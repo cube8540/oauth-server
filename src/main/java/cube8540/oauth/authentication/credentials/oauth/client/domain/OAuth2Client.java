@@ -13,6 +13,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.springframework.data.domain.AbstractAggregateRoot;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
@@ -56,18 +58,21 @@ public class OAuth2Client extends AbstractAggregateRoot<OAuth2Client> {
     private String clientName;
 
     @ElementCollection
+    @Fetch(FetchMode.JOIN)
     @Column(name = "redirect_uri", length = 128, nullable = false)
     @CollectionTable(name = "oauth2_client_redirect_uri", joinColumns = @JoinColumn(name = "client_id", nullable = false))
     @Convert(converter = RedirectUriConverter.class)
     private Set<URI> redirectURI;
 
     @ElementCollection
+    @Fetch(FetchMode.JOIN)
     @Column(name = "grant_type", length = 32, nullable = false)
     @CollectionTable(name = "oauth2_client_grant_type", joinColumns = @JoinColumn(name = "client_id", nullable = false))
     @Convert(converter = AuthorizationGrantTypeConverter.class)
     private Set<AuthorizationGrantType> grantType;
 
     @ElementCollection
+    @Fetch(FetchMode.JOIN)
     @CollectionTable(name = "oauth2_client_scope", joinColumns = @JoinColumn(name = "client_id", nullable = false))
     @AttributeOverride(name = "value", column = @Column(name = "scope_id", length = 32, nullable = false))
     private Set<OAuth2ScopeId> scope;
