@@ -89,7 +89,7 @@ class AbstractOAuth2TokenGranterTest {
             this.clientDetails = mock(OAuth2ClientDetails.class);
             this.tokenRequest = mock(OAuth2TokenRequest.class);
 
-            when(clientDetails.clientId()).thenReturn(RAW_CLIENT);
+            when(clientDetails.getClientId()).thenReturn(RAW_CLIENT);
             when(accessToken.getTokenId()).thenReturn(TOKEN_ID);
             when(accessToken.getEmail()).thenReturn(EMAIL);
             when(accessToken.getClient()).thenReturn(CLIENT);

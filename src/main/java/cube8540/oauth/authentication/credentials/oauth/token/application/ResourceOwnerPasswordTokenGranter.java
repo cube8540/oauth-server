@@ -38,7 +38,7 @@ public class ResourceOwnerPasswordTokenGranter extends AbstractOAuth2TokenGrante
         Authentication authentication = authentication(tokenRequest);
         OAuth2AuthorizedAccessToken accessToken = OAuth2AuthorizedAccessToken.builder(getTokenIdGenerator())
                 .expiration(extractTokenExpiration(clientDetails))
-                .client(new OAuth2ClientId(clientDetails.clientId()))
+                .client(new OAuth2ClientId(clientDetails.getClientId()))
                 .email(new UserEmail(authentication.getName()))
                 .scope(extractGrantScope(clientDetails, tokenRequest))
                 .tokenGrantType(AuthorizationGrantType.PASSWORD)

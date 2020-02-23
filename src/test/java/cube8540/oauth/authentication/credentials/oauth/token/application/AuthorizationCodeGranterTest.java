@@ -106,10 +106,10 @@ class AuthorizationCodeGranterTest {
             this.tokenRequest = mock(OAuth2TokenRequest.class);
             this.authorizationCode = mock(OAuth2AuthorizationCode.class);
 
-            when(clientDetails.clientId()).thenReturn(RAW_AUTH_CLIENT_ID);
-            when(clientDetails.accessTokenValiditySeconds()).thenReturn(ACCESS_TOKEN_VALIDITY_SECONDS);
-            when(clientDetails.refreshTokenValiditySeconds()).thenReturn(REFRESH_TOKEN_VALIDITY_SECONDS);
-            when(clientDetails.scope()).thenReturn(RAW_CLIENT_SCOPES);
+            when(clientDetails.getClientId()).thenReturn(RAW_AUTH_CLIENT_ID);
+            when(clientDetails.getAccessTokenValiditySeconds()).thenReturn(ACCESS_TOKEN_VALIDITY_SECONDS);
+            when(clientDetails.getRefreshTokenValiditySeconds()).thenReturn(REFRESH_TOKEN_VALIDITY_SECONDS);
+            when(clientDetails.getScopes()).thenReturn(RAW_CLIENT_SCOPES);
 
             when(tokenRequest.clientId()).thenReturn(RAW_CLIENT_ID);
             when(tokenRequest.code()).thenReturn(RAW_CODE);

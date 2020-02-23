@@ -31,7 +31,7 @@ public class RefreshTokenGranter extends AbstractOAuth2TokenGranter {
         OAuth2AuthorizedRefreshToken storedRefreshToken = refreshTokenRepository.findById(new OAuth2TokenId(tokenRequest.refreshToken()))
                 .orElseThrow(() -> InvalidGrantException.invalidGrant("invalid refresh token"));
         OAuth2AuthorizedAccessToken storedAccessToken = storedRefreshToken.getAccessToken();
-        if (!storedAccessToken.getClient().equals(new OAuth2ClientId(clientDetails.clientId()))) {
+        if (!storedAccessToken.getClient().equals(new OAuth2ClientId(clientDetails.getClientId()))) {
             throw InvalidClientException.invalidClient("invalid refresh token");
         }
 

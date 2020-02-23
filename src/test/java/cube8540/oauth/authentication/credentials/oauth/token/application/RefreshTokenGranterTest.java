@@ -111,9 +111,9 @@ class RefreshTokenGranterTest {
             this.tokenRequest = mock(OAuth2TokenRequest.class);
             this.validator = mock(OAuth2RequestValidator.class);
 
-            when(clientDetails.clientId()).thenReturn(RAW_CLIENT_ID);
-            when(clientDetails.accessTokenValiditySeconds()).thenReturn(ACCESS_TOKEN_VALIDITY_SECONDS);
-            when(clientDetails.refreshTokenValiditySeconds()).thenReturn(REFRESH_TOKEN_VALIDITY_SECONDS);
+            when(clientDetails.getClientId()).thenReturn(RAW_CLIENT_ID);
+            when(clientDetails.getAccessTokenValiditySeconds()).thenReturn(ACCESS_TOKEN_VALIDITY_SECONDS);
+            when(clientDetails.getRefreshTokenValiditySeconds()).thenReturn(REFRESH_TOKEN_VALIDITY_SECONDS);
             when(tokenRequest.scopes()).thenReturn(RAW_SCOPES);
             when(tokenIdGenerator.generateTokenValue()).thenReturn(TOKEN_ID);
 

@@ -53,7 +53,7 @@ class DefaultClientGrantTypeValidationRuleTest {
         void setup() {
             this.client = mock(OAuth2Client.class);
 
-            when(this.client.getGrantType()).thenReturn(Collections.emptySet());
+            when(this.client.getGrantTypes()).thenReturn(Collections.emptySet());
         }
 
         @Test
@@ -74,7 +74,7 @@ class DefaultClientGrantTypeValidationRuleTest {
             Set<AuthorizationGrantType> grantTypes = new HashSet<>(Arrays.asList(AuthorizationGrantType.AUTHORIZATION_CODE, AuthorizationGrantType.PASSWORD));
             this.client = mock(OAuth2Client.class);
 
-            when(this.client.getGrantType()).thenReturn(grantTypes);
+            when(this.client.getGrantTypes()).thenReturn(grantTypes);
         }
 
         @Test

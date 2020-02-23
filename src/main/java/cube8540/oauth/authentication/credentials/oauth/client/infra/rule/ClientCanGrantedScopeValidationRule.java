@@ -45,12 +45,12 @@ public class ClientCanGrantedScopeValidationRule implements ValidationRule<OAuth
         if (scopeDetailsService == null || securityContext == null) {
             return false;
         }
-        if (target.getScope() == null || target.getScope().isEmpty()) {
+        if (target.getScopes() == null || target.getScopes().isEmpty()) {
             return false;
         }
         Set<OAuth2ScopeId> accessibleScopes = scopeDetailsService.readAccessibleScopes(securityContext.getAuthentication())
                 .stream().map(OAuth2ScopeDetails::scopeId)
                 .map(OAuth2ScopeId::new).collect(Collectors.toSet());
-        return accessibleScopes.containsAll(target.getScope());
+        return accessibleScopes.containsAll(target.getScopes());
     }
 }

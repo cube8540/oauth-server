@@ -67,7 +67,7 @@ public class AuthorizationCodeTokenGranter extends AbstractOAuth2TokenGranter {
 
         @Override
         public String clientId() {
-            return clientDetails.clientId();
+            return clientDetails.getClientId();
         }
 
         @Override

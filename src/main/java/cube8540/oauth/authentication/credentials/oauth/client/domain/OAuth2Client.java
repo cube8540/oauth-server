@@ -62,20 +62,20 @@ public class OAuth2Client extends AbstractAggregateRoot<OAuth2Client> {
     @Column(name = "redirect_uri", length = 128, nullable = false)
     @CollectionTable(name = "oauth2_client_redirect_uri", joinColumns = @JoinColumn(name = "client_id", nullable = false))
     @Convert(converter = RedirectUriConverter.class)
-    private Set<URI> redirectURI;
+    private Set<URI> redirectUris;
 
     @ElementCollection
     @Fetch(FetchMode.JOIN)
     @Column(name = "grant_type", length = 32, nullable = false)
     @CollectionTable(name = "oauth2_client_grant_type", joinColumns = @JoinColumn(name = "client_id", nullable = false))
     @Convert(converter = AuthorizationGrantTypeConverter.class)
-    private Set<AuthorizationGrantType> grantType;
+    private Set<AuthorizationGrantType> grantTypes;
 
     @ElementCollection
     @Fetch(FetchMode.JOIN)
     @CollectionTable(name = "oauth2_client_scope", joinColumns = @JoinColumn(name = "client_id", nullable = false))
     @AttributeOverride(name = "value", column = @Column(name = "scope_id", length = 32, nullable = false))
-    private Set<OAuth2ScopeId> scope;
+    private Set<OAuth2ScopeId> scopes;
 
     @Setter
     @Embedded
@@ -99,39 +99,39 @@ public class OAuth2Client extends AbstractAggregateRoot<OAuth2Client> {
         this.secret = encoder.encode(this.secret);
     }
 
-    public void addRedirectURI(URI uri) {
-        if (this.redirectURI == null) {
-            this.redirectURI = new HashSet<>();
+    public void addRedirectUri(URI uri) {
+        if (this.redirectUris == null) {
+            this.redirectUris = new HashSet<>();
         }
-        this.redirectURI.add(uri);
+        this.redirectUris.add(uri);
     }
 
-    public void removeRedirectURI(URI redirectURI) {
-        Optional.ofNullable(this.redirectURI)
-                .ifPresent(uris -> uris.remove(redirectURI));
+    public void removeRedirectUri(URI redirectUri) {
+        Optional.ofNullable(this.redirectUris)
+                .ifPresent(uris -> uris.remove(redirectUri));
     }
 
     public void addGrantType(AuthorizationGrantType grantType) {
-        if (this.grantType == null) {
-            this.grantType = new HashSet<>();
+        if (this.grantTypes == null) {
+            this.grantTypes = new HashSet<>();
         }
-        this.grantType.add(grantType);
+        this.grantTypes.add(grantType);
     }
 
     public void removeGrantType(AuthorizationGrantType grantType) {
-        Optional.ofNullable(this.grantType)
+        Optional.ofNullable(this.grantTypes)
                 .ifPresent(types -> types.remove(grantType));
     }
 
     public void addScope(OAuth2ScopeId scope) {
-        if (this.scope == null) {
-            this.scope = new HashSet<>();
+        if (this.scopes == null) {
+            this.scopes = new HashSet<>();
         }
-        this.scope.add(scope);
+        this.scopes.add(scope);
     }
 
     public void removeScope(OAuth2ScopeId scope) {
-        Optional.ofNullable(this.scope)
+        Optional.ofNullable(this.scopes)
                 .ifPresent(scopes -> scopes.remove(scope));
     }
 

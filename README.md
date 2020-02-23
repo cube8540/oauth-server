@@ -731,16 +731,16 @@ Content-Type: application/json
 {
     "clientId": "CLIENT-ID",
     "clientName": "CLIENT-NAME",
-    "registeredRedirectURI": [
+    "registeredRedirectUris": [
         "http://localhost:8080/callback",
         "http://localhost:8081/callback"
     ],
-    "authorizedGrantType": [
+    "authorizedGrantTypes": [
         { "value": "refresh_token" },
         { "value": "client_credentials" },
         { "value": "authorization_code" }
     ],
-    "scope": ["TEST-3", "TEST-1", "TEST-2"],
+    "scopes": ["TEST-3", "TEST-1", "TEST-2"],
     "owner": "email@email.com",
     "accessTokenValiditySeconds": 600,
     "refreshTokenValiditySeconds": 7200
@@ -796,16 +796,16 @@ Content-Type: application/json
         {
             "clientId": "CLIENT-ID",
             "clientName": "CLIENT-NAME",
-            "registeredRedirectURI": [
+            "registeredRedirectUris": [
                 "http://localhost:8080/callback",
                 "http://localhost:8081/callback"
             ],
-            "authorizedGrantType": [
+            "authorizedGrantTypes": [
                 { "value": "refresh_token" },
                 { "value": "client_credentials" },
                 { "value": "authorization_code" }
             ],
-            "scope": [ "TEST-3", "TEST-1", "TEST-2" ],
+            "scopes": [ "TEST-3", "TEST-1", "TEST-2" ],
             "owner": "email@email.com",
             "accessTokenValiditySeconds": 600,
             "refreshTokenValiditySeconds": 7200
@@ -813,18 +813,18 @@ Content-Type: application/json
         {
             "clientId": "oauth-server",
             "clientName": "oauth-server",
-            "registeredRedirectURI": [
+            "registeredRedirectUris": [
                 "http://localhost:9090/?test_parameter=test",
                 "http://localhost:8080/"
             ],
-            "authorizedGrantType": [
+            "authorizedGrantTypes": [
                 { "value": "implicit" },
                 { "value": "refresh_token" },
                 { "value": "client_credentials" },
                 { "value": "password" },
                 { "value": "authorization_code" }
             ],
-            "scope": [ "TEST-3", "TEST-4","TEST-1",  "TEST-2" ],
+            "scopes": [ "TEST-3", "TEST-4","TEST-1",  "TEST-2" ],
             "owner": "email@email.com",
             "accessTokenValiditySeconds": 600,
             "refreshTokenValiditySeconds": 7200
@@ -904,18 +904,14 @@ Content-Type: application/json
 {
     "clientId": "CLIENT-ID",
     "clientName": "MODIFY-CLIENT-NAME",
-    "registeredRedirectURI": [
+    "registeredRedirectUris": [
         "http://localhost:8083/callback",
         "http://localhost:8082/callback"
     ],
-    "authorizedGrantType": [
-        {
-            "value": "password"
-        }
+    "authorizedGrantTypes": [
+        { "value": "password" }
     ],
-    "scope": [
-        "TEST-3"
-    ],
+    "scopes": [ "TEST-3" ],
     "owner": "email@email.com",
     "accessTokenValiditySeconds": 600,
     "refreshTokenValiditySeconds": 7200
@@ -971,18 +967,14 @@ Content-Type: application/json
 {
     "clientId": "CLIENT-ID",
     "clientName": "MODIFY-CLIENT-NAME",
-    "registeredRedirectURI": [
+    "registeredRedirectUris": [
         "http://localhost:8083/callback",
         "http://localhost:8082/callback"
     ],
-    "authorizedGrantType": [
-        {
-            "value": "password"
-        }
+    "authorizedGrantTypes": [
+        { "value": "password" }
     ],
-    "scope": [
-        "TEST-3"
-    ],
+    "scopes": [ "TEST-3" ],
     "owner": "email@email.com",
     "accessTokenValiditySeconds": 600,
     "refreshTokenValiditySeconds": 7200
@@ -1044,18 +1036,14 @@ Content-Type: application/json
 {
     "clientId": "CLIENT-ID",
     "clientName": "MODIFY-CLIENT-NAME",
-    "registeredRedirectURI": [
+    "registeredRedirectUris": [
         "http://localhost:8083/callback",
         "http://localhost:8082/callback"
     ],
-    "authorizedGrantType": [
-        {
-            "value": "password"
-        }
+    "authorizedGrantTypes": [
+        { "value": "password" }
     ],
-    "scope": [
-        "TEST-3"
-    ],
+    "scopes": [ "TEST-3" ],
     "owner": "email@email.com",
     "accessTokenValiditySeconds": 600,
     "refreshTokenValiditySeconds": 7200

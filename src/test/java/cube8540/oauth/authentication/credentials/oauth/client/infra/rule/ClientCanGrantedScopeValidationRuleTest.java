@@ -80,7 +80,7 @@ class ClientCanGrantedScopeValidationRuleTest {
             SecurityContext securityContext = mock(SecurityContext.class);
             this.client = mock(OAuth2Client.class);
 
-            when(client.getScope()).thenReturn(null);
+            when(client.getScopes()).thenReturn(null);
             rule.setScopeDetailsService(scopeDetailsService);
             rule.setSecurityContext(securityContext);
         }
@@ -104,7 +104,7 @@ class ClientCanGrantedScopeValidationRuleTest {
             SecurityContext securityContext = mock(SecurityContext.class);
             this.client = mock(OAuth2Client.class);
 
-            when(client.getScope()).thenReturn(Collections.emptySet());
+            when(client.getScopes()).thenReturn(Collections.emptySet());
             rule.setScopeDetailsService(scopeDetailsService);
             rule.setSecurityContext(securityContext);
         }
@@ -134,7 +134,7 @@ class ClientCanGrantedScopeValidationRuleTest {
 
             when(securityContext.getAuthentication()).thenReturn(authentication);
             when(scopeDetailsService.readAccessibleScopes(authentication)).thenReturn(scopes);
-            when(client.getScope()).thenReturn(clientScopes);
+            when(client.getScopes()).thenReturn(clientScopes);
 
             rule.setScopeDetailsService(scopeDetailsService);
             rule.setSecurityContext(securityContext);
@@ -172,7 +172,7 @@ class ClientCanGrantedScopeValidationRuleTest {
 
             when(securityContext.getAuthentication()).thenReturn(authentication);
             when(scopeDetailsService.readAccessibleScopes(authentication)).thenReturn(scopes);
-            when(client.getScope()).thenReturn(clientScopes);
+            when(client.getScopes()).thenReturn(clientScopes);
 
             rule.setScopeDetailsService(scopeDetailsService);
             rule.setSecurityContext(securityContext);

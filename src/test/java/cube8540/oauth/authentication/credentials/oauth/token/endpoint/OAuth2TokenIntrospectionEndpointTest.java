@@ -131,7 +131,7 @@ class OAuth2TokenIntrospectionEndpointTest {
 
                 when(service.readAccessToken(TOKEN_VALUE)).thenReturn(accessToken);
                 when(this.clientCredentialsToken.getPrincipal()).thenReturn(clientDetails);
-                when(clientDetails.clientId()).thenReturn("DIFFERENT_CLIENT_ID");
+                when(clientDetails.getClientId()).thenReturn("DIFFERENT_CLIENT_ID");
                 when(accessToken.clientId()).thenReturn(CLIENT_ID);
             }
 
@@ -163,7 +163,7 @@ class OAuth2TokenIntrospectionEndpointTest {
             this.responseMap = mock(Map.class);
 
             when(this.clientCredentials.getPrincipal()).thenReturn(clientDetails);
-            when(clientDetails.clientId()).thenReturn(RAW_CLIENT_ID);
+            when(clientDetails.getClientId()).thenReturn(RAW_CLIENT_ID);
             when(accessToken.clientId()).thenReturn(CLIENT_ID);
             when(service.readAccessToken(TOKEN_VALUE)).thenReturn(accessToken);
             when(converter.convertAccessToken(accessToken)).thenReturn(responseMap);

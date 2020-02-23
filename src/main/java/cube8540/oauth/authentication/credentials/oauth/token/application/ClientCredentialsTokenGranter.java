@@ -26,7 +26,7 @@ public class ClientCredentialsTokenGranter extends AbstractOAuth2TokenGranter {
         }
 
         OAuth2AuthorizedAccessToken accessToken = OAuth2AuthorizedAccessToken.builder(getTokenIdGenerator())
-                .client(new OAuth2ClientId(clientDetails.clientId()))
+                .client(new OAuth2ClientId(clientDetails.getClientId()))
                 .expiration(extractTokenExpiration(clientDetails))
                 .tokenGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
                 .scope(extractGrantScope(clientDetails, tokenRequest))

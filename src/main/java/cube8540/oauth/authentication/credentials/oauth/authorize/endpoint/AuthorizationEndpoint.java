@@ -123,7 +123,7 @@ public class AuthorizationEndpoint {
         Collection<OAuth2ScopeDetails> scopeDetails = scopeDetailsService.loadScopeDetailsByScopeIds(authorizationRequest.requestScopes());
         model.put(AUTHORIZATION_REQUEST_ATTRIBUTE, authorizationRequest);
         return new ModelAndView(approvalPage)
-                .addObject(AUTHORIZATION_REQUEST_CLIENT_NAME, clientDetails.clientName())
+                .addObject(AUTHORIZATION_REQUEST_CLIENT_NAME, clientDetails.getClientName())
                 .addObject(AUTHORIZATION_REQUEST_SCOPES_NAME, scopeDetails);
     }
 
@@ -239,6 +239,6 @@ public class AuthorizationEndpoint {
     }
 
     protected Set<String> extractRequestScope(OAuth2ClientDetails clientDetails, AuthorizationRequest authorizationRequest) {
-        return authorizationRequest.requestScopes().isEmpty() ? clientDetails.scope() : authorizationRequest.requestScopes();
+        return authorizationRequest.requestScopes().isEmpty() ? clientDetails.getScopes() : authorizationRequest.requestScopes();
     }
 }
