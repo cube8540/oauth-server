@@ -41,7 +41,7 @@ class DefaultOAuth2RequestValidatorTest {
 
             @BeforeEach
             void setup() {
-                when(clientDetails.scope()).thenReturn(SCOPES);
+                when(clientDetails.getScopes()).thenReturn(SCOPES);
             }
 
             @Test
@@ -59,7 +59,7 @@ class DefaultOAuth2RequestValidatorTest {
 
             @BeforeEach
             void setup() {
-                when(clientDetails.scope()).thenReturn(SCOPES);
+                when(clientDetails.getScopes()).thenReturn(SCOPES);
             }
 
             @Test
@@ -81,7 +81,7 @@ class DefaultOAuth2RequestValidatorTest {
 
                 @BeforeEach
                 void setup() {
-                    when(clientDetails.scope()).thenReturn(SCOPES);
+                    when(clientDetails.getScopes()).thenReturn(SCOPES);
                 }
 
                 @Test
@@ -99,7 +99,7 @@ class DefaultOAuth2RequestValidatorTest {
 
                 @BeforeEach
                 void setup() {
-                    when(clientDetails.scope()).thenReturn(SCOPES);
+                    when(clientDetails.getScopes()).thenReturn(SCOPES);
                 }
 
                 @Test

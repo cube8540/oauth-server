@@ -140,8 +140,8 @@ class ClientCredentialsAuthenticationProviderTest {
             @BeforeEach
             void setup() {
                 this.details = mock(OAuth2ClientDetails.class);
-                when(details.clientId()).thenReturn(CLIENT_ID);
-                when(details.clientSecret()).thenReturn(ENCODING_CLIENT_SECRET);
+                when(details.getClientId()).thenReturn(CLIENT_ID);
+                when(details.getClientSecret()).thenReturn(ENCODING_CLIENT_SECRET);
                 when(service.loadClientDetailsByClientId(CLIENT_ID)).thenReturn(details);
             }
 

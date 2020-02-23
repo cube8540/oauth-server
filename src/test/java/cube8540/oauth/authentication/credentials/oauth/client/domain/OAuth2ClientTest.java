@@ -88,11 +88,11 @@ class OAuth2ClientTest {
             @Test
             @DisplayName("인자로 받은 URI를 저장해야함")
             void shouldSaveGiveURI() {
-                client.addRedirectURI(newRedirectURI);
-                client.addRedirectURI(newDifferentRedirectURI);
+                client.addRedirectUri(newRedirectURI);
+                client.addRedirectUri(newDifferentRedirectURI);
 
-                assertTrue(client.getRedirectURI().contains(newRedirectURI));
-                assertTrue(client.getRedirectURI().contains(newDifferentRedirectURI));
+                assertTrue(client.getRedirectUris().contains(newRedirectURI));
+                assertTrue(client.getRedirectUris().contains(newDifferentRedirectURI));
             }
         }
 
@@ -102,22 +102,22 @@ class OAuth2ClientTest {
 
             @BeforeEach
             void setup() {
-                client.addRedirectURI(newRedirectURI);
+                client.addRedirectUri(newRedirectURI);
             }
 
             @Test
             @DisplayName("인자로 받은 URI가 저장되어 있어야 한다.")
             void shouldStoredGiveRedirectURI() {
-                client.addRedirectURI(newRedirectURI);
-                assertTrue(client.getRedirectURI().contains(newRedirectURI));
+                client.addRedirectUri(newRedirectURI);
+                assertTrue(client.getRedirectUris().contains(newRedirectURI));
             }
 
             @Test
             @DisplayName("같은 URI는 하나만 저장되어 있어야 한다.")
             void shouldStoredOnlyOneSameURI() {
-                client.addRedirectURI(newRedirectURI);
+                client.addRedirectUri(newRedirectURI);
 
-                long size = client.getRedirectURI().stream().filter(uri -> uri.equals(newRedirectURI)).count();
+                long size = client.getRedirectUris().stream().filter(uri -> uri.equals(newRedirectURI)).count();
                 assertEquals(1, size);
             }
         }
@@ -141,7 +141,7 @@ class OAuth2ClientTest {
             @Test
             @DisplayName("해당 요청은 무시한다.")
             void shouldNothing() {
-                assertDoesNotThrow(() -> client.removeRedirectURI(redirectURI));
+                assertDoesNotThrow(() -> client.removeRedirectUri(redirectURI));
             }
         }
 
@@ -151,14 +151,14 @@ class OAuth2ClientTest {
 
             @BeforeEach
             void setup() {
-                client.addRedirectURI(redirectURI);
+                client.addRedirectUri(redirectURI);
             }
 
             @Test
             @DisplayName("인자로 받은 URI를 삭제한다.")
             void shouldRemoveGivenRedirectURI() {
-                client.removeRedirectURI(redirectURI);
-                assertFalse(client.getRedirectURI().contains(redirectURI));
+                client.removeRedirectUri(redirectURI);
+                assertFalse(client.getRedirectUris().contains(redirectURI));
             }
         }
     }
@@ -183,8 +183,8 @@ class OAuth2ClientTest {
                 client.addGrantType(AuthorizationGrantType.AUTHORIZATION_CODE);
                 client.addGrantType(AuthorizationGrantType.PASSWORD);
 
-                assertTrue(client.getGrantType().contains(AuthorizationGrantType.AUTHORIZATION_CODE));
-                assertTrue(client.getGrantType().contains(AuthorizationGrantType.PASSWORD));
+                assertTrue(client.getGrantTypes().contains(AuthorizationGrantType.AUTHORIZATION_CODE));
+                assertTrue(client.getGrantTypes().contains(AuthorizationGrantType.PASSWORD));
             }
         }
 
@@ -201,7 +201,7 @@ class OAuth2ClientTest {
             @DisplayName("인자로 받은 인증 방식이 저장되어 있어야 한다.")
             void shouldStoredGiveGrantType() {
                 client.addGrantType(AuthorizationGrantType.AUTHORIZATION_CODE);
-                assertTrue(client.getGrantType().contains(AuthorizationGrantType.AUTHORIZATION_CODE));
+                assertTrue(client.getGrantTypes().contains(AuthorizationGrantType.AUTHORIZATION_CODE));
             }
 
             @Test
@@ -209,7 +209,7 @@ class OAuth2ClientTest {
             void shouldStoredOnlyOneSameGrantType() {
                 client.addGrantType(AuthorizationGrantType.AUTHORIZATION_CODE);
 
-                long size = client.getGrantType().stream()
+                long size = client.getGrantTypes().stream()
                         .filter(grantType -> grantType.equals(AuthorizationGrantType.AUTHORIZATION_CODE)).count();
                 assertEquals(1, size);
             }
@@ -250,7 +250,7 @@ class OAuth2ClientTest {
             @DisplayName("인자로 받은 인증 방식을 삭제한다.")
             void shouldRemoveGivenGrantType() {
                 client.removeGrantType(AuthorizationGrantType.AUTHORIZATION_CODE);
-                assertFalse(client.getGrantType().contains(AuthorizationGrantType.AUTHORIZATION_CODE));
+                assertFalse(client.getGrantTypes().contains(AuthorizationGrantType.AUTHORIZATION_CODE));
             }
         }
     }
@@ -283,8 +283,8 @@ class OAuth2ClientTest {
                 client.addScope(newScope);
                 client.addScope(newDifferentScope);
 
-                assertTrue(client.getScope().contains(newScope));
-                assertTrue(client.getScope().contains(newDifferentScope));
+                assertTrue(client.getScopes().contains(newScope));
+                assertTrue(client.getScopes().contains(newDifferentScope));
             }
         }
 
@@ -301,7 +301,7 @@ class OAuth2ClientTest {
             @DisplayName("인자로 받은 스코프가 저장되어 있어야 한다.")
             void shouldStoredGiveScope() {
                 client.addScope(newScope);
-                assertTrue(client.getScope().contains(newScope));
+                assertTrue(client.getScopes().contains(newScope));
             }
 
             @Test
@@ -309,7 +309,7 @@ class OAuth2ClientTest {
             void shouldStoredOnlyOneSameScope() {
                 client.addScope(newScope);
 
-                long size = client.getScope().stream()
+                long size = client.getScopes().stream()
                         .filter(scope -> scope.equals(newScope)).count();
                 assertEquals(1, size);
             }
@@ -352,7 +352,7 @@ class OAuth2ClientTest {
             @DisplayName("인자로 받은 인증 방식을 삭제한다.")
             void shouldRemoveGivenGrantType() {
                 client.removeScope(scope);
-                assertFalse(client.getScope().contains(scope));
+                assertFalse(client.getScopes().contains(scope));
             }
         }
     }

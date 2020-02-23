@@ -44,6 +44,11 @@ public class DefaultScopeDetailsService implements OAuth2ScopeManagementService,
     }
 
     @Override
+    public Long countByScopeId(String scopeId) {
+        return repository.countById(new OAuth2ScopeId(scopeId));
+    }
+
+    @Override
     @Transactional
     public OAuth2ScopeDetails registerNewScope(OAuth2ScopeRegisterRequest registerRequest) {
         if (repository.countById(new OAuth2ScopeId(registerRequest.getScopeId())) > 0) {

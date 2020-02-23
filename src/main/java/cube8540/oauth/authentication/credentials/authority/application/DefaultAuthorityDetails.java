@@ -11,17 +11,9 @@ public class DefaultAuthorityDetails implements AuthorityDetails {
 
     private String description;
 
-    @Override
-    public String code() {
-        return code;
-    }
-
-    @Override
-    public String description() {
-        return description;
-    }
+    private boolean basic;
 
     public static DefaultAuthorityDetails of(Authority authority) {
-        return new DefaultAuthorityDetails(authority.getCode().getValue(), authority.getDescription());
+        return new DefaultAuthorityDetails(authority.getCode().getValue(), authority.getDescription(), authority.isBasic());
     }
 }

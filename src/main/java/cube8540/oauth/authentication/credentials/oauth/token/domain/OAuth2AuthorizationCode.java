@@ -61,7 +61,7 @@ public class OAuth2AuthorizationCode extends AbstractAggregateRoot<OAuth2Authori
 
     @Embedded
     @AttributeOverride(name = "value", column = @Column(name = "email", length = 128, nullable = false))
-    private UserEmail email;
+    private UserEmail username;
 
     @Column(name = "state", length = 12)
     private String state;
@@ -81,11 +81,11 @@ public class OAuth2AuthorizationCode extends AbstractAggregateRoot<OAuth2Authori
     }
 
     public void setAuthorizationRequest(AuthorizationRequest request) {
-        this.clientId = new OAuth2ClientId(request.clientId());
-        this.email = new UserEmail(request.username());
-        this.state = request.state();
-        this.redirectURI = request.redirectURI();
-        this.approvedScopes = request.requestScopes().stream()
+        this.clientId = new OAuth2ClientId(request.getClientId());
+        this.username = new UserEmail(request.getUsername());
+        this.state = request.getState();
+        this.redirectURI = request.getRedirectUri();
+        this.approvedScopes = request.getRequestScopes().stream()
                 .map(OAuth2ScopeId::new).collect(Collectors.toSet());
     }
 
@@ -94,15 +94,15 @@ public class OAuth2AuthorizationCode extends AbstractAggregateRoot<OAuth2Authori
             throw InvalidGrantException.invalidGrant("Authorization code is expired");
         }
 
-        if (state != null && !state.equals(request.state())) {
+        if (state != null && !state.equals(request.getState())) {
             throw InvalidGrantException.invalidGrant("State is not matched");
         }
 
-        if (!redirectURI.equals(request.redirectURI())) {
+        if (!redirectURI.equals(request.getRedirectUri())) {
             throw new RedirectMismatchException("Redirect URI mismatched");
         }
 
-        if (!clientId.equals(new OAuth2ClientId(request.clientId()))) {
+        if (!clientId.equals(new OAuth2ClientId(request.getClientId()))) {
             throw InvalidClientException.invalidClient("Client id mismatch");
         }
     }

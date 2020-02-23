@@ -4,7 +4,6 @@ import cube8540.oauth.authentication.credentials.oauth.OAuth2Utils;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import cube8540.oauth.authentication.credentials.oauth.token.OAuth2AccessTokenDetails;
-import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedAccessToken;
 import cube8540.oauth.authentication.users.domain.UserEmail;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -49,10 +48,10 @@ class DefaultOAuth2AccessTokenIntrospectionConverterTest {
     void setup() {
         this.accessToken = mock(OAuth2AccessTokenDetails.class);
 
-        when(accessToken.clientId()).thenReturn(CLIENT_ID);
-        when(accessToken.username()).thenReturn(RAW_USERNAME);
-        when(accessToken.expiration()).thenReturn(EXPIRATION);
-        when(accessToken.scope()).thenReturn(SCOPE);
+        when(accessToken.getClientId()).thenReturn(CLIENT_ID);
+        when(accessToken.getUsername()).thenReturn(RAW_USERNAME);
+        when(accessToken.getExpiration()).thenReturn(EXPIRATION);
+        when(accessToken.getScopes()).thenReturn(SCOPE);
 
         this.converter = new DefaultOAuth2AccessTokenIntrospectionConverter();
     }
@@ -112,10 +111,10 @@ class DefaultOAuth2AccessTokenIntrospectionConverterTest {
             void setup() {
                 this.accessToken = mock(OAuth2AccessTokenDetails.class);
 
-                when(accessToken.clientId()).thenReturn(CLIENT_ID);
-                when(accessToken.username()).thenReturn(null);
-                when(accessToken.expiration()).thenReturn(EXPIRATION);
-                when(accessToken.scope()).thenReturn(SCOPE);
+                when(accessToken.getClientId()).thenReturn(CLIENT_ID);
+                when(accessToken.getUsername()).thenReturn(null);
+                when(accessToken.getExpiration()).thenReturn(EXPIRATION);
+                when(accessToken.getScopes()).thenReturn(SCOPE);
             }
 
             @Test

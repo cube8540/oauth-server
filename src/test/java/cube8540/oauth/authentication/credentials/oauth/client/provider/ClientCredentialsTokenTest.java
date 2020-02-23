@@ -205,7 +205,7 @@ class ClientCredentialsTokenTest {
             void setup() {
                 this.clientDetails = mock(OAuth2ClientDetails.class);
                 this.token = new ClientCredentialsToken(clientDetails, CLIENT_SECRET);
-                when(clientDetails.clientId()).thenReturn(CLIENT_ID);
+                when(clientDetails.getClientId()).thenReturn(CLIENT_ID);
             }
 
             @Test

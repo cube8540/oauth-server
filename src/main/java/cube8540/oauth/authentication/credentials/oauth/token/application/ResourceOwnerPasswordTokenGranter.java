@@ -29,18 +29,18 @@ public class ResourceOwnerPasswordTokenGranter extends AbstractOAuth2TokenGrante
 
     @Override
     public OAuth2AuthorizedAccessToken createAccessToken(OAuth2ClientDetails clientDetails, OAuth2TokenRequest tokenRequest) {
-        if (tokenRequest.username() == null || tokenRequest.password() == null) {
+        if (tokenRequest.getUsername() == null || tokenRequest.getPassword() == null) {
             throw InvalidRequestException.invalidRequest("username, password is required");
         }
-        if (!getTokenRequestValidator().validateScopes(clientDetails, tokenRequest.scopes())) {
+        if (!getTokenRequestValidator().validateScopes(clientDetails, tokenRequest.getScopes())) {
             throw InvalidGrantException.invalidScope("cannot grant scopes");
         }
         Authentication authentication = authentication(tokenRequest);
         OAuth2AuthorizedAccessToken accessToken = OAuth2AuthorizedAccessToken.builder(getTokenIdGenerator())
                 .expiration(extractTokenExpiration(clientDetails))
-                .client(new OAuth2ClientId(clientDetails.clientId()))
-                .email(new UserEmail(authentication.getName()))
-                .scope(extractGrantScope(clientDetails, tokenRequest))
+                .client(new OAuth2ClientId(clientDetails.getClientId()))
+                .username(new UserEmail(authentication.getName()))
+                .scopes(extractGrantScope(clientDetails, tokenRequest))
                 .tokenGrantType(AuthorizationGrantType.PASSWORD)
                 .build();
         accessToken.generateRefreshToken(refreshTokenGenerator(), extractRefreshTokenExpiration(clientDetails));
@@ -50,7 +50,7 @@ public class ResourceOwnerPasswordTokenGranter extends AbstractOAuth2TokenGrante
     private Authentication authentication(OAuth2TokenRequest tokenRequest) {
         try {
             UsernamePasswordAuthenticationToken usernamePasswordToken =
-                    new UsernamePasswordAuthenticationToken(tokenRequest.username(), tokenRequest.password());
+                    new UsernamePasswordAuthenticationToken(tokenRequest.getUsername(), tokenRequest.getPassword());
             return authenticationManager.authenticate(usernamePasswordToken);
         } catch (BadCredentialsException | AccountStatusException e) {
             throw new UserDeniedAuthorizationException(e.getMessage());

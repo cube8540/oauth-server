@@ -28,6 +28,6 @@ public class DefaultClientGrantTypeValidationRule implements ValidationRule<OAut
 
     @Override
     public boolean isValid(OAuth2Client target) {
-        return target.getGrantType() != null && !target.getGrantType().isEmpty();
+        return target.getGrantTypes() != null && !target.getGrantTypes().isEmpty();
     }
 }

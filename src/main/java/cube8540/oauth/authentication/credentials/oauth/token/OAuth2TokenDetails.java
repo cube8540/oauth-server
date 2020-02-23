@@ -4,12 +4,12 @@ import java.time.LocalDateTime;
 
 public interface OAuth2TokenDetails {
 
-    String tokenValue();
+    String getTokenValue();
 
-    LocalDateTime expiration();
+    LocalDateTime getExpiration();
 
     boolean isExpired();
 
-    int expiresIn();
+    long getExpiresIn();
 
 }

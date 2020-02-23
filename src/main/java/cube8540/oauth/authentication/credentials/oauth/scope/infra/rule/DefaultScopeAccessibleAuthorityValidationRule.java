@@ -42,7 +42,7 @@ public class DefaultScopeAccessibleAuthorityValidationRule implements Validation
         }
 
         return authorityService.getAuthorities().stream()
-                .map(AuthorityDetails::code).map(AuthorityCode::new)
+                .map(AuthorityDetails::getCode).map(AuthorityCode::new)
                 .collect(Collectors.toList())
                 .containsAll(target.getAccessibleAuthority());
     }

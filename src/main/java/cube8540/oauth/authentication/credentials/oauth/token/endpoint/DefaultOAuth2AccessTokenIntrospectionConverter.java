@@ -15,17 +15,17 @@ public class DefaultOAuth2AccessTokenIntrospectionConverter implements OAuth2Acc
         Map<String, Object> result = new HashMap<>();
 
         result.put(OAuth2Utils.AccessTokenIntrospectionKey.ACTIVE, true);
-        result.put(OAuth2Utils.AccessTokenIntrospectionKey.CLIENT_ID, accessToken.clientId().getValue());
-        if (accessToken.username() != null) {
-            result.put(OAuth2Utils.AccessTokenIntrospectionKey.USERNAME, accessToken.username());
+        result.put(OAuth2Utils.AccessTokenIntrospectionKey.CLIENT_ID, accessToken.getClientId().getValue());
+        if (accessToken.getUsername() != null) {
+            result.put(OAuth2Utils.AccessTokenIntrospectionKey.USERNAME, accessToken.getUsername());
         } else {
             result.put(OAuth2Utils.AccessTokenIntrospectionKey.USERNAME, null);
         }
 
-        long expiration = accessToken.expiration().atZone(AuthenticationApplication.DEFAULT_TIME_ZONE.toZoneId()).toEpochSecond();
+        long expiration = accessToken.getExpiration().atZone(AuthenticationApplication.DEFAULT_TIME_ZONE.toZoneId()).toEpochSecond();
         result.put(OAuth2Utils.AccessTokenIntrospectionKey.EXPIRATION, expiration);
 
-        String scope = accessToken.scope().stream().map(OAuth2ScopeId::getValue).collect(Collectors.joining(" "));
+        String scope = accessToken.getScopes().stream().map(OAuth2ScopeId::getValue).collect(Collectors.joining(" "));
         result.put(OAuth2Utils.AccessTokenIntrospectionKey.SCOPE, scope);
         return result;
     }

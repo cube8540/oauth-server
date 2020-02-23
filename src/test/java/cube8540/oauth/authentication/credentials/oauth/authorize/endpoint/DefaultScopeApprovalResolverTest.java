@@ -46,7 +46,7 @@ class DefaultScopeApprovalResolverTest {
             this.approvalScopes.put("SCOPE-3", "false"); // 비허용
             this.approvalScopes.put("ANY", "ANY"); // 스코프가 아닌 다른값
 
-            when(authorizationRequest.requestScopes()).thenReturn(STORED_SCOPE);
+            when(authorizationRequest.getRequestScopes()).thenReturn(STORED_SCOPE);
         }
 
         @Nested

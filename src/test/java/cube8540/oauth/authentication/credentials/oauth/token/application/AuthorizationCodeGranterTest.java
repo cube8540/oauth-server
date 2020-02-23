@@ -106,19 +106,19 @@ class AuthorizationCodeGranterTest {
             this.tokenRequest = mock(OAuth2TokenRequest.class);
             this.authorizationCode = mock(OAuth2AuthorizationCode.class);
 
-            when(clientDetails.clientId()).thenReturn(RAW_AUTH_CLIENT_ID);
-            when(clientDetails.accessTokenValiditySeconds()).thenReturn(ACCESS_TOKEN_VALIDITY_SECONDS);
-            when(clientDetails.refreshTokenValiditySeconds()).thenReturn(REFRESH_TOKEN_VALIDITY_SECONDS);
-            when(clientDetails.scope()).thenReturn(RAW_CLIENT_SCOPES);
+            when(clientDetails.getClientId()).thenReturn(RAW_AUTH_CLIENT_ID);
+            when(clientDetails.getAccessTokenValiditySeconds()).thenReturn(ACCESS_TOKEN_VALIDITY_SECONDS);
+            when(clientDetails.getRefreshTokenValiditySeconds()).thenReturn(REFRESH_TOKEN_VALIDITY_SECONDS);
+            when(clientDetails.getScopes()).thenReturn(RAW_CLIENT_SCOPES);
 
-            when(tokenRequest.clientId()).thenReturn(RAW_CLIENT_ID);
-            when(tokenRequest.code()).thenReturn(RAW_CODE);
-            when(tokenRequest.redirectURI()).thenReturn(REDIRECT_URI);
-            when(tokenRequest.state()).thenReturn(STATE);
+            when(tokenRequest.getClientId()).thenReturn(RAW_CLIENT_ID);
+            when(tokenRequest.getCode()).thenReturn(RAW_CODE);
+            when(tokenRequest.getRedirectUri()).thenReturn(REDIRECT_URI);
+            when(tokenRequest.getState()).thenReturn(STATE);
 
             when(authorizationCode.getCode()).thenReturn(CODE);
             when(authorizationCode.getClientId()).thenReturn(CLIENT_ID);
-            when(authorizationCode.getEmail()).thenReturn(STORED_EMAIL);
+            when(authorizationCode.getUsername()).thenReturn(STORED_EMAIL);
             when(authorizationCode.getApprovedScopes()).thenReturn(STORED_SCOPES);
 
             Clock clock = Clock.fixed(TOKEN_CREATED_DATETIME.toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
@@ -203,9 +203,9 @@ class AuthorizationCodeGranterTest {
 
                     tokenGranter.createAccessToken(clientDetails, tokenRequest);
                     verify(authorizationCode, times(1)).validateWithAuthorizationRequest(requestCaptor.capture());
-                    assertEquals(REDIRECT_URI, requestCaptor.getValue().redirectURI());
-                    assertEquals(RAW_AUTH_CLIENT_ID, requestCaptor.getValue().clientId());
-                    assertEquals(STATE, requestCaptor.getValue().state());
+                    assertEquals(REDIRECT_URI, requestCaptor.getValue().getRedirectUri());
+                    assertEquals(RAW_AUTH_CLIENT_ID, requestCaptor.getValue().getClientId());
+                    assertEquals(STATE, requestCaptor.getValue().getState());
                 }
 
                 @Test
@@ -229,7 +229,7 @@ class AuthorizationCodeGranterTest {
                 void shouldUserEmailIsSavedUserEmailInAuthorizationCode() {
                     OAuth2AuthorizedAccessToken accessToken = tokenGranter.createAccessToken(clientDetails, tokenRequest);
 
-                    assertEquals(STORED_EMAIL, accessToken.getEmail());
+                    assertEquals(STORED_EMAIL, accessToken.getUsername());
                 }
 
                 @Test
@@ -237,7 +237,7 @@ class AuthorizationCodeGranterTest {
                 void shouldScopeIsSavedScopeInAuthorizationCode() {
                     OAuth2AuthorizedAccessToken accessToken = tokenGranter.createAccessToken(clientDetails, tokenRequest);
 
-                    assertEquals(STORED_SCOPES, accessToken.getScope());
+                    assertEquals(STORED_SCOPES, accessToken.getScopes());
                 }
 
                 @Test

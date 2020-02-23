@@ -44,7 +44,7 @@ public class ClientCredentialsToken extends AbstractAuthenticationToken {
         if (principal instanceof String) {
             return principal.toString();
         } else if (principal instanceof OAuth2ClientDetails) {
-            return ((OAuth2ClientDetails) principal).clientId();
+            return ((OAuth2ClientDetails) principal).getClientId();
         } else {
             return super.getName();
         }

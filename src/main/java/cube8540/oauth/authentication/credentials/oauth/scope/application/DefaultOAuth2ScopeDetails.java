@@ -14,14 +14,4 @@ public class DefaultOAuth2ScopeDetails implements OAuth2ScopeDetails {
     public static DefaultOAuth2ScopeDetails of(OAuth2Scope scope) {
         return new DefaultOAuth2ScopeDetails(scope.getId().getValue(), scope.getDescription());
     }
-
-    @Override
-    public String scopeId() {
-        return scopeId;
-    }
-
-    @Override
-    public String description() {
-        return description;
-    }
 }
