@@ -23,6 +23,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import javax.servlet.Filter;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 
@@ -45,8 +46,8 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
     @Primary
     public ObjectMapper escapeObjectMapper() {
         Module timeModule = new JavaTimeModule()
-                .addDeserializer(LocalDateTime.class, LocalDateTimeDeserializer.INSTANCE)
-                .addSerializer(LocalDateTime.class, LocalDateTimeSerializer.INSTANCE);
+                .addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
+                .addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
 
         Module oauth2Module = new SimpleModule()
                 .addSerializer(OAuth2Error.class, new OAuth2ErrorSerializer())

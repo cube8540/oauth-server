@@ -297,7 +297,7 @@ Content-Type: application/json
 
 {
     "email": "email@email.com",
-    "registeredAt": [2020, 1, 31, 15, 10, 7]
+    "registeredAt": "2020-01-31T15:10:07"
 }
 ```
 |  파라미터명    |  타입   |  설명  |
@@ -347,7 +347,7 @@ Content-Type: application/json
 
 {
     "email": "email@email.com",
-    "registeredAt": [2020, 1, 31, 15, 10, 7]
+    "registeredAt": "2020-01-31T15:10:07"
 }
 ```
 |  파라미터명    |  타입   |  설명  |
@@ -401,7 +401,7 @@ Content-Type: application/json
 
 {
     "email": "email@email.com",
-    "registeredAt": [2020, 1, 31, 15, 10, 7]
+    "registeredAt": "2020-01-31T15:10:07"
 }
 ```
 |  파라미터명    |  타입   |  설명  |
@@ -450,7 +450,7 @@ Content-Type: application/json
 
 {
     "email": "email@email.com",
-    "registeredAt": [2020, 1, 31, 15, 10, 7]
+    "registeredAt": "2020-01-31T15:10:07"
 }
 ```
 |  파라미터명    |  타입   |  설명  |
