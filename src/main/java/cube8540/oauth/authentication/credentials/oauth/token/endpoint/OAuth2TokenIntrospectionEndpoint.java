@@ -61,7 +61,7 @@ public class OAuth2TokenIntrospectionEndpoint {
 
         OAuth2AccessTokenDetails accessToken = service.readAccessToken(token);
         OAuth2ClientDetails clientDetails = (OAuth2ClientDetails) clientCredentials.getPrincipal();
-        if (!accessToken.clientId().getValue().equals(clientDetails.getClientId())) {
+        if (!accessToken.getClientId().getValue().equals(clientDetails.getClientId())) {
             throw InvalidClientException.invalidClient("client and access token client is different");
         }
 

@@ -213,7 +213,7 @@ class OAuth2TokenEndpointTest {
 
             endpoint.grantNewAccessToken(clientCredentialsToken, requestMap);
             verify(grantService, times(1)).grant(eq(clientDetails), requestCaptor.capture());
-            assertEquals(new AuthorizationGrantType(GRANT_TYPE), requestCaptor.getValue().grantType());
+            assertEquals(new AuthorizationGrantType(GRANT_TYPE), requestCaptor.getValue().getGrantType());
         }
 
         @Test
@@ -223,7 +223,7 @@ class OAuth2TokenEndpointTest {
 
             endpoint.grantNewAccessToken(clientCredentialsToken, requestMap);
             verify(grantService, times(1)).grant(eq(clientDetails), requestCaptor.capture());
-            assertEquals(USERNAME, requestCaptor.getValue().username());
+            assertEquals(USERNAME, requestCaptor.getValue().getUsername());
         }
 
         @Test
@@ -233,7 +233,7 @@ class OAuth2TokenEndpointTest {
 
             endpoint.grantNewAccessToken(clientCredentialsToken, requestMap);
             verify(grantService, times(1)).grant(eq(clientDetails), requestCaptor.capture());
-            assertEquals(PASSWORD, requestCaptor.getValue().password());
+            assertEquals(PASSWORD, requestCaptor.getValue().getPassword());
         }
 
         @Test
@@ -243,7 +243,7 @@ class OAuth2TokenEndpointTest {
 
             endpoint.grantNewAccessToken(clientCredentialsToken, requestMap);
             verify(grantService, times(1)).grant(eq(clientDetails), requestCaptor.capture());
-            assertEquals(CLIENT_ID, requestCaptor.getValue().clientId());
+            assertEquals(CLIENT_ID, requestCaptor.getValue().getClientId());
         }
 
         @Test
@@ -253,7 +253,7 @@ class OAuth2TokenEndpointTest {
 
             endpoint.grantNewAccessToken(clientCredentialsToken, requestMap);
             verify(grantService, times(1)).grant(eq(clientDetails), requestCaptor.capture());
-            assertEquals(REFRESH_TOKEN, requestCaptor.getValue().refreshToken());
+            assertEquals(REFRESH_TOKEN, requestCaptor.getValue().getRefreshToken());
         }
 
         @Test
@@ -263,7 +263,7 @@ class OAuth2TokenEndpointTest {
 
             endpoint.grantNewAccessToken(clientCredentialsToken, requestMap);
             verify(grantService, times(1)).grant(eq(clientDetails), requestCaptor.capture());
-            assertEquals(CODE, requestCaptor.getValue().code());
+            assertEquals(CODE, requestCaptor.getValue().getCode());
         }
 
         @Test
@@ -273,7 +273,7 @@ class OAuth2TokenEndpointTest {
 
             endpoint.grantNewAccessToken(clientCredentialsToken, requestMap);
             verify(grantService, times(1)).grant(eq(clientDetails), requestCaptor.capture());
-            assertEquals(REDIRECT_URI, requestCaptor.getValue().redirectURI());
+            assertEquals(REDIRECT_URI, requestCaptor.getValue().getRedirectUri());
         }
 
         @Test
@@ -283,7 +283,7 @@ class OAuth2TokenEndpointTest {
 
             endpoint.grantNewAccessToken(clientCredentialsToken, requestMap);
             verify(grantService, times(1)).grant(eq(clientDetails), requestCaptor.capture());
-            assertEquals(SCOPES, requestCaptor.getValue().scopes());
+            assertEquals(SCOPES, requestCaptor.getValue().getScopes());
         }
 
         @Test

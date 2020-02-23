@@ -309,7 +309,7 @@ class AuthorizationEndpointTest {
                     endpoint.authorize(parameter, model, principal);
 
                     AuthorizationRequest storedRequest = (AuthorizationRequest) model.get(AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE);
-                    assertEquals(RAW_CLIENT_ID, storedRequest.clientId());
+                    assertEquals(RAW_CLIENT_ID, storedRequest.getClientId());
                 }
 
                 @Test
@@ -318,7 +318,7 @@ class AuthorizationEndpointTest {
                     endpoint.authorize(parameter, model, principal);
 
                     AuthorizationRequest storedRequest = (AuthorizationRequest) model.get(AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE);
-                    assertEquals(RAW_USERNAME, storedRequest.username());
+                    assertEquals(RAW_USERNAME, storedRequest.getUsername());
                 }
 
                 @Test
@@ -327,7 +327,7 @@ class AuthorizationEndpointTest {
                     endpoint.authorize(parameter, model, principal);
 
                     AuthorizationRequest storedRequest = (AuthorizationRequest) model.get(AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE);
-                    assertEquals(STATE, storedRequest.state());
+                    assertEquals(STATE, storedRequest.getState());
                 }
 
                 @Test
@@ -336,7 +336,7 @@ class AuthorizationEndpointTest {
                     endpoint.authorize(parameter, model, principal);
 
                     AuthorizationRequest storedRequest = (AuthorizationRequest) model.get(AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE);
-                    assertEquals(RESOLVED_REDIRECT_URI, storedRequest.redirectURI());
+                    assertEquals(RESOLVED_REDIRECT_URI, storedRequest.getRedirectUri());
                 }
 
                 @Test
@@ -345,7 +345,7 @@ class AuthorizationEndpointTest {
                     endpoint.authorize(parameter, model, principal);
 
                     AuthorizationRequest storedRequest = (AuthorizationRequest) model.get(AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE);
-                    assertEquals(SCOPE, storedRequest.requestScopes());
+                    assertEquals(SCOPE, storedRequest.getRequestScopes());
                 }
 
                 @Nested
@@ -366,7 +366,7 @@ class AuthorizationEndpointTest {
                         endpoint.authorize(parameter, model, principal);
 
                         AuthorizationRequest storedRequest = (AuthorizationRequest) model.get(AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE);
-                        assertEquals(CLIENT_SCOPE, storedRequest.requestScopes());
+                        assertEquals(CLIENT_SCOPE, storedRequest.getRequestScopes());
                     }
 
                     @Test
@@ -527,10 +527,10 @@ class AuthorizationEndpointTest {
 
             when(authentication.isAuthenticated()).thenReturn(true);
             when(authentication.getName()).thenReturn(RAW_USERNAME);
-            when(originalAuthorizationRequest.clientId()).thenReturn(RAW_CLIENT_ID);
-            when(originalAuthorizationRequest.username()).thenReturn(RAW_USERNAME);
-            when(originalAuthorizationRequest.redirectURI()).thenReturn(RESOLVED_REDIRECT_URI);
-            when(originalAuthorizationRequest.requestScopes()).thenReturn(originalRequestScope);
+            when(originalAuthorizationRequest.getClientId()).thenReturn(RAW_CLIENT_ID);
+            when(originalAuthorizationRequest.getUsername()).thenReturn(RAW_USERNAME);
+            when(originalAuthorizationRequest.getRedirectUri()).thenReturn(RESOLVED_REDIRECT_URI);
+            when(originalAuthorizationRequest.getRequestScopes()).thenReturn(originalRequestScope);
             when(resolver.resolveApprovalScopes(originalAuthorizationRequest, approvalParameter)).thenReturn(resolvedRequestScope);
             when(codeGenerator.generateNewAuthorizationCode(any())).thenReturn(CODE);
 
@@ -543,7 +543,7 @@ class AuthorizationEndpointTest {
             endpoint.approval(approvalParameter, model, sessionStatus, authentication);
 
             verify(originalAuthorizationRequest, never()).setRequestScopes(any());
-            verify(originalAuthorizationRequest, never()).setRedirectURI(any());
+            verify(originalAuthorizationRequest, never()).setRedirectUri(any());
         }
 
         @Test
@@ -553,7 +553,7 @@ class AuthorizationEndpointTest {
 
             endpoint.approval(approvalParameter, model, sessionStatus, authentication);
             verify(codeGenerator, times(1)).generateNewAuthorizationCode(requestCaptor.capture());
-            assertEquals(RAW_CLIENT_ID, requestCaptor.getValue().clientId());
+            assertEquals(RAW_CLIENT_ID, requestCaptor.getValue().getClientId());
         }
 
         @Test
@@ -563,7 +563,7 @@ class AuthorizationEndpointTest {
 
             endpoint.approval(approvalParameter, model, sessionStatus, authentication);
             verify(codeGenerator, times(1)).generateNewAuthorizationCode(requestCaptor.capture());
-            assertEquals(RESOLVED_REDIRECT_URI, requestCaptor.getValue().redirectURI());
+            assertEquals(RESOLVED_REDIRECT_URI, requestCaptor.getValue().getRedirectUri());
         }
 
         @Test
@@ -573,7 +573,7 @@ class AuthorizationEndpointTest {
 
             endpoint.approval(approvalParameter, model, sessionStatus, authentication);
             verify(codeGenerator, times(1)).generateNewAuthorizationCode(requestCaptor.capture());
-            assertEquals(resolvedRequestScope, requestCaptor.getValue().requestScopes());
+            assertEquals(resolvedRequestScope, requestCaptor.getValue().getRequestScopes());
         }
 
         @Test
@@ -599,7 +599,7 @@ class AuthorizationEndpointTest {
 
             @BeforeEach
             void setup() {
-                when(originalAuthorizationRequest.state()).thenReturn(STATE);
+                when(originalAuthorizationRequest.getState()).thenReturn(STATE);
             }
 
             @Test
@@ -609,7 +609,7 @@ class AuthorizationEndpointTest {
 
                 endpoint.approval(approvalParameter, model, sessionStatus, authentication);
                 verify(codeGenerator, times(1)).generateNewAuthorizationCode(requestCaptor.capture());
-                assertEquals(STATE, requestCaptor.getValue().state());
+                assertEquals(STATE, requestCaptor.getValue().getState());
             }
 
             @Test
@@ -627,7 +627,7 @@ class AuthorizationEndpointTest {
 
             @BeforeEach
             void setup() {
-                when(originalAuthorizationRequest.state()).thenReturn(null);
+                when(originalAuthorizationRequest.getState()).thenReturn(null);
             }
 
             @Test
@@ -637,7 +637,7 @@ class AuthorizationEndpointTest {
 
                 endpoint.approval(approvalParameter, model, sessionStatus, authentication);
                 verify(codeGenerator, times(1)).generateNewAuthorizationCode(requestCaptor.capture());
-                assertNull(requestCaptor.getValue().state());
+                assertNull(requestCaptor.getValue().getState());
             }
 
             @Test
@@ -919,8 +919,8 @@ class AuthorizationEndpointTest {
                     this.storedURI = URI.create("http://stored.localhost:8080");
                     this.storedClientId = "STORED-CLIENT-ID";
 
-                    when(authorizationRequest.clientId()).thenReturn(storedClientId);
-                    when(authorizationRequest.redirectURI()).thenReturn(storedURI);
+                    when(authorizationRequest.getClientId()).thenReturn(storedClientId);
+                    when(authorizationRequest.getRedirectUri()).thenReturn(storedURI);
                     when(sessionAttributeStore.retrieveAttribute(servletWebRequest, AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE))
                             .thenReturn(authorizationRequest);
 
@@ -1006,7 +1006,7 @@ class AuthorizationEndpointTest {
 
                         @BeforeEach
                         void setup() {
-                            when(authorizationRequest.state()).thenReturn(STATE);
+                            when(authorizationRequest.getState()).thenReturn(STATE);
                         }
 
                         @Test
@@ -1046,7 +1046,7 @@ class AuthorizationEndpointTest {
 
                         @BeforeEach
                         void setup() {
-                            when(authorizationRequest.state()).thenReturn(null);
+                            when(authorizationRequest.getState()).thenReturn(null);
                         }
 
                         @Test
@@ -1348,8 +1348,8 @@ class AuthorizationEndpointTest {
                     this.storedURI = URI.create("http://stored.localhost:8080");
                     this.storedClientId = "STORED-CLIENT-ID";
 
-                    when(authorizationRequest.clientId()).thenReturn(storedClientId);
-                    when(authorizationRequest.redirectURI()).thenReturn(storedURI);
+                    when(authorizationRequest.getClientId()).thenReturn(storedClientId);
+                    when(authorizationRequest.getRedirectUri()).thenReturn(storedURI);
                     when(sessionAttributeStore.retrieveAttribute(servletWebRequest, AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE))
                             .thenReturn(authorizationRequest);
 
@@ -1435,7 +1435,7 @@ class AuthorizationEndpointTest {
 
                         @BeforeEach
                         void setup() {
-                            when(authorizationRequest.state()).thenReturn(STATE);
+                            when(authorizationRequest.getState()).thenReturn(STATE);
                         }
 
                         @Test
@@ -1475,7 +1475,7 @@ class AuthorizationEndpointTest {
 
                         @BeforeEach
                         void setup() {
-                            when(authorizationRequest.state()).thenReturn(null);
+                            when(authorizationRequest.getState()).thenReturn(null);
                         }
 
                         @Test

@@ -28,7 +28,7 @@ public class RefreshTokenGranter extends AbstractOAuth2TokenGranter {
 
     @Override
     public OAuth2AuthorizedAccessToken createAccessToken(OAuth2ClientDetails clientDetails, OAuth2TokenRequest tokenRequest) {
-        OAuth2AuthorizedRefreshToken storedRefreshToken = refreshTokenRepository.findById(new OAuth2TokenId(tokenRequest.refreshToken()))
+        OAuth2AuthorizedRefreshToken storedRefreshToken = refreshTokenRepository.findById(new OAuth2TokenId(tokenRequest.getRefreshToken()))
                 .orElseThrow(() -> InvalidGrantException.invalidGrant("invalid refresh token"));
         OAuth2AuthorizedAccessToken storedAccessToken = storedRefreshToken.getAccessToken();
         if (!storedAccessToken.getClient().equals(new OAuth2ClientId(clientDetails.getClientId()))) {
@@ -40,15 +40,15 @@ public class RefreshTokenGranter extends AbstractOAuth2TokenGranter {
             throw InvalidGrantException.invalidGrant("refresh token is expired");
         }
 
-        Set<String> storedAccessTokenScopes = storedAccessToken.getScope().stream().map(OAuth2ScopeId::getValue).collect(Collectors.toSet());
-        if (!getTokenRequestValidator().validateScopes(storedAccessTokenScopes, tokenRequest.scopes())) {
+        Set<String> storedAccessTokenScopes = storedAccessToken.getScopes().stream().map(OAuth2ScopeId::getValue).collect(Collectors.toSet());
+        if (!getTokenRequestValidator().validateScopes(storedAccessTokenScopes, tokenRequest.getScopes())) {
             throw InvalidGrantException.invalidScope("cannot grant scope");
         }
         OAuth2AuthorizedAccessToken accessToken = OAuth2AuthorizedAccessToken.builder(getTokenIdGenerator())
                 .expiration(extractTokenExpiration(clientDetails))
                 .client(storedAccessToken.getClient())
-                .email(storedAccessToken.getEmail())
-                .scope(extractGrantScope(storedAccessToken, tokenRequest))
+                .username(storedAccessToken.getUsername())
+                .scopes(extractGrantScope(storedAccessToken, tokenRequest))
                 .tokenGrantType(storedAccessToken.getTokenGrantType())
                 .build();
         accessToken.generateRefreshToken(refreshTokenGenerator(), extractRefreshTokenExpiration(clientDetails));
@@ -57,7 +57,7 @@ public class RefreshTokenGranter extends AbstractOAuth2TokenGranter {
     }
 
     protected Set<OAuth2ScopeId> extractGrantScope(OAuth2AuthorizedAccessToken accessToken, OAuth2TokenRequest tokenRequest) {
-        return (tokenRequest.scopes() == null || tokenRequest.scopes().isEmpty()) ? accessToken.getScope() :
-                tokenRequest.scopes().stream().map(OAuth2ScopeId::new).collect(Collectors.toSet());
+        return (tokenRequest.getScopes() == null || tokenRequest.getScopes().isEmpty()) ? accessToken.getScopes() :
+                tokenRequest.getScopes().stream().map(OAuth2ScopeId::new).collect(Collectors.toSet());
     }
 }

@@ -8,16 +8,16 @@ import java.util.Set;
 
 public interface OAuth2AccessTokenDetails extends OAuth2TokenDetails {
 
-    OAuth2ClientId clientId();
+    OAuth2ClientId getClientId();
 
-    Set<OAuth2ScopeId> scope();
+    Set<OAuth2ScopeId> getScopes();
 
-    String tokenType();
+    String getTokenType();
 
-    String username();
+    String getUsername();
 
-    OAuth2RefreshTokenDetails refreshToken();
+    OAuth2RefreshTokenDetails getRefreshToken();
 
-    Map<String, String> additionalInformation();
+    Map<String, String> getAdditionalInformation();
 
 }

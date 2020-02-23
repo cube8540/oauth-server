@@ -21,7 +21,7 @@ public class ClientCredentialsTokenGranter extends AbstractOAuth2TokenGranter {
 
     @Override
     public OAuth2AuthorizedAccessToken createAccessToken(OAuth2ClientDetails clientDetails, OAuth2TokenRequest tokenRequest) {
-        if (!getTokenRequestValidator().validateScopes(clientDetails, tokenRequest.scopes())) {
+        if (!getTokenRequestValidator().validateScopes(clientDetails, tokenRequest.getScopes())) {
             throw InvalidGrantException.invalidScope("cannot grant scopes");
         }
 
@@ -29,7 +29,7 @@ public class ClientCredentialsTokenGranter extends AbstractOAuth2TokenGranter {
                 .client(new OAuth2ClientId(clientDetails.getClientId()))
                 .expiration(extractTokenExpiration(clientDetails))
                 .tokenGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
-                .scope(extractGrantScope(clientDetails, tokenRequest))
+                .scopes(extractGrantScope(clientDetails, tokenRequest))
                 .build();
         if (allowedRefreshToken) {
             accessToken.generateRefreshToken(refreshTokenGenerator(), extractRefreshTokenExpiration(clientDetails));

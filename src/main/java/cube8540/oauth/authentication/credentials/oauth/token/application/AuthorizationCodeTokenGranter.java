@@ -32,7 +32,7 @@ public class AuthorizationCodeTokenGranter extends AbstractOAuth2TokenGranter {
 
     @Override
     public OAuth2AuthorizedAccessToken createAccessToken(OAuth2ClientDetails clientDetails, OAuth2TokenRequest tokenRequest) {
-        OAuth2AuthorizationCode authorizationCode = authorizationCodeConsumer.consume(new AuthorizationCode(tokenRequest.code()))
+        OAuth2AuthorizationCode authorizationCode = authorizationCodeConsumer.consume(new AuthorizationCode(tokenRequest.getCode()))
                 .orElseThrow(() -> InvalidRequestException.invalidRequest("authorization code not found"));
 
         Set<String> authorizationCodeScope = Optional.ofNullable(authorizationCode.getApprovedScopes())
@@ -47,8 +47,8 @@ public class AuthorizationCodeTokenGranter extends AbstractOAuth2TokenGranter {
         OAuth2AuthorizedAccessToken accessToken = OAuth2AuthorizedAccessToken.builder(getTokenIdGenerator())
                 .expiration(extractTokenExpiration(clientDetails))
                 .client(authorizationCode.getClientId())
-                .email(authorizationCode.getEmail())
-                .scope(authorizationCode.getApprovedScopes())
+                .username(authorizationCode.getUsername())
+                .scopes(authorizationCode.getApprovedScopes())
                 .tokenGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .build();
         accessToken.generateRefreshToken(refreshTokenGenerator(), extractRefreshTokenExpiration(clientDetails));
@@ -66,42 +66,42 @@ public class AuthorizationCodeTokenGranter extends AbstractOAuth2TokenGranter {
         }
 
         @Override
-        public String clientId() {
+        public String getClientId() {
             return clientDetails.getClientId();
         }
 
         @Override
-        public String username() {
-            return tokenRequest.username();
+        public String getUsername() {
+            return tokenRequest.getUsername();
         }
 
         @Override
-        public String state() {
-            return tokenRequest.state();
+        public String getState() {
+            return tokenRequest.getState();
         }
 
         @Override
-        public URI redirectURI() {
-            return tokenRequest.redirectURI();
+        public URI getRedirectUri() {
+            return tokenRequest.getRedirectUri();
         }
 
         @Override
-        public Set<String> requestScopes() {
-            return tokenRequest.scopes();
+        public Set<String> getRequestScopes() {
+            return tokenRequest.getScopes();
         }
 
         @Override
-        public OAuth2AuthorizationResponseType responseType() {
+        public OAuth2AuthorizationResponseType getResponseType() {
             return OAuth2AuthorizationResponseType.CODE;
         }
 
         @Override
-        public void setRedirectURI(URI redirectURI) {
+        public void setRedirectUri(URI redirectUri) {
             throw new UnsupportedOperationException(getClass().getName() + "#setRedirectURI");
         }
 
         @Override
-        public void setRequestScopes(Set<String> requestScope) {
+        public void setRequestScopes(Set<String> requestScopes) {
             throw new UnsupportedOperationException(getClass().getName() + "#setRequestScopes");
         }
     }

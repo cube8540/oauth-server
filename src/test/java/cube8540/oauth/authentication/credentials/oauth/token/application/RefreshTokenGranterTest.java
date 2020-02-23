@@ -114,10 +114,10 @@ class RefreshTokenGranterTest {
             when(clientDetails.getClientId()).thenReturn(RAW_CLIENT_ID);
             when(clientDetails.getAccessTokenValiditySeconds()).thenReturn(ACCESS_TOKEN_VALIDITY_SECONDS);
             when(clientDetails.getRefreshTokenValiditySeconds()).thenReturn(REFRESH_TOKEN_VALIDITY_SECONDS);
-            when(tokenRequest.scopes()).thenReturn(RAW_SCOPES);
+            when(tokenRequest.getScopes()).thenReturn(RAW_SCOPES);
             when(tokenIdGenerator.generateTokenValue()).thenReturn(TOKEN_ID);
 
-            when(tokenRequest.refreshToken()).thenReturn(RAW_REFRESH_TOKEN_ID);
+            when(tokenRequest.getRefreshToken()).thenReturn(RAW_REFRESH_TOKEN_ID);
 
             tokenGranter.setTokenRequestValidator(validator);
 
@@ -233,9 +233,9 @@ class RefreshTokenGranterTest {
                 when(refreshToken.isExpired()).thenReturn(false);
                 when(accessToken.getTokenId()).thenReturn(TOKEN_ID);
                 when(accessToken.getClient()).thenReturn(CLIENT_ID);
-                when(accessToken.getEmail()).thenReturn(EMAIL);
+                when(accessToken.getUsername()).thenReturn(EMAIL);
                 when(accessToken.getTokenGrantType()).thenReturn(AuthorizationGrantType.AUTHORIZATION_CODE);
-                when(accessToken.getScope()).thenReturn(STORED_SCOPES);
+                when(accessToken.getScopes()).thenReturn(STORED_SCOPES);
 
                 when(tokenIdGenerator.generateTokenValue()).thenReturn(NEW_TOKEN_ID);
                 when(refreshTokenIdGenerator.generateTokenValue()).thenReturn(NEW_REFRESH_TOKEN_ID);
@@ -297,7 +297,7 @@ class RefreshTokenGranterTest {
                 void shouldUserEmailIsSearchedAccessTokensUserEmail() {
                     OAuth2AuthorizedAccessToken result = tokenGranter.createAccessToken(clientDetails, tokenRequest);
 
-                    assertEquals(EMAIL, result.getEmail());
+                    assertEquals(EMAIL, result.getUsername());
                 }
 
                 @Test
@@ -305,7 +305,7 @@ class RefreshTokenGranterTest {
                 void shouldScopeIsRequestedScope() {
                     OAuth2AuthorizedAccessToken result = tokenGranter.createAccessToken(clientDetails, tokenRequest);
 
-                    assertEquals(REQUESTED_SCOPE, result.getScope());
+                    assertEquals(REQUESTED_SCOPE, result.getScopes());
                 }
 
                 @Test
@@ -380,7 +380,7 @@ class RefreshTokenGranterTest {
                     class WhenRequestScopeNull {
                         @BeforeEach
                         void setup() {
-                            when(tokenRequest.scopes()).thenReturn(null);
+                            when(tokenRequest.getScopes()).thenReturn(null);
                             when(validator.validateScopes(RAW_STORED_SCOPES, null)).thenReturn(true);
                         }
 
@@ -388,7 +388,7 @@ class RefreshTokenGranterTest {
                         @DisplayName("토큰의 스코프는 액세스 토큰에 저장된 스코프어야 한다.")
                         void shouldScopeIsStoredInClientDetails() {
                             OAuth2AuthorizedAccessToken accessToken = tokenGranter.createAccessToken(clientDetails, tokenRequest);
-                            assertEquals(STORED_SCOPES, accessToken.getScope());
+                            assertEquals(STORED_SCOPES, accessToken.getScopes());
                         }
                     }
 
@@ -397,7 +397,7 @@ class RefreshTokenGranterTest {
                     class WhenRequestEmptyScope {
                         @BeforeEach
                         void setup() {
-                            when(tokenRequest.scopes()).thenReturn(Collections.emptySet());
+                            when(tokenRequest.getScopes()).thenReturn(Collections.emptySet());
                             when(validator.validateScopes(RAW_STORED_SCOPES, Collections.emptySet())).thenReturn(true);
                         }
 
@@ -405,7 +405,7 @@ class RefreshTokenGranterTest {
                         @DisplayName("토큰의 스코프는 액세스 토큰에 저장된 스코프어야 한다.")
                         void shouldScopeIsStoredInClientDetails() {
                             OAuth2AuthorizedAccessToken accessToken = tokenGranter.createAccessToken(clientDetails, tokenRequest);
-                            assertEquals(STORED_SCOPES, accessToken.getScope());
+                            assertEquals(STORED_SCOPES, accessToken.getScopes());
                         }
                     }
                 }

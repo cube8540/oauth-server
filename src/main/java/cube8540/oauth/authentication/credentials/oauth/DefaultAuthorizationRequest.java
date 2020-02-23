@@ -1,16 +1,20 @@
 package cube8540.oauth.authentication.credentials.oauth;
 
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationResponseType;
 
 import java.net.URI;
 import java.security.Principal;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+@Getter
+@ToString
 @EqualsAndHashCode
 public class DefaultAuthorizationRequest implements AuthorizationRequest {
 
@@ -20,18 +24,20 @@ public class DefaultAuthorizationRequest implements AuthorizationRequest {
 
     private String username;
 
-    private URI redirectURI;
+    @Setter
+    private URI redirectUri;
 
-    private Set<String> scopes;
+    @Setter
+    private Set<String> requestScopes;
 
     private OAuth2AuthorizationResponseType responseType;
 
     public DefaultAuthorizationRequest(Map<String, String> requestMap, Principal principal) {
         this.clientId = requestMap.get(OAuth2Utils.AuthorizationRequestKey.CLIENT_ID);
         this.state = requestMap.get(OAuth2Utils.AuthorizationRequestKey.STATE);
-        this.scopes = OAuth2Utils.extractScopes(requestMap.get(OAuth2Utils.AuthorizationRequestKey.SCOPE));
+        this.requestScopes = OAuth2Utils.extractScopes(requestMap.get(OAuth2Utils.AuthorizationRequestKey.SCOPE));
         this.username = Optional.ofNullable(principal).map(Principal::getName).orElse(null);
-        this.redirectURI = Optional.ofNullable(requestMap.get(OAuth2Utils.AuthorizationRequestKey.REDIRECT_URI))
+        this.redirectUri = Optional.ofNullable(requestMap.get(OAuth2Utils.AuthorizationRequestKey.REDIRECT_URI))
                 .map(URI::create).orElse(null);
         if (OAuth2AuthorizationResponseType.CODE.getValue()
                 .equals(requestMap.get(OAuth2Utils.AuthorizationRequestKey.RESPONSE_TYPE))) {
@@ -43,53 +49,13 @@ public class DefaultAuthorizationRequest implements AuthorizationRequest {
     }
 
     public DefaultAuthorizationRequest(AuthorizationRequest authorizationRequest) {
-        this.clientId = authorizationRequest.clientId();
-        this.state = authorizationRequest.state();
-        this.username = authorizationRequest.username();
-        this.redirectURI = authorizationRequest.redirectURI();
-        this.responseType = authorizationRequest.responseType();
-        if (authorizationRequest.requestScopes() != null) {
-            this.scopes = new HashSet<>(authorizationRequest.requestScopes());
+        this.clientId = authorizationRequest.getClientId();
+        this.state = authorizationRequest.getState();
+        this.username = authorizationRequest.getUsername();
+        this.redirectUri = authorizationRequest.getRedirectUri();
+        this.responseType = authorizationRequest.getResponseType();
+        if (authorizationRequest.getRequestScopes() != null) {
+            this.requestScopes = new HashSet<>(authorizationRequest.getRequestScopes());
         }
-    }
-
-    @Override
-    public String clientId() {
-        return clientId;
-    }
-
-    @Override
-    public String username() {
-        return username;
-    }
-
-    @Override
-    public String state() {
-        return state;
-    }
-
-    @Override
-    public URI redirectURI() {
-        return redirectURI;
-    }
-
-    @Override
-    public Set<String> requestScopes() {
-        return scopes;
-    }
-
-    @Override
-    public OAuth2AuthorizationResponseType responseType() {
-        return responseType;
-    }
-
-    @Override
-    public void setRedirectURI(URI redirectURI) {
-        this.redirectURI = redirectURI;
-    }
-
-    @Override
-    public void setRequestScopes(Set<String> requestScope) {
-        this.scopes = Collections.unmodifiableSet(requestScope);
     }
 }

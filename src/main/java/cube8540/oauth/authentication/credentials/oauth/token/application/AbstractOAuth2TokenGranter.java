@@ -50,7 +50,7 @@ public abstract class AbstractOAuth2TokenGranter implements OAuth2AccessTokenGra
     @Override
     public OAuth2AccessTokenDetails grant(OAuth2ClientDetails clientDetails, OAuth2TokenRequest tokenRequest) {
         OAuth2AuthorizedAccessToken accessToken = createAccessToken(clientDetails, tokenRequest);
-        tokenRepository.findByClientAndEmail(accessToken.getClient(), accessToken.getEmail()).ifPresent(tokenRepository::delete);
+        tokenRepository.findByClientAndUsername(accessToken.getClient(), accessToken.getUsername()).ifPresent(tokenRepository::delete);
         tokenEnhancer.enhance(accessToken);
         tokenRepository.save(accessToken);
         return DefaultAccessTokenDetails.of(accessToken);
@@ -71,7 +71,7 @@ public abstract class AbstractOAuth2TokenGranter implements OAuth2AccessTokenGra
     }
 
     protected Set<OAuth2ScopeId> extractGrantScope(OAuth2ClientDetails clientDetails, OAuth2TokenRequest tokenRequest) {
-        return (tokenRequest.scopes() == null || tokenRequest.scopes().isEmpty() ? clientDetails.getScopes() : tokenRequest.scopes())
+        return (tokenRequest.getScopes() == null || tokenRequest.getScopes().isEmpty() ? clientDetails.getScopes() : tokenRequest.getScopes())
                 .stream().map(OAuth2ScopeId::new).collect(Collectors.toSet());
     }
 

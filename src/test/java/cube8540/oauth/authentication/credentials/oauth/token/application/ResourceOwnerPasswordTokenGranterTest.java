@@ -108,9 +108,9 @@ class ResourceOwnerPasswordTokenGranterTest {
             when(clientDetails.getAccessTokenValiditySeconds()).thenReturn(ACCESS_TOKEN_VALIDITY_SECONDS);
             when(clientDetails.getRefreshTokenValiditySeconds()).thenReturn(REFRESH_TOKEN_VALIDITY_SECONDS);
 
-            when(tokenRequest.scopes()).thenReturn(RAW_SCOPES);
-            when(tokenRequest.username()).thenReturn(RAW_REQUESTED_USERNAME);
-            when(tokenRequest.password()).thenReturn(RAW_REQUESTED_PASSWORD);
+            when(tokenRequest.getScopes()).thenReturn(RAW_SCOPES);
+            when(tokenRequest.getUsername()).thenReturn(RAW_REQUESTED_USERNAME);
+            when(tokenRequest.getPassword()).thenReturn(RAW_REQUESTED_PASSWORD);
 
             tokenGranter.setTokenRequestValidator(this.validator);
 
@@ -124,7 +124,7 @@ class ResourceOwnerPasswordTokenGranterTest {
 
             @BeforeEach
             void setup() {
-                when(tokenRequest.username()).thenReturn(null);
+                when(tokenRequest.getUsername()).thenReturn(null);
             }
 
             @Test
@@ -148,7 +148,7 @@ class ResourceOwnerPasswordTokenGranterTest {
 
             @BeforeEach
             void setup() {
-                when(tokenRequest.password()).thenReturn(null);
+                when(tokenRequest.getPassword()).thenReturn(null);
             }
 
             @Test
@@ -274,7 +274,7 @@ class ResourceOwnerPasswordTokenGranterTest {
             void shouldScopeIsRequestedScope() {
                 OAuth2AuthorizedAccessToken accessToken = tokenGranter.createAccessToken(clientDetails, tokenRequest);
 
-                assertEquals(REQUESTED_SCOPE, accessToken.getScope());
+                assertEquals(REQUESTED_SCOPE, accessToken.getScopes());
             }
 
             @Test
@@ -282,7 +282,7 @@ class ResourceOwnerPasswordTokenGranterTest {
             void shouldUsernameIsAuthenticationUsername() {
                 OAuth2AuthorizedAccessToken accessToken = tokenGranter.createAccessToken(clientDetails, tokenRequest);
 
-                assertEquals(authenticationUsername, accessToken.getEmail());
+                assertEquals(authenticationUsername, accessToken.getUsername());
             }
 
             @Test
@@ -351,7 +351,7 @@ class ResourceOwnerPasswordTokenGranterTest {
                 class WhenRequestScopeNull {
                     @BeforeEach
                     void setup() {
-                        when(tokenRequest.scopes()).thenReturn(null);
+                        when(tokenRequest.getScopes()).thenReturn(null);
                         when(validator.validateScopes(clientDetails, null)).thenReturn(true);
                     }
 
@@ -361,7 +361,7 @@ class ResourceOwnerPasswordTokenGranterTest {
                         Set<OAuth2ScopeId> exceptedScopes = CLIENT_SCOPE.stream().map(OAuth2ScopeId::new).collect(Collectors.toSet());
 
                         OAuth2AuthorizedAccessToken accessToken = tokenGranter.createAccessToken(clientDetails, tokenRequest);
-                        assertEquals(exceptedScopes, accessToken.getScope());
+                        assertEquals(exceptedScopes, accessToken.getScopes());
                     }
                 }
 
@@ -370,7 +370,7 @@ class ResourceOwnerPasswordTokenGranterTest {
                 class WhenRequestEmptyScope {
                     @BeforeEach
                     void setup() {
-                        when(tokenRequest.scopes()).thenReturn(Collections.emptySet());
+                        when(tokenRequest.getScopes()).thenReturn(Collections.emptySet());
                         when(validator.validateScopes(clientDetails, Collections.emptySet())).thenReturn(true);
                     }
 
@@ -380,7 +380,7 @@ class ResourceOwnerPasswordTokenGranterTest {
                         Set<OAuth2ScopeId> exceptedScopes = CLIENT_SCOPE.stream().map(OAuth2ScopeId::new).collect(Collectors.toSet());
 
                         OAuth2AuthorizedAccessToken accessToken = tokenGranter.createAccessToken(clientDetails, tokenRequest);
-                        assertEquals(exceptedScopes, accessToken.getScope());
+                        assertEquals(exceptedScopes, accessToken.getScopes());
                     }
                 }
             }
