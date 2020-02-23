@@ -149,7 +149,7 @@ class ClientCanGrantedScopeValidationRuleTest {
         private OAuth2ScopeDetails mocking(String scopeId) {
             OAuth2ScopeDetails scopeDetails = mock(OAuth2ScopeDetails.class);
 
-            when(scopeDetails.scopeId()).thenReturn(scopeId);
+            when(scopeDetails.getScopeId()).thenReturn(scopeId);
             return scopeDetails;
         }
     }
@@ -187,7 +187,7 @@ class ClientCanGrantedScopeValidationRuleTest {
         private OAuth2ScopeDetails mocking(String scopeId) {
             OAuth2ScopeDetails scopeDetails = mock(OAuth2ScopeDetails.class);
 
-            when(scopeDetails.scopeId()).thenReturn(scopeId);
+            when(scopeDetails.getScopeId()).thenReturn(scopeId);
             return scopeDetails;
         }
     }
