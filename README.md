@@ -511,13 +511,15 @@ Content-Type: application/json
 
 {
     "code": "TEST-ROLE",
-    "description": "테스트 권한"
+    "description": "테스트 권한",
+    "basic": true
 }
 ```
 |  파라미터명    |  타입   |  설명  |
 | :-----------: | :----: | --------------------- |
 | code         | String | 추가된 권한 코드        |
 | description  | String |추가된 권한의 설명 텍스트 |
+| basic  | Boolean |추가된 권한의 기본 권한 여부 |
 
 #### 에러
 ```
@@ -553,7 +555,8 @@ Content-Type: application/json
     "authorities": [
         {
             "code": "ROLE_USER",
-            "description": "테스트용 기본 권한"
+            "description": "테스트용 기본 권한",
+            "basic": true
         }
     ]
 }
@@ -563,6 +566,7 @@ Content-Type: application/json
 | authorities  | Array  | 검색된 권한 리스트      |
 | code         | String | 권한 코드               |
 | description  | String | 권한의 설명 텍스트      |
+| basic  | Boolean | 권한의 기본 권한 여부      |
 
 ### 권한 정보 변경
 권한의 정보를 변경 합니다.
@@ -592,13 +596,15 @@ Content-Type: application/json
 
 {
     "code": "TEST-ROLE",
-    "description": "변경된 설명 텍스트"
+    "description": "변경된 설명 텍스트",
+    "basic": true
 }
 ```
 |  파라미터명    |  타입   |  설명  |
 | :-----------: | :----: | --------------------- |
 | code         | String | 변경된 권한 코드        |
 | description  | String | 변경된 권한의 설명 텍스트 |
+| basic  | Boolean | 변경된 권한의 기본 권한 여부 |
 
 #### 에러
 ```
@@ -636,13 +642,15 @@ Content-Type: application/json
 
 {
     "code": "TEST-ROLE",
-    "description": "권한 설명 텍스트"
+    "description": "권한 설명 텍스트",
+    "basic": true
 }
 ```
 |  파라미터명    |  타입   |  설명  |
 | :-----------: | :----: | --------------------- |
 | code         | String | 삭제된 권한 코드        |
 | description  | String | 삭제된 권한의 설명 텍스트 |
+| basic  | Boolean | 삭제된 권한의 기본 권한 여부 |
 
 #### 에러
 ```
