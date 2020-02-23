@@ -14,12 +14,16 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.SessionAttributes;
 
 import java.util.Collections;
 import java.util.Map;
 
 @RestController
+@SessionAttributes({UserManagementAPIEndpoint.NEW_REGISTERED_USER_ATTRIBUTE})
 public class UserManagementAPIEndpoint {
+
+    protected static final String NEW_REGISTERED_USER_ATTRIBUTE = "UserManagementAPIEndpoint.newRegisteredUser";
 
     private final UserManagementService service;
 
@@ -32,8 +36,11 @@ public class UserManagementAPIEndpoint {
     }
 
     @PostMapping(value = "/api/accounts")
-    public UserProfile registerUserAccounts(@RequestBody UserRegisterRequest registerRequest) {
-        return service.registerUser(registerRequest);
+    public UserProfile registerUserAccounts(@RequestBody UserRegisterRequest registerRequest, Map<String, Object> model) {
+        UserProfile registerUser = service.registerUser(registerRequest);
+
+        model.put(NEW_REGISTERED_USER_ATTRIBUTE, registerUser);
+        return registerUser;
     }
 
     @GetMapping(value = "/api/accounts/attributes/email")

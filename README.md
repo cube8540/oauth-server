@@ -430,14 +430,13 @@ Content-Type: application/json
 #### 요청
 ```
 PUT HTTP/1.1
-http://localhost:8080/api/accounts/credentials/{email=email@email.com}
+http://localhost:8080/api/accounts/attributes/active
 ?credentialsKey=xxxxxxxxxxx
 
 X-CSRF-TOKEN: 03eacf13-6f4a-4ea5-8d63-ae2fb0b39f06
 ```
 |  파라미터명    | 필수 여부 |  타입   |  설명  |
 | :-----------: | :-------: | :----: | --------------- |
-| email         | Required  | String | 활성화 시킬 이메일 |
 | credentialsKey| Required  | String | 계정 활성화 키 |
 
 #### 응답
