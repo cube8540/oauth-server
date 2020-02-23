@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public interface OAuth2AccessTokenRepository extends JpaRepository<OAuth2AuthorizedAccessToken, OAuth2TokenId> {
 
-    @EntityGraph(attributePaths = {"scope", "refreshToken", "additionalInformation"})
+    @EntityGraph(attributePaths = {"scopes", "refreshToken", "additionalInformation"})
     Optional<OAuth2AuthorizedAccessToken> findByClientAndUsername(OAuth2ClientId clientId, UserEmail username);
 
 }

@@ -12,7 +12,7 @@ public interface OAuth2ClientRepository extends JpaRepository<OAuth2Client, OAut
 
     Long countByClientId(OAuth2ClientId clientId);
 
-    @EntityGraph(attributePaths = {"redirectURI", "grantType", "scope"})
+    @EntityGraph(attributePaths = {"redirectUris", "grantTypes", "scopes"})
     Optional<OAuth2Client> findByClientId(OAuth2ClientId clientId);
 
     Page<OAuth2Client> findByOwner(UserEmail owner, Pageable pageable);
