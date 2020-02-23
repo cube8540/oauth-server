@@ -2,6 +2,12 @@
 
 Spring Boot + Spring Security 를 이용하여 구현한 OAuth2 권한 서버 입니다. 
 
+## 환경
+- Java 13
+- Gradle 6.0.1
+- Spring Boot 2.2.2
+- Spring Security 5.2.1
+
 ## 구현되어 있는 인증 타입
 - [Authorization Code](#authorization-code-flow)
 - [Resource Owner Password Credentials (Password)](#resource-owner-password-credentials-flow)
