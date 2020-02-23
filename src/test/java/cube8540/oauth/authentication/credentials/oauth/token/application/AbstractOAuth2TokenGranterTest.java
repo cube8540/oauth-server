@@ -89,11 +89,11 @@ class AbstractOAuth2TokenGranterTest {
             this.clientDetails = mock(OAuth2ClientDetails.class);
             this.tokenRequest = mock(OAuth2TokenRequest.class);
 
-            when(clientDetails.clientId()).thenReturn(RAW_CLIENT);
+            when(clientDetails.getClientId()).thenReturn(RAW_CLIENT);
             when(accessToken.getTokenId()).thenReturn(TOKEN_ID);
-            when(accessToken.getEmail()).thenReturn(EMAIL);
+            when(accessToken.getUsername()).thenReturn(EMAIL);
             when(accessToken.getClient()).thenReturn(CLIENT);
-            when(accessToken.getScope()).thenReturn(SCOPE);
+            when(accessToken.getScopes()).thenReturn(SCOPE);
             when(accessToken.getExpiration()).thenReturn(EXPIRATION);
             when(accessToken.getTokenGrantType()).thenReturn(GRANT_TYPE);
             when(accessToken.getAdditionalInformation()).thenReturn(ADDITIONAL_INFO);
@@ -120,7 +120,7 @@ class AbstractOAuth2TokenGranterTest {
             void setup() {
                 this.existsToken = mock(OAuth2AuthorizedAccessToken.class);
 
-                when(repository.findByClientAndEmail(CLIENT, EMAIL)).thenReturn(Optional.of(existsToken));
+                when(repository.findByClientAndUsername(CLIENT, EMAIL)).thenReturn(Optional.of(existsToken));
             }
 
             @Test
@@ -133,7 +133,7 @@ class AbstractOAuth2TokenGranterTest {
 
             @AfterEach
             void after() {
-                when(repository.findByClientAndEmail(any(), any())).thenReturn(Optional.empty());
+                when(repository.findByClientAndUsername(any(), any())).thenReturn(Optional.empty());
             }
         }
 
@@ -142,7 +142,7 @@ class AbstractOAuth2TokenGranterTest {
         void shouldTokenTypeMustBearer() {
             OAuth2AccessTokenDetails tokenDetails = granter.grant(clientDetails, tokenRequest);
 
-            assertEquals("Bearer", tokenDetails.tokenType());
+            assertEquals("Bearer", tokenDetails.getTokenType());
         }
 
         @Test
@@ -172,7 +172,7 @@ class AbstractOAuth2TokenGranterTest {
             void shouldReturnsRefreshTokenNull() {
                 OAuth2AccessTokenDetails tokenDetails = granter.grant(clientDetails, tokenRequest);
 
-                assertNull(tokenDetails.refreshToken());
+                assertNull(tokenDetails.getRefreshToken());
             }
         }
     }

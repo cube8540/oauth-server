@@ -82,7 +82,7 @@ class CompositeOAuth2AccessTokenGranterTest {
                 this.passwordTokenGranter = mock(OAuth2AccessTokenGrantService.class);
                 this.token = mock(OAuth2AccessTokenDetails.class);
 
-                when(this.tokenRequest.grantType()).thenReturn(AuthorizationGrantType.AUTHORIZATION_CODE);
+                when(this.tokenRequest.getGrantType()).thenReturn(AuthorizationGrantType.AUTHORIZATION_CODE);
                 when(this.codeTokenGranter.grant(clientDetails, tokenRequest)).thenReturn(token);
 
                 accessTokenGranter.putTokenGranterMap(AuthorizationGrantType.AUTHORIZATION_CODE, codeTokenGranter);

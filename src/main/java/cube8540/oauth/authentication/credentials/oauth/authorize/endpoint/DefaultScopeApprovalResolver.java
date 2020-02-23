@@ -11,7 +11,7 @@ import java.util.Set;
 public class DefaultScopeApprovalResolver implements ScopeApprovalResolver {
     @Override
     public Set<String> resolveApprovalScopes(AuthorizationRequest originalRequest, Map<String, String> approvalParameters) {
-        Set<String> storedScopes = originalRequest.requestScopes();
+        Set<String> storedScopes = originalRequest.getRequestScopes();
         Set<String> approvalScopes = new HashSet<>();
         for (String storedScope : storedScopes) {
             String approval = approvalParameters.get(storedScope);

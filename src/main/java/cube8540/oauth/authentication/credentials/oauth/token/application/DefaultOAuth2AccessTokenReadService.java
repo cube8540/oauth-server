@@ -42,7 +42,7 @@ public class DefaultOAuth2AccessTokenReadService implements OAuth2AccessTokenRea
         OAuth2AuthorizedAccessToken accessToken = tokenRepository.findById(new OAuth2TokenId(tokenValue))
                 .orElseThrow(() -> new OAuth2AccessTokenNotFoundException("[" + tokenValue + "] token is not found"));
 
-        UserDetails user = userDetailsService.loadUserByUsername(accessToken.getEmail().getValue());
+        UserDetails user = userDetailsService.loadUserByUsername(accessToken.getUsername().getValue());
         if (user instanceof CredentialsContainer) {
             ((CredentialsContainer) user).eraseCredentials();
         }

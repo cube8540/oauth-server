@@ -7,21 +7,21 @@ import java.util.Set;
 
 public interface OAuth2TokenRequest {
 
-    AuthorizationGrantType grantType();
+    AuthorizationGrantType getGrantType();
 
-    String username();
+    String getUsername();
 
-    String password();
+    String getPassword();
 
-    String clientId();
+    String getClientId();
 
-    String refreshToken();
+    String getRefreshToken();
 
-    String code();
+    String getCode();
 
-    String state();
+    String getState();
 
-    URI redirectURI();
+    URI getRedirectUri();
 
-    Set<String> scopes();
+    Set<String> getScopes();
 }

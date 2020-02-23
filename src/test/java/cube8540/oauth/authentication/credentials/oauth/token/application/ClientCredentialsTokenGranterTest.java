@@ -82,11 +82,11 @@ class ClientCredentialsTokenGranterTest {
             this.tokenRequest = mock(OAuth2TokenRequest.class);
             this.validator = mock(OAuth2RequestValidator.class);
 
-            when(clientDetails.clientId()).thenReturn(RAW_CLIENT_ID);
-            when(clientDetails.scope()).thenReturn(CLIENT_SCOPE);
-            when(clientDetails.accessTokenValiditySeconds()).thenReturn(ACCESS_TOKEN_VALIDITY_SECONDS);
-            when(clientDetails.refreshTokenValiditySeconds()).thenReturn(REFRESH_TOKEN_VALIDITY_SECONDS);
-            when(tokenRequest.scopes()).thenReturn(RAW_SCOPES);
+            when(clientDetails.getClientId()).thenReturn(RAW_CLIENT_ID);
+            when(clientDetails.getScopes()).thenReturn(CLIENT_SCOPE);
+            when(clientDetails.getAccessTokenValiditySeconds()).thenReturn(ACCESS_TOKEN_VALIDITY_SECONDS);
+            when(clientDetails.getRefreshTokenValiditySeconds()).thenReturn(REFRESH_TOKEN_VALIDITY_SECONDS);
+            when(tokenRequest.getScopes()).thenReturn(RAW_SCOPES);
 
             tokenGranter.setTokenRequestValidator(validator);
 
@@ -141,7 +141,7 @@ class ClientCredentialsTokenGranterTest {
             void shouldSetNullUserEmail() {
                 OAuth2AuthorizedAccessToken accessToken = tokenGranter.createAccessToken(clientDetails, tokenRequest);
 
-                assertNull(accessToken.getEmail());
+                assertNull(accessToken.getUsername());
             }
 
             @Test
@@ -166,7 +166,7 @@ class ClientCredentialsTokenGranterTest {
                 Set<OAuth2ScopeId> exceptedScopes = RAW_SCOPES.stream().map(OAuth2ScopeId::new).collect(Collectors.toSet());
 
                 OAuth2AuthorizedAccessToken accessToken = tokenGranter.createAccessToken(clientDetails, tokenRequest);
-                assertEquals(exceptedScopes, accessToken.getScope());
+                assertEquals(exceptedScopes, accessToken.getScopes());
             }
 
             @Test
@@ -194,7 +194,7 @@ class ClientCredentialsTokenGranterTest {
                 class WhenRequestScopeNull {
                     @BeforeEach
                     void setup() {
-                        when(tokenRequest.scopes()).thenReturn(null);
+                        when(tokenRequest.getScopes()).thenReturn(null);
                         when(validator.validateScopes(clientDetails, null)).thenReturn(true);
                     }
 
@@ -204,7 +204,7 @@ class ClientCredentialsTokenGranterTest {
                         Set<OAuth2ScopeId> exceptedScopes = CLIENT_SCOPE.stream().map(OAuth2ScopeId::new).collect(Collectors.toSet());
 
                         OAuth2AuthorizedAccessToken accessToken = tokenGranter.createAccessToken(clientDetails, tokenRequest);
-                        assertEquals(exceptedScopes, accessToken.getScope());
+                        assertEquals(exceptedScopes, accessToken.getScopes());
                     }
                 }
 
@@ -213,7 +213,7 @@ class ClientCredentialsTokenGranterTest {
                 class WhenRequestEmptyScope {
                     @BeforeEach
                     void setup() {
-                        when(tokenRequest.scopes()).thenReturn(Collections.emptySet());
+                        when(tokenRequest.getScopes()).thenReturn(Collections.emptySet());
                         when(validator.validateScopes(clientDetails, Collections.emptySet())).thenReturn(true);
                     }
 
@@ -223,7 +223,7 @@ class ClientCredentialsTokenGranterTest {
                         Set<OAuth2ScopeId> exceptedScopes = CLIENT_SCOPE.stream().map(OAuth2ScopeId::new).collect(Collectors.toSet());
 
                         OAuth2AuthorizedAccessToken accessToken = tokenGranter.createAccessToken(clientDetails, tokenRequest);
-                        assertEquals(exceptedScopes, accessToken.getScope());
+                        assertEquals(exceptedScopes, accessToken.getScopes());
                     }
                 }
             }

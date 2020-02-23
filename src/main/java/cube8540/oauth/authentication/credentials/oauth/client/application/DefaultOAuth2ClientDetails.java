@@ -36,13 +36,13 @@ public class DefaultOAuth2ClientDetails implements OAuth2ClientDetails, Credenti
     private String clientName;
 
     @Singular("registeredRedirectURI")
-    private Set<URI> registeredRedirectURI;
+    private Set<URI> registeredRedirectUris;
 
     @Singular("authorizedGrantType")
-    private Set<AuthorizationGrantType> authorizedGrantType;
+    private Set<AuthorizationGrantType> authorizedGrantTypes;
 
     @Singular("scope")
-    private Set<String> scope;
+    private Set<String> scopes;
 
     private String owner;
 
@@ -51,7 +51,7 @@ public class DefaultOAuth2ClientDetails implements OAuth2ClientDetails, Credenti
     private Integer refreshTokenValiditySeconds;
 
     public static DefaultOAuth2ClientDetails of(OAuth2Client client) {
-        Set<String> scope = Optional.ofNullable(client.getScope()).orElse(Collections.emptySet())
+        Set<String> scope = Optional.ofNullable(client.getScopes()).orElse(Collections.emptySet())
                 .stream().map(OAuth2ScopeId::getValue).collect(Collectors.toSet());
         Long tokenValidity = Optional.ofNullable(client.getAccessTokenValidity()).map(Duration::toSeconds).orElse(0L);
         Long refreshValidity = Optional.ofNullable(client.getRefreshTokenValidity()).map(Duration::toSeconds).orElse(0L);
@@ -60,56 +60,11 @@ public class DefaultOAuth2ClientDetails implements OAuth2ClientDetails, Credenti
                 .clientSecret(client.getSecret())
                 .clientName(client.getClientName())
                 .owner(Optional.ofNullable(client.getOwner()).map(UserEmail::getValue).orElse(null))
-                .scope(scope)
+                .scopes(scope)
                 .accessTokenValiditySeconds(Double.valueOf(tokenValidity).intValue())
                 .refreshTokenValiditySeconds(Double.valueOf(refreshValidity).intValue())
-                .registeredRedirectURI(Optional.ofNullable(client.getRedirectURI()).orElse(Collections.emptySet()))
-                .authorizedGrantType(Optional.ofNullable(client.getGrantType()).orElse(Collections.emptySet())).build();
-    }
-
-    @Override
-    public String clientId() {
-        return clientId;
-    }
-
-    @Override
-    public String clientSecret() {
-        return clientSecret;
-    }
-
-    @Override
-    public String clientName() {
-        return clientName;
-    }
-
-    @Override
-    public Set<URI> registeredRedirectURI() {
-        return registeredRedirectURI;
-    }
-
-    @Override
-    public Set<AuthorizationGrantType> authorizedGrantType() {
-        return authorizedGrantType;
-    }
-
-    @Override
-    public Set<String> scope() {
-        return scope;
-    }
-
-    @Override
-    public String owner() {
-        return owner;
-    }
-
-    @Override
-    public Integer accessTokenValiditySeconds() {
-        return accessTokenValiditySeconds;
-    }
-
-    @Override
-    public Integer refreshTokenValiditySeconds() {
-        return refreshTokenValiditySeconds;
+                .registeredRedirectUris(Optional.ofNullable(client.getRedirectUris()).orElse(Collections.emptySet()))
+                .authorizedGrantTypes(Optional.ofNullable(client.getGrantTypes()).orElse(Collections.emptySet())).build();
     }
 
     @Override

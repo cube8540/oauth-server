@@ -77,7 +77,7 @@ class DefaultScopeAccessibleAuthorityValidationRuleTest {
         private AuthorityDetails mocking(String code) {
             AuthorityDetails details = mock(AuthorityDetails.class);
 
-            when(details.code()).thenReturn(code);
+            when(details.getCode()).thenReturn(code);
             return details;
         }
     }
@@ -108,7 +108,7 @@ class DefaultScopeAccessibleAuthorityValidationRuleTest {
         private AuthorityDetails mocking(String code) {
             AuthorityDetails details = mock(AuthorityDetails.class);
 
-            when(details.code()).thenReturn(code);
+            when(details.getCode()).thenReturn(code);
             return details;
         }
     }

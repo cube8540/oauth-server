@@ -3,10 +3,10 @@
 Spring Boot + Spring Security 를 이용하여 구현한 OAuth2 권한 서버 입니다. 
 
 ## 구현되어 있는 인증 타입
-- Authorization Code
-- Resource Owner Password Credentials (Password)
-- Client Credentials
-- Refresh Token
+- [Authorization Code](#authorization-code-flow)
+- [Resource Owner Password Credentials (Password)](#resource-owner-password-credentials-flow)
+- [Client Credentials](#client-credentials-flow)
+- [Refresh Token](#refresh-token-flow)
 
 위의 네가지 인증 타입을 구현하였으며 Implicit 인증 타입은 현재 구현되어 있지 않습니다. 아래는 각 인증 타입의 Access Token 을 얻는 과정 입니다.
 ### Authorization Code Flow
@@ -185,15 +185,12 @@ OAuth2 토큰 발급에 관련되어 있지 않은 API 입니다. 아래의 API�
 ## 계정 HTTP API
 저장소에 계정을 추가 하거나 변경하는 HTTP API 입니다. 계정의 패스워드 변경을 제외하고는 모두 로그인을 하지 않고 호출 할 수 있습니다.
 아래는 현재 구현된 계정 HTTP API 리스트 입니다.
-
-|              Endpoint             | Method |                설명                |
-| --------------------------------- | :------: | ----------------------------------------- |
-| /api/accounts                     |  POST  | 새 계정을 등록 합니다.                    |
-| /api/accounts/attributes/email    |  GET   | 저장소에 저장된 이메일의 갯수를 검색 합니다.|
-| /api/accounts/attributes/password | DELETE | 패스워드 초기화 키를 할당 합니다.         |
-| /api/accounts/attributes/password |  PUT   | 패스워드를 변경 합니다.                   |
-| /api/accounts/attributes/password |  POST  | 패스워드를 초기화 합니다.                 |
-| /api/accounts/credentials/{email} |  PUT   | 계정을 활성화 합니다.                     |
+- [새 계정 등록](#새-계정-등록)
+- [등록된 이메일 갯수 검색](#저장소에-등록된-이메일-갯수-검색)
+- [패스워드 초기화키 할당](#패스워드-초기화키-할당)
+- [패스워드 변경](#패스워드-변경)
+- [패스워드 초기화](#패스워드-초기화)
+- [계정 활성화](#계정-활성화)
 
 ### 새 계정 등록
 저장소에 새 계정을 등록하고 계정 활성화 키를 할당 합니다. 처음 계정이 등록 되었을땐 계정은 비 활성화 상태 임으로 로그인을 할 수 없습니다.
@@ -297,7 +294,7 @@ Content-Type: application/json
 
 {
     "email": "email@email.com",
-    "registeredAt": [2020, 1, 31, 15, 10, 7]
+    "registeredAt": "2020-01-31T15:10:07"
 }
 ```
 |  파라미터명    |  타입   |  설명  |
@@ -347,7 +344,7 @@ Content-Type: application/json
 
 {
     "email": "email@email.com",
-    "registeredAt": [2020, 1, 31, 15, 10, 7]
+    "registeredAt": "2020-01-31T15:10:07"
 }
 ```
 |  파라미터명    |  타입   |  설명  |
@@ -401,7 +398,7 @@ Content-Type: application/json
 
 {
     "email": "email@email.com",
-    "registeredAt": [2020, 1, 31, 15, 10, 7]
+    "registeredAt": "2020-01-31T15:10:07"
 }
 ```
 |  파라미터명    |  타입   |  설명  |
@@ -450,7 +447,7 @@ Content-Type: application/json
 
 {
     "email": "email@email.com",
-    "registeredAt": [2020, 1, 31, 15, 10, 7]
+    "registeredAt": "2020-01-31T15:10:07"
 }
 ```
 |  파라미터명    |  타입   |  설명  |
@@ -476,16 +473,14 @@ Content-Type: application/json
 | server_error                 |    500    | 서버에서 알 수 없는 에러가 발생 했음을 알리는 에러 코드 입니다.                |
 
 ## 권한 HTTP API
-새 권한을 추가하거나 삭제, 수정하는 HTTP API 입니다. 관리자 권한을 가진 계정으로 로그인 했을시만 접근 할 수 있습니다. 아래는
-현재 구현된 권한 HTTP API 리스트 입니다.
+새 권한을 추가하거나 삭제, 수정하는 HTTP API 입니다. 관리자 권한을 가진 계정으로 로그인 했을시만 접근 할 수 있도록 설정 해야 합니다.
+아래는 현재 구현된 권한 HTTP API 리스트 입니다.
 
-|              Endpoint             | Method |                설명                |
-| --------------------------------- | :------: | ----------------------------------------- |
-| /api/authorities                 |  POST  | 새 권한을 등록 합니다.                      |
-| /api/authorities                 |   GET  | 저장된 모든 권한을 검색 합니다.              |
-| /api/authorities/{code}          |   PUT  | 권한의 정보를 변경 합니다.                   |
-| /api/authorities/{code}          | DELETE | 권한을 삭제 합니다.                          |
-| /api/authorities/attributes/code |   PUT  | 저장소에 저장된 권한 코드의 갯수를 검색 합니다.|
+- [새 권한 등록](#새-권한-등록)
+- [모든 권한 검색](#저장된-모든-권한-검색)
+- [권한 정보 변경](#권한-정보-변경)
+- [권한 삭제](#권한-삭제)
+- [저장된 권한 코드 갯수 검색](#권한-코드-갯수-검색)
 
 ### 새 권한 등록
 저장소에 새 권한을 등록 합니다.
@@ -516,13 +511,15 @@ Content-Type: application/json
 
 {
     "code": "TEST-ROLE",
-    "description": "테스트 권한"
+    "description": "테스트 권한",
+    "basic": true
 }
 ```
 |  파라미터명    |  타입   |  설명  |
 | :-----------: | :----: | --------------------- |
 | code         | String | 추가된 권한 코드        |
 | description  | String |추가된 권한의 설명 텍스트 |
+| basic  | Boolean |추가된 권한의 기본 권한 여부 |
 
 #### 에러
 ```
@@ -558,7 +555,8 @@ Content-Type: application/json
     "authorities": [
         {
             "code": "ROLE_USER",
-            "description": "테스트용 기본 권한"
+            "description": "테스트용 기본 권한",
+            "basic": true
         }
     ]
 }
@@ -568,6 +566,7 @@ Content-Type: application/json
 | authorities  | Array  | 검색된 권한 리스트      |
 | code         | String | 권한 코드               |
 | description  | String | 권한의 설명 텍스트      |
+| basic  | Boolean | 권한의 기본 권한 여부      |
 
 ### 권한 정보 변경
 권한의 정보를 변경 합니다.
@@ -597,13 +596,15 @@ Content-Type: application/json
 
 {
     "code": "TEST-ROLE",
-    "description": "변경된 설명 텍스트"
+    "description": "변경된 설명 텍스트",
+    "basic": true
 }
 ```
 |  파라미터명    |  타입   |  설명  |
 | :-----------: | :----: | --------------------- |
 | code         | String | 변경된 권한 코드        |
 | description  | String | 변경된 권한의 설명 텍스트 |
+| basic  | Boolean | 변경된 권한의 기본 권한 여부 |
 
 #### 에러
 ```
@@ -641,13 +642,15 @@ Content-Type: application/json
 
 {
     "code": "TEST-ROLE",
-    "description": "권한 설명 텍스트"
+    "description": "권한 설명 텍스트",
+    "basic": true
 }
 ```
 |  파라미터명    |  타입   |  설명  |
 | :-----------: | :----: | --------------------- |
 | code         | String | 삭제된 권한 코드        |
 | description  | String | 삭제된 권한의 설명 텍스트 |
+| basic  | Boolean | 삭제된 권한의 기본 권한 여부 |
 
 #### 에러
 ```
@@ -689,17 +692,16 @@ Content-Type: application/json
 |  파라미터명    |  타입   |  설명  |
 | :-----------: | :----: | ------------------- |
 | count         | Number | 등록된 권한 코드의 갯수 |
+
 ## OAuth2 클라이언트 HTTP API
 로그인한 계정의 OAuth2 클라이언트를 검색 하거나 추가, 수정 합니다. 아래는 현재 구현된 OAuth2 클라이언트 HTTP API 리스트 입니다.
 
-|              Endpoint             | Method |                설명                |
-| --------------------------------- | :------: | ----------------------------------------- |
-| /api/clients                      |  POST  | 새 클라이언트를 등록 합니다.              |
-| /api/clients                      |  GET   | 등록된 자신의 클라이언트를 검색 합니다.   |
-| /api/clients/{clientId}           |  PUT   | 클라이언트의 정보를 변경 합니다.          |
-| /api/clients/{clientId}           | DELETE | 클라이언트를 삭제 합니다.                 |
-| /api/clients/{clientId}/attributes/secret|  PUT   | 클라이언트의 패스워드를 변경 합니다.      |
-| /api/clients/attributes/id        |  GET   | 저장소에 저장된 클라이언트의 아이디 갯수를 검색 합니다.|
+- [새 클라이언트 등록](#새-클라이언트-등록)
+- [등록된 클라이언트 검색](#등록된-클라이언트-검색)
+- [클라이언트 정보 변경](#클라이언트-정보-변경)
+- [클라이언트 삭제](#클라이언트-삭제)
+- [클라이언트 패스워드 변경](#클라이언트-패스워드-변경)
+- [저장된 클라이언트 갯수 검색](#클라이언트-아이디-갯수-검색)
 
 ### 새 클라이언트 등록
 새 클라이언트를 저장소에 등록합니다. 등록된 클라이언트를 이용해 앞으로 OAuth2 토큰 발급을 할 수 있습니다.
@@ -737,16 +739,16 @@ Content-Type: application/json
 {
     "clientId": "CLIENT-ID",
     "clientName": "CLIENT-NAME",
-    "registeredRedirectURI": [
+    "registeredRedirectUris": [
         "http://localhost:8080/callback",
         "http://localhost:8081/callback"
     ],
-    "authorizedGrantType": [
+    "authorizedGrantTypes": [
         { "value": "refresh_token" },
         { "value": "client_credentials" },
         { "value": "authorization_code" }
     ],
-    "scope": ["TEST-3", "TEST-1", "TEST-2"],
+    "scopes": ["TEST-3", "TEST-1", "TEST-2"],
     "owner": "email@email.com",
     "accessTokenValiditySeconds": 600,
     "refreshTokenValiditySeconds": 7200
@@ -802,35 +804,35 @@ Content-Type: application/json
         {
             "clientId": "CLIENT-ID",
             "clientName": "CLIENT-NAME",
-            "registeredRedirectURI": [
+            "registeredRedirectUris": [
                 "http://localhost:8080/callback",
                 "http://localhost:8081/callback"
             ],
-            "authorizedGrantType": [
+            "authorizedGrantTypes": [
                 { "value": "refresh_token" },
                 { "value": "client_credentials" },
                 { "value": "authorization_code" }
             ],
-            "scope": [ "TEST-3", "TEST-1", "TEST-2" ],
+            "scopes": [ "TEST-3", "TEST-1", "TEST-2" ],
             "owner": "email@email.com",
             "accessTokenValiditySeconds": 600,
             "refreshTokenValiditySeconds": 7200
         },
         {
             "clientId": "oauth-server",
-            "clientName": "&lt;script&gt;alert('test')&lt;/script&gt;",
-            "registeredRedirectURI": [
+            "clientName": "oauth-server",
+            "registeredRedirectUris": [
                 "http://localhost:9090/?test_parameter=test",
                 "http://localhost:8080/"
             ],
-            "authorizedGrantType": [
+            "authorizedGrantTypes": [
                 { "value": "implicit" },
                 { "value": "refresh_token" },
                 { "value": "client_credentials" },
                 { "value": "password" },
                 { "value": "authorization_code" }
             ],
-            "scope": [ "TEST-3", "TEST-4","TEST-1",  "TEST-2" ],
+            "scopes": [ "TEST-3", "TEST-4","TEST-1",  "TEST-2" ],
             "owner": "email@email.com",
             "accessTokenValiditySeconds": 600,
             "refreshTokenValiditySeconds": 7200
@@ -910,18 +912,14 @@ Content-Type: application/json
 {
     "clientId": "CLIENT-ID",
     "clientName": "MODIFY-CLIENT-NAME",
-    "registeredRedirectURI": [
+    "registeredRedirectUris": [
         "http://localhost:8083/callback",
         "http://localhost:8082/callback"
     ],
-    "authorizedGrantType": [
-        {
-            "value": "password"
-        }
+    "authorizedGrantTypes": [
+        { "value": "password" }
     ],
-    "scope": [
-        "TEST-3"
-    ],
+    "scopes": [ "TEST-3" ],
     "owner": "email@email.com",
     "accessTokenValiditySeconds": 600,
     "refreshTokenValiditySeconds": 7200
@@ -977,18 +975,14 @@ Content-Type: application/json
 {
     "clientId": "CLIENT-ID",
     "clientName": "MODIFY-CLIENT-NAME",
-    "registeredRedirectURI": [
+    "registeredRedirectUris": [
         "http://localhost:8083/callback",
         "http://localhost:8082/callback"
     ],
-    "authorizedGrantType": [
-        {
-            "value": "password"
-        }
+    "authorizedGrantTypes": [
+        { "value": "password" }
     ],
-    "scope": [
-        "TEST-3"
-    ],
+    "scopes": [ "TEST-3" ],
     "owner": "email@email.com",
     "accessTokenValiditySeconds": 600,
     "refreshTokenValiditySeconds": 7200
@@ -1050,18 +1044,14 @@ Content-Type: application/json
 {
     "clientId": "CLIENT-ID",
     "clientName": "MODIFY-CLIENT-NAME",
-    "registeredRedirectURI": [
+    "registeredRedirectUris": [
         "http://localhost:8083/callback",
         "http://localhost:8082/callback"
     ],
-    "authorizedGrantType": [
-        {
-            "value": "password"
-        }
+    "authorizedGrantTypes": [
+        { "value": "password" }
     ],
-    "scope": [
-        "TEST-3"
-    ],
+    "scopes": [ "TEST-3" ],
     "owner": "email@email.com",
     "accessTokenValiditySeconds": 600,
     "refreshTokenValiditySeconds": 7200
@@ -1123,14 +1113,13 @@ Content-Type: application/json
 
 ## OAuth2 스코프 HTTP API
 OAuth2 스코프의 추가와 삭제, 수정을 하는 HTTP API 입니다. 등록된 스코프를 검색하는 API를 제외하고 관리자로 로그인된 계정만
-접근 할 수 있습니다. 아래는 현재 구현된 스코프 HTTP API 리스트 입니다.
+접근 할 수 있도록 설정 해야 합니다. 아래는 현재 구현된 스코프 HTTP API 리스트 입니다.
 
-|              Endpoint             | Method |                설명                |
-| --------------------------------- | :------: | ----------------------------------------- |
-| /api/scopes                       |  POST  | 새 스코프를 등록 합니다.                  |
-| /api/scopes                       |  GET   | 등록된 모든 스코프를 반환 합니다.         |
-| /api/scopes/{scopeId}             |  PUT   | 스코프의 정보를 변경 합니다.              |
-| /api/scopes/{scopeId}             | DELETE | 스코프를 삭제 합니다.                     |
+- [새 스코프 등록](#새-스코프-등록)
+- [등록된 스코프 검색](#모든-스코프-검색)
+- [스코프 정보 변경](#스코프-정보-변경)
+- [스코프 삭제](#스코프-삭제)
+- [저장된 스코프 갯수 검색](#스코프-아이디-갯수-검색)
 
 ### 새 스코프 등록
 새 스코프를 등록 합니다.
@@ -1335,3 +1324,29 @@ Content-Type: application/json
 | :----------------------------------: | :---------: | -------------------------------------------------------------------------- |
 | not_found                            |    404    | 삭제하려는 스코프를 찾을 수 없음을 알리는 에러 코드 입니다.                     |
 | server_error                         |    500    | 서버에서 알 수 없는 에러가 발생 했음을 알리는 에러 코드 입니다.                 |
+
+### 스코프 아이디 갯수 검색
+저장소에 저장된 스코프 아이디의 갯수를 검색합니다. 주로 스코프 아이디의 중복 검사를 할 때 사용 합니다.
+
+#### 요청
+```
+GET HTTP/1.1
+http://localhost:8080/api/scopes/attributes/scopeId
+?scopeId=TEST-SCOPE-1
+```
+|  파라미터명    | 필수 여부 |  타입   |  설명  |
+| :-----------: | :-------: | :----: | ------------------ |
+| scopeId       | Required  | String | 검색할 스코프 아이디 |
+
+### 응답
+```
+HTTP/1.1 200
+Content-Type: application/json
+
+{
+    "count": 1
+}
+```
+|  파라미터명    |  타입   |  설명  |
+| :-----------: | :----: | ------------------- |
+| count         | Number | 등록된 스포크 아이디 갯수 |

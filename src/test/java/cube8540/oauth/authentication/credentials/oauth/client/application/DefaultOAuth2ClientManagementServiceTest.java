@@ -257,7 +257,7 @@ class DefaultOAuth2ClientManagementServiceTest {
 
                     service.registerNewClient(request);
                     verify(repository, times(1)).save(clientCaptor.capture());
-                    assertNull(clientCaptor.getValue().getGrantType());
+                    assertNull(clientCaptor.getValue().getGrantTypes());
                 }
             }
 
@@ -271,7 +271,7 @@ class DefaultOAuth2ClientManagementServiceTest {
                 inOrder.verify(grantTypeRule, times(1)).isValid(clientCaptor.capture());
                 inOrder.verify(repository, times(1)).save(clientCaptor.capture());
                 assertEquals(clientCaptor.getAllValues().get(0), clientCaptor.getAllValues().get(1));
-                assertEquals(GRANT_TYPES, clientCaptor.getValue().getGrantType());
+                assertEquals(GRANT_TYPES, clientCaptor.getValue().getGrantTypes());
             }
 
             @Nested
@@ -291,7 +291,7 @@ class DefaultOAuth2ClientManagementServiceTest {
 
                     service.registerNewClient(request);
                     verify(repository, times(1)).save(clientCaptor.capture());
-                    assertNull(clientCaptor.getValue().getScope());
+                    assertNull(clientCaptor.getValue().getScopes());
                 }
             }
 
@@ -305,7 +305,7 @@ class DefaultOAuth2ClientManagementServiceTest {
                 inOrder.verify(scopeRule, times(1)).isValid(clientCaptor.capture());
                 inOrder.verify(repository, times(1)).save(clientCaptor.capture());
                 assertEquals(clientCaptor.getAllValues().get(0), clientCaptor.getAllValues().get(1));
-                assertEquals(SCOPES, clientCaptor.getValue().getScope());
+                assertEquals(SCOPES, clientCaptor.getValue().getScopes());
             }
 
             @Test
@@ -338,7 +338,7 @@ class DefaultOAuth2ClientManagementServiceTest {
 
                     service.registerNewClient(request);
                     verify(repository, times(1)).save(clientCaptor.capture());
-                    assertNull(clientCaptor.getValue().getRedirectURI());
+                    assertNull(clientCaptor.getValue().getRedirectUris());
                 }
             }
 
@@ -349,7 +349,7 @@ class DefaultOAuth2ClientManagementServiceTest {
 
                 service.registerNewClient(request);
                 verify(repository, times(1)).save(clientCaptor.capture());
-                assertEquals(REDIRECT_URIS, clientCaptor.getValue().getRedirectURI());
+                assertEquals(REDIRECT_URIS, clientCaptor.getValue().getRedirectUris());
             }
         }
     }
@@ -409,9 +409,9 @@ class DefaultOAuth2ClientManagementServiceTest {
                 when(modifiedClient.getClientId()).thenReturn(CLIENT_ID);
                 when(modifiedClient.getClientName()).thenReturn(MODIFY_CLIENT_NAME);
                 when(modifiedClient.getOwner()).thenReturn(OWNER);
-                when(modifiedClient.getRedirectURI()).thenReturn(NEW_REDIRECT_URIS);
-                when(modifiedClient.getScope()).thenReturn(NEW_SCOPES);
-                when(modifiedClient.getGrantType()).thenReturn(NEW_GRANT_TYPES);
+                when(modifiedClient.getRedirectUris()).thenReturn(NEW_REDIRECT_URIS);
+                when(modifiedClient.getScopes()).thenReturn(NEW_SCOPES);
+                when(modifiedClient.getGrantTypes()).thenReturn(NEW_GRANT_TYPES);
                 when(modifiedClient.getAccessTokenValidity()).thenReturn(ACCESS_TOKEN_VALIDITY);
                 when(modifiedClient.getRefreshTokenValidity()).thenReturn(REFRESH_TOKEN_VALIDITY);
                 when(repository.findByClientId(CLIENT_ID)).thenReturn(Optional.of(client));
@@ -467,7 +467,7 @@ class DefaultOAuth2ClientManagementServiceTest {
                 @DisplayName("클라이언트의 리다이렉트 URI를 삭제하지 않아야 한다.")
                 void shouldNotRemoveClientsRedirectUri() {
                     service.modifyClient(RAW_CLIENT_ID, request);
-                    verify(client, never()).removeRedirectURI(any());
+                    verify(client, never()).removeRedirectUri(any());
                 }
             }
 
@@ -486,7 +486,7 @@ class DefaultOAuth2ClientManagementServiceTest {
                 @DisplayName("클라이언트의 리다이렉트 URI를 추가하지 않아야 한다.")
                 void shouldNotAddClientsRedirectUri() {
                     service.modifyClient(RAW_CLIENT_ID, request);
-                    verify(client, never()).addRedirectURI(any());
+                    verify(client, never()).addRedirectUri(any());
                 }
             }
 
@@ -572,8 +572,8 @@ class DefaultOAuth2ClientManagementServiceTest {
                 InOrder inOrder = inOrder(client);
 
                 service.modifyClient(RAW_CLIENT_ID, modifyRequest);
-                REMOVE_REDIRECT_URIS.forEach(uri -> inOrder.verify(client, times(1)).removeRedirectURI(uri));
-                NEW_REDIRECT_URIS.forEach(uri -> inOrder.verify(client, times(1)).addRedirectURI(uri));
+                REMOVE_REDIRECT_URIS.forEach(uri -> inOrder.verify(client, times(1)).removeRedirectUri(uri));
+                NEW_REDIRECT_URIS.forEach(uri -> inOrder.verify(client, times(1)).addRedirectUri(uri));
             }
 
             @Test
@@ -629,9 +629,9 @@ class DefaultOAuth2ClientManagementServiceTest {
             when(client.getClientId()).thenReturn(CLIENT_ID);
             when(client.getClientName()).thenReturn(CLIENT_NAME);
             when(client.getOwner()).thenReturn(OWNER);
-            when(client.getRedirectURI()).thenReturn(REDIRECT_URIS);
-            when(client.getScope()).thenReturn(SCOPES);
-            when(client.getGrantType()).thenReturn(GRANT_TYPES);
+            when(client.getRedirectUris()).thenReturn(REDIRECT_URIS);
+            when(client.getScopes()).thenReturn(SCOPES);
+            when(client.getGrantTypes()).thenReturn(GRANT_TYPES);
             when(client.getAccessTokenValidity()).thenReturn(ACCESS_TOKEN_VALIDITY);
             when(client.getRefreshTokenValidity()).thenReturn(REFRESH_TOKEN_VALIDITY);
 
@@ -734,9 +734,9 @@ class DefaultOAuth2ClientManagementServiceTest {
             when(client.getClientId()).thenReturn(CLIENT_ID);
             when(client.getClientName()).thenReturn(CLIENT_NAME);
             when(client.getOwner()).thenReturn(OWNER);
-            when(client.getRedirectURI()).thenReturn(REDIRECT_URIS);
-            when(client.getScope()).thenReturn(SCOPES);
-            when(client.getGrantType()).thenReturn(GRANT_TYPES);
+            when(client.getRedirectUris()).thenReturn(REDIRECT_URIS);
+            when(client.getScopes()).thenReturn(SCOPES);
+            when(client.getGrantTypes()).thenReturn(GRANT_TYPES);
             when(client.getAccessTokenValidity()).thenReturn(ACCESS_TOKEN_VALIDITY);
             when(client.getRefreshTokenValidity()).thenReturn(REFRESH_TOKEN_VALIDITY);
 

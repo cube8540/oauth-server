@@ -59,7 +59,7 @@ public class DefaultOAuth2ClientManagementService extends DefaultOAuth2ClientDet
         Optional.ofNullable(registerRequest.getScopes())
                 .ifPresent(scope -> scope.forEach(s -> client.addScope(new OAuth2ScopeId(s))));
         Optional.ofNullable(registerRequest.getRedirectUris())
-                .ifPresent(redirectUri -> redirectUri.forEach(uri -> client.addRedirectURI(URI.create(uri))));
+                .ifPresent(redirectUri -> redirectUri.forEach(uri -> client.addRedirectUri(URI.create(uri))));
 
         client.validate(validatePolicy);
         client.encrypted(passwordEncoder);
@@ -77,9 +77,9 @@ public class DefaultOAuth2ClientManagementService extends DefaultOAuth2ClientDet
         }
         client.setClientName(modifyRequest.getClientName());
         Optional.ofNullable(modifyRequest.getRemoveRedirectUris())
-                .ifPresent(redirectUri -> redirectUri.forEach(uri -> client.removeRedirectURI(URI.create(uri))));
+                .ifPresent(redirectUri -> redirectUri.forEach(uri -> client.removeRedirectUri(URI.create(uri))));
         Optional.ofNullable(modifyRequest.getNewRedirectUris())
-                .ifPresent(redirectUri -> redirectUri.forEach(uri -> client.addRedirectURI(URI.create(uri))));
+                .ifPresent(redirectUri -> redirectUri.forEach(uri -> client.addRedirectUri(URI.create(uri))));
         Optional.ofNullable(modifyRequest.getRemoveGrantTypes())
                 .ifPresent(grantType -> grantType.forEach(grant -> client.removeGrantType(OAuth2Utils.extractGrantType(grant))));
         Optional.ofNullable(modifyRequest.getNewGrantTypes())

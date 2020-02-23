@@ -29,7 +29,7 @@ class OAuth2AccessTokenDetailsSerializerTest {
 
     private static final String REFRESH_TOKEN_VALUE = "REFRESH-TOKEN";
 
-    private static final int EXPIRES_IN = 60000;
+    private static final long EXPIRES_IN = 60000L;
 
     private static final String TOKEN_TYPE = "TOKEN_TYPE";
 
@@ -57,12 +57,12 @@ class OAuth2AccessTokenDetailsSerializerTest {
         ADDITIONAL_INFORMATION.put("TEST-2", "TEST-2-VALUE");
         ADDITIONAL_INFORMATION.put("TEST-3", "TEST-3-VALUE");
 
-        when(accessToken.tokenValue()).thenReturn(TOKEN_VALUE);
-        when(accessToken.tokenType()).thenReturn(TOKEN_TYPE);
-        when(accessToken.expiresIn()).thenReturn(EXPIRES_IN);
-        when(accessToken.scope()).thenReturn(SCOPE);
-        when(accessToken.additionalInformation()).thenReturn(null);
-        when(accessToken.refreshToken()).thenReturn(null);
+        when(accessToken.getTokenValue()).thenReturn(TOKEN_VALUE);
+        when(accessToken.getTokenType()).thenReturn(TOKEN_TYPE);
+        when(accessToken.getExpiresIn()).thenReturn(EXPIRES_IN);
+        when(accessToken.getScopes()).thenReturn(SCOPE);
+        when(accessToken.getAdditionalInformation()).thenReturn(null);
+        when(accessToken.getRefreshToken()).thenReturn(null);
 
         this.serializer = new OAuth2AccessTokenDetailsSerializer();
     }
@@ -117,8 +117,8 @@ class OAuth2AccessTokenDetailsSerializerTest {
         void setup() {
             OAuth2RefreshTokenDetails refreshToken = mock(OAuth2RefreshTokenDetails.class);
 
-            when(refreshToken.tokenValue()).thenReturn(REFRESH_TOKEN_VALUE);
-            when(accessToken.refreshToken()).thenReturn(refreshToken);
+            when(refreshToken.getTokenValue()).thenReturn(REFRESH_TOKEN_VALUE);
+            when(accessToken.getRefreshToken()).thenReturn(refreshToken);
         }
 
         @Test
@@ -131,7 +131,7 @@ class OAuth2AccessTokenDetailsSerializerTest {
 
         @AfterEach
         void after() {
-            when(accessToken.refreshToken()).thenReturn(null);
+            when(accessToken.getRefreshToken()).thenReturn(null);
         }
     }
 
@@ -141,7 +141,7 @@ class OAuth2AccessTokenDetailsSerializerTest {
 
         @BeforeEach
         void setup() {
-            when(accessToken.additionalInformation()).thenReturn(ADDITIONAL_INFORMATION);
+            when(accessToken.getAdditionalInformation()).thenReturn(ADDITIONAL_INFORMATION);
         }
 
         @Test
@@ -156,7 +156,7 @@ class OAuth2AccessTokenDetailsSerializerTest {
 
         @AfterEach
         void after() {
-            when(accessToken.additionalInformation()).thenReturn(null);
+            when(accessToken.getAdditionalInformation()).thenReturn(null);
         }
     }
 

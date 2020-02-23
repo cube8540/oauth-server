@@ -105,25 +105,25 @@ public class AuthorizationEndpoint {
         }
 
         AuthorizationRequest authorizationRequest = new DefaultAuthorizationRequest(parameters, principal);
-        if (authorizationRequest.responseType() == null) {
+        if (authorizationRequest.getResponseType() == null) {
             throw InvalidRequestException.invalidRequest("response_type is required");
         }
-        if (!authorizationRequest.responseType().equals(OAuth2AuthorizationResponseType.CODE)) {
+        if (!authorizationRequest.getResponseType().equals(OAuth2AuthorizationResponseType.CODE)) {
             throw InvalidRequestException.unsupportedResponseType("unsupported response type");
         }
 
         OAuth2ClientDetails clientDetails = clientDetailsService.loadClientDetailsByClientId(parameters.get(OAuth2Utils.AuthorizationRequestKey.CLIENT_ID));
         URI redirectURI = redirectResolver.resolveRedirectURI(parameters.get(OAuth2Utils.AuthorizationRequestKey.REDIRECT_URI), clientDetails);
-        authorizationRequest.setRedirectURI(redirectURI);
-        if (!requestValidator.validateScopes(clientDetails, authorizationRequest.requestScopes())) {
+        authorizationRequest.setRedirectUri(redirectURI);
+        if (!requestValidator.validateScopes(clientDetails, authorizationRequest.getRequestScopes())) {
             throw InvalidGrantException.invalidScope("cannot grant scope");
         }
         authorizationRequest.setRequestScopes(extractRequestScope(clientDetails, authorizationRequest));
 
-        Collection<OAuth2ScopeDetails> scopeDetails = scopeDetailsService.loadScopeDetailsByScopeIds(authorizationRequest.requestScopes());
+        Collection<OAuth2ScopeDetails> scopeDetails = scopeDetailsService.loadScopeDetailsByScopeIds(authorizationRequest.getRequestScopes());
         model.put(AUTHORIZATION_REQUEST_ATTRIBUTE, authorizationRequest);
         return new ModelAndView(approvalPage)
-                .addObject(AUTHORIZATION_REQUEST_CLIENT_NAME, clientDetails.clientName())
+                .addObject(AUTHORIZATION_REQUEST_CLIENT_NAME, clientDetails.getClientName())
                 .addObject(AUTHORIZATION_REQUEST_SCOPES_NAME, scopeDetails);
     }
 
@@ -144,10 +144,10 @@ public class AuthorizationEndpoint {
             authorizationRequest.setRequestScopes(approvalScopes);
 
             AuthorizationCode code = codeGenerator.generateNewAuthorizationCode(authorizationRequest);
-            ModelAndView modelAndView = new ModelAndView(new RedirectView(authorizationRequest.redirectURI().toString()))
+            ModelAndView modelAndView = new ModelAndView(new RedirectView(authorizationRequest.getRedirectUri().toString()))
                     .addObject(OAuth2Utils.AuthorizationResponseKey.CODE, code.getValue());
-            if (authorizationRequest.state() != null) {
-                modelAndView.addObject(OAuth2Utils.AuthorizationResponseKey.STATE, authorizationRequest.state());
+            if (authorizationRequest.getState() != null) {
+                modelAndView.addObject(OAuth2Utils.AuthorizationResponseKey.STATE, authorizationRequest.getState());
             }
             return modelAndView;
         } finally {
@@ -199,8 +199,8 @@ public class AuthorizationEndpoint {
 
         AuthorizationRequest authorizationRequest = getErrorAuthorizationRequest(webRequest);
         try {
-            OAuth2ClientDetails clientDetails = clientDetailsService.loadClientDetailsByClientId(authorizationRequest.clientId());
-            String storedRedirectURI = Optional.ofNullable(authorizationRequest.redirectURI()).map(URI::toString).orElse(null);
+            OAuth2ClientDetails clientDetails = clientDetailsService.loadClientDetailsByClientId(authorizationRequest.getClientId());
+            String storedRedirectURI = Optional.ofNullable(authorizationRequest.getRedirectUri()).map(URI::toString).orElse(null);
             URI redirectURI = redirectResolver.resolveRedirectURI(storedRedirectURI, clientDetails);
             return getUnsuccessfulRedirectView(redirectURI, responseEntity.getBody(), authorizationRequest);
         } catch (Exception exception) {
@@ -216,8 +216,8 @@ public class AuthorizationEndpoint {
                 .addObject("error_code", error.getErrorCode())
                 .addObject("error_description", error.getDescription());
 
-        if (authorizationRequest.state() != null) {
-            modelAndView.addObject("state", authorizationRequest.state());
+        if (authorizationRequest.getState() != null) {
+            modelAndView.addObject("state", authorizationRequest.getState());
         }
         return modelAndView;
     }
@@ -239,6 +239,6 @@ public class AuthorizationEndpoint {
     }
 
     protected Set<String> extractRequestScope(OAuth2ClientDetails clientDetails, AuthorizationRequest authorizationRequest) {
-        return authorizationRequest.requestScopes().isEmpty() ? clientDetails.scope() : authorizationRequest.requestScopes();
+        return authorizationRequest.getRequestScopes().isEmpty() ? clientDetails.getScopes() : authorizationRequest.getRequestScopes();
     }
 }

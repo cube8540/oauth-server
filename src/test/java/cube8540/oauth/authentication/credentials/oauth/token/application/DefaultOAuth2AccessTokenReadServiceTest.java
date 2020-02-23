@@ -80,9 +80,9 @@ class DefaultOAuth2AccessTokenReadServiceTest {
             this.accessToken = mock(OAuth2AuthorizedAccessToken.class);
 
             when(accessToken.getTokenId()).thenReturn(TOKEN_ID);
-            when(accessToken.getEmail()).thenReturn(EMAIL);
+            when(accessToken.getUsername()).thenReturn(EMAIL);
             when(accessToken.getClient()).thenReturn(CLIENT);
-            when(accessToken.getScope()).thenReturn(SCOPE);
+            when(accessToken.getScopes()).thenReturn(SCOPE);
             when(accessToken.getExpiration()).thenReturn(EXPIRATION);
             when(accessToken.getTokenGrantType()).thenReturn(GRANT_TYPE);
             when(accessToken.getAdditionalInformation()).thenReturn(ADDITIONAL_INFO);
@@ -155,7 +155,7 @@ class DefaultOAuth2AccessTokenReadServiceTest {
                     void shouldReturnsRefreshTokenIsNull() {
                         OAuth2AccessTokenDetails accessToken = service.readAccessToken(RAW_TOKEN_ID);
 
-                        assertNull(accessToken.refreshToken());
+                        assertNull(accessToken.getRefreshToken());
                     }
                 }
 
@@ -173,7 +173,7 @@ class DefaultOAuth2AccessTokenReadServiceTest {
                     void shouldReturnsAdditionalInformationIsNull() {
                         OAuth2AccessTokenDetails accessToken = service.readAccessToken(RAW_TOKEN_ID);
 
-                        assertNull(accessToken.additionalInformation());
+                        assertNull(accessToken.getAdditionalInformation());
                     }
                 }
             }
@@ -207,11 +207,11 @@ class DefaultOAuth2AccessTokenReadServiceTest {
 
             @BeforeEach
             void setup() {
-                OAuth2AuthorizedAccessToken token = mock(OAuth2AuthorizedAccessToken.class);
+                OAuth2AuthorizedAccessToken accessToken = mock(OAuth2AuthorizedAccessToken.class);
                 this.userDetails = mock(UserDetails.class);
 
-                when(token.getEmail()).thenReturn(EMAIL);
-                when(accessTokenRepository.findById(TOKEN_ID)).thenReturn(Optional.of(token));
+                when(accessToken.getUsername()).thenReturn(EMAIL);
+                when(accessTokenRepository.findById(TOKEN_ID)).thenReturn(Optional.of(accessToken));
                 when(userDetailsService.loadUserByUsername(RAW_EMAIL)).thenReturn(userDetails);
             }
 
@@ -229,11 +229,11 @@ class DefaultOAuth2AccessTokenReadServiceTest {
 
                 @BeforeEach
                 void setup() {
-                    OAuth2AuthorizedAccessToken token = mock(OAuth2AuthorizedAccessToken.class);
+                    OAuth2AuthorizedAccessToken accessToken = mock(OAuth2AuthorizedAccessToken.class);
                     this.userDetails = mock(User.class);
 
-                    when(token.getEmail()).thenReturn(EMAIL);
-                    when(accessTokenRepository.findById(TOKEN_ID)).thenReturn(Optional.of(token));
+                    when(accessToken.getUsername()).thenReturn(EMAIL);
+                    when(accessTokenRepository.findById(TOKEN_ID)).thenReturn(Optional.of(accessToken));
                     when(userDetailsService.loadUserByUsername(RAW_EMAIL)).thenReturn(userDetails);
                 }
 

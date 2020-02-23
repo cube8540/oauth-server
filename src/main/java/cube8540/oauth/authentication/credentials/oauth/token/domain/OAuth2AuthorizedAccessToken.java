@@ -69,7 +69,7 @@ public class OAuth2AuthorizedAccessToken extends AbstractAggregateRoot<OAuth2Aut
 
     @Embedded
     @AttributeOverride(name = "value", column = @Column(name = "email", length = 128))
-    private UserEmail email;
+    private UserEmail username;
 
     @Embedded
     @AttributeOverride(name = "value", column = @Column(name = "client_id", length = 32, nullable = false))
@@ -80,7 +80,7 @@ public class OAuth2AuthorizedAccessToken extends AbstractAggregateRoot<OAuth2Aut
     @Fetch(FetchMode.JOIN)
     @CollectionTable(name = "oauth2_token_scope", joinColumns = @JoinColumn(name = "token_id", nullable = false))
     @AttributeOverride(name = "value", column = @Column(name = "scope_id", length = 32, nullable = false))
-    private Set<OAuth2ScopeId> scope;
+    private Set<OAuth2ScopeId> scopes;
 
     @Column(name = "expiration", nullable = false)
     private LocalDateTime expiration;

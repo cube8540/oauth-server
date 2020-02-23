@@ -7,22 +7,22 @@ import java.util.Set;
 
 public interface OAuth2ClientDetails {
 
-    String clientId();
+    String getClientId();
 
-    String clientSecret();
+    String getClientSecret();
 
-    String clientName();
+    String getClientName();
 
-    Set<URI> registeredRedirectURI();
+    Set<URI> getRegisteredRedirectUris();
 
-    Set<AuthorizationGrantType> authorizedGrantType();
+    Set<AuthorizationGrantType> getAuthorizedGrantTypes();
 
-    Set<String> scope();
+    Set<String> getScopes();
 
-    String owner();
+    String getOwner();
 
-    Integer accessTokenValiditySeconds();
+    Integer getAccessTokenValiditySeconds();
 
-    Integer refreshTokenValiditySeconds();
+    Integer getRefreshTokenValiditySeconds();
 
 }

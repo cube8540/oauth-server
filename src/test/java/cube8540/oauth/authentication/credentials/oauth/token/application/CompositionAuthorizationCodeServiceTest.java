@@ -130,11 +130,11 @@ class CompositionAuthorizationCodeServiceTest {
             this.authorizationRequest = mock(AuthorizationRequest.class);
 
             when(generator.generate()).thenReturn(CODE);
-            when(authorizationRequest.requestScopes()).thenReturn(RAW_SCOPES);
-            when(authorizationRequest.clientId()).thenReturn(RAW_CLIENT_ID);
-            when(authorizationRequest.redirectURI()).thenReturn(REDIRECT_URI);
-            when(authorizationRequest.username()).thenReturn(RAW_EMAIL);
-            when(authorizationRequest.state()).thenReturn(STATE);
+            when(authorizationRequest.getRequestScopes()).thenReturn(RAW_SCOPES);
+            when(authorizationRequest.getClientId()).thenReturn(RAW_CLIENT_ID);
+            when(authorizationRequest.getRedirectUri()).thenReturn(REDIRECT_URI);
+            when(authorizationRequest.getUsername()).thenReturn(RAW_EMAIL);
+            when(authorizationRequest.getState()).thenReturn(STATE);
 
             codeService.setCodeGenerator(generator);
         }
@@ -196,7 +196,7 @@ class CompositionAuthorizationCodeServiceTest {
 
             codeService.generateNewAuthorizationCode(authorizationRequest);
             verify(codeRepository, times(1)).save(codeArgumentCaptor.capture());
-            assertEquals(EMAIL, codeArgumentCaptor.getValue().getEmail());
+            assertEquals(EMAIL, codeArgumentCaptor.getValue().getUsername());
         }
     }
 }

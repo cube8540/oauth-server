@@ -7,20 +7,20 @@ import java.util.Set;
 
 public interface AuthorizationRequest {
 
-    String clientId();
+    String getClientId();
 
-    String username();
+    String getUsername();
 
-    String state();
+    String getState();
 
-    URI redirectURI();
+    URI getRedirectUri();
 
-    Set<String> requestScopes();
+    Set<String> getRequestScopes();
 
-    OAuth2AuthorizationResponseType responseType();
+    OAuth2AuthorizationResponseType getResponseType();
 
-    void setRedirectURI(URI redirectURI);
+    void setRedirectUri(URI redirectUri);
 
-    void setRequestScopes(Set<String> requestScope);
+    void setRequestScopes(Set<String> requestScopes);
 
 }

@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collection;
@@ -60,6 +61,13 @@ public class ScopeManagementAPIEndpoint {
     @DeleteMapping(value = "/api/scopes/{id}")
     public OAuth2ScopeDetails removeScope(@PathVariable("id") String id) {
         return managementService.removeScope(id);
+    }
+
+    @GetMapping(value = "/api/scopes/attributes/scopeId")
+    public Map<String, Long> countScopeId(@RequestParam String scopeId) {
+        Long count = managementService.countByScopeId(scopeId);
+
+        return Collections.singletonMap("count", count);
     }
 
     @ExceptionHandler(Exception.class)

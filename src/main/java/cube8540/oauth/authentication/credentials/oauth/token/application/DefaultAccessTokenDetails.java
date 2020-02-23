@@ -23,7 +23,7 @@ public class DefaultAccessTokenDetails implements OAuth2AccessTokenDetails {
 
     private String tokenValue;
     private OAuth2ClientId clientId;
-    private Set<OAuth2ScopeId> scopeId;
+    private Set<OAuth2ScopeId> scopes;
     private String tokenType;
     private String username;
     private Map<String, String> additionalInformation;
@@ -39,60 +39,10 @@ public class DefaultAccessTokenDetails implements OAuth2AccessTokenDetails {
                 .expiresIn(accessToken.expiresIn())
                 .isExpired(accessToken.isExpired())
                 .tokenType(TOKEN_TYPE);
-        builder.scopeId(Optional.ofNullable(accessToken.getScope()).orElse(Collections.emptySet()));
-        builder.username(Optional.ofNullable(accessToken.getEmail()).map(UserEmail::getValue).orElse(null));
+        builder.scopes(Optional.ofNullable(accessToken.getScopes()).orElse(Collections.emptySet()));
+        builder.username(Optional.ofNullable(accessToken.getUsername()).map(UserEmail::getValue).orElse(null));
         builder.refreshToken(Optional.ofNullable(accessToken.getRefreshToken()).map(DefaultRefreshTokenDetails::of).orElse(null));
         builder.additionalInformation(Optional.ofNullable(accessToken.getAdditionalInformation()).orElse(null));
         return builder.build();
-    }
-
-    @Override
-    public OAuth2ClientId clientId() {
-        return clientId;
-    }
-
-    @Override
-    public Set<OAuth2ScopeId> scope() {
-        return scopeId;
-    }
-
-    @Override
-    public String tokenType() {
-        return tokenType;
-    }
-
-    @Override
-    public String username() {
-        return username;
-    }
-
-    @Override
-    public OAuth2RefreshTokenDetails refreshToken() {
-        return refreshToken;
-    }
-
-    @Override
-    public Map<String, String> additionalInformation() {
-        return additionalInformation;
-    }
-
-    @Override
-    public String tokenValue() {
-        return tokenValue;
-    }
-
-    @Override
-    public LocalDateTime expiration() {
-        return expiration;
-    }
-
-    @Override
-    public boolean isExpired() {
-        return isExpired;
-    }
-
-    @Override
-    public int expiresIn() {
-        return Long.valueOf(expiresIn).intValue();
     }
 }

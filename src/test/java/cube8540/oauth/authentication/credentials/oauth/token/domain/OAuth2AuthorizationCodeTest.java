@@ -96,11 +96,11 @@ class OAuth2AuthorizationCodeTest {
         void setup() {
             this.request = mock(AuthorizationRequest.class);
 
-            when(request.clientId()).thenReturn(RAW_CLIENT_ID);
-            when(request.username()).thenReturn(RAW_EMAIL);
-            when(request.state()).thenReturn(STATE);
-            when(request.redirectURI()).thenReturn(REDIRECT_URI);
-            when(request.requestScopes()).thenReturn(SCOPES);
+            when(request.getClientId()).thenReturn(RAW_CLIENT_ID);
+            when(request.getUsername()).thenReturn(RAW_EMAIL);
+            when(request.getState()).thenReturn(STATE);
+            when(request.getRedirectUri()).thenReturn(REDIRECT_URI);
+            when(request.getRequestScopes()).thenReturn(SCOPES);
             when(codeGenerator.generate()).thenReturn(CODE);
 
             this.code = new OAuth2AuthorizationCode(codeGenerator);
@@ -119,7 +119,7 @@ class OAuth2AuthorizationCodeTest {
         void shouldSaveGivenUserEmail() {
             this.code.setAuthorizationRequest(request);
 
-            assertEquals(EMAIL, this.code.getEmail());
+            assertEquals(EMAIL, this.code.getUsername());
         }
 
         @Test
@@ -157,11 +157,11 @@ class OAuth2AuthorizationCodeTest {
         void setup() {
             this.savedRequest = mock(AuthorizationRequest.class);
 
-            when(savedRequest.clientId()).thenReturn(RAW_CLIENT_ID);
-            when(savedRequest.username()).thenReturn(RAW_EMAIL);
-            when(savedRequest.state()).thenReturn(STATE);
-            when(savedRequest.redirectURI()).thenReturn(REDIRECT_URI);
-            when(savedRequest.requestScopes()).thenReturn(SCOPES);
+            when(savedRequest.getClientId()).thenReturn(RAW_CLIENT_ID);
+            when(savedRequest.getUsername()).thenReturn(RAW_EMAIL);
+            when(savedRequest.getState()).thenReturn(STATE);
+            when(savedRequest.getRedirectUri()).thenReturn(REDIRECT_URI);
+            when(savedRequest.getRequestScopes()).thenReturn(SCOPES);
             when(codeGenerator.generate()).thenReturn(CODE);
         }
 
@@ -208,7 +208,7 @@ class OAuth2AuthorizationCodeTest {
                 this.code = new OAuth2AuthorizationCode(codeGenerator);
 
                 this.code.setAuthorizationRequest(savedRequest);
-                when(request.state()).thenReturn("NOT MATCHED STATE");
+                when(request.getState()).thenReturn("NOT MATCHED STATE");
 
                 Clock clock = Clock.fixed(EXPIRATION_DATETIME.minusNanos(1).toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
                 OAuth2AuthorizationCode.setClock(clock);
@@ -241,8 +241,8 @@ class OAuth2AuthorizationCodeTest {
                 this.code = new OAuth2AuthorizationCode(codeGenerator);
 
                 this.code.setAuthorizationRequest(savedRequest);
-                when(request.state()).thenReturn(STATE);
-                when(request.redirectURI()).thenReturn(URI.create("http://mismach-uri.info"));
+                when(request.getState()).thenReturn(STATE);
+                when(request.getRedirectUri()).thenReturn(URI.create("http://mismach-uri.info"));
 
                 Clock clock = Clock.fixed(EXPIRATION_DATETIME.minusNanos(1).toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
                 OAuth2AuthorizationCode.setClock(clock);
@@ -267,9 +267,9 @@ class OAuth2AuthorizationCodeTest {
                 this.code = new OAuth2AuthorizationCode(codeGenerator);
 
                 this.code.setAuthorizationRequest(savedRequest);
-                when(request.redirectURI()).thenReturn(REDIRECT_URI);
-                when(request.state()).thenReturn(STATE);
-                when(request.clientId()).thenReturn("MISMATCH-CLIENT-ID");
+                when(request.getRedirectUri()).thenReturn(REDIRECT_URI);
+                when(request.getState()).thenReturn(STATE);
+                when(request.getClientId()).thenReturn("MISMATCH-CLIENT-ID");
 
                 Clock clock = Clock.fixed(EXPIRATION_DATETIME.minusNanos(1).toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
                 OAuth2AuthorizationCode.setClock(clock);
@@ -305,9 +305,9 @@ class OAuth2AuthorizationCodeTest {
                 this.code = new OAuth2AuthorizationCode(codeGenerator);
 
                 this.code.setAuthorizationRequest(savedRequest);
-                when(request.state()).thenReturn(STATE);
-                when(request.redirectURI()).thenReturn(REDIRECT_URI);
-                when(request.clientId()).thenReturn(RAW_CLIENT_ID);
+                when(request.getState()).thenReturn(STATE);
+                when(request.getRedirectUri()).thenReturn(REDIRECT_URI);
+                when(request.getClientId()).thenReturn(RAW_CLIENT_ID);
 
                 Clock clock = Clock.fixed(EXPIRATION_DATETIME.minusNanos(1).toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
                 OAuth2AuthorizationCode.setClock(clock);

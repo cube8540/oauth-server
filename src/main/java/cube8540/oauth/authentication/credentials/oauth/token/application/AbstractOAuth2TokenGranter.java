@@ -50,7 +50,7 @@ public abstract class AbstractOAuth2TokenGranter implements OAuth2AccessTokenGra
     @Override
     public OAuth2AccessTokenDetails grant(OAuth2ClientDetails clientDetails, OAuth2TokenRequest tokenRequest) {
         OAuth2AuthorizedAccessToken accessToken = createAccessToken(clientDetails, tokenRequest);
-        tokenRepository.findByClientAndEmail(accessToken.getClient(), accessToken.getEmail()).ifPresent(tokenRepository::delete);
+        tokenRepository.findByClientAndUsername(accessToken.getClient(), accessToken.getUsername()).ifPresent(tokenRepository::delete);
         tokenEnhancer.enhance(accessToken);
         tokenRepository.save(accessToken);
         return DefaultAccessTokenDetails.of(accessToken);
@@ -59,11 +59,11 @@ public abstract class AbstractOAuth2TokenGranter implements OAuth2AccessTokenGra
     protected abstract OAuth2AuthorizedAccessToken createAccessToken(OAuth2ClientDetails clientDetails, OAuth2TokenRequest tokenRequest);
 
     protected LocalDateTime extractTokenExpiration(OAuth2ClientDetails clientDetails) {
-        return LocalDateTime.now(clock).plusSeconds(clientDetails.accessTokenValiditySeconds());
+        return LocalDateTime.now(clock).plusSeconds(clientDetails.getAccessTokenValiditySeconds());
     }
 
     protected LocalDateTime extractRefreshTokenExpiration(OAuth2ClientDetails clientDetails) {
-        return LocalDateTime.now(clock).plusSeconds(clientDetails.refreshTokenValiditySeconds());
+        return LocalDateTime.now(clock).plusSeconds(clientDetails.getRefreshTokenValiditySeconds());
     }
 
     protected OAuth2TokenIdGenerator refreshTokenGenerator() {
@@ -71,7 +71,7 @@ public abstract class AbstractOAuth2TokenGranter implements OAuth2AccessTokenGra
     }
 
     protected Set<OAuth2ScopeId> extractGrantScope(OAuth2ClientDetails clientDetails, OAuth2TokenRequest tokenRequest) {
-        return (tokenRequest.scopes() == null || tokenRequest.scopes().isEmpty() ? clientDetails.scope() : tokenRequest.scopes())
+        return (tokenRequest.getScopes() == null || tokenRequest.getScopes().isEmpty() ? clientDetails.getScopes() : tokenRequest.getScopes())
                 .stream().map(OAuth2ScopeId::new).collect(Collectors.toSet());
     }
 

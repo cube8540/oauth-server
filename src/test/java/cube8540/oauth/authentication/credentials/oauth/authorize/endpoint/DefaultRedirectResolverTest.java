@@ -17,7 +17,6 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
 @DisplayName("기본 리다이렉트 주소 Resolver 클래스 테스트")
@@ -47,7 +46,7 @@ class DefaultRedirectResolverTest {
 
                 redirectURI.add(URI.create("http://localhost:8080"));
 
-                when(this.clientDetails.registeredRedirectURI()).thenReturn(redirectURI);
+                when(this.clientDetails.getRegisteredRedirectUris()).thenReturn(redirectURI);
             }
 
             @Nested
@@ -105,7 +104,7 @@ class DefaultRedirectResolverTest {
                 redirectURI.add(URI.create("http://localhost:8081"));
                 redirectURI.add(URI.create("http://localhost:8082"));
 
-                when(this.clientDetails.registeredRedirectURI()).thenReturn(redirectURI);
+                when(this.clientDetails.getRegisteredRedirectUris()).thenReturn(redirectURI);
             }
 
             @Nested
