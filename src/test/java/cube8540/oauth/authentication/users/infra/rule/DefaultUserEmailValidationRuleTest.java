@@ -4,21 +4,19 @@ import cube8540.oauth.authentication.users.domain.User;
 import cube8540.oauth.authentication.users.domain.UserEmail;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@DisplayName("기본 유저 이메일 검사룰 테스트")
+@DisplayName("기본 유저 이메일 검사 테스트")
 class DefaultUserEmailValidationRuleTest {
 
-    private static final String EMAIL = "email@email.com";
-    private static final String EMAIL_WITHOUT_AT = "emailemail.com";
-    private static final String EMAIL_WITHOUT_DOT = "email@emailcom";
-    private static final String EMAIL_START_WITH_DOMAIN = "email.com@email";
+    private static final UserEmail EMAIL_WITHOUT_AT = new UserEmail("emailemail.com");
+    private static final UserEmail EMAIL_WITHOUT_DOT = new UserEmail("email@emailcom");
+    private static final UserEmail EMAIL_START_WITH_DOMAIN = new UserEmail("email.com@email");
+    private static final UserEmail EMAIL_WITH_NULL = new UserEmail(null);
 
     private DefaultUserEmailValidationRule rule;
 
@@ -27,110 +25,53 @@ class DefaultUserEmailValidationRuleTest {
         this.rule = new DefaultUserEmailValidationRule();
     }
 
-    @Nested
-    @DisplayName("허용되지 않는 이메일의 유효성 검사")
-    class ValidateNotAllowedEmail {
+    @Test
+    @DisplayName("이메일에 골뱅이표(@)가 없을시 유효성 검사 결과는 'false'가 반환되어야 한다.")
+    void emailNotContainsAtValidationResultShouldReturnFalse() {
+        User user = mock(User.class);
 
-        private User user;
+        when(user.getEmail()).thenReturn(EMAIL_WITHOUT_AT);
 
-        @BeforeEach
-        void setup() {
-            this.user = mock(User.class);
-        }
-
-        @Nested
-        @DisplayName("골뱅이표(@)가 없을때")
-        class WhenWithoutAt {
-
-            @BeforeEach
-            void setup() {
-                UserEmail email = new UserEmail(EMAIL_WITHOUT_AT);
-                when(user.getEmail()).thenReturn(email);
-            }
-
-            @Test
-            @DisplayName("유효성 검사시 false가 반환 되어야 한다.")
-            void shouldValidReturnsFalse() {
-                boolean isValid = rule.isValid(user);
-                assertFalse(isValid);
-            }
-        }
-
-        @Nested
-        @DisplayName("닷(.)이 없을떄")
-        class WhenWithoutDot {
-
-            @BeforeEach
-            void setup() {
-                UserEmail email = new UserEmail(EMAIL_WITHOUT_DOT);
-                when(user.getEmail()).thenReturn(email);
-            }
-
-            @Test
-            @DisplayName("유효성 검사시 false가 반환 되어야 한다.")
-            void shouldValidReturnsFalse() {
-                boolean isValid = rule.isValid(user);
-                assertFalse(isValid);
-            }
-        }
-
-        @Nested
-        @DisplayName("이메일이 도메인으로 시작할시")
-        class WhenStartWithDomain {
-
-            @BeforeEach
-            void setup() {
-                UserEmail email = new UserEmail(EMAIL_START_WITH_DOMAIN);
-                when(user.getEmail()).thenReturn(email);
-            }
-
-            @Test
-            @DisplayName("유효성 검사시 false가 반환 되어야 한다.")
-            void shouldValidReturnsFalse() {
-                boolean isValid = rule.isValid(user);
-                assertFalse(isValid);
-            }
-        }
-
-        @Nested
-        @DisplayName("null 일시")
-        class WhenNull {
-
-            @BeforeEach
-            void setup() {
-                UserEmail email = new UserEmail(null);
-                when(user.getEmail()).thenReturn(email);
-            }
-
-            @Test
-            @DisplayName("유효성 검사시 false가 반환 되어야 한다.")
-            void shouldValidReturnsFalse() {
-                boolean isValid = rule.isValid(user);
-                assertFalse(isValid);
-            }
-        }
+        assertFalse(rule.isValid(user));
     }
 
-    @Nested
-    @DisplayName("허용되는 이메일의 유효성 검사")
-    class ValidateAllowedEmail {
+    @Test
+    @DisplayName("이메일에 닷(.)이 없을시 유효성 검사 결과는 'false'가 반환되어야 한다.")
+    void emailNotContainsDotValidationResultShouldReturnFalse() {
+        User user = mock(User.class);
 
-        private User user;
+        when(user.getEmail()).thenReturn(EMAIL_WITHOUT_DOT);
 
-        @BeforeEach
-        void setup() {
-            this.user = mock(User.class);
-
-            UserEmail email = new UserEmail(EMAIL);
-            when(user.getEmail()).thenReturn(email);
-        }
-
-        @Test
-        @DisplayName("유효성 검사시 true가 반환되어야 한다.")
-        void shouldValidReturnsTrue() {
-            boolean isValid = rule.isValid(user);
-            assertTrue(isValid);
-        }
+        assertFalse(rule.isValid(user));
     }
 
+    @Test
+    @DisplayName("이메일이 도메인으로 시작할시 유효성 검사 결과는 'false'가 반환되어야 한다.")
+    void emailStartWithDomainValidationResultShouldReturnFalse() {
+        User user = mock(User.class);
+
+        when(user.getEmail()).thenReturn(EMAIL_START_WITH_DOMAIN);
+
+        assertFalse(rule.isValid(user));
+    }
+
+    @Test
+    @DisplayName("이메일 값이 null 일시 유효성 검사 결과는 'false'가 반환되어야 한다.")
+    void emailValueIsNullValidationResultShouldReturnFalse() {
+        User user = mock(User.class);
+
+        when(user.getEmail()).thenReturn(EMAIL_WITH_NULL);
+
+        assertFalse(rule.isValid(user));
+    }
+
+    @Test
+    @DisplayName("이메일이 null 일시 유효성 검사 결과는 'false'가 반환되어야 한다.")
+    void emailIsNullValidationResultShouldReturnFalse() {
+        User user = mock(User.class);
+
+        when(user.getEmail()).thenReturn(null);
+
+        assertFalse(rule.isValid(user));
+    }
 }
