@@ -348,6 +348,14 @@ class AuthorizationEndpointTest {
                     assertEquals(SCOPE, storedRequest.getRequestScopes());
                 }
 
+                @Test
+                @DisplayName("요청 받은 매개변수들을 세션에 저장해야 한다.")
+                void shouldSaveRequestingParameterToSession() {
+                    endpoint.authorize(parameter, model, principal);
+
+                    assertEquals(parameter, model.get(AuthorizationEndpoint.ORIGINAL_AUTHORIZATION_REQUEST_ATTRIBUTE));
+                }
+
                 @Nested
                 @DisplayName("요청한 스코프가 null일시")
                 class WhenRequestingScopeIsNull {
@@ -479,12 +487,53 @@ class AuthorizationEndpointTest {
 
             @BeforeEach
             void setup() {
+                Map<String, String> originalAuthorizationMap = new HashMap<>();
+
                 this.approvalParameter = new HashMap<>();
                 this.model = new HashMap<>();
                 this.sessionStatus = mock(SessionStatus.class);
                 this.principal = mock(Authentication.class);
 
                 this.model.put(AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE, null);
+                this.model.put(AuthorizationEndpoint.ORIGINAL_AUTHORIZATION_REQUEST_ATTRIBUTE, originalAuthorizationMap);
+
+                when(this.principal.isAuthenticated()).thenReturn(true);
+            }
+
+            @Test
+            @DisplayName("InvalidRequestException이 발생해야 한다.")
+            void shouldThrowsInvalidRequestException() {
+                assertThrows(InvalidRequestException.class, () -> endpoint.approval(approvalParameter, model, sessionStatus, principal));
+            }
+
+            @Test
+            @DisplayName("에러 코드는 INVALID_REQUIEST 이어야 한다.")
+            void shouldErrorCodeIsInvalidRequest() {
+                OAuth2Error error = assertThrows(InvalidRequestException.class, () -> endpoint.approval(approvalParameter, model, sessionStatus, principal))
+                        .getError();
+                assertEquals(OAuth2ErrorCodes.INVALID_REQUEST, error.getErrorCode());
+            }
+        }
+
+        @Nested
+        @DisplayName("세션에 원본 인가 요청 매개변수 정보가 없을시")
+        class WhenNotOriginalAuthorizationRequestInSession {
+            private Map<String, String> approvalParameter;
+            private Map<String, Object> model;
+            private SessionStatus sessionStatus;
+            private Authentication principal;
+
+            @BeforeEach
+            void setup() {
+                AuthorizationRequest originalAuthorizationRequest = mock(AuthorizationRequest.class);
+
+                this.approvalParameter = new HashMap<>();
+                this.model = new HashMap<>();
+                this.sessionStatus = mock(SessionStatus.class);
+                this.principal = mock(Authentication.class);
+
+                this.model.put(AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE, originalAuthorizationRequest);
+                this.model.put(AuthorizationEndpoint.ORIGINAL_AUTHORIZATION_REQUEST_ATTRIBUTE, null);
 
                 when(this.principal.isAuthenticated()).thenReturn(true);
             }
@@ -505,6 +554,7 @@ class AuthorizationEndpointTest {
         }
 
         private Map<String, String> approvalParameter;
+        private Map<String, String> originalAuthorizationRequestMap;
         private Map<String, Object> model;
         private SessionStatus sessionStatus;
         private Authentication authentication;
@@ -514,6 +564,7 @@ class AuthorizationEndpointTest {
         @BeforeEach
         void setup() {
             this.approvalParameter = new HashMap<>();
+            this.originalAuthorizationRequestMap = new HashMap<>();
             this.model = new HashMap<>();
             this.sessionStatus = mock(SessionStatus.class);
             this.authentication = mock(Authentication.class);
@@ -524,6 +575,7 @@ class AuthorizationEndpointTest {
             Set<String> originalRequestScope = new HashSet<>(Arrays.asList("SCOPE-1", "SCOPE-2", "SCOPE-3"));
 
             this.model.put(AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE, originalAuthorizationRequest);
+            this.model.put(AuthorizationEndpoint.ORIGINAL_AUTHORIZATION_REQUEST_ATTRIBUTE, originalAuthorizationRequestMap);
 
             when(authentication.isAuthenticated()).thenReturn(true);
             when(authentication.getName()).thenReturn(RAW_USERNAME);
@@ -556,14 +608,44 @@ class AuthorizationEndpointTest {
             assertEquals(RAW_CLIENT_ID, requestCaptor.getValue().getClientId());
         }
 
-        @Test
-        @DisplayName("요청 받은 리다이렉트 주소로 새 코드를 부여해야 한다.")
-        void shouldGrantNewCodeUsingRequestingRedirectURI() {
-            ArgumentCaptor<AuthorizationRequest> requestCaptor = ArgumentCaptor.forClass(AuthorizationRequest.class);
+        @Nested
+        @DisplayName("원본 요청 매개변수에 리다이렉트 주소가 없을시")
+        class WhenOriginalAuthorizationRequestMapHasNotRedirectUri {
 
-            endpoint.approval(approvalParameter, model, sessionStatus, authentication);
-            verify(codeGenerator, times(1)).generateNewAuthorizationCode(requestCaptor.capture());
-            assertEquals(RESOLVED_REDIRECT_URI, requestCaptor.getValue().getRedirectUri());
+            @BeforeEach
+            void setup() {
+                originalAuthorizationRequestMap.put(OAuth2Utils.AuthorizationRequestKey.REDIRECT_URI, null);
+            }
+
+            @Test
+            @DisplayName("리다이렉트 주소를 null 로 새 코드를 부여해야 한다.")
+            void shouldGrantNewCodeUsingNullRedirectUri() {
+                ArgumentCaptor<AuthorizationRequest> requestCaptor = ArgumentCaptor.forClass(AuthorizationRequest.class);
+
+                endpoint.approval(approvalParameter, model, sessionStatus, authentication);
+                verify(codeGenerator, times(1)).generateNewAuthorizationCode(requestCaptor.capture());
+                assertNull(requestCaptor.getValue().getRedirectUri());
+            }
+        }
+
+        @Nested
+        @DisplayName("원본 요청 매개변수에 리다이렉트 주소가 있을시")
+        class WhenOriginalAuthorizationRequestMapHasRedirectUri {
+
+            @BeforeEach
+            void setup() {
+                originalAuthorizationRequestMap.put(OAuth2Utils.AuthorizationRequestKey.REDIRECT_URI, RESOLVED_REDIRECT_URI.toString());
+            }
+
+            @Test
+            @DisplayName("요청 받은 리다이렉트 주소로 새 코드를 부여해야 한다.")
+            void shouldGrantNewCodeUsingRequestingRedirectURI() {
+                ArgumentCaptor<AuthorizationRequest> requestCaptor = ArgumentCaptor.forClass(AuthorizationRequest.class);
+
+                endpoint.approval(approvalParameter, model, sessionStatus, authentication);
+                verify(codeGenerator, times(1)).generateNewAuthorizationCode(requestCaptor.capture());
+                assertEquals(RESOLVED_REDIRECT_URI, requestCaptor.getValue().getRedirectUri());
+            }
         }
 
         @Test

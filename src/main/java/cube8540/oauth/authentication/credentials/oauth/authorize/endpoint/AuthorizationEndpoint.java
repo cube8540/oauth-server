@@ -52,9 +52,10 @@ import java.util.Set;
 
 @Slf4j
 @Controller
-@SessionAttributes({AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE})
+@SessionAttributes({AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE, AuthorizationEndpoint.ORIGINAL_AUTHORIZATION_REQUEST_ATTRIBUTE})
 public class AuthorizationEndpoint {
 
+    protected static final String ORIGINAL_AUTHORIZATION_REQUEST_ATTRIBUTE = "originalAuthorizationRequest";
     protected static final String AUTHORIZATION_REQUEST_ATTRIBUTE = "authorizationRequest";
     protected static final String AUTHORIZATION_REQUEST_CLIENT_NAME = "authorizationRequestClientName";
     protected static final String AUTHORIZATION_REQUEST_SCOPES_NAME = "authorizationRequestScopes";
@@ -122,6 +123,7 @@ public class AuthorizationEndpoint {
 
         Collection<OAuth2ScopeDetails> scopeDetails = scopeDetailsService.loadScopeDetailsByScopeIds(authorizationRequest.getRequestScopes());
         model.put(AUTHORIZATION_REQUEST_ATTRIBUTE, authorizationRequest);
+        model.put(ORIGINAL_AUTHORIZATION_REQUEST_ATTRIBUTE, parameters);
         return new ModelAndView(approvalPage)
                 .addObject(AUTHORIZATION_REQUEST_CLIENT_NAME, clientDetails.getClientName())
                 .addObject(AUTHORIZATION_REQUEST_SCOPES_NAME, scopeDetails);
@@ -134,8 +136,9 @@ public class AuthorizationEndpoint {
                 throw new InsufficientAuthenticationException("User must be authenticated");
             }
 
+            Map<?, ?> originalAuthorizationRequestMap = (Map<?, ?>) model.get(ORIGINAL_AUTHORIZATION_REQUEST_ATTRIBUTE);
             AuthorizationRequest originalAuthorizationRequest = (AuthorizationRequest) model.get(AUTHORIZATION_REQUEST_ATTRIBUTE);
-            if (originalAuthorizationRequest == null) {
+            if (originalAuthorizationRequest == null || originalAuthorizationRequestMap == null) {
                 throw InvalidRequestException.invalidRequest("Cannot approval uninitialized authorization request");
             }
 
@@ -143,8 +146,12 @@ public class AuthorizationEndpoint {
             Set<String> approvalScopes = approvalResolver.resolveApprovalScopes(originalAuthorizationRequest, approvalParameters);
             authorizationRequest.setRequestScopes(approvalScopes);
 
+            URI redirectURI = authorizationRequest.getRedirectUri();
+            if (originalAuthorizationRequestMap.get(OAuth2Utils.AuthorizationRequestKey.REDIRECT_URI) == null) {
+                authorizationRequest.setRedirectUri(null);
+            }
             AuthorizationCode code = codeGenerator.generateNewAuthorizationCode(authorizationRequest);
-            ModelAndView modelAndView = new ModelAndView(new RedirectView(authorizationRequest.getRedirectUri().toString()))
+            ModelAndView modelAndView = new ModelAndView(new RedirectView(redirectURI.toString()))
                     .addObject(OAuth2Utils.AuthorizationResponseKey.CODE, code.getValue());
             if (authorizationRequest.getState() != null) {
                 modelAndView.addObject(OAuth2Utils.AuthorizationResponseKey.STATE, authorizationRequest.getState());
