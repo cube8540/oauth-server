@@ -98,7 +98,8 @@ public class OAuth2AuthorizationCode extends AbstractAggregateRoot<OAuth2Authori
             throw InvalidGrantException.invalidGrant("State is not matched");
         }
 
-        if (!redirectURI.equals(request.getRedirectUri())) {
+        if ((redirectURI == null && request.getRedirectUri() != null) ||
+                (redirectURI != null && !redirectURI.equals(request.getRedirectUri()))) {
             throw new RedirectMismatchException("Redirect URI mismatched");
         }
 

@@ -232,26 +232,61 @@ class OAuth2AuthorizationCodeTest {
         @Nested
         @DisplayName("리다이렉트 주소가 일치하지 않을시")
         class WhenRedirectUriMismatch {
-            private AuthorizationRequest request;
-            private OAuth2AuthorizationCode code;
 
-            @BeforeEach
-            void setup() {
-                this.request = mock(AuthorizationRequest.class);
-                this.code = new OAuth2AuthorizationCode(codeGenerator);
+            @Nested
+            @DisplayName("리다이렉트 주소가 null 일시")
+            class WhenRedirectUriIsNull {
+                private AuthorizationRequest request;
+                private OAuth2AuthorizationCode code;
 
-                this.code.setAuthorizationRequest(savedRequest);
-                when(request.getState()).thenReturn(STATE);
-                when(request.getRedirectUri()).thenReturn(URI.create("http://mismach-uri.info"));
+                @BeforeEach
+                void setup() {
+                    this.request = mock(AuthorizationRequest.class);
+                    this.code = new OAuth2AuthorizationCode(codeGenerator);
 
-                Clock clock = Clock.fixed(EXPIRATION_DATETIME.minusNanos(1).toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
-                OAuth2AuthorizationCode.setClock(clock);
+                    when(savedRequest.getRedirectUri()).thenReturn(null);
+                    when(request.getState()).thenReturn(STATE);
+                    when(request.getRedirectUri()).thenReturn(URI.create("http://mismach-uri.info"));
+
+                    this.code.setAuthorizationRequest(savedRequest);
+
+                    Clock clock = Clock.fixed(EXPIRATION_DATETIME.minusNanos(1).toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
+                    OAuth2AuthorizationCode.setClock(clock);
+                }
+
+                @Test
+                @DisplayName("RedirectMismatchException이 발생해야 한다.")
+                void shouldThrowsRedirectMismatchException() {
+                    assertThrows(RedirectMismatchException.class, () -> code.validateWithAuthorizationRequest(request));
+                }
             }
 
-            @Test
-            @DisplayName("RedirectMismatchException이 발생해야 한다.")
-            void shouldThrowsRedirectMismatchException() {
-                assertThrows(RedirectMismatchException.class, () -> code.validateWithAuthorizationRequest(request));
+            @Nested
+            @DisplayName("리다이렉트 주소가 null이 아닐시")
+            class WhenRedirectUriIsNotNull {
+                private AuthorizationRequest request;
+                private OAuth2AuthorizationCode code;
+
+                @BeforeEach
+                void setup() {
+                    this.request = mock(AuthorizationRequest.class);
+                    this.code = new OAuth2AuthorizationCode(codeGenerator);
+
+                    when(savedRequest.getRedirectUri()).thenReturn(REDIRECT_URI);
+                    when(request.getState()).thenReturn(STATE);
+                    when(request.getRedirectUri()).thenReturn(URI.create("http://mismach-uri.info"));
+
+                    this.code.setAuthorizationRequest(savedRequest);
+
+                    Clock clock = Clock.fixed(EXPIRATION_DATETIME.minusNanos(1).toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
+                    OAuth2AuthorizationCode.setClock(clock);
+                }
+
+                @Test
+                @DisplayName("RedirectMismatchException이 발생해야 한다.")
+                void shouldThrowsRedirectMismatchException() {
+                    assertThrows(RedirectMismatchException.class, () -> code.validateWithAuthorizationRequest(request));
+                }
             }
         }
 
@@ -293,30 +328,69 @@ class OAuth2AuthorizationCodeTest {
         @Nested
         @DisplayName("일치하지 않는 정보가 없을시")
         class WhenNotMismatchRequest {
-            private AuthorizationRequest request;
-            private OAuth2AuthorizationCode code;
 
-            @BeforeEach
-            void setup() {
-                Clock createdClock = Clock.fixed(NOW.toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
-                OAuth2AuthorizationCode.setClock(createdClock);
+            @Nested
+            @DisplayName("리다이렉트 주소가 null일시")
+            class WhenRedirectUriIsNull {
+                private AuthorizationRequest request;
+                private OAuth2AuthorizationCode code;
 
-                this.request = mock(AuthorizationRequest.class);
-                this.code = new OAuth2AuthorizationCode(codeGenerator);
+                @BeforeEach
+                void setup() {
+                    Clock createdClock = Clock.fixed(NOW.toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
+                    OAuth2AuthorizationCode.setClock(createdClock);
 
-                this.code.setAuthorizationRequest(savedRequest);
-                when(request.getState()).thenReturn(STATE);
-                when(request.getRedirectUri()).thenReturn(REDIRECT_URI);
-                when(request.getClientId()).thenReturn(RAW_CLIENT_ID);
+                    this.request = mock(AuthorizationRequest.class);
+                    this.code = new OAuth2AuthorizationCode(codeGenerator);
 
-                Clock clock = Clock.fixed(EXPIRATION_DATETIME.minusNanos(1).toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
-                OAuth2AuthorizationCode.setClock(clock);
+                    when(savedRequest.getRedirectUri()).thenReturn(null);
+                    when(request.getState()).thenReturn(STATE);
+                    when(request.getRedirectUri()).thenReturn(null);
+                    when(request.getClientId()).thenReturn(RAW_CLIENT_ID);
+
+                    this.code.setAuthorizationRequest(savedRequest);
+
+                    Clock clock = Clock.fixed(EXPIRATION_DATETIME.minusNanos(1).toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
+                    OAuth2AuthorizationCode.setClock(clock);
+                }
+
+                @Test
+                @DisplayName("어떠한 에러도 발생시키지 않아야 한다.")
+                void shouldNotThrows() {
+                    assertDoesNotThrow(() -> this.code.validateWithAuthorizationRequest(request));
+                }
             }
 
-            @Test
-            @DisplayName("어떠한 에러도 발생시키지 않아야 한다.")
-            void shouldNotThrows() {
-                assertDoesNotThrow(() -> this.code.validateWithAuthorizationRequest(request));
+            @Nested
+            @DisplayName("리다이렉트 주소가 null이 아닐시")
+            class WhenRedirectUriIsNotNull {
+                private AuthorizationRequest request;
+                private OAuth2AuthorizationCode code;
+
+                @BeforeEach
+                void setup() {
+                    Clock createdClock = Clock.fixed(NOW.toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
+                    OAuth2AuthorizationCode.setClock(createdClock);
+
+                    this.request = mock(AuthorizationRequest.class);
+                    this.code = new OAuth2AuthorizationCode(codeGenerator);
+
+                    when(savedRequest.getRedirectUri()).thenReturn(REDIRECT_URI);
+                    when(request.getState()).thenReturn(STATE);
+                    when(request.getRedirectUri()).thenReturn(REDIRECT_URI);
+                    when(request.getClientId()).thenReturn(RAW_CLIENT_ID);
+
+                    this.code.setAuthorizationRequest(savedRequest);
+
+                    Clock clock = Clock.fixed(EXPIRATION_DATETIME.minusNanos(1).toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
+                    OAuth2AuthorizationCode.setClock(clock);
+                }
+
+                @Test
+                @DisplayName("어떠한 에러도 발생시키지 않아야 한다.")
+                void shouldNotThrows() {
+                    assertDoesNotThrow(() -> this.code.validateWithAuthorizationRequest(request));
+                }
             }
         }
     }

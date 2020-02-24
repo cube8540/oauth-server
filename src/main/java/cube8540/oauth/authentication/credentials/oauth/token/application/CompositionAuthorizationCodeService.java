@@ -9,6 +9,7 @@ import cube8540.oauth.authentication.credentials.oauth.token.infra.DefaultAuthor
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -34,6 +35,7 @@ public class CompositionAuthorizationCodeService implements OAuth2AuthorizationC
     }
 
     @Override
+    @Transactional
     public AuthorizationCode generateNewAuthorizationCode(AuthorizationRequest request) {
         OAuth2AuthorizationCode authorizationCode = new OAuth2AuthorizationCode(codeGenerator);
 
