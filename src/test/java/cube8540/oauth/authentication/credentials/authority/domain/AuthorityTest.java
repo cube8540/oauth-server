@@ -12,26 +12,24 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class AuthorityTest {
 
     private static final String RAW_AUTHORITY_CODE = "AUTHORITY_CODE";
-    private static final AuthorityCode AUTHORITY_CODE = new AuthorityCode(RAW_AUTHORITY_CODE);
-
     private static final String DESCRIPTION = "DESCRIPTION";
 
     @Nested
     @DisplayName("기본 권한 설정")
     class SettingBasicAuthority {
 
-        private Authority authority;
-
-        @BeforeEach
-        void setup() {
-            this.authority = new Authority(RAW_AUTHORITY_CODE, DESCRIPTION);
-        }
-
         @Nested
         @DisplayName("기본 권한으로 설정시")
         class ConfigBasicAuthority {
+            private Authority authority;
+
+            @BeforeEach
+            void setup() {
+                this.authority = new Authority(RAW_AUTHORITY_CODE, DESCRIPTION);
+            }
+
             @Test
-            @DisplayName("기본 권한 여부가 true로 설정되어야 한다.")
+            @DisplayName("기본 권한 여부가 true 로 설정되어야 한다.")
             void shouldSettingBasicAuthority() {
                 authority.settingBasicAuthority();
 
@@ -42,8 +40,16 @@ class AuthorityTest {
         @Nested
         @DisplayName("일반 권한으로 설정")
         class ConfigNotBasicAuthority {
+
+            private Authority authority;
+
+            @BeforeEach
+            void setup() {
+                this.authority = new Authority(RAW_AUTHORITY_CODE, DESCRIPTION);
+            }
+
             @Test
-            @DisplayName("기본 권한 여부가 false로 설정되어야 한다.")
+            @DisplayName("기본 권한 여부가 false 로 설정되어야 한다.")
             void shouldSettingNotBasicAuthority() {
                 authority.settingNotBasicAuthority();
 
