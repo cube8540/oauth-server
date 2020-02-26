@@ -61,9 +61,7 @@ class DefaultUserPasswordServiceTest {
             private ChangePasswordRequest changeRequest;
 
             @BeforeEach
-            void setup() {
-                super.setup();
-
+            void setupRequest() {
                 this.principal = mockPrincipal(RAW_EMAIL);
                 this.changeRequest = new ChangePasswordRequest(PASSWORD, NEW_PASSWORD);
             }
@@ -281,9 +279,7 @@ class DefaultUserPasswordServiceTest {
             private ResetPasswordRequest request;
 
             @BeforeEach
-            void setup() {
-                super.setup();
-
+            void setupRequest() {
                 this.request = new ResetPasswordRequest(RAW_EMAIL, RAW_PASSWORD_CREDENTIALS_KEY, NEW_PASSWORD);
             }
 
