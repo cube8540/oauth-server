@@ -15,6 +15,9 @@ import static org.mockito.Mockito.when;
 @DisplayName("권한 예외 변환기 클래스 테스트")
 class AuthorityExceptionTranslatorTest {
 
+    private static final String RAW_CODE = "CODE";
+    private static final String DESCRIPTION = "DESCRIPTION";
+
     private AuthorityExceptionTranslator translator;
 
     @BeforeEach
@@ -31,8 +34,8 @@ class AuthorityExceptionTranslatorTest {
         void setup() {
             this.e = mock(AuthorityNotFoundException.class);
 
-            when(e.getCode()).thenReturn("CODE");
-            when(e.getDescription()).thenReturn("DESCRIPTION");
+            when(e.getCode()).thenReturn(RAW_CODE);
+            when(e.getDescription()).thenReturn(DESCRIPTION);
         }
 
         @Test
