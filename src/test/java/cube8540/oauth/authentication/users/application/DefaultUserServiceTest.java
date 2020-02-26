@@ -79,7 +79,7 @@ class DefaultUserServiceTest {
 
                 @BeforeEach
                 void setup() {
-                    User user = configDefaultMockUser().authorities().build();
+                    User user = configDefaultMockUser().certified().build();
                     UserRepository repository = mockUserRepository().registerUser(user).build();
                     this.service = new DefaultUserService(repository);
                 }
