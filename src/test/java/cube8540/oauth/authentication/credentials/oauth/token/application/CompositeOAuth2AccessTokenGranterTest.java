@@ -67,9 +67,6 @@ class CompositeOAuth2AccessTokenGranterTest {
             private OAuth2ClientDetails clientDetails;
             private OAuth2TokenRequest tokenRequest;
             private OAuth2AccessTokenGrantService codeTokenGranter;
-            private OAuth2AccessTokenGrantService refreshTokenGranter;
-            private OAuth2AccessTokenGrantService clientTokenGranter;
-            private OAuth2AccessTokenGrantService passwordTokenGranter;
             private OAuth2AccessTokenDetails token;
 
             @BeforeEach
@@ -77,18 +74,15 @@ class CompositeOAuth2AccessTokenGranterTest {
                 this.clientDetails = mock(OAuth2ClientDetails.class);
                 this.tokenRequest = mock(OAuth2TokenRequest.class);
                 this.codeTokenGranter = mock(OAuth2AccessTokenGrantService.class);
-                this.refreshTokenGranter = mock(OAuth2AccessTokenGrantService.class);
-                this.clientTokenGranter = mock(OAuth2AccessTokenGrantService.class);
-                this.passwordTokenGranter = mock(OAuth2AccessTokenGrantService.class);
                 this.token = mock(OAuth2AccessTokenDetails.class);
 
                 when(this.tokenRequest.getGrantType()).thenReturn(AuthorizationGrantType.AUTHORIZATION_CODE);
                 when(this.codeTokenGranter.grant(clientDetails, tokenRequest)).thenReturn(token);
 
                 accessTokenGranter.putTokenGranterMap(AuthorizationGrantType.AUTHORIZATION_CODE, codeTokenGranter);
-                accessTokenGranter.putTokenGranterMap(AuthorizationGrantType.CLIENT_CREDENTIALS, clientTokenGranter);
-                accessTokenGranter.putTokenGranterMap(AuthorizationGrantType.REFRESH_TOKEN, refreshTokenGranter);
-                accessTokenGranter.putTokenGranterMap(AuthorizationGrantType.PASSWORD, passwordTokenGranter);
+                accessTokenGranter.putTokenGranterMap(AuthorizationGrantType.CLIENT_CREDENTIALS, mock(OAuth2AccessTokenGrantService.class));
+                accessTokenGranter.putTokenGranterMap(AuthorizationGrantType.REFRESH_TOKEN, mock(OAuth2AccessTokenGrantService.class));
+                accessTokenGranter.putTokenGranterMap(AuthorizationGrantType.PASSWORD, mock(OAuth2AccessTokenGrantService.class));
             }
 
             @Test
