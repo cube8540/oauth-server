@@ -12,8 +12,19 @@ import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 
-import static cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientTestsHelper.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientTestsHelper.ADDED_SCOPE;
+import static cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientTestsHelper.RAW_CHANGE_SECRET;
+import static cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientTestsHelper.RAW_CLIENT_ID;
+import static cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientTestsHelper.RAW_ENCODING_SECRET;
+import static cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientTestsHelper.RAW_SECRET;
+import static cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientTestsHelper.REDIRECT_URI;
+import static cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientTestsHelper.mocKValidationRule;
+import static cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientTestsHelper.mockPasswordEncoder;
+import static cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientTestsHelper.mockValidationPolicy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("OAuth2 클라이언트 테스트")
 class OAuth2ClientTest {

@@ -13,8 +13,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Collections;
 
-import static cube8540.oauth.authentication.credentials.oauth.client.provider.ClientCredentialsProviderTestHelper.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static cube8540.oauth.authentication.credentials.oauth.client.provider.ClientCredentialsProviderTestHelper.CLIENT_SECRET;
+import static cube8540.oauth.authentication.credentials.oauth.client.provider.ClientCredentialsProviderTestHelper.ENCODING_CLIENT_SECRET;
+import static cube8540.oauth.authentication.credentials.oauth.client.provider.ClientCredentialsProviderTestHelper.RAW_CLIENT_ID;
+import static cube8540.oauth.authentication.credentials.oauth.client.provider.ClientCredentialsProviderTestHelper.mockOAuth2ClientDetails;
+import static cube8540.oauth.authentication.credentials.oauth.client.provider.ClientCredentialsProviderTestHelper.mockOAuth2ClientDetailsService;
+import static cube8540.oauth.authentication.credentials.oauth.client.provider.ClientCredentialsProviderTestHelper.mockPasswordEncoder;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("클라이언트 인증 제공 클래스 테스트")
 class ClientCredentialsAuthenticationProviderTest {

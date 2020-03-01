@@ -1,6 +1,10 @@
 package cube8540.oauth.authentication.credentials.oauth.client.provider;
 
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -13,7 +17,16 @@ import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import static cube8540.oauth.authentication.credentials.oauth.client.provider.ClientCredentialsProviderTestHelper.*;
+import static cube8540.oauth.authentication.credentials.oauth.client.provider.ClientCredentialsProviderTestHelper.BASIC_AUTH_CLIENT_ID;
+import static cube8540.oauth.authentication.credentials.oauth.client.provider.ClientCredentialsProviderTestHelper.BASIC_AUTH_CLIENT_SECRET;
+import static cube8540.oauth.authentication.credentials.oauth.client.provider.ClientCredentialsProviderTestHelper.CLIENT_SECRET;
+import static cube8540.oauth.authentication.credentials.oauth.client.provider.ClientCredentialsProviderTestHelper.FILTER_PATH;
+import static cube8540.oauth.authentication.credentials.oauth.client.provider.ClientCredentialsProviderTestHelper.RAW_CLIENT_ID;
+import static cube8540.oauth.authentication.credentials.oauth.client.provider.ClientCredentialsProviderTestHelper.mockAuthentication;
+import static cube8540.oauth.authentication.credentials.oauth.client.provider.ClientCredentialsProviderTestHelper.mockAuthenticationManager;
+import static cube8540.oauth.authentication.credentials.oauth.client.provider.ClientCredentialsProviderTestHelper.mockFilterChain;
+import static cube8540.oauth.authentication.credentials.oauth.client.provider.ClientCredentialsProviderTestHelper.mockHttpServletRequest;
+import static cube8540.oauth.authentication.credentials.oauth.client.provider.ClientCredentialsProviderTestHelper.mockHttpServletResponse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.times;
