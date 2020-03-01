@@ -3,7 +3,6 @@ package cube8540.oauth.authentication.credentials.oauth.client.domain;
 import cube8540.oauth.authentication.credentials.oauth.client.error.ClientAuthorizationException;
 import cube8540.oauth.authentication.credentials.oauth.client.error.ClientErrorCodes;
 import cube8540.oauth.authentication.credentials.oauth.client.error.ClientInvalidException;
-import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import cube8540.validator.core.ValidationError;
 import cube8540.validator.core.ValidationRule;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,66 +12,16 @@ import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 
-import java.net.URI;
-
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientTestsHelper.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("OAuth2 클라이언트 테스트")
 class OAuth2ClientTest {
 
-    private static final String RAW_CLIENT_ID = "CLIENT-ID";
-    private static final OAuth2ClientId CLIENT_ID = new OAuth2ClientId(RAW_CLIENT_ID);
-
-    private static final String RAW_SECRET = "SECRET";
-    private static final String RAW_ENCODING_SECRET = "ENCODING-SECRET";
-    private static final String RAW_CHANGE_SECRET = "CHANGE-SECRET";
-
-    @Nested
-    @DisplayName("OAuth2 클라이언트 생성")
-    class InitializeOAuth2Client {
-
-        private OAuth2Client client;
-
-        @BeforeEach
-        void setup() {
-            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET);
-        }
-
-        @Test
-        @DisplayName("인자로 받은 클라이언트 아이디를 저장해야 한다.")
-        void shouldSaveGivenClientId() {
-            assertEquals(CLIENT_ID, client.getClientId());
-        }
-
-        @Test
-        @DisplayName("인자로 받은 클라이언트 패스워드를 저장해야 한다.")
-        void shouldSaveGivenSecret() {
-            assertEquals(RAW_SECRET, client.getSecret());
-        }
-
-        @Test
-        @DisplayName("인증 토큰의 만료 시간을 기본 시간으로 저장해야 한다.")
-        void shouldSaveDefaultAccessTokenValidity() {
-            assertEquals(OAuth2Client.DEFAULT_ACCESS_TOKEN_VALIDITY, client.getAccessTokenValidity());
-        }
-
-        @Test
-        @DisplayName("리플래시 토큰의 만료 시간을 기본 시간으로 저장해야 한다.")
-        void shouldSaveDefaultRefreshTokenValidity() {
-            assertEquals(OAuth2Client.DEFAULT_REFRESH_TOKEN_VALIDITY, client.getRefreshTokenValidity());
-        }
-    }
-
     @Nested
     @DisplayName("리다이렉트 URI 저장")
     class AddRedirectURI {
-        private URI newRedirectURI = URI.create("http://localhost");
+
         private OAuth2Client client;
 
         @BeforeEach
@@ -80,86 +29,33 @@ class OAuth2ClientTest {
             this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET);
         }
 
-        @Nested
-        @DisplayName("새 리다이렉트 URI를 저장할시")
-        class WhenNewRedirectURI {
-            private URI newDifferentRedirectURI = URI.create("http://localhost:81");
+        @Test
+        @DisplayName("인자로 받은 URI 를 저장해야함")
+        void shouldSaveGiveURI() {
+            client.addRedirectUri(REDIRECT_URI);
 
-            @Test
-            @DisplayName("인자로 받은 URI를 저장해야함")
-            void shouldSaveGiveURI() {
-                client.addRedirectUri(newRedirectURI);
-                client.addRedirectUri(newDifferentRedirectURI);
-
-                assertTrue(client.getRedirectUris().contains(newRedirectURI));
-                assertTrue(client.getRedirectUris().contains(newDifferentRedirectURI));
-            }
-        }
-
-        @Nested
-        @DisplayName("이미 저장된 리다이렉트 URI를 다시 저장할시")
-        class WhenGivenAlreadyRedirectURI {
-
-            @BeforeEach
-            void setup() {
-                client.addRedirectUri(newRedirectURI);
-            }
-
-            @Test
-            @DisplayName("인자로 받은 URI가 저장되어 있어야 한다.")
-            void shouldStoredGiveRedirectURI() {
-                client.addRedirectUri(newRedirectURI);
-                assertTrue(client.getRedirectUris().contains(newRedirectURI));
-            }
-
-            @Test
-            @DisplayName("같은 URI는 하나만 저장되어 있어야 한다.")
-            void shouldStoredOnlyOneSameURI() {
-                client.addRedirectUri(newRedirectURI);
-
-                long size = client.getRedirectUris().stream().filter(uri -> uri.equals(newRedirectURI)).count();
-                assertEquals(1, size);
-            }
+            assertTrue(client.getRedirectUris().contains(REDIRECT_URI));
         }
     }
 
     @Nested
     @DisplayName("리다이렉트 URI 삭제")
     class RemoveRedirectURI {
-        private URI redirectURI = URI.create("http://localhost");
         private OAuth2Client client;
 
         @BeforeEach
         void setup() {
             this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET);
+
+            this.client.addRedirectUri(REDIRECT_URI);
         }
 
-        @Nested
-        @DisplayName("삭제하려는 리다이렉트 URI가 저장되어 있지 않을시")
-        class WhenRemoveNotStoredURI {
+        @Test
+        @DisplayName("인자로 받은 URI 를 삭제한다.")
+        void shouldRemoveGivenRedirectURI() {
+            client.removeRedirectUri(REDIRECT_URI);
 
-            @Test
-            @DisplayName("해당 요청은 무시한다.")
-            void shouldNothing() {
-                assertDoesNotThrow(() -> client.removeRedirectUri(redirectURI));
-            }
-        }
-
-        @Nested
-        @DisplayName("삭제하려는 리다이렉트 URI가 저장되어 있을시")
-        class WhenRemoveStoredURI {
-
-            @BeforeEach
-            void setup() {
-                client.addRedirectUri(redirectURI);
-            }
-
-            @Test
-            @DisplayName("인자로 받은 URI를 삭제한다.")
-            void shouldRemoveGivenRedirectURI() {
-                client.removeRedirectUri(redirectURI);
-                assertFalse(client.getRedirectUris().contains(redirectURI));
-            }
+            assertFalse(client.getRedirectUris().contains(REDIRECT_URI));
         }
     }
 
@@ -173,46 +69,12 @@ class OAuth2ClientTest {
             this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET);
         }
 
-        @Nested
-        @DisplayName("새 클라이언즈 인증 방식을 저장할시")
-        class WhenNewGrantType {
+        @Test
+        @DisplayName("인자로 받은 클라이언트 인증 방식을 저장해야함")
+        void shouldSaveGiveGrantType() {
+            client.addGrantType(AuthorizationGrantType.AUTHORIZATION_CODE);
 
-            @Test
-            @DisplayName("인자로 받은 클라이언트 인증 방식을 저장해야함")
-            void shouldSaveGiveGrantType() {
-                client.addGrantType(AuthorizationGrantType.AUTHORIZATION_CODE);
-                client.addGrantType(AuthorizationGrantType.PASSWORD);
-
-                assertTrue(client.getGrantTypes().contains(AuthorizationGrantType.AUTHORIZATION_CODE));
-                assertTrue(client.getGrantTypes().contains(AuthorizationGrantType.PASSWORD));
-            }
-        }
-
-        @Nested
-        @DisplayName("이미 저장된 리다이렉트 URI를 다시 저장할시")
-        class WhenGivenAlreadyGrantType {
-
-            @BeforeEach
-            void setup() {
-                client.addGrantType(AuthorizationGrantType.AUTHORIZATION_CODE);
-            }
-
-            @Test
-            @DisplayName("인자로 받은 인증 방식이 저장되어 있어야 한다.")
-            void shouldStoredGiveGrantType() {
-                client.addGrantType(AuthorizationGrantType.AUTHORIZATION_CODE);
-                assertTrue(client.getGrantTypes().contains(AuthorizationGrantType.AUTHORIZATION_CODE));
-            }
-
-            @Test
-            @DisplayName("같은 인증 방식은 하나만 저장되어 있어야 한다.")
-            void shouldStoredOnlyOneSameGrantType() {
-                client.addGrantType(AuthorizationGrantType.AUTHORIZATION_CODE);
-
-                long size = client.getGrantTypes().stream()
-                        .filter(grantType -> grantType.equals(AuthorizationGrantType.AUTHORIZATION_CODE)).count();
-                assertEquals(1, size);
-            }
+            assertTrue(client.getGrantTypes().contains(AuthorizationGrantType.AUTHORIZATION_CODE));
         }
     }
 
@@ -224,157 +86,74 @@ class OAuth2ClientTest {
         @BeforeEach
         void setup() {
             this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET);
+            this.client.addGrantType(AuthorizationGrantType.AUTHORIZATION_CODE);
         }
 
-        @Nested
-        @DisplayName("삭제하려는 인증 방식이 저장되어 있지 않을시")
-        class WhenRemoveNotStoredGrantType {
+        @Test
+        @DisplayName("인자로 받은 인증 방식을 삭제한다.")
+        void shouldRemoveGivenGrantType() {
+            client.removeGrantType(AuthorizationGrantType.AUTHORIZATION_CODE);
 
-            @Test
-            @DisplayName("해당 요청은 무시한다.")
-            void shouldNothing() {
-                assertDoesNotThrow(() -> client.removeGrantType(AuthorizationGrantType.AUTHORIZATION_CODE));
-            }
-        }
-
-        @Nested
-        @DisplayName("삭제하려는 인증 방식이 저장되어 있을시")
-        class WhenRemoveStoredGrantType {
-
-            @BeforeEach
-            void setup() {
-                client.addGrantType(AuthorizationGrantType.AUTHORIZATION_CODE);
-            }
-
-            @Test
-            @DisplayName("인자로 받은 인증 방식을 삭제한다.")
-            void shouldRemoveGivenGrantType() {
-                client.removeGrantType(AuthorizationGrantType.AUTHORIZATION_CODE);
-                assertFalse(client.getGrantTypes().contains(AuthorizationGrantType.AUTHORIZATION_CODE));
-            }
+            assertFalse(client.getGrantTypes().contains(AuthorizationGrantType.AUTHORIZATION_CODE));
         }
     }
 
     @Nested
     @DisplayName("스코프 저장")
     class AddScope {
-        private OAuth2ScopeId newScope;
         private OAuth2Client client;
 
         @BeforeEach
         void setup(){
-            this.newScope = new OAuth2ScopeId("SCOPE-1");
             this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET);
         }
 
-        @Nested
-        @DisplayName("새 스코프를 저장할시")
-        class WhenNewScope {
-            private OAuth2ScopeId newDifferentScope;
+        @Test
+        @DisplayName("인자로 받은 스코프를 저장해야함")
+        void shouldSaveGiveScope() {
+            client.addScope(ADDED_SCOPE);
 
-            @BeforeEach
-            void setup() {
-                this.newDifferentScope = new OAuth2ScopeId("SCOPE-2");
-            }
-
-            @Test
-            @DisplayName("인자로 받은 스코프를 저장해야함")
-            void shouldSaveGiveScope() {
-                client.addScope(newScope);
-                client.addScope(newDifferentScope);
-
-                assertTrue(client.getScopes().contains(newScope));
-                assertTrue(client.getScopes().contains(newDifferentScope));
-            }
-        }
-
-        @Nested
-        @DisplayName("이미 저장된 스코프를 다시 저장할시")
-        class WhenGivenAlreadyScope {
-
-            @BeforeEach
-            void setup() {
-                client.addScope(newScope);
-            }
-
-            @Test
-            @DisplayName("인자로 받은 스코프가 저장되어 있어야 한다.")
-            void shouldStoredGiveScope() {
-                client.addScope(newScope);
-                assertTrue(client.getScopes().contains(newScope));
-            }
-
-            @Test
-            @DisplayName("같은 스코프는 하나만 저장되어 있어야 한다.")
-            void shouldStoredOnlyOneSameScope() {
-                client.addScope(newScope);
-
-                long size = client.getScopes().stream()
-                        .filter(scope -> scope.equals(newScope)).count();
-                assertEquals(1, size);
-            }
+            assertTrue(client.getScopes().contains(ADDED_SCOPE));
         }
     }
 
     @Nested
     @DisplayName("스코프 삭제")
     class RemoveScope {
-        private OAuth2ScopeId scope;
         private OAuth2Client client;
 
         @BeforeEach
         void setup() {
-            this.scope = new OAuth2ScopeId("SCOPE-1");
             this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET);
+            this.client.addScope(ADDED_SCOPE);
         }
 
-        @Nested
-        @DisplayName("삭제하려는 스코프가 저장되어 있지 않을시")
-        class WhenRemoveNotStoredScope {
+        @Test
+        @DisplayName("인자로 받은 인증 방식을 삭제한다.")
+        void shouldRemoveGivenGrantType() {
+            client.removeScope(ADDED_SCOPE);
 
-            @Test
-            @DisplayName("해당 요청은 무시한다.")
-            void shouldNothing() {
-                assertDoesNotThrow(() -> client.removeScope(scope));
-            }
-        }
-
-        @Nested
-        @DisplayName("삭제하려는 스코프가 저장되어 있을시")
-        class WhenRemoveStoredScope {
-
-            @BeforeEach
-            void setup() {
-                client.addScope(scope);
-            }
-
-            @Test
-            @DisplayName("인자로 받은 인증 방식을 삭제한다.")
-            void shouldRemoveGivenGrantType() {
-                client.removeScope(scope);
-                assertFalse(client.getScopes().contains(scope));
-            }
+            assertFalse(client.getScopes().contains(ADDED_SCOPE));
         }
     }
 
     @Nested
     @DisplayName("클라이언트 패스워드 암호화")
     class SecretEncrypting {
+        private PasswordEncoder encoder;
+
         private OAuth2Client client;
-        private PasswordEncoder passwordEncoder;
 
         @BeforeEach
         void setup() {
             this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET);
-            this.passwordEncoder = mock(PasswordEncoder.class);
-
-            when(passwordEncoder.encode(RAW_SECRET)).thenReturn(RAW_ENCODING_SECRET);
+            this.encoder = mockPasswordEncoder().encode().build();
         }
 
         @Test
         @DisplayName("클라이언트 패스워드를 암호화 하여 저장해야 한다.")
         void shouldSaveEncryptedClientSecret() {
-            client.encrypted(passwordEncoder);
+            client.encrypted(encoder);
 
             assertEquals(RAW_ENCODING_SECRET, client.getSecret());
         }
@@ -383,58 +162,31 @@ class OAuth2ClientTest {
     @Nested
     @DisplayName("클라이언트 유효성 채크")
     class ClientValidation {
-        private OAuth2Client client;
-
-        private OAuth2ClientValidatePolicy policy;
-
-        private ValidationRule<OAuth2Client> clientIdRule;
-        private ValidationRule<OAuth2Client> secretRule;
-        private ValidationRule<OAuth2Client> clientNameRule;
-        private ValidationRule<OAuth2Client> grantTypeRule;
-        private ValidationRule<OAuth2Client> scopeRule;
-        private ValidationRule<OAuth2Client> ownerRule;
-
-        @BeforeEach
-        @SuppressWarnings("unchecked")
-        void setup() {
-            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET);
-
-            this.policy = mock(OAuth2ClientValidatePolicy.class);
-            this.clientIdRule = mock(ValidationRule.class);
-            this.secretRule = mock(ValidationRule.class);
-            this.clientNameRule = mock(ValidationRule.class);
-            this.grantTypeRule = mock(ValidationRule.class);
-            this.scopeRule = mock(ValidationRule.class);
-            this.ownerRule = mock(ValidationRule.class);
-
-            when(policy.clientIdRule()).thenReturn(clientIdRule);
-            when(policy.secretRule()).thenReturn(secretRule);
-            when(policy.clientNameRule()).thenReturn(clientNameRule);
-            when(policy.grantTypeRule()).thenReturn(grantTypeRule);
-            when(policy.scopeRule()).thenReturn(scopeRule);
-            when(policy.ownerRule()).thenReturn(ownerRule);
-        }
 
         @Nested
         @DisplayName("클라이언트 아이디가 유효하지 않을시")
         class WhenClientIdIsNotAllowed {
             private ValidationError clientIdError;
+            private OAuth2ClientValidatePolicy policy;
+
+            private OAuth2Client client;
 
             @BeforeEach
             void setup() {
                 this.clientIdError = new ValidationError("clientId", "invalid client id");
-
-                when(clientIdRule.isValid(client)).thenReturn(false);
-                when(secretRule.isValid(client)).thenReturn(true);
-                when(clientNameRule.isValid(client)).thenReturn(true);
-                when(grantTypeRule.isValid(client)).thenReturn(true);
-                when(scopeRule.isValid(client)).thenReturn(true);
-                when(ownerRule.isValid(client)).thenReturn(true);
-                when(clientIdRule.error()).thenReturn(clientIdError);
+                this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET);
+                ValidationRule<OAuth2Client> clientIdRule = mocKValidationRule().configValidationFalse(client).error(clientIdError).build();
+                this.policy = mockValidationPolicy().clientIdRule(clientIdRule)
+                        .secretRule(mocKValidationRule().configValidationTrue(client).build())
+                        .clientNameRule(mocKValidationRule().configValidationTrue(client).build())
+                        .grantTypeRule(mocKValidationRule().configValidationTrue(client).build())
+                        .scopeRule(mocKValidationRule().configValidationTrue(client).build())
+                        .ownerRule(mocKValidationRule().configValidationTrue(client).build())
+                        .build();
             }
 
             @Test
-            @DisplayName("ClientInvalidException이 발생해야 한다.")
+            @DisplayName("ClientInvalidException 이 발생해야 해야 한다.")
             void shouldThrowsClientInvalidException() {
                 assertThrows(ClientInvalidException.class, () -> client.validate(policy));
             }
@@ -451,22 +203,26 @@ class OAuth2ClientTest {
         @DisplayName("클라이언트 패스워드가 유효하지 않을시")
         class WhenClientSecretIsNotAllowed {
             private ValidationError passwordError;
+            private OAuth2ClientValidatePolicy policy;
+
+            private OAuth2Client client;
 
             @BeforeEach
             void setup() {
                 this.passwordError = new ValidationError("secret", "invalid secret");
-
-                when(clientIdRule.isValid(client)).thenReturn(true);
-                when(secretRule.isValid(client)).thenReturn(false);
-                when(clientNameRule.isValid(client)).thenReturn(true);
-                when(grantTypeRule.isValid(client)).thenReturn(true);
-                when(scopeRule.isValid(client)).thenReturn(true);
-                when(ownerRule.isValid(client)).thenReturn(true);
-                when(secretRule.error()).thenReturn(passwordError);
+                this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET);
+                ValidationRule<OAuth2Client> secretRule = mocKValidationRule().configValidationFalse(client).error(passwordError).build();
+                this.policy = mockValidationPolicy().clientIdRule(mocKValidationRule().configValidationTrue(client).build())
+                        .secretRule(secretRule)
+                        .clientNameRule(mocKValidationRule().configValidationTrue(client).build())
+                        .grantTypeRule(mocKValidationRule().configValidationTrue(client).build())
+                        .scopeRule(mocKValidationRule().configValidationTrue(client).build())
+                        .ownerRule(mocKValidationRule().configValidationTrue(client).build())
+                        .build();
             }
 
             @Test
-            @DisplayName("ClientInvalidException이 발생해야 한다.")
+            @DisplayName("ClientInvalidException 이 발생해야 한다.")
             void shouldThrowsClientInvalidException() {
                 assertThrows(ClientInvalidException.class, () -> client.validate(policy));
             }
@@ -483,22 +239,26 @@ class OAuth2ClientTest {
         @DisplayName("클라이언트명이 유효하지 않을시")
         class WhenClientNameIsNotAllowed {
             private ValidationError nameError;
+            private OAuth2ClientValidatePolicy policy;
+
+            private OAuth2Client client;
 
             @BeforeEach
             void setup() {
                 this.nameError = new ValidationError("clientName", "invalid client name");
-
-                when(clientIdRule.isValid(client)).thenReturn(true);
-                when(secretRule.isValid(client)).thenReturn(true);
-                when(clientNameRule.isValid(client)).thenReturn(false);
-                when(grantTypeRule.isValid(client)).thenReturn(true);
-                when(scopeRule.isValid(client)).thenReturn(true);
-                when(ownerRule.isValid(client)).thenReturn(true);
-                when(clientNameRule.error()).thenReturn(nameError);
+                this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET);
+                ValidationRule<OAuth2Client> clientNameRule = mocKValidationRule().configValidationFalse(client).error(nameError).build();
+                this.policy = mockValidationPolicy().clientIdRule(mocKValidationRule().configValidationTrue(client).build())
+                        .secretRule(mocKValidationRule().configValidationTrue(client).build())
+                        .clientNameRule(clientNameRule)
+                        .grantTypeRule(mocKValidationRule().configValidationTrue(client).build())
+                        .scopeRule(mocKValidationRule().configValidationTrue(client).build())
+                        .ownerRule(mocKValidationRule().configValidationTrue(client).build())
+                        .build();
             }
 
             @Test
-            @DisplayName("ClientInvalidException이 발생해야 한다.")
+            @DisplayName("ClientInvalidException 이 발생해야 한다.")
             void shouldThrowsClientInvalidException() {
                 assertThrows(ClientInvalidException.class, () -> client.validate(policy));
             }
@@ -515,22 +275,26 @@ class OAuth2ClientTest {
         @DisplayName("클라이언트 인가 방식이 유효하지 않을시")
         class WhenClientAuthorizationGrantTypeIsNotAllowed {
             private ValidationError grantError;
+            private OAuth2ClientValidatePolicy policy;
+
+            private OAuth2Client client;
 
             @BeforeEach
             void setup() {
                 this.grantError = new ValidationError("grantType", "invalid grant type");
-
-                when(clientIdRule.isValid(client)).thenReturn(true);
-                when(secretRule.isValid(client)).thenReturn(true);
-                when(clientNameRule.isValid(client)).thenReturn(true);
-                when(grantTypeRule.isValid(client)).thenReturn(false);
-                when(scopeRule.isValid(client)).thenReturn(true);
-                when(ownerRule.isValid(client)).thenReturn(true);
-                when(grantTypeRule.error()).thenReturn(grantError);
+                this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET);
+                ValidationRule<OAuth2Client> grantRule = mocKValidationRule().configValidationFalse(client).error(grantError).build();
+                this.policy = mockValidationPolicy().clientIdRule(mocKValidationRule().configValidationTrue(client).build())
+                        .secretRule(mocKValidationRule().configValidationTrue(client).build())
+                        .clientNameRule(mocKValidationRule().configValidationTrue(client).build())
+                        .grantTypeRule(grantRule)
+                        .scopeRule(mocKValidationRule().configValidationTrue(client).build())
+                        .ownerRule(mocKValidationRule().configValidationTrue(client).build())
+                        .build();
             }
 
             @Test
-            @DisplayName("ClientInvalidException이 발생해야 한다.")
+            @DisplayName("ClientInvalidException 이 발생해야 한다.")
             void shouldThrowsClientInvalidException() {
                 assertThrows(ClientInvalidException.class, () -> client.validate(policy));
             }
@@ -547,22 +311,26 @@ class OAuth2ClientTest {
         @DisplayName("클라이언트 스코프가 유효하지 않을시")
         class WhenClientScopeIsNotAllowed {
             private ValidationError scopeError;
+            private OAuth2ClientValidatePolicy policy;
+
+            private OAuth2Client client;
 
             @BeforeEach
             void setup() {
                 this.scopeError = new ValidationError("scope", "invalid scope");
-
-                when(clientIdRule.isValid(client)).thenReturn(true);
-                when(secretRule.isValid(client)).thenReturn(true);
-                when(clientNameRule.isValid(client)).thenReturn(true);
-                when(grantTypeRule.isValid(client)).thenReturn(true);
-                when(scopeRule.isValid(client)).thenReturn(false);
-                when(ownerRule.isValid(client)).thenReturn(true);
-                when(scopeRule.error()).thenReturn(scopeError);
+                this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET);
+                ValidationRule<OAuth2Client> scopeRule = mocKValidationRule().configValidationFalse(client).error(scopeError).build();
+                this.policy = mockValidationPolicy().clientIdRule(mocKValidationRule().configValidationTrue(client).build())
+                        .secretRule(mocKValidationRule().configValidationTrue(client).build())
+                        .clientNameRule(mocKValidationRule().configValidationTrue(client).build())
+                        .grantTypeRule(mocKValidationRule().configValidationTrue(client).build())
+                        .scopeRule(scopeRule)
+                        .ownerRule(mocKValidationRule().configValidationTrue(client).build())
+                        .build();
             }
 
             @Test
-            @DisplayName("ClientInvalidException이 발생해야 한다.")
+            @DisplayName("ClientInvalidException 이 발생해야 한다.")
             void shouldThrowsClientInvalidException() {
                 assertThrows(ClientInvalidException.class, () -> client.validate(policy));
             }
@@ -579,22 +347,26 @@ class OAuth2ClientTest {
         @DisplayName("클라이언트 소유자가 유효하지 않을시")
         class WhenClientOwnerIsNotAllowed {
             private ValidationError ownerError;
+            private OAuth2ClientValidatePolicy policy;
+
+            private OAuth2Client client;
 
             @BeforeEach
             void setup() {
                 this.ownerError = new ValidationError("owner", "invalid owner");
-
-                when(clientIdRule.isValid(client)).thenReturn(true);
-                when(secretRule.isValid(client)).thenReturn(true);
-                when(clientNameRule.isValid(client)).thenReturn(true);
-                when(grantTypeRule.isValid(client)).thenReturn(true);
-                when(scopeRule.isValid(client)).thenReturn(true);
-                when(ownerRule.isValid(client)).thenReturn(false);
-                when(ownerRule.error()).thenReturn(ownerError);
+                this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET);
+                ValidationRule<OAuth2Client> ownerRule = mocKValidationRule().configValidationFalse(client).error(ownerError).build();
+                this.policy = mockValidationPolicy().clientIdRule(mocKValidationRule().configValidationTrue(client).build())
+                        .secretRule(mocKValidationRule().configValidationTrue(client).build())
+                        .clientNameRule(mocKValidationRule().configValidationTrue(client).build())
+                        .grantTypeRule(mocKValidationRule().configValidationTrue(client).build())
+                        .scopeRule(mocKValidationRule().configValidationTrue(client).build())
+                        .ownerRule(ownerRule)
+                        .build();
             }
 
             @Test
-            @DisplayName("ClientInvalidException이 발생해야 한다.")
+            @DisplayName("ClientInvalidException 이 발생해야 한다.")
             void shouldThrowsClientInvalidException() {
                 assertThrows(ClientInvalidException.class, () -> client.validate(policy));
             }
@@ -612,34 +384,22 @@ class OAuth2ClientTest {
     @DisplayName("클라이언트 패스워드 변경")
     class ClientChangeSecret {
 
-        private OAuth2Client client;
-
-        @BeforeEach
-        void setup() {
-            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET);
-        }
-
         @Nested
         @DisplayName("이전에 사용하던 패스워드가 서로 일치 하지 않을시")
         class WhenExistsPasswordIsNotMatched {
             private PasswordEncoder passwordEncoder;
 
+            private OAuth2Client client;
+
             @BeforeEach
             void setup() {
-                this.passwordEncoder = mock(PasswordEncoder.class);
-
-                when(passwordEncoder.matches(RAW_SECRET, RAW_SECRET)).thenReturn(false);
+                this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET);
+                this.passwordEncoder = mockPasswordEncoder().mismatches().build();
             }
 
             @Test
-            @DisplayName("ClientAuthorizationException이 발생해야 한다.")
+            @DisplayName("ClientAuthorizationException 이 발생해야 해야 하며 에러 코드는 INVALID_PASSWORD 이어야 한다.")
             void shouldThrowsClientAuthorizationException() {
-                assertThrows(ClientAuthorizationException.class, () -> client.changeSecret(RAW_SECRET, RAW_CHANGE_SECRET, passwordEncoder));
-            }
-
-            @Test
-            @DisplayName("에러 코드는 INVALID_PASSWORD 이어야 한다.")
-            void shouldErrorCodeIsInvalidPassword() {
                 ClientAuthorizationException e = assertThrows(ClientAuthorizationException.class, () -> client.changeSecret(RAW_SECRET, RAW_CHANGE_SECRET, passwordEncoder));
                 assertEquals(ClientErrorCodes.INVALID_PASSWORD, e.getCode());
             }
@@ -648,19 +408,22 @@ class OAuth2ClientTest {
         @Nested
         @DisplayName("이전에 사용하던 패스워드가 서로 일치할시")
         class WhenExistsPasswordMatched {
-            private PasswordEncoder passwordEncoder;
+            private PasswordEncoder encoder;
+
+            private OAuth2Client client;
 
             @BeforeEach
             void setup() {
-                this.passwordEncoder = mock(PasswordEncoder.class);
+                this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET);
+                this.encoder = mockPasswordEncoder().encode().matches().build();
 
-                when(passwordEncoder.matches(RAW_SECRET, RAW_SECRET)).thenReturn(true);
+                this.client.encrypted(encoder);
             }
 
             @Test
             @DisplayName("요청 받은 패스워드로 클라이언트의 패스워드를 변경해야 한다.")
             void shouldChangeSecretWithRequestingSecret() {
-                client.changeSecret(RAW_SECRET, RAW_CHANGE_SECRET, passwordEncoder);
+                client.changeSecret(RAW_SECRET, RAW_CHANGE_SECRET, encoder);
 
                 assertEquals(RAW_CHANGE_SECRET, client.getSecret());
             }
