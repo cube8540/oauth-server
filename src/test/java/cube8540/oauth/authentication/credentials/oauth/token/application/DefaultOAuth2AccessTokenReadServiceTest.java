@@ -1,6 +1,7 @@
 package cube8540.oauth.authentication.credentials.oauth.token.application;
 
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
+import cube8540.oauth.authentication.credentials.oauth.error.InvalidClientException;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import cube8540.oauth.authentication.credentials.oauth.token.OAuth2AccessTokenDetails;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenExpiredException;
@@ -9,14 +10,18 @@ import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2Access
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedAccessToken;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2TokenId;
 import cube8540.oauth.authentication.users.domain.UserEmail;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
+import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -46,6 +51,9 @@ class DefaultOAuth2AccessTokenReadServiceTest {
 
     private static final String RAW_CLIENT = "CLIENT";
     private static final OAuth2ClientId CLIENT = new OAuth2ClientId(RAW_CLIENT);
+
+    private static final String RAW_DIFFERENT_CLIENT = "DIFFERENT-CLIENT";
+    private static final OAuth2ClientId DIFFERENT_CLIENT = new OAuth2ClientId(RAW_DIFFERENT_CLIENT);
 
     private static final Set<String> RAW_SCOPE = new HashSet<>(Arrays.asList("SCOPE_1", "SCOPE_2", "SCOPE_3"));
     private static final Set<OAuth2ScopeId> SCOPE = RAW_SCOPE.stream().map(OAuth2ScopeId::new).collect(Collectors.toSet());
@@ -111,13 +119,39 @@ class DefaultOAuth2AccessTokenReadServiceTest {
         class WhenAccessTokenFound {
 
             @Nested
+            @DisplayName("엑세스 토큰의 클라이언트와 요청한 클라이언트의 정보가 일치하지 않을시")
+            class WhenDifferentSearchedAccessTokensClientAndRequestingClient {
+                @BeforeEach
+                void setup() {
+                    Authentication authentication = mock(Authentication.class);
+                    when(authentication.getName()).thenReturn(RAW_CLIENT);
+                    when(accessToken.getClient()).thenReturn(DIFFERENT_CLIENT);
+                    when(accessToken.isExpired()).thenReturn(false);
+                    when(accessTokenRepository.findById(TOKEN_ID)).thenReturn(Optional.of(accessToken));
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                }
+
+                @Test
+                @DisplayName("InvalidClientException이 발생해야 하며 에러 코드는 INVALID_CLIENT 이어야 한다.")
+                void shouldThrowsInvalidClientExceptionAndErrorCodeIsInvalidClient() {
+                    String errorCode = assertThrows(InvalidClientException.class, () -> service.readAccessToken(RAW_TOKEN_ID))
+                            .getError().getErrorCode();
+                    assertEquals(OAuth2ErrorCodes.INVALID_CLIENT, errorCode);
+                }
+            }
+
+            @Nested
             @DisplayName("엑세스 토큰이 만료되었을시")
             class WhenAccessTokenIsExpired {
 
                 @BeforeEach
                 void setup() {
+                    Authentication authentication = mock(Authentication.class);
+
                     when(accessToken.isExpired()).thenReturn(true);
                     when(accessTokenRepository.findById(TOKEN_ID)).thenReturn(Optional.of(accessToken));
+                    when(authentication.getName()).thenReturn(RAW_CLIENT);
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
 
                 @Test
@@ -128,16 +162,19 @@ class DefaultOAuth2AccessTokenReadServiceTest {
             }
 
             @Nested
-            @DisplayName("엑세스 토큰이 만료되지 않았을시")
-            class WhenAccessTokenIsNotExpired {
+            @DisplayName("엑세스 토큰이 만료되지 않았으며 엑세스 토큰의 클라이언트 정보와 요청한 클라이언트 정보가 일치할시")
+            class WhenAccessTokenIsNotExpiredAndSameAccessTokensClientAndRequestingClient {
 
                 @BeforeEach
                 void setup() {
+                    Authentication authentication = mock(Authentication.class);
                     long expiresIn = 60L;
 
                     when(accessToken.isExpired()).thenReturn(false);
                     when(accessToken.expiresIn()).thenReturn(expiresIn);
                     when(accessTokenRepository.findById(TOKEN_ID)).thenReturn(Optional.of(accessToken));
+                    when(authentication.getName()).thenReturn(RAW_CLIENT);
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
 
 
@@ -160,7 +197,7 @@ class DefaultOAuth2AccessTokenReadServiceTest {
                 }
 
                 @Nested
-                @DisplayName("엑세스 토큰의 추가 확장 정보가 null일시")
+                @DisplayName("엑세스 토큰의 추가 확장 정보가 null 일시")
                 class WhenAccessTokenAdditionalInformationIsNull {
 
                     @BeforeEach
@@ -176,6 +213,11 @@ class DefaultOAuth2AccessTokenReadServiceTest {
                         assertNull(accessToken.getAdditionalInformation());
                     }
                 }
+            }
+
+            @AfterEach
+            void after() {
+                SecurityContextHolder.clearContext();
             }
         }
     }
@@ -211,8 +253,39 @@ class DefaultOAuth2AccessTokenReadServiceTest {
                 this.userDetails = mock(UserDetails.class);
 
                 when(accessToken.getUsername()).thenReturn(EMAIL);
+                when(accessToken.getClient()).thenReturn(CLIENT);
                 when(accessTokenRepository.findById(TOKEN_ID)).thenReturn(Optional.of(accessToken));
                 when(userDetailsService.loadUserByUsername(RAW_EMAIL)).thenReturn(userDetails);
+
+                Authentication authentication = mock(Authentication.class);
+                when(authentication.getName()).thenReturn(RAW_CLIENT);
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
+
+            @Nested
+            @DisplayName("검색된 토큰의 클라이언트 정보와 요청한 클라이언트 정보가 일치하지 않을시")
+            class WhenDifferentSearchedAccessTokenClientAndRequestingClient {
+
+                @BeforeEach
+                void setup() {
+                    OAuth2AuthorizedAccessToken accessToken = mock(OAuth2AuthorizedAccessToken.class);
+
+                    when(accessToken.getUsername()).thenReturn(EMAIL);
+                    when(accessToken.getClient()).thenReturn(DIFFERENT_CLIENT);
+                    when(accessTokenRepository.findById(TOKEN_ID)).thenReturn(Optional.of(accessToken));
+
+                    Authentication authentication = mock(Authentication.class);
+                    when(authentication.getName()).thenReturn(RAW_CLIENT);
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                }
+
+                @Test
+                @DisplayName("InvalidClientException이 발생해야 하며 에러 코드는 INVALID_CLIENT 이어야 한다.")
+                void shouldThrowsInvalidClientExceptionAndErrorCodeIsInvalidClient() {
+                    String errorCode = assertThrows(InvalidClientException.class, () -> service.readAccessTokenUser(RAW_TOKEN_ID))
+                            .getError().getErrorCode();
+                    assertEquals(OAuth2ErrorCodes.INVALID_CLIENT, errorCode);
+                }
             }
 
             @Test
@@ -233,6 +306,7 @@ class DefaultOAuth2AccessTokenReadServiceTest {
                     this.userDetails = mock(User.class);
 
                     when(accessToken.getUsername()).thenReturn(EMAIL);
+                    when(accessToken.getClient()).thenReturn(CLIENT);
                     when(accessTokenRepository.findById(TOKEN_ID)).thenReturn(Optional.of(accessToken));
                     when(userDetailsService.loadUserByUsername(RAW_EMAIL)).thenReturn(userDetails);
                 }
@@ -244,6 +318,11 @@ class DefaultOAuth2AccessTokenReadServiceTest {
                     verify(userDetails, times(1)).eraseCredentials();
                 }
             }
+        }
+
+        @AfterEach
+        void after() {
+            SecurityContextHolder.clearContext();
         }
     }
 }
