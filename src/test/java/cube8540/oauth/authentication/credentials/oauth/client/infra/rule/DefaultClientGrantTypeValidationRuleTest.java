@@ -23,7 +23,7 @@ class DefaultClientGrantTypeValidationRuleTest {
 
     @Test
     @DisplayName("클라이언트의 인증 타입이 null 일시 유효성 검사 결과는 false 가 반환되어야 한다.")
-    void clientGrantTpyeIsNullValidationShouldReturnsFalse() {
+    void clientGrantTypeIsNullValidationShouldReturnsFalse() {
         OAuth2Client client = mock(OAuth2Client.class);
 
         when(client.getGrantTypes()).thenReturn(null);
