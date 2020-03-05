@@ -1,7 +1,7 @@
 package cube8540.oauth.authentication.credentials.oauth.error;
 
 import cube8540.oauth.authentication.credentials.oauth.client.error.ClientNotFoundException;
-import cube8540.oauth.authentication.error.ExceptionTranslator;
+import cube8540.oauth.authentication.error.message.ExceptionTranslator;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
