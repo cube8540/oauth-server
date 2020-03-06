@@ -1,7 +1,7 @@
 package cube8540.oauth.authentication.credentials.authority.error;
 
-import cube8540.oauth.authentication.error.ErrorMessage;
-import cube8540.oauth.authentication.error.ExceptionTranslator;
+import cube8540.oauth.authentication.error.message.ErrorMessage;
+import cube8540.oauth.authentication.error.message.ExceptionTranslator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

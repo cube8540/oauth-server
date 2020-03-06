@@ -1,4 +1,4 @@
-package cube8540.oauth.authentication.error;
+package cube8540.oauth.authentication.error.message;
 
 import lombok.Value;
 

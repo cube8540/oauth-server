@@ -1,6 +1,6 @@
 package cube8540.oauth.authentication.credentials.oauth.client.error;
 
-import cube8540.oauth.authentication.error.ErrorCodes;
+import cube8540.oauth.authentication.error.message.ErrorCodes;
 
 public interface ClientErrorCodes extends ErrorCodes {
 
