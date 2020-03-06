@@ -1,7 +1,6 @@
 package cube8540.oauth.authentication.credentials.oauth.token.endpoint;
 
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
-import cube8540.oauth.authentication.credentials.oauth.error.InvalidClientException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidRequestException;
 import cube8540.oauth.authentication.credentials.oauth.token.OAuth2AccessTokenDetails;
 import org.junit.jupiter.api.BeforeEach;
@@ -90,30 +89,6 @@ class OAuth2TokenIntrospectionEndpointTest {
             @DisplayName("InsufficientAuthenticationException 이 발생해야 한다.")
             void shouldInsufficientAuthenticationException() {
                 assertThrows(InsufficientAuthenticationException.class, () -> endpoint.introspection(this.clientCredentialsToken, RAW_TOKEN_ID));
-            }
-        }
-
-        @Nested
-        @DisplayName("인증 객체의 클라이언트 아이디와 검색된 엑세스 토큰의 아이디가 다를시")
-        class WhenAuthenticationClientIdAndAccessTokenIdAreDifferent {
-            private Principal clientCredentialsToken;
-            private OAuth2TokenIntrospectionEndpoint endpoint;
-
-            @BeforeEach
-            void setup() {
-                OAuth2ClientDetails clientDetails = mockClientDetails().configDefault().build();
-                OAuth2AccessTokenDetails token = mockAccessToken().configDefault().configDifferentClientId().build();
-
-                this.clientCredentialsToken = mockPrincipal(clientDetails);
-                this.endpoint = new OAuth2TokenIntrospectionEndpoint(mockAccessTokenReadService().registerToken(token).build());
-            }
-
-            @Test
-            @DisplayName("InvalidClientException 이 발생해야 하며 에러 코드는 INVALID_CLIENT 이어야 한다.")
-            void shouldThrowsInvalidClientException() {
-                OAuth2Error error = assertThrows(InvalidClientException.class, () -> endpoint.introspection(this.clientCredentialsToken, RAW_TOKEN_ID))
-                        .getError();
-                assertEquals(OAuth2ErrorCodes.INVALID_CLIENT, error.getErrorCode());
             }
         }
 
