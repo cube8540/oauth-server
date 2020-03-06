@@ -21,6 +21,7 @@ import static cube8540.oauth.authentication.credentials.oauth.token.application.
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.RAW_REFRESH_TOKEN_ID;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.RAW_USERNAME;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.SCOPES;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.TOKEN_TYPE;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.mockAccessToken;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.mockAccessTokenRepository;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.mockRefreshToken;
@@ -87,26 +88,12 @@ class AbstractOAuth2TokenGranterTest {
             }
 
             @Test
-            @DisplayName("저장된 엑세스 토큰의 리플래시 토큰의 아이디를 반환해야 한다.")
-            void shouldReturnsRegisteredAccessTokensRefreshTokenId() {
+            @DisplayName("저장된 엑세스 토큰의 리플래시 토큰의 정보를 반환해야 한다.")
+            void shouldReturnsRegisteredAccessTokensRefreshTokenInfo() {
                 OAuth2AccessTokenDetails token = granter.grant(clientDetails, tokenRequest);
 
                 assertEquals(RAW_REFRESH_TOKEN_ID, token.getRefreshToken().getTokenValue());
-            }
-
-            @Test
-            @DisplayName("저장된 엑세스 토큰의 리플래시 토큰의 만료일을 반환해야 한다.")
-            void shouldReturnsRegisteredAccessTokensRefreshTokenExpiration() {
-                OAuth2AccessTokenDetails token = granter.grant(clientDetails, tokenRequest);
-
                 assertEquals(EXPIRATION_DATETIME, token.getRefreshToken().getExpiration());
-            }
-
-            @Test
-            @DisplayName("저장된 엑세스 토큰의 리플래시 토큰의 만료일 까지 남은 시간을 반환해야 한다.")
-            void shouldReturnsRegisteredAccessTokensRefreshTokenExpiresIn() {
-                OAuth2AccessTokenDetails token = granter.grant(clientDetails, tokenRequest);
-
                 assertEquals(EXPIRATION_IN, token.getExpiresIn());
             }
         }
@@ -150,15 +137,7 @@ class AbstractOAuth2TokenGranterTest {
         }
 
         @Test
-        @DisplayName("설정된 Enhancer 를 사용해야 한다.")
-        void shouldUsingEnhancer() {
-            granter.grant(clientDetails, tokenRequest);
-
-            verify(enhancer, times(1)).enhance(accessToken);
-        }
-
-        @Test
-        @DisplayName("설정된 Enhancer를 사용한 후 저장해야 한다.")
+        @DisplayName("설정된 Enhancer 를 사용한 후 저장해야 한다.")
         void shouldSaveBeforeUsingEnhancer() {
             granter.grant(clientDetails, tokenRequest);
 
@@ -168,67 +147,18 @@ class AbstractOAuth2TokenGranterTest {
         }
 
         @Test
-        @DisplayName("저장된 토큰의 아이디를 반환해야 한다.")
-        void shouldReturnsRegisteredTokenId() {
+        @DisplayName("저장된 토큰의 정보를 반환해야 한다.")
+        void shouldReturnsRegisteredTokenInfo() {
             OAuth2AccessTokenDetails token = granter.grant(clientDetails, tokenRequest);
 
             assertEquals(RAW_ACCESS_TOKEN_ID, token.getTokenValue());
-        }
-
-        @Test
-        @DisplayName("저장된 토큰의 만료시간을 반환해야 한다.")
-        void shouldReturnsRegisteredTokenExpirationDateTime() {
-            OAuth2AccessTokenDetails token = granter.grant(clientDetails, tokenRequest);
-
             assertEquals(EXPIRATION_DATETIME, token.getExpiration());
-        }
-
-        @Test
-        @DisplayName("저장된 토큰의 만료일까지 남은 시간을 반환해야 한다.")
-        void shouldReturnsRegisteredTokenExpiresIn() {
-            OAuth2AccessTokenDetails token = granter.grant(clientDetails, tokenRequest);
-
             assertEquals(EXPIRATION_IN, token.getExpiresIn());
-        }
-
-        @Test
-        @DisplayName("저장된 토큰의 클라이언트 아이디를 반환해야 한다.")
-        void shouldReturnsRegisteredTokenClientId() {
-            OAuth2AccessTokenDetails token = granter.grant(clientDetails, tokenRequest);
-
             assertEquals(CLIENT_ID, token.getClientId());
-        }
-
-        @Test
-        @DisplayName("저장된 토큰의 스코프를 반환해야 한다.")
-        void shouldReturnsRegisteredTokenScopes() {
-            OAuth2AccessTokenDetails token = granter.grant(clientDetails, tokenRequest);
-
             assertEquals(SCOPES, token.getScopes());
-        }
-
-        @Test
-        @DisplayName("저장된 토큰의 유저 아이디를 반환 해야 한다.")
-        void shouldReturnsRegisteredTokenUsername() {
-            OAuth2AccessTokenDetails token = granter.grant(clientDetails, tokenRequest);
-
             assertEquals(RAW_USERNAME, token.getUsername());
-        }
-
-        @Test
-        @DisplayName("저장된 토큰의 확장 정보를 반환해야 한다.")
-        void shouldReturnsRegisteredTokenAdditionalInfo() {
-            OAuth2AccessTokenDetails token = granter.grant(clientDetails, tokenRequest);
-
             assertEquals(ADDITIONAL_INFO, token.getAdditionalInformation());
-        }
-
-        @Test
-        @DisplayName("토큰의 타입은 Bearer 이어야 한다.")
-        void shouldTokenTypeMustBearer() {
-            OAuth2AccessTokenDetails tokenDetails = granter.grant(clientDetails, tokenRequest);
-
-            assertEquals("Bearer", tokenDetails.getTokenType());
+            assertEquals(TOKEN_TYPE, token.getTokenType());
         }
 
         protected void configRepository(OAuth2TokenApplicationTestHelper.MockAccessTokenRepository repository) {}

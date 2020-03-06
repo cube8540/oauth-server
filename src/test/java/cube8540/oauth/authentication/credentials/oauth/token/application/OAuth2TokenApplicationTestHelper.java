@@ -1,11 +1,14 @@
 package cube8540.oauth.authentication.credentials.oauth.token.application;
 
+import cube8540.oauth.authentication.credentials.oauth.AuthorizationRequest;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2RequestValidator;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2TokenRequest;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.AuthorizationCode;
+import cube8540.oauth.authentication.credentials.oauth.token.domain.AuthorizationCodeGenerator;
+import cube8540.oauth.authentication.credentials.oauth.token.domain.AuthorizationCodeRepository;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenRepository;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizationCode;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedAccessToken;
@@ -19,6 +22,9 @@ import org.springframework.security.authentication.AccountStatusException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 
 import java.net.URI;
@@ -36,6 +42,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 class OAuth2TokenApplicationTestHelper {
+
+    static final String TOKEN_TYPE = "Bearer";
 
     static final String RAW_ACCESS_TOKEN_ID = "ACCESS-TOKEN-ID";
     static final OAuth2TokenId ACCESS_TOKEN_ID = new OAuth2TokenId(RAW_ACCESS_TOKEN_ID);
@@ -125,6 +133,12 @@ class OAuth2TokenApplicationTestHelper {
         return generator;
     }
 
+    static AuthorizationCodeGenerator mockCodeGenerator(AuthorizationCode code) {
+        AuthorizationCodeGenerator generator = mock(AuthorizationCodeGenerator.class);
+        when(generator.generate()).thenReturn(code);
+        return generator;
+    }
+
     static MockTokenRequestValidator mockTokenRequestValidator() {
         return new MockTokenRequestValidator();
     }
@@ -139,6 +153,22 @@ class OAuth2TokenApplicationTestHelper {
         return authentication;
     }
 
+    static MockAuthorizationRequest mockAuthorizationRequest() {
+        return new MockAuthorizationRequest();
+    }
+
+    static MockAuthorizationCodeRepository mockAuthorizationCodeRepository() {
+        return new MockAuthorizationCodeRepository();
+    }
+
+    static User mockUser() {
+        return mock(User.class);
+    }
+
+    static MockUserDetailsService mockUserDetailsService() {
+        return new MockUserDetailsService();
+    }
+
     static class MockAccessToken {
         private OAuth2AuthorizedAccessToken accessToken;
 
@@ -147,60 +177,20 @@ class OAuth2TokenApplicationTestHelper {
         }
 
         MockAccessToken configDefault() {
-            configDefaultTokenId();
-            configDefaultClient();
-            configDefaultUsername();
-            configDefaultScopes();
-            configDefaultExpiration();
-            configDefaultGrantType();
-            configDefaultExpirationIn();
-            configDefaultAdditionalInfo();
-            configNotExpired();
-            return this;
-        }
-
-        MockAccessToken configDefaultTokenId() {
             when(accessToken.getTokenId()).thenReturn(ACCESS_TOKEN_ID);
-            return this;
-        }
-
-        MockAccessToken configDefaultUsername() {
-            when(accessToken.getUsername()).thenReturn(USERNAME);
-            return this;
-        }
-
-        MockAccessToken configDefaultClient() {
             when(accessToken.getClient()).thenReturn(CLIENT_ID);
-            return this;
-        }
-
-        MockAccessToken configDefaultScopes() {
+            when(accessToken.getUsername()).thenReturn(USERNAME);
             when(accessToken.getScopes()).thenReturn(SCOPES);
+            when(accessToken.getExpiration()).thenReturn(EXPIRATION_DATETIME);
+            when(accessToken.getTokenGrantType()).thenReturn(GRANT_TYPE);
+            when(accessToken.expiresIn()).thenReturn(EXPIRATION_IN);
+            when(accessToken.getAdditionalInformation()).thenReturn(ADDITIONAL_INFO);
+            configNotExpired();
             return this;
         }
 
         MockAccessToken configScopes(Set<OAuth2ScopeId> scopeIds) {
             when(accessToken.getScopes()).thenReturn(scopeIds);
-            return this;
-        }
-
-        MockAccessToken configDefaultExpiration() {
-            when(accessToken.getExpiration()).thenReturn(EXPIRATION_DATETIME);
-            return this;
-        }
-
-        MockAccessToken configDefaultGrantType() {
-            when(accessToken.getTokenGrantType()).thenReturn(GRANT_TYPE);
-            return this;
-        }
-
-        MockAccessToken configDefaultAdditionalInfo() {
-            when(accessToken.getAdditionalInformation()).thenReturn(ADDITIONAL_INFO);
-            return this;
-        }
-
-        MockAccessToken configDefaultExpirationIn() {
-            when(accessToken.expiresIn()).thenReturn(EXPIRATION_IN);
             return this;
         }
 
@@ -229,6 +219,11 @@ class OAuth2TokenApplicationTestHelper {
             return this;
         }
 
+        MockAccessToken configNullAdditionalInfo() {
+            when(accessToken.getAdditionalInformation()).thenReturn(null);
+            return this;
+        }
+
         OAuth2AuthorizedAccessToken build() {
             return accessToken;
         }
@@ -242,20 +237,10 @@ class OAuth2TokenApplicationTestHelper {
         }
 
         MockRefreshToken configDefault() {
-            configDefaultTokenId();
-            configDefaultExpiration();
-            configNotExpired();
-            configExpiresIn();
-            return this;
-        }
-
-        MockRefreshToken configDefaultTokenId() {
             when(refreshToken.getTokenId()).thenReturn(REFRESH_TOKEN_ID);
-            return this;
-        }
-
-        MockRefreshToken configDefaultExpiration() {
             when(refreshToken.getExpiration()).thenReturn(EXPIRATION_DATETIME);
+            when(refreshToken.expiresIn()).thenReturn(EXPIRATION_IN);
+            configNotExpired();
             return this;
         }
 
@@ -266,11 +251,6 @@ class OAuth2TokenApplicationTestHelper {
 
         MockRefreshToken configExpired() {
             when(refreshToken.isExpired()).thenReturn(true);
-            return this;
-        }
-
-        MockRefreshToken configExpiresIn() {
-            when(refreshToken.expiresIn()).thenReturn(EXPIRATION_IN);
             return this;
         }
 
@@ -346,30 +326,10 @@ class OAuth2TokenApplicationTestHelper {
         }
 
         MockClientDetails configDefault() {
-            configDefaultClientId();
-            configDefaultScopes();
-            configDefaultAccessTokenValidity();
-            configDefaultRefreshTokenValidity();
-            return this;
-        }
-
-        MockClientDetails configDefaultClientId() {
             when(clientDetails.getClientId()).thenReturn(RAW_CLIENT_ID);
-            return this;
-        }
-
-        MockClientDetails configDefaultAccessTokenValidity() {
-            when(clientDetails.getAccessTokenValiditySeconds()).thenReturn(ACCESS_TOKEN_VALIDITY_SECONDS);
-            return this;
-        }
-
-        MockClientDetails configDefaultRefreshTokenValidity() {
-            when(clientDetails.getRefreshTokenValiditySeconds()).thenReturn(REFRESH_TOKEN_VALIDITY_SECONDS);
-            return this;
-        }
-
-        MockClientDetails configDefaultScopes() {
             when(clientDetails.getScopes()).thenReturn(RAW_CLIENT_SCOPES);
+            when(clientDetails.getAccessTokenValiditySeconds()).thenReturn(ACCESS_TOKEN_VALIDITY_SECONDS);
+            when(clientDetails.getRefreshTokenValiditySeconds()).thenReturn(REFRESH_TOKEN_VALIDITY_SECONDS);
             return this;
         }
 
@@ -468,29 +428,9 @@ class OAuth2TokenApplicationTestHelper {
         }
 
         MockAuthorizationCode configDefault() {
-            configDefaultCode();
-            configDefaultClientId();
-            configDefaultUsername();
-            configDefaultApprovalScopes();
-            return this;
-        }
-
-        MockAuthorizationCode configDefaultCode() {
             when(code.getCode()).thenReturn(AUTHORIZATION_CODE);
-            return this;
-        }
-
-        MockAuthorizationCode configDefaultClientId() {
             when(code.getClientId()).thenReturn(CLIENT_ID);
-            return this;
-        }
-
-        MockAuthorizationCode configDefaultUsername() {
             when(code.getUsername()).thenReturn(USERNAME);
-            return this;
-        }
-
-        MockAuthorizationCode configDefaultApprovalScopes() {
             when(code.getApprovedScopes()).thenReturn(APPROVED_SCOPES);
             return this;
         }
@@ -588,6 +528,66 @@ class OAuth2TokenApplicationTestHelper {
 
         AuthenticationManager build() {
             return manager;
+        }
+    }
+
+    static class MockAuthorizationRequest {
+        private AuthorizationRequest request;
+
+        private MockAuthorizationRequest() {
+            this.request = mock(AuthorizationRequest.class);
+        }
+
+        MockAuthorizationRequest configDefault() {
+            when(request.getRequestScopes()).thenReturn(RAW_SCOPES);
+            when(request.getClientId()).thenReturn(RAW_CLIENT_ID);
+            when(request.getRedirectUri()).thenReturn(REDIRECT_URI);
+            when(request.getUsername()).thenReturn(RAW_USERNAME);
+            when(request.getState()).thenReturn(STATE);
+            return this;
+        }
+
+        AuthorizationRequest build() {
+            return request;
+        }
+    }
+
+    static class MockAuthorizationCodeRepository {
+        private AuthorizationCodeRepository repository;
+
+        private MockAuthorizationCodeRepository() {
+            this.repository = mock(AuthorizationCodeRepository.class);
+        }
+
+        MockAuthorizationCodeRepository registerCode(OAuth2AuthorizationCode code) {
+            when(repository.findById(AUTHORIZATION_CODE)).thenReturn(Optional.of(code));
+            return this;
+        }
+
+        MockAuthorizationCodeRepository emptyCode() {
+            when(repository.findById(AUTHORIZATION_CODE)).thenReturn(Optional.empty());
+            return this;
+        }
+
+        AuthorizationCodeRepository build() {
+            return repository;
+        }
+    }
+
+    static class MockUserDetailsService {
+        private UserDetailsService service;
+
+        private MockUserDetailsService() {
+            this.service = mock(UserDetailsService.class);
+        }
+
+        MockUserDetailsService registerUser(UserDetails userDetails) {
+            when(service.loadUserByUsername(RAW_USERNAME)).thenReturn(userDetails);
+            return this;
+        }
+
+        UserDetailsService build() {
+            return service;
         }
     }
 
