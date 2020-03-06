@@ -5,7 +5,6 @@ import cube8540.oauth.authentication.users.domain.UserEmail;
 import cube8540.oauth.authentication.users.domain.UserRegisterEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static org.mockito.Mockito.mock;
@@ -15,7 +14,9 @@ import static org.mockito.Mockito.verify;
 @DisplayName("유저 등록 이벤트 리스너 테스트")
 class UserRegisteredEventListenerTest {
 
-    public static final String RAW_EMAIL = "email@email.com";
+    private static final String RAW_EMAIL = "email@email.com";
+    private static final UserEmail EMAIL = new UserEmail(RAW_EMAIL);
+
     private UserCredentialsService credentialsService;
     private UserRegisteredEventListener eventListener;
 
@@ -25,25 +26,14 @@ class UserRegisteredEventListenerTest {
         this.eventListener = new UserRegisteredEventListener(credentialsService);
     }
 
-    @Nested
-    @DisplayName("유저 등록 이벤트 리스닝")
-    class ListeningUserRegisteredEvent {
+    @Test
+    @DisplayName("새 유저 등록 이벤트 발생시 등록된 계정에 인증키를 할당해야 한다.")
+    void issuedRegisteredNewUserEventAnCredentialsKeyShouldBeAssignedToTheRegisteredAccount() {
+        UserRegisterEvent event = new UserRegisterEvent(EMAIL);
 
-        private UserRegisterEvent event;
+        eventListener.handle(event);
 
-        @BeforeEach
-        void setup() {
-            UserEmail email = new UserEmail(RAW_EMAIL);
-            this.event = new UserRegisterEvent(email);
-        }
-
-        @Test
-        @DisplayName("등록된 유저에게 인증키를 할당해야 한다.")
-        void shouldGenerateCredentialsKeyForRegisterUser() {
-            eventListener.handle(event);
-
-            verify(credentialsService, times(1)).grantCredentialsKey(RAW_EMAIL);
-        }
+        verify(credentialsService, times(1)).grantCredentialsKey(RAW_EMAIL);
     }
 
 }

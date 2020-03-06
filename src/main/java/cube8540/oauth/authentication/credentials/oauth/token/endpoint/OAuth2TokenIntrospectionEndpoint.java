@@ -4,7 +4,6 @@ import cube8540.oauth.authentication.credentials.oauth.OAuth2Utils;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.client.provider.ClientCredentialsToken;
 import cube8540.oauth.authentication.credentials.oauth.error.AbstractOAuth2AuthenticationException;
-import cube8540.oauth.authentication.credentials.oauth.error.InvalidClientException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidRequestException;
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTranslator;
 import cube8540.oauth.authentication.credentials.oauth.token.OAuth2AccessTokenDetails;
@@ -60,11 +59,6 @@ public class OAuth2TokenIntrospectionEndpoint {
         }
 
         OAuth2AccessTokenDetails accessToken = service.readAccessToken(token);
-        OAuth2ClientDetails clientDetails = (OAuth2ClientDetails) clientCredentials.getPrincipal();
-        if (!accessToken.getClientId().getValue().equals(clientDetails.getClientId())) {
-            throw InvalidClientException.invalidClient("client and access token client is different");
-        }
-
         return converter.convertAccessToken(accessToken);
     }
 

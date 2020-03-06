@@ -1,61 +1,34 @@
 package cube8540.oauth.authentication.credentials.oauth.token.application;
 
 import cube8540.oauth.authentication.credentials.oauth.AuthorizationRequest;
-import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
-import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
-import cube8540.oauth.authentication.credentials.oauth.token.domain.AuthorizationCode;
-import cube8540.oauth.authentication.credentials.oauth.token.domain.AuthorizationCodeGenerator;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.AuthorizationCodeRepository;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizationCode;
-import cube8540.oauth.authentication.users.domain.UserEmail;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
-import java.net.URI;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.AUTHORIZATION_CODE;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.CLIENT_ID;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.REDIRECT_URI;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.SCOPES;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.STATE;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.USERNAME;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.mockAuthorizationCode;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.mockAuthorizationCodeRepository;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.mockAuthorizationRequest;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.mockCodeGenerator;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @DisplayName("기본 인증 코드 서비스 테스트")
 class CompositionAuthorizationCodeServiceTest {
-
-    private static final String RAW_CODE = "CODE";
-    private static final AuthorizationCode CODE = new AuthorizationCode(RAW_CODE);
-
-    private static final String RAW_CLIENT_ID = "CLIENT";
-    private static final OAuth2ClientId CLIENT_ID = new OAuth2ClientId(RAW_CLIENT_ID);
-
-    private static final String RAW_EMAIL = "email@email.com";
-    private static final UserEmail EMAIL = new UserEmail(RAW_EMAIL);
-
-    private static final URI REDIRECT_URI = URI.create("http://localhost");
-
-    private static final String STATE = "STATE";
-
-    private static final Set<String> RAW_SCOPES = new HashSet<>(Arrays.asList("SCOPE-1", "SCOPE-2", "SCOPE-3"));
-    private static final Set<OAuth2ScopeId> SCOPES = RAW_SCOPES.stream().map(OAuth2ScopeId::new).collect(Collectors.toSet());
-
-    private AuthorizationCodeRepository codeRepository;
-    private CompositionAuthorizationCodeService codeService;
-
-    @BeforeEach
-    void setup() {
-        this.codeRepository = mock(AuthorizationCodeRepository.class);
-        this.codeService = new CompositionAuthorizationCodeService(codeRepository);
-    }
 
     @Nested
     @DisplayName("코드 컨슘 테스트")
@@ -64,16 +37,19 @@ class CompositionAuthorizationCodeServiceTest {
         @Nested
         @DisplayName("저장소에 코드가 없을시")
         class WhenCodeNotFound {
+            private AuthorizationCodeRepository repository;
+            private CompositionAuthorizationCodeService service;
 
             @BeforeEach
             void setup() {
-                when(codeRepository.findById(CODE)).thenReturn(Optional.empty());
+                this.repository = mockAuthorizationCodeRepository().emptyCode().build();
+                this.service = new CompositionAuthorizationCodeService(repository);
             }
 
             @Test
-            @DisplayName("Optional.empty가 반환되어야 한다.")
+            @DisplayName("Optional.empty 가 반환되어야 한다.")
             void shouldReturnsOptionalEmpty() {
-                Optional<OAuth2AuthorizationCode> result = codeService.consume(CODE);
+                Optional<OAuth2AuthorizationCode> result = this.service.consume(AUTHORIZATION_CODE);
 
                 assertEquals(Optional.empty(), result);
             }
@@ -81,29 +57,30 @@ class CompositionAuthorizationCodeServiceTest {
             @Test
             @DisplayName("어떤 코드도 삭제하지 않는다.")
             void shouldNotRemovedAnything() {
-                codeService.consume(CODE);
+                this.service.consume(AUTHORIZATION_CODE);
 
-                verify(codeRepository, never()).delete(any());
+                verify(repository, never()).delete(any());
             }
         }
 
         @Nested
         @DisplayName("저장소에서 코드를 찾았을시")
         class WhenCodeFound {
-
             private OAuth2AuthorizationCode authorizationCode;
+            private AuthorizationCodeRepository repository;
+            private CompositionAuthorizationCodeService service;
 
             @BeforeEach
             void setup() {
-                this.authorizationCode = mock(OAuth2AuthorizationCode.class);
-
-                when(codeRepository.findById(CODE)).thenReturn(Optional.of(authorizationCode));
+                this.authorizationCode = mockAuthorizationCode().configDefault().build();
+                this.repository = mockAuthorizationCodeRepository().registerCode(authorizationCode).build();
+                this.service = new CompositionAuthorizationCodeService(repository);
             }
 
             @Test
-            @DisplayName("저장소에서 반환된 인증 코드를 포함한 Optional이 반환되어야 한다.")
+            @DisplayName("저장소에서 반환된 인증 코드를 포함한 Optional 이 반환되어야 한다.")
             void shouldReturnsOptionalIncludingAuthorizationCode() {
-                Optional<OAuth2AuthorizationCode> result = codeService.consume(CODE);
+                Optional<OAuth2AuthorizationCode> result = service.consume(AUTHORIZATION_CODE);
 
                 assertEquals(Optional.of(authorizationCode), result);
             }
@@ -111,9 +88,9 @@ class CompositionAuthorizationCodeServiceTest {
             @Test
             @DisplayName("저장소에서 반환된 인증 코드를 삭제해야 한다.")
             void shouldRemovedAuthorizationCode() {
-                codeService.consume(CODE);
+                this.service.consume(AUTHORIZATION_CODE);
 
-                verify(codeRepository, times(1)).delete(authorizationCode);
+                verify(repository, times(1)).delete(authorizationCode);
             }
         }
     }
@@ -121,22 +98,16 @@ class CompositionAuthorizationCodeServiceTest {
     @Nested
     @DisplayName("새 인증 코드 생성")
     class GeneratorAuthorizationCode {
+        private AuthorizationCodeRepository repository;
         private AuthorizationRequest authorizationRequest;
+        private CompositionAuthorizationCodeService service;
 
         @BeforeEach
         void setup() {
-            AuthorizationCodeGenerator generator = mock(AuthorizationCodeGenerator.class);
-
-            this.authorizationRequest = mock(AuthorizationRequest.class);
-
-            when(generator.generate()).thenReturn(CODE);
-            when(authorizationRequest.getRequestScopes()).thenReturn(RAW_SCOPES);
-            when(authorizationRequest.getClientId()).thenReturn(RAW_CLIENT_ID);
-            when(authorizationRequest.getRedirectUri()).thenReturn(REDIRECT_URI);
-            when(authorizationRequest.getUsername()).thenReturn(RAW_EMAIL);
-            when(authorizationRequest.getState()).thenReturn(STATE);
-
-            codeService.setCodeGenerator(generator);
+            this.authorizationRequest = mockAuthorizationRequest().configDefault().build();
+            this.repository = mockAuthorizationCodeRepository().build();
+            this.service = new CompositionAuthorizationCodeService(repository);
+            this.service.setCodeGenerator(mockCodeGenerator(AUTHORIZATION_CODE));
         }
 
         @Test
@@ -144,9 +115,9 @@ class CompositionAuthorizationCodeServiceTest {
         void shouldSaveAuthorizationCodeCreatedByGenerator() {
             ArgumentCaptor<OAuth2AuthorizationCode> codeArgumentCaptor = ArgumentCaptor.forClass(OAuth2AuthorizationCode.class);
 
-            codeService.generateNewAuthorizationCode(authorizationRequest);
-            verify(codeRepository, times(1)).save(codeArgumentCaptor.capture());
-            assertEquals(CODE, codeArgumentCaptor.getValue().getCode());
+            this.service.generateNewAuthorizationCode(authorizationRequest);
+            verify(this.repository, times(1)).save(codeArgumentCaptor.capture());
+            assertEquals(AUTHORIZATION_CODE, codeArgumentCaptor.getValue().getCode());
         }
 
         @Test
@@ -154,8 +125,8 @@ class CompositionAuthorizationCodeServiceTest {
         void shouldClientIdIsAuthorizationRequestClientId() {
             ArgumentCaptor<OAuth2AuthorizationCode> codeArgumentCaptor = ArgumentCaptor.forClass(OAuth2AuthorizationCode.class);
 
-            codeService.generateNewAuthorizationCode(authorizationRequest);
-            verify(codeRepository, times(1)).save(codeArgumentCaptor.capture());
+            this.service.generateNewAuthorizationCode(authorizationRequest);
+            verify(this.repository, times(1)).save(codeArgumentCaptor.capture());
             assertEquals(CLIENT_ID, codeArgumentCaptor.getValue().getClientId());
         }
 
@@ -164,28 +135,28 @@ class CompositionAuthorizationCodeServiceTest {
         void shouldScopeIsAuthorizationRequestScope() {
             ArgumentCaptor<OAuth2AuthorizationCode> codeArgumentCaptor = ArgumentCaptor.forClass(OAuth2AuthorizationCode.class);
 
-            codeService.generateNewAuthorizationCode(authorizationRequest);
-            verify(codeRepository, times(1)).save(codeArgumentCaptor.capture());
+            this.service.generateNewAuthorizationCode(authorizationRequest);
+            verify(this.repository, times(1)).save(codeArgumentCaptor.capture());
             assertEquals(SCOPES, codeArgumentCaptor.getValue().getApprovedScopes());
         }
 
         @Test
-        @DisplayName("인증 코드의 리다이렉트 URI는 인증 요청 객체에 담긴 URI어야 한다.")
+        @DisplayName("인증 코드의 리다이렉트 URI 는 인증 요청 객체에 담긴 URI 어야 한다.")
         void shouldRedirectUriIsAuthorizationRequestRedirectURI() {
             ArgumentCaptor<OAuth2AuthorizationCode> codeArgumentCaptor = ArgumentCaptor.forClass(OAuth2AuthorizationCode.class);
 
-            codeService.generateNewAuthorizationCode(authorizationRequest);
-            verify(codeRepository, times(1)).save(codeArgumentCaptor.capture());
+            this.service.generateNewAuthorizationCode(authorizationRequest);
+            verify(this.repository, times(1)).save(codeArgumentCaptor.capture());
             assertEquals(REDIRECT_URI, codeArgumentCaptor.getValue().getRedirectURI());
         }
 
         @Test
-        @DisplayName("인증 코드의 STATE는 인증 요청 객체에 담긴 STATE어야 한다.")
+        @DisplayName("인증 코드의 STATE 는 인증 요청 객체에 담긴 STATE 어야 한다.")
         void shouldStateIsAuthorizationRequestState() {
             ArgumentCaptor<OAuth2AuthorizationCode> codeArgumentCaptor = ArgumentCaptor.forClass(OAuth2AuthorizationCode.class);
 
-            codeService.generateNewAuthorizationCode(authorizationRequest);
-            verify(codeRepository, times(1)).save(codeArgumentCaptor.capture());
+            this.service.generateNewAuthorizationCode(authorizationRequest);
+            verify(this.repository, times(1)).save(codeArgumentCaptor.capture());
             assertEquals(STATE, codeArgumentCaptor.getValue().getState());
         }
 
@@ -194,9 +165,9 @@ class CompositionAuthorizationCodeServiceTest {
         void shouldEmailIsAuthorizationRequestEmail() {
             ArgumentCaptor<OAuth2AuthorizationCode> codeArgumentCaptor = ArgumentCaptor.forClass(OAuth2AuthorizationCode.class);
 
-            codeService.generateNewAuthorizationCode(authorizationRequest);
-            verify(codeRepository, times(1)).save(codeArgumentCaptor.capture());
-            assertEquals(EMAIL, codeArgumentCaptor.getValue().getUsername());
+            this.service.generateNewAuthorizationCode(authorizationRequest);
+            verify(this.repository, times(1)).save(codeArgumentCaptor.capture());
+            assertEquals(USERNAME, codeArgumentCaptor.getValue().getUsername());
         }
     }
 }

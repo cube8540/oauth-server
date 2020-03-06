@@ -6,7 +6,7 @@ import cube8540.oauth.authentication.credentials.oauth.scope.application.OAuth2S
 import cube8540.oauth.authentication.credentials.oauth.scope.application.OAuth2ScopeModifyRequest;
 import cube8540.oauth.authentication.credentials.oauth.scope.application.OAuth2ScopeRegisterRequest;
 import cube8540.oauth.authentication.credentials.oauth.scope.error.ScopeExceptionTranslator;
-import cube8540.oauth.authentication.error.ErrorMessage;
+import cube8540.oauth.authentication.error.message.ErrorMessage;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

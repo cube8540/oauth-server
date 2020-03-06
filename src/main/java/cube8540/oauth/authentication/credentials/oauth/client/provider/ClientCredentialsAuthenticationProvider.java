@@ -34,7 +34,7 @@ public class ClientCredentialsAuthenticationProvider implements AuthenticationPr
             if (!encoder.matches(givenSecret, client.getClientSecret())) {
                 throw new BadCredentialsException("secret does not match stored value");
             }
-            return new ClientCredentialsToken(client, authentication.getCredentials(), Collections.emptyList());
+            return new ClientCredentialsToken(client, client.getClientSecret(), Collections.emptyList());
         } catch (ClientNotFoundException e) {
             throw new BadCredentialsException(e.getMessage());
         } catch (BadCredentialsException | InternalAuthenticationServiceException e) {

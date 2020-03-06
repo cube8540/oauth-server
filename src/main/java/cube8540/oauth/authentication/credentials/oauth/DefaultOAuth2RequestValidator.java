@@ -7,7 +7,7 @@ import java.util.Set;
 public class DefaultOAuth2RequestValidator implements OAuth2RequestValidator {
     @Override
     public boolean validateScopes(OAuth2ClientDetails clientDetails, Set<String> scopes) {
-        return scopes == null || clientDetails.getScopes().containsAll(scopes);
+        return validateScopes(clientDetails.getScopes(), scopes);
     }
 
     @Override

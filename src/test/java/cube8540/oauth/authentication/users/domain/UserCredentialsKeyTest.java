@@ -6,19 +6,17 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.time.Clock;
-import java.time.LocalDateTime;
 
 import static cube8540.oauth.authentication.AuthenticationApplication.DEFAULT_TIME_ZONE;
 import static cube8540.oauth.authentication.AuthenticationApplication.DEFAULT_ZONE_OFFSET;
+import static cube8540.oauth.authentication.users.domain.UserTestHelper.EXPIRATION_DATETIME;
+import static cube8540.oauth.authentication.users.domain.UserTestHelper.NOT_EXPIRATION_DATETIME;
+import static cube8540.oauth.authentication.users.domain.UserTestHelper.NOW;
+import static cube8540.oauth.authentication.users.domain.UserTestHelper.RAW_CREDENTIALS_KEY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DisplayName("인증키 테스트")
 class UserCredentialsKeyTest {
-
-    private static final String KEY_VALUE = "KEY-VALUE";
-
-    private static final LocalDateTime NOW = LocalDateTime.of(2020, 2, 8, 23, 5);
-    private static final LocalDateTime EXPIRATION_DATETIME = NOW.plusMinutes(5);
 
     @Nested
     @DisplayName("키 생성")
@@ -31,13 +29,7 @@ class UserCredentialsKeyTest {
             Clock clock = Clock.fixed(NOW.toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
             UserCredentialsKey.setClock(clock);
 
-            this.key = new UserCredentialsKey(KEY_VALUE);
-        }
-
-        @Test
-        @DisplayName("인자로 받은 키값을 저장해야 한다.")
-        void shouldSaveKeyValueForArguments() {
-            assertEquals(KEY_VALUE, key.getKeyValue());
+            this.key = new UserCredentialsKey(RAW_CREDENTIALS_KEY);
         }
 
         @Test
@@ -61,14 +53,11 @@ class UserCredentialsKeyTest {
                 Clock registeredClock = Clock.fixed(NOW.toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
                 UserCredentialsKey.setClock(registeredClock);
 
-                this.key = new UserCredentialsKey(KEY_VALUE);
-
-                Clock clock = Clock.fixed(EXPIRATION_DATETIME.minusNanos(1).toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
-                UserCredentialsKey.setClock(clock);
+                this.key = new UserCredentialsKey(RAW_CREDENTIALS_KEY);
             }
 
             @Test
-            @DisplayName("결과값으로 NOT_MATCHED가 반환되어야 한다.")
+            @DisplayName("결과값으로 NOT_MATCHED 가 반환되어야 한다.")
             void shouldReturnsNotMatched() {
                 UserKeyMatchedResult matchedResult = key.matches("NOT MATCHED KEY");
                 assertEquals(UserKeyMatchedResult.NOT_MATCHED, matchedResult);
@@ -85,16 +74,17 @@ class UserCredentialsKeyTest {
                 Clock registeredClock = Clock.fixed(NOW.toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
                 UserCredentialsKey.setClock(registeredClock);
 
-                this.key = new UserCredentialsKey(KEY_VALUE);
+                this.key = new UserCredentialsKey(RAW_CREDENTIALS_KEY);
 
-                Clock clock = Clock.fixed(EXPIRATION_DATETIME.plusNanos(1).toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
+                Clock clock = Clock.fixed(NOT_EXPIRATION_DATETIME.toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
                 UserCredentialsKey.setClock(clock);
             }
 
             @Test
-            @DisplayName("결과값으로 EXPIRED가 반환되어야 한다.")
+            @DisplayName("결과값으로 EXPIRED 가 반환되어야 한다.")
             void shouldReturnsExpired() {
-                UserKeyMatchedResult matchedResult = key.matches(KEY_VALUE);
+                UserKeyMatchedResult matchedResult = key.matches(RAW_CREDENTIALS_KEY);
+
                 assertEquals(UserKeyMatchedResult.EXPIRED, matchedResult);
             }
         }
@@ -109,16 +99,17 @@ class UserCredentialsKeyTest {
                 Clock registeredClock = Clock.fixed(NOW.toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
                 UserCredentialsKey.setClock(registeredClock);
 
-                this.key = new UserCredentialsKey(KEY_VALUE);
+                this.key = new UserCredentialsKey(RAW_CREDENTIALS_KEY);
 
                 Clock clock = Clock.fixed(EXPIRATION_DATETIME.minusNanos(1).toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
                 UserCredentialsKey.setClock(clock);
             }
 
             @Test
-            @DisplayName("결과값으로 MATCHED가 반환되어야 한다.")
+            @DisplayName("결과값으로 MATCHED 가 반환되어야 한다.")
             void shouldReturnsMatched() {
-                UserKeyMatchedResult matchedResult = key.matches(KEY_VALUE);
+                UserKeyMatchedResult matchedResult = key.matches(RAW_CREDENTIALS_KEY);
+
                 assertEquals(UserKeyMatchedResult.MATCHED, matchedResult);
             }
         }

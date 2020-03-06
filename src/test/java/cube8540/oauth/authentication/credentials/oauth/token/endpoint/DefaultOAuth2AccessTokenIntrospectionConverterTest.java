@@ -1,67 +1,82 @@
 package cube8540.oauth.authentication.credentials.oauth.token.endpoint;
 
 import cube8540.oauth.authentication.credentials.oauth.OAuth2Utils;
-import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import cube8540.oauth.authentication.credentials.oauth.token.OAuth2AccessTokenDetails;
-import cube8540.oauth.authentication.users.domain.UserEmail;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static cube8540.oauth.authentication.AuthenticationApplication.DEFAULT_TIME_ZONE;
+import static cube8540.oauth.authentication.credentials.oauth.token.endpoint.TokenEndpointTestHelper.EXPIRATION;
+import static cube8540.oauth.authentication.credentials.oauth.token.endpoint.TokenEndpointTestHelper.RAW_CLIENT_ID;
+import static cube8540.oauth.authentication.credentials.oauth.token.endpoint.TokenEndpointTestHelper.RAW_USERNAME;
+import static cube8540.oauth.authentication.credentials.oauth.token.endpoint.TokenEndpointTestHelper.SCOPES;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @DisplayName("기본 엑세스 토큰")
 class DefaultOAuth2AccessTokenIntrospectionConverterTest {
-
-    private static final String RAW_CLIENT_ID = "CLIENT-ID";
-    private static final OAuth2ClientId CLIENT_ID = new OAuth2ClientId(RAW_CLIENT_ID);
-
-    private static final String RAW_USERNAME = "email@email.com";
-    private static final UserEmail USERNAME = new UserEmail(RAW_USERNAME);
-
-    private static final LocalDateTime EXPIRATION = LocalDateTime.of(2020, 2, 1, 22, 52);
-
-    private static final Set<OAuth2ScopeId> SCOPE = new HashSet<>(Arrays.asList(
-            new OAuth2ScopeId("SCOPE-1"),
-            new OAuth2ScopeId("SCOPE-2"),
-            new OAuth2ScopeId("SCOPE-3")
-    ));
-
-    private OAuth2AccessTokenDetails accessToken;
-    private DefaultOAuth2AccessTokenIntrospectionConverter converter;
-
-    @BeforeEach
-    void setup() {
-        this.accessToken = mock(OAuth2AccessTokenDetails.class);
-
-        when(accessToken.getClientId()).thenReturn(CLIENT_ID);
-        when(accessToken.getUsername()).thenReturn(RAW_USERNAME);
-        when(accessToken.getExpiration()).thenReturn(EXPIRATION);
-        when(accessToken.getScopes()).thenReturn(SCOPE);
-
-        this.converter = new DefaultOAuth2AccessTokenIntrospectionConverter();
-    }
 
     @Nested
     @DisplayName("엑세스 토큰 컨버팅")
     class AccessTokenConverting {
 
+        @Nested
+        @DisplayName("엑세스 토큰이 클라이언트 인증을 통해 생성된 엑세스 토큰일때")
+        class WhenAccessTokenCreatedByClientCredentials extends AccessTokenAssertSetup {
+
+            @Override
+            protected void configAccessToken(TokenEndpointTestHelper.MockAccessToken mockAccessToken) {
+                mockAccessToken.configClientAuthentication();
+            }
+
+            @Test
+            @DisplayName("유저 아이디를 null 로 설정해야 한다.")
+            void shouldSetUsernameNull() {
+                Map<String, Object> result = converter.convertAccessToken(accessToken);
+
+                assertNull(result.get(OAuth2Utils.AccessTokenIntrospectionKey.USERNAME));
+            }
+        }
+
+        @Nested
+        @DisplayName("엑세스 토큰이 클라이언트 인증을 통해 생성된 토큰이 아닐시")
+        class WhenAccessTokenCreatedByNotClientCredentials extends AccessTokenAssertSetup {
+
+            @Test
+            @DisplayName("엑세스 토큰의 유저 아이디를 반환해야 한다.")
+            void shouldReturnsUsernameInAccessToken() {
+                Map<String, Object> result = converter.convertAccessToken(accessToken);
+
+                assertEquals(RAW_USERNAME, result.get(OAuth2Utils.AccessTokenIntrospectionKey.USERNAME));
+            }
+        }
+    }
+
+    private static abstract class AccessTokenAssertSetup {
+        protected OAuth2AccessTokenDetails accessToken;
+        protected DefaultOAuth2AccessTokenIntrospectionConverter converter;
+
+        @BeforeEach
+        void setup() {
+            TokenEndpointTestHelper.MockAccessToken mockAccessToken = TokenEndpointTestHelper.mockAccessToken().configDefault();
+
+            configAccessToken(mockAccessToken);
+
+            this.accessToken = mockAccessToken.build();
+            this.converter = new DefaultOAuth2AccessTokenIntrospectionConverter();
+        }
+
+        protected void configAccessToken(TokenEndpointTestHelper.MockAccessToken mockAccessToken) {}
+
         @Test
-        @DisplayName("active 플래그는 true로 설정되어야 한다.")
+        @DisplayName("active 플래그는 true 로 설정되어야 한다.")
         void shouldActiveFlagIsTrue() {
             Map<String, Object> result = converter.convertAccessToken(accessToken);
 
@@ -77,15 +92,7 @@ class DefaultOAuth2AccessTokenIntrospectionConverterTest {
         }
 
         @Test
-        @DisplayName("엑세스 토큰의 유저 아이디를 반환해야 한다.")
-        void shouldReturnsUsernameInAccessToken() {
-            Map<String, Object> result = converter.convertAccessToken(accessToken);
-
-            assertEquals(RAW_USERNAME, result.get(OAuth2Utils.AccessTokenIntrospectionKey.USERNAME));
-        }
-
-        @Test
-        @DisplayName("토큰의 만료일을 Unix Timestamp로 변환하여 반환해야 한다.")
+        @DisplayName("토큰의 만료일을 Unix Timestamp 로 변환하여 반환해야 한다.")
         void shouldReturnsTokenExpirationUnixTimestamp() {
             Map<String, Object> result = converter.convertAccessToken(accessToken);
 
@@ -98,32 +105,8 @@ class DefaultOAuth2AccessTokenIntrospectionConverterTest {
         void shouldReturnsAccessTokenScope() {
             Map<String, Object> result = converter.convertAccessToken(accessToken);
 
-            String expected = String.join(" ", SCOPE.stream().map(OAuth2ScopeId::getValue).collect(Collectors.toSet()));
+            String expected = String.join(" ", SCOPES.stream().map(OAuth2ScopeId::getValue).collect(Collectors.toSet()));
             assertEquals(expected, result.get(OAuth2Utils.AccessTokenIntrospectionKey.SCOPE));
-        }
-
-        @Nested
-        @DisplayName("엑세스 토큰의 유저 아이디가 null 일시")
-        class WhenAccessTokenUsernameIsNull {
-            private OAuth2AccessTokenDetails accessToken;
-
-            @BeforeEach
-            void setup() {
-                this.accessToken = mock(OAuth2AccessTokenDetails.class);
-
-                when(accessToken.getClientId()).thenReturn(CLIENT_ID);
-                when(accessToken.getUsername()).thenReturn(null);
-                when(accessToken.getExpiration()).thenReturn(EXPIRATION);
-                when(accessToken.getScopes()).thenReturn(SCOPE);
-            }
-
-            @Test
-            @DisplayName("유저 아이디를 null로 설정해야 한다.")
-            void shouldSetUsernameNull() {
-                Map<String, Object> result = converter.convertAccessToken(accessToken);
-
-                assertNull(result.get(OAuth2Utils.AccessTokenIntrospectionKey.USERNAME));
-            }
         }
     }
 }

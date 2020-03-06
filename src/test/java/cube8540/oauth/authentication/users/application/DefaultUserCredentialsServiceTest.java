@@ -1,10 +1,8 @@
 package cube8540.oauth.authentication.users.application;
 
 import cube8540.oauth.authentication.credentials.authority.application.BasicAuthorityService;
-import cube8540.oauth.authentication.credentials.authority.domain.AuthorityCode;
 import cube8540.oauth.authentication.users.domain.User;
 import cube8540.oauth.authentication.users.domain.UserCredentialsKeyGenerator;
-import cube8540.oauth.authentication.users.domain.UserEmail;
 import cube8540.oauth.authentication.users.domain.UserRepository;
 import cube8540.oauth.authentication.users.error.UserNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,45 +11,20 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 
-import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-
+import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.BASIC_AUTHORITIES;
+import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.RAW_CREDENTIALS_KEY;
+import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.RAW_EMAIL;
+import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.configDefaultMockUser;
+import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.mockBasicAuthorityService;
+import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.mockKeyGenerator;
+import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.mockUserRepository;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.AdditionalAnswers.returnsFirstArg;
-import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @DisplayName("기본 유저 인증 서비스 테스트")
 class DefaultUserCredentialsServiceTest {
-
-    private static final String RAW_EMAIL = "email@email.com";
-    private static final UserEmail EMAIL = new UserEmail(RAW_EMAIL);
-
-    private static final LocalDateTime REGISTERED_AT = LocalDateTime.of(2020, 2, 8, 19, 24);
-
-    private static final String RAW_CREDENTIALS_KEY = "KEY";
-
-    private UserRepository userRepository;
-    private BasicAuthorityService authorityService;
-    private UserCredentialsKeyGenerator keyGenerator;
-    private DefaultUserCredentialsService service;
-
-    @BeforeEach
-    void setup() {
-        this.userRepository = mock(UserRepository.class);
-        this.authorityService = mock(BasicAuthorityService.class);
-        this.keyGenerator = mock(UserCredentialsKeyGenerator.class);
-
-        this.service = new DefaultUserCredentialsService(userRepository, authorityService);
-        this.service.setKeyGenerator(keyGenerator);
-    }
 
     @Nested
     @DisplayName("유저 인증키 할당")
@@ -59,15 +32,10 @@ class DefaultUserCredentialsServiceTest {
 
         @Nested
         @DisplayName("인증키를 할당할 유저가 저장소에 등록되지 않았을시")
-        class WhenUserNotRegisterInRepository {
-
-            @BeforeEach
-            void setup() {
-                when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.empty());
-            }
+        class WhenUserNotRegisteredInRepository extends UserNotFoundSetup {
 
             @Test
-            @DisplayName("UserNotFoundException이 발생해야 한다.")
+            @DisplayName("UserNotFoundException 이 발생해야 한다.")
             void shouldThrowsUserNotFoundException() {
                 assertThrows(UserNotFoundException.class, () -> service.grantCredentialsKey(RAW_EMAIL));
             }
@@ -75,19 +43,21 @@ class DefaultUserCredentialsServiceTest {
 
         @Nested
         @DisplayName("인증키를 할당할 유저가 저장소에 등록되어 있을시")
-        class WhenUserRegisterInRepository {
-
+        class WhenUserRegisteredInRepository {
             private User user;
+            private UserRepository repository;
+            private UserCredentialsKeyGenerator keyGenerator;
+
+            private DefaultUserCredentialsService service;
 
             @BeforeEach
             void setup() {
-                this.user = mock(User.class);
+                this.user = configDefaultMockUser().build();
+                this.repository = mockUserRepository().registerUser(user).build();
+                this.keyGenerator = mockKeyGenerator();
 
-                when(user.getEmail()).thenReturn(EMAIL);
-                when(user.getRegisteredAt()).thenReturn(REGISTERED_AT);
-                when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
-
-                doAnswer(returnsFirstArg()).when(userRepository).save(isA(User.class));
+                this.service = new DefaultUserCredentialsService(repository, mockBasicAuthorityService().build());
+                this.service.setKeyGenerator(keyGenerator);
             }
 
             @Test
@@ -103,9 +73,9 @@ class DefaultUserCredentialsServiceTest {
             void shouldSaveUserForRepositoryAfterGrantCredentialsKey() {
                 service.grantCredentialsKey(RAW_EMAIL);
 
-                InOrder inOrder = inOrder(user, userRepository);
+                InOrder inOrder = inOrder(user, repository);
                 inOrder.verify(user, times(1)).generateCredentialsKey(keyGenerator);
-                inOrder.verify(userRepository, times(1)).save(user);
+                inOrder.verify(repository, times(1)).save(user);
             }
         }
     }
@@ -116,15 +86,10 @@ class DefaultUserCredentialsServiceTest {
 
         @Nested
         @DisplayName("유저가 저장소에 등록되지 않았을시")
-        class WhenUserNotRegisterInRepository {
-
-            @BeforeEach
-            void setup() {
-                when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.empty());
-            }
+        class WhenUserNotRegisteredInRepository extends UserNotFoundSetup {
 
             @Test
-            @DisplayName("UserNotFoundException이 발생해야 한다.")
+            @DisplayName("UserNotFoundException 이 발생해야 한다.")
             void shouldThrowsUserNotFoundException() {
                 assertThrows(UserNotFoundException.class, () -> service.accountCredentials(RAW_EMAIL, RAW_CREDENTIALS_KEY));
             }
@@ -132,23 +97,20 @@ class DefaultUserCredentialsServiceTest {
 
         @Nested
         @DisplayName("유저가 저장소에 등록되어 있을시")
-        class WhenUserRegisterInRepository {
-
+        class WhenUserRegisteredInRepository {
             private User user;
-            private List<AuthorityCode> basicAuthority;
+            private UserRepository repository;
+
+            private DefaultUserCredentialsService service;
 
             @BeforeEach
             void setup() {
-                this.user = mock(User.class);
-                this.basicAuthority = Arrays.asList(new AuthorityCode("CODE-1"),
-                        new AuthorityCode("CODE-2"), new AuthorityCode("CODE-3"));
+                this.user = configDefaultMockUser().build();
+                this.repository = mockUserRepository().registerUser(user).build();
 
-                when(user.getEmail()).thenReturn(EMAIL);
-                when(user.getRegisteredAt()).thenReturn(REGISTERED_AT);
-                when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
-                when(authorityService.getBasicAuthority()).thenReturn(basicAuthority);
+                BasicAuthorityService basicAuthorityService = mockBasicAuthorityService().basicAuthority().build();
 
-                doAnswer(returnsFirstArg()).when(userRepository).save(isA(User.class));
+                this.service = new DefaultUserCredentialsService(repository, basicAuthorityService);
             }
 
             @Test
@@ -156,7 +118,7 @@ class DefaultUserCredentialsServiceTest {
             void shouldAccountCredentialsByRequestingCredentialsKeyAndBasicAuthority() {
                 service.accountCredentials(RAW_EMAIL, RAW_CREDENTIALS_KEY);
 
-                verify(user, times(1)).credentials(RAW_CREDENTIALS_KEY, basicAuthority);
+                verify(user, times(1)).credentials(RAW_CREDENTIALS_KEY, BASIC_AUTHORITIES);
             }
 
             @Test
@@ -164,10 +126,21 @@ class DefaultUserCredentialsServiceTest {
             void shouldSaveUserForRepositoryAfterAccountCredentials() {
                 service.accountCredentials(RAW_EMAIL, RAW_CREDENTIALS_KEY);
 
-                InOrder inOrder = inOrder(user, userRepository);
-                inOrder.verify(user, times(1)).credentials(RAW_CREDENTIALS_KEY, basicAuthority);
-                inOrder.verify(userRepository, times(1)).save(user);
+                InOrder inOrder = inOrder(user, repository);
+                inOrder.verify(user, times(1)).credentials(RAW_CREDENTIALS_KEY, BASIC_AUTHORITIES);
+                inOrder.verify(repository, times(1)).save(user);
             }
+        }
+    }
+
+    abstract static class UserNotFoundSetup {
+        protected DefaultUserCredentialsService service;
+
+        @BeforeEach
+        void setup() {
+            UserRepository repository = mockUserRepository().emptyUser().build();
+
+            this.service = new DefaultUserCredentialsService(repository, mockBasicAuthorityService().build());
         }
     }
 }

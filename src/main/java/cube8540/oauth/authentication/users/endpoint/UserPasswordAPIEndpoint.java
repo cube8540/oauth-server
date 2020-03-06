@@ -1,6 +1,6 @@
 package cube8540.oauth.authentication.users.endpoint;
 
-import cube8540.oauth.authentication.error.ErrorMessage;
+import cube8540.oauth.authentication.error.message.ErrorMessage;
 import cube8540.oauth.authentication.users.application.ChangePasswordRequest;
 import cube8540.oauth.authentication.users.application.ResetPasswordRequest;
 import cube8540.oauth.authentication.users.application.UserPasswordService;

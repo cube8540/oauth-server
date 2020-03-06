@@ -70,17 +70,15 @@ class UserCredentialsAPIEndpointTest {
         @Nested
         @DisplayName("세션에 새 유저 정보가 있을시")
         class WhenSavedNewRegisteredUserInSession {
-            private UserProfile newRegisteredUser;
             private Map<String, Object> model;
             private SessionStatus sessionStatus;
 
             @BeforeEach
             void setup() {
-                this.newRegisteredUser = new UserProfile(EMAIL, REGISTERED_DATE_TIME);
+                UserProfile newRegisteredUser = new UserProfile(EMAIL, REGISTERED_DATE_TIME);
                 this.model = new HashMap<>();
                 this.sessionStatus = mock(SessionStatus.class);
-
-                this.model.put(UserManagementAPIEndpoint.NEW_REGISTERED_USER_ATTRIBUTE, this.newRegisteredUser);
+                this.model.put(UserManagementAPIEndpoint.NEW_REGISTERED_USER_ATTRIBUTE, newRegisteredUser);
             }
 
             @Test
