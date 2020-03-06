@@ -1,6 +1,7 @@
 package cube8540.oauth.authentication.credentials.oauth.error;
 
 import cube8540.oauth.authentication.credentials.oauth.client.error.ClientNotFoundException;
+import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenNotFoundException;
 import cube8540.oauth.authentication.error.message.ExceptionTranslator;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
@@ -19,6 +20,8 @@ public class OAuth2ExceptionTranslator implements ExceptionTranslator<OAuth2Erro
             return createResponseEntity(new MethodNotAllowedException(exception.getMessage()));
         } else if (exception instanceof ClientNotFoundException) {
             return createResponseEntity(new ClientAuthenticationException(exception.getMessage()));
+        } else if (exception instanceof OAuth2AccessTokenNotFoundException) {
+            return createResponseEntity(new TokenNotFoundException(exception.getMessage()));
         } else {
             return createResponseEntity(new ServerErrorException(exception.getMessage()));
         }
@@ -44,6 +47,12 @@ public class OAuth2ExceptionTranslator implements ExceptionTranslator<OAuth2Erro
     private static class ClientAuthenticationException extends AbstractOAuth2AuthenticationException {
         public ClientAuthenticationException(String message) {
             super(401, new OAuth2Error(OAuth2ErrorCodes.UNAUTHORIZED_CLIENT, message, null));
+        }
+    }
+
+    private static class TokenNotFoundException extends AbstractOAuth2AuthenticationException {
+        public TokenNotFoundException(String message) {
+            super(400, new OAuth2Error(OAuth2ErrorCodes.INVALID_REQUEST, message, null));
         }
     }
 

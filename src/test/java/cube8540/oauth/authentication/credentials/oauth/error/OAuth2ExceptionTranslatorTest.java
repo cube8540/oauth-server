@@ -1,6 +1,7 @@
 package cube8540.oauth.authentication.credentials.oauth.error;
 
 import cube8540.oauth.authentication.credentials.oauth.client.error.ClientNotFoundException;
+import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -149,6 +150,41 @@ class OAuth2ExceptionTranslatorTest {
         @DisplayName("ResponseEntity의 헤더에 Pragma는 no-cache로 저장되어야 한다.")
         void shouldHttpResponsePragmaSetNoCache() {
             ResponseEntity<OAuth2Error> result = translator.translate(clientRegistrationException);
+
+            assertEquals("no-cache", result.getHeaders().getPragma());
+        }
+    }
+
+    @Nested
+    @DisplayName("OAuth2AccessTokenNotFoundException 에러 일시")
+    class WhenOAuth2AccessTokenNotFoundException {
+        private OAuth2AccessTokenNotFoundException exception;
+
+        @BeforeEach
+        void setup() {
+            this.exception = new OAuth2AccessTokenNotFoundException("TEST");
+        }
+
+        @Test
+        @DisplayName("HTTP의 상태 코드는 400 이어야 한다.")
+        void shouldHttpStatusCodeIs401() {
+            ResponseEntity<OAuth2Error> result = translator.translate(exception);
+
+            assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
+        }
+
+        @Test
+        @DisplayName("ResponseEntity의 헤더에 Cache-Control이 no-store로 저장되어야 한다.")
+        void shouldHttpResponseCacheControlSetNoStore() {
+            ResponseEntity<OAuth2Error> result = translator.translate(exception);
+
+            assertEquals(CacheControl.noStore().getHeaderValue(), result.getHeaders().getCacheControl());
+        }
+
+        @Test
+        @DisplayName("ResponseEntity의 헤더에 Pragma는 no-cache로 저장되어야 한다.")
+        void shouldHttpResponsePragmaSetNoCache() {
+            ResponseEntity<OAuth2Error> result = translator.translate(exception);
 
             assertEquals("no-cache", result.getHeaders().getPragma());
         }
