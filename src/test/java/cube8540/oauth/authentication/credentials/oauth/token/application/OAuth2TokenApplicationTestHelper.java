@@ -65,6 +65,8 @@ class OAuth2TokenApplicationTestHelper {
 
     static final String RAW_CLIENT_ID = "CLIENT-ID";
     static final OAuth2ClientId CLIENT_ID = new OAuth2ClientId(RAW_CLIENT_ID);
+    static final String RAW_DIFFERENT_CLIENT = "DIFFERENT-CLIENT";
+    static final OAuth2ClientId DIFFERENT_CLIENT = new OAuth2ClientId(RAW_DIFFERENT_CLIENT);
 
     static final Set<String> RAW_SCOPES = new HashSet<>(Arrays.asList("SCOPE-1", "SCOPE-2", "SCOPE-3"));
     static final Set<OAuth2ScopeId> SCOPES = RAW_SCOPES.stream().map(OAuth2ScopeId::new).collect(Collectors.toSet());
@@ -150,6 +152,12 @@ class OAuth2TokenApplicationTestHelper {
     static Authentication mockAuthentication() {
         Authentication authentication = mock(Authentication.class);
         when(authentication.getName()).thenReturn(RAW_AUTHENTICATION_USERNAME);
+        return authentication;
+    }
+
+    static Authentication mockAuthentication(String principalName) {
+        Authentication authentication = mock(Authentication.class);
+        when(authentication.getName()).thenReturn(principalName);
         return authentication;
     }
 
