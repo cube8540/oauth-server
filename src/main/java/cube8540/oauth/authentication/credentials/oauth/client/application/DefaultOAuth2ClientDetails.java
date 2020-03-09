@@ -61,8 +61,8 @@ public class DefaultOAuth2ClientDetails implements OAuth2ClientDetails, Credenti
                 .clientName(client.getClientName())
                 .owner(Optional.ofNullable(client.getOwner()).map(UserEmail::getValue).orElse(null))
                 .scopes(scope)
-                .accessTokenValiditySeconds(Double.valueOf(tokenValidity).intValue())
-                .refreshTokenValiditySeconds(Double.valueOf(refreshValidity).intValue())
+                .accessTokenValiditySeconds(tokenValidity.intValue())
+                .refreshTokenValiditySeconds(refreshValidity.intValue())
                 .registeredRedirectUris(Optional.ofNullable(client.getRedirectUris()).orElse(Collections.emptySet()))
                 .authorizedGrantTypes(Optional.ofNullable(client.getGrantTypes()).orElse(Collections.emptySet())).build();
     }

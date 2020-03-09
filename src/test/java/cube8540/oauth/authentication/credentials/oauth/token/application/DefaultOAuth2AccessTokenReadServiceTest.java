@@ -107,65 +107,60 @@ class DefaultOAuth2AccessTokenReadServiceTest {
             }
 
             @Nested
-            @DisplayName("엑세스 토큰이 만료되지 않았으며 엑세스 토큰의 클라이언트 정보와 요청한 클라이언트 정보가 일치할시")
-            class WhenAccessTokenIsNotExpiredAndSameAccessTokensClientAndRequestingClient {
+            @DisplayName("엑세스 토큰의 리플래시 토큰이 null 일시")
+            class WhenAccessTokensRefreshTokenIsNull {
+                private DefaultOAuth2AccessTokenReadService service;
 
-                @Nested
-                @DisplayName("엑세스 토큰의 리플래시 토큰이 null 일시")
-                class WhenAccessTokensRefreshTokenIsNull {
-                    private DefaultOAuth2AccessTokenReadService service;
+                @BeforeEach
+                void setup() {
+                    OAuth2AuthorizedAccessToken accessToken = mockAccessToken()
+                            .configDefault().configNotExpired().configEmptyRefreshToken().build();
+                    OAuth2AccessTokenRepository repository = mockAccessTokenRepository().registerAccessToken(accessToken).build();
+                    SecurityContextHolder.getContext().setAuthentication(mockAuthentication(RAW_CLIENT_ID));
 
-                    @BeforeEach
-                    void setup() {
-                        OAuth2AuthorizedAccessToken accessToken = mockAccessToken()
-                                .configDefault().configNotExpired().configEmptyRefreshToken().build();
-                        OAuth2AccessTokenRepository repository = mockAccessTokenRepository().registerAccessToken(accessToken).build();
-                        SecurityContextHolder.getContext().setAuthentication(mockAuthentication(RAW_CLIENT_ID));
-
-                        this.service = new DefaultOAuth2AccessTokenReadService(repository, mockUserDetailsService().build());
-                    }
-
-                    @Test
-                    @DisplayName("리플래시 토큰 정보는 null 로 반환해야 한다.")
-                    void shouldReturnsRefreshTokenIsNull() {
-                        OAuth2AccessTokenDetails accessToken = service.readAccessToken(RAW_ACCESS_TOKEN_ID);
-
-                        assertNull(accessToken.getRefreshToken());
-                    }
-
-                    @AfterEach
-                    void after() {
-                        SecurityContextHolder.clearContext();
-                    }
+                    this.service = new DefaultOAuth2AccessTokenReadService(repository, mockUserDetailsService().build());
                 }
 
-                @Nested
-                @DisplayName("엑세스 토큰의 추가 확장 정보가 null 일시")
-                class WhenAccessTokenAdditionalInformationIsNull {
-                    private DefaultOAuth2AccessTokenReadService service;
+                @Test
+                @DisplayName("리플래시 토큰 정보는 null 로 반환해야 한다.")
+                void shouldReturnsRefreshTokenIsNull() {
+                    OAuth2AccessTokenDetails accessToken = service.readAccessToken(RAW_ACCESS_TOKEN_ID);
 
-                    @BeforeEach
-                    void setup() {
-                        OAuth2AuthorizedAccessToken accessToken = mockAccessToken()
-                                .configDefault().configNotExpired().configNullAdditionalInfo().build();
-                        OAuth2AccessTokenRepository repository = mockAccessTokenRepository().registerAccessToken(accessToken).build();
-                        SecurityContextHolder.getContext().setAuthentication(mockAuthentication(RAW_CLIENT_ID));
+                    assertNull(accessToken.getRefreshToken());
+                }
 
-                        this.service = new DefaultOAuth2AccessTokenReadService(repository, mockUserDetailsService().build());
-                    }
+                @AfterEach
+                void after() {
+                    SecurityContextHolder.clearContext();
+                }
+            }
 
-                    @Test
-                    @DisplayName("추가 확장 정보는 null 로 반환해야 한다.")
-                    void shouldReturnsAdditionalInformationIsNull() {
-                        OAuth2AccessTokenDetails accessToken = service.readAccessToken(RAW_ACCESS_TOKEN_ID);
+            @Nested
+            @DisplayName("엑세스 토큰의 추가 확장 정보가 null 일시")
+            class WhenAccessTokenAdditionalInformationIsNull {
+                private DefaultOAuth2AccessTokenReadService service;
 
-                        assertNull(accessToken.getAdditionalInformation());
-                    }
+                @BeforeEach
+                void setup() {
+                    OAuth2AuthorizedAccessToken accessToken = mockAccessToken()
+                            .configDefault().configNotExpired().configNullAdditionalInfo().build();
+                    OAuth2AccessTokenRepository repository = mockAccessTokenRepository().registerAccessToken(accessToken).build();
+                    SecurityContextHolder.getContext().setAuthentication(mockAuthentication(RAW_CLIENT_ID));
 
-                    @AfterEach
-                    void after() {
-                        SecurityContextHolder.clearContext();
-                    }
+                    this.service = new DefaultOAuth2AccessTokenReadService(repository, mockUserDetailsService().build());
+                }
+
+                @Test
+                @DisplayName("추가 확장 정보는 null 로 반환해야 한다.")
+                void shouldReturnsAdditionalInformationIsNull() {
+                    OAuth2AccessTokenDetails accessToken = service.readAccessToken(RAW_ACCESS_TOKEN_ID);
+
+                    assertNull(accessToken.getAdditionalInformation());
+                }
+
+                @AfterEach
+                void after() {
+                    SecurityContextHolder.clearContext();
                 }
             }
         }

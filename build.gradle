@@ -2,6 +2,7 @@ plugins {
     id 'org.springframework.boot' version '2.2.2.RELEASE'
     id 'io.spring.dependency-management' version '1.0.8.RELEASE'
     id 'java'
+    id 'org.sonarqube' version '2.7'
 }
 
 group = 'cube8540.oauth'
@@ -17,6 +18,16 @@ configurations {
 repositories {
     mavenCentral()
     jcenter()
+}
+
+sonarqube {
+    properties {
+        property 'sonarqube.sourceEncoding', 'UTF-8'
+        property 'sonarqube.source', 'src'
+        property 'sonarqube.language', 'java'
+        property 'sonar.host.url', 'http://192.168.0.5:9000'
+        property 'sonar.login', '8388394f9a8839e8a676ad3ad9f2487fef29412d'
+    }
 }
 
 dependencies {
