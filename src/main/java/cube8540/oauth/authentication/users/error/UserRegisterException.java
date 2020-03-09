@@ -8,8 +8,8 @@ import lombok.Getter;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class UserRegisterException extends RuntimeException {
 
-    private String code;
-    private String description;
+    private final String code;
+    private final String description;
 
     public static UserRegisterException existsIdentifier(String description) {
         return new UserRegisterException(UserErrorCodes.EXISTS_IDENTIFIER, description);

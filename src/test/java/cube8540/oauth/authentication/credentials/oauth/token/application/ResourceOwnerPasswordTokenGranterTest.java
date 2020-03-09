@@ -1,12 +1,12 @@
 package cube8540.oauth.authentication.credentials.oauth.token.application;
 
+import cube8540.oauth.authentication.AuthenticationApplication;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2RequestValidator;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2TokenRequest;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidGrantException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidRequestException;
 import cube8540.oauth.authentication.credentials.oauth.error.UserDeniedAuthorizationException;
-import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenRepository;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedAccessToken;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,11 +21,7 @@ import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 
 import java.time.Clock;
 import java.util.Collections;
-import java.util.Set;
-import java.util.stream.Collectors;
 
-import static cube8540.oauth.authentication.AuthenticationApplication.DEFAULT_TIME_ZONE;
-import static cube8540.oauth.authentication.AuthenticationApplication.DEFAULT_ZONE_OFFSET;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.ACCESS_TOKEN_ID;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.ACCESS_TOKEN_VALIDITY_SECONDS;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.AUTHENTICATION_USERNAME;
@@ -46,7 +42,6 @@ import static cube8540.oauth.authentication.credentials.oauth.token.application.
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.mockTokenRequestValidator;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.when;
 
 @DisplayName("자원 소유자의 패스워드를 통한 토큰 부여 테스트")
 class ResourceOwnerPasswordTokenGranterTest {
@@ -321,7 +316,7 @@ class ResourceOwnerPasswordTokenGranterTest {
 
             configGranter(granter);
 
-            Clock clock = Clock.fixed(TOKEN_CREATED_DATETIME.toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
+            Clock clock = Clock.fixed(TOKEN_CREATED_DATETIME.toInstant(AuthenticationApplication.DEFAULT_ZONE_OFFSET), AuthenticationApplication.DEFAULT_TIME_ZONE.toZoneId());
             AbstractOAuth2TokenGranter.setClock(clock);
         }
 

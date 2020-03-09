@@ -39,8 +39,7 @@ public class DefaultUserPasswordService implements UserPasswordService {
     @Override
     @Transactional
     public UserProfile changePassword(Principal principal, ChangePasswordRequest changeRequest) {
-        User user = repository.findByEmail(new UserEmail(principal.getName()))
-                .orElseThrow(() -> new UserNotFoundException(principal.getName() + " user not found"));
+        User user = getUser(principal.getName());
 
         user.changePassword(changeRequest.getExistingPassword(), changeRequest.getNewPassword(), encoder);
         user.validation(validationPolicy);
@@ -52,16 +51,14 @@ public class DefaultUserPasswordService implements UserPasswordService {
     @Override
     @Transactional
     public UserProfile forgotPassword(String email) {
-        User user = repository.findByEmail(new UserEmail(email))
-                .orElseThrow(() -> new UserNotFoundException(email + " user not found"));
+        User user = getUser(email);
         user.forgotPassword(keyGenerator);
         return UserProfile.of(repository.save(user));
     }
 
     @Override
     public boolean validateCredentialsKey(String email, String credentialsKey) {
-        User user = repository.findByEmail(new UserEmail(email))
-                .orElseThrow(() -> new UserNotFoundException(email + " user not found"));
+        User user = getUser(email);
 
         return user.getPasswordCredentialsKey().matches(credentialsKey).equals(UserKeyMatchedResult.MATCHED);
     }
@@ -69,13 +66,17 @@ public class DefaultUserPasswordService implements UserPasswordService {
     @Override
     @Transactional
     public UserProfile resetPassword(ResetPasswordRequest resetRequest) {
-        User user = repository.findByEmail(new UserEmail(resetRequest.getEmail()))
-                .orElseThrow(() -> new UserNotFoundException(resetRequest.getEmail() + " user not found"));
+        User user = getUser(resetRequest.getEmail());
 
         user.resetPassword(resetRequest.getCredentialsKey(), resetRequest.getNewPassword());
         user.validation(validationPolicy);
         user.encrypted(encoder);
 
         return UserProfile.of(repository.save(user));
+    }
+
+    private User getUser(String email) {
+        return repository.findByEmail(new UserEmail(email))
+                .orElseThrow(() -> UserNotFoundException.instance(email + " is not found"));
     }
 }

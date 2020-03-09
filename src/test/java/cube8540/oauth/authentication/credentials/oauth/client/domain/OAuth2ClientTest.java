@@ -5,6 +5,7 @@ import cube8540.oauth.authentication.credentials.oauth.client.error.ClientErrorC
 import cube8540.oauth.authentication.credentials.oauth.client.error.ClientInvalidException;
 import cube8540.validator.core.ValidationError;
 import cube8540.validator.core.ValidationRule;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -12,15 +13,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 
-import static cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientTestsHelper.ADDED_SCOPE;
-import static cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientTestsHelper.RAW_CHANGE_SECRET;
-import static cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientTestsHelper.RAW_CLIENT_ID;
-import static cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientTestsHelper.RAW_ENCODING_SECRET;
-import static cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientTestsHelper.RAW_SECRET;
-import static cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientTestsHelper.REDIRECT_URI;
-import static cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientTestsHelper.mocKValidationRule;
-import static cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientTestsHelper.mockPasswordEncoder;
-import static cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientTestsHelper.mockValidationPolicy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -37,15 +29,15 @@ class OAuth2ClientTest {
 
         @BeforeEach
         void setup() {
-            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET);
+            this.client = new OAuth2Client(OAuth2ClientTestsHelper.RAW_CLIENT_ID, OAuth2ClientTestsHelper.RAW_SECRET);
         }
 
         @Test
         @DisplayName("인자로 받은 URI 를 저장해야함")
         void shouldSaveGiveURI() {
-            client.addRedirectUri(REDIRECT_URI);
+            client.addRedirectUri(OAuth2ClientTestsHelper.REDIRECT_URI);
 
-            assertTrue(client.getRedirectUris().contains(REDIRECT_URI));
+            assertTrue(client.getRedirectUris().contains(OAuth2ClientTestsHelper.REDIRECT_URI));
         }
     }
 
@@ -56,17 +48,17 @@ class OAuth2ClientTest {
 
         @BeforeEach
         void setup() {
-            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET);
+            this.client = new OAuth2Client(OAuth2ClientTestsHelper.RAW_CLIENT_ID, OAuth2ClientTestsHelper.RAW_SECRET);
 
-            this.client.addRedirectUri(REDIRECT_URI);
+            this.client.addRedirectUri(OAuth2ClientTestsHelper.REDIRECT_URI);
         }
 
         @Test
         @DisplayName("인자로 받은 URI 를 삭제한다.")
         void shouldRemoveGivenRedirectURI() {
-            client.removeRedirectUri(REDIRECT_URI);
+            client.removeRedirectUri(OAuth2ClientTestsHelper.REDIRECT_URI);
 
-            assertFalse(client.getRedirectUris().contains(REDIRECT_URI));
+            assertFalse(client.getRedirectUris().contains(OAuth2ClientTestsHelper.REDIRECT_URI));
         }
     }
 
@@ -77,7 +69,7 @@ class OAuth2ClientTest {
 
         @BeforeEach
         void setup() {
-            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET);
+            this.client = new OAuth2Client(OAuth2ClientTestsHelper.RAW_CLIENT_ID, OAuth2ClientTestsHelper.RAW_SECRET);
         }
 
         @Test
@@ -96,7 +88,7 @@ class OAuth2ClientTest {
 
         @BeforeEach
         void setup() {
-            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET);
+            this.client = new OAuth2Client(OAuth2ClientTestsHelper.RAW_CLIENT_ID, OAuth2ClientTestsHelper.RAW_SECRET);
             this.client.addGrantType(AuthorizationGrantType.AUTHORIZATION_CODE);
         }
 
@@ -116,15 +108,15 @@ class OAuth2ClientTest {
 
         @BeforeEach
         void setup(){
-            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET);
+            this.client = new OAuth2Client(OAuth2ClientTestsHelper.RAW_CLIENT_ID, OAuth2ClientTestsHelper.RAW_SECRET);
         }
 
         @Test
         @DisplayName("인자로 받은 스코프를 저장해야함")
         void shouldSaveGiveScope() {
-            client.addScope(ADDED_SCOPE);
+            client.addScope(OAuth2ClientTestsHelper.ADDED_SCOPE);
 
-            assertTrue(client.getScopes().contains(ADDED_SCOPE));
+            assertTrue(client.getScopes().contains(OAuth2ClientTestsHelper.ADDED_SCOPE));
         }
     }
 
@@ -135,16 +127,16 @@ class OAuth2ClientTest {
 
         @BeforeEach
         void setup() {
-            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET);
-            this.client.addScope(ADDED_SCOPE);
+            this.client = new OAuth2Client(OAuth2ClientTestsHelper.RAW_CLIENT_ID, OAuth2ClientTestsHelper.RAW_SECRET);
+            this.client.addScope(OAuth2ClientTestsHelper.ADDED_SCOPE);
         }
 
         @Test
         @DisplayName("인자로 받은 인증 방식을 삭제한다.")
         void shouldRemoveGivenGrantType() {
-            client.removeScope(ADDED_SCOPE);
+            client.removeScope(OAuth2ClientTestsHelper.ADDED_SCOPE);
 
-            assertFalse(client.getScopes().contains(ADDED_SCOPE));
+            assertFalse(client.getScopes().contains(OAuth2ClientTestsHelper.ADDED_SCOPE));
         }
     }
 
@@ -157,8 +149,8 @@ class OAuth2ClientTest {
 
         @BeforeEach
         void setup() {
-            this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET);
-            this.encoder = mockPasswordEncoder().encode().build();
+            this.client = new OAuth2Client(OAuth2ClientTestsHelper.RAW_CLIENT_ID, OAuth2ClientTestsHelper.RAW_SECRET);
+            this.encoder = OAuth2ClientTestsHelper.mockPasswordEncoder().encode().build();
         }
 
         @Test
@@ -166,7 +158,7 @@ class OAuth2ClientTest {
         void shouldSaveEncryptedClientSecret() {
             client.encrypted(encoder);
 
-            assertEquals(RAW_ENCODING_SECRET, client.getSecret());
+            Assertions.assertEquals(OAuth2ClientTestsHelper.RAW_ENCODING_SECRET, client.getSecret());
         }
     }
 
@@ -185,14 +177,14 @@ class OAuth2ClientTest {
             @BeforeEach
             void setup() {
                 this.clientIdError = new ValidationError("clientId", "invalid client id");
-                this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET);
-                ValidationRule<OAuth2Client> clientIdRule = mocKValidationRule().configValidationFalse(client).error(clientIdError).build();
-                this.policy = mockValidationPolicy().clientIdRule(clientIdRule)
-                        .secretRule(mocKValidationRule().configValidationTrue(client).build())
-                        .clientNameRule(mocKValidationRule().configValidationTrue(client).build())
-                        .grantTypeRule(mocKValidationRule().configValidationTrue(client).build())
-                        .scopeRule(mocKValidationRule().configValidationTrue(client).build())
-                        .ownerRule(mocKValidationRule().configValidationTrue(client).build())
+                this.client = new OAuth2Client(OAuth2ClientTestsHelper.RAW_CLIENT_ID, OAuth2ClientTestsHelper.RAW_SECRET);
+                ValidationRule<OAuth2Client> clientIdRule = OAuth2ClientTestsHelper.mocKValidationRule().configValidationFalse(client).error(clientIdError).build();
+                this.policy = OAuth2ClientTestsHelper.mockValidationPolicy().clientIdRule(clientIdRule)
+                        .secretRule(OAuth2ClientTestsHelper.mocKValidationRule().configValidationTrue(client).build())
+                        .clientNameRule(OAuth2ClientTestsHelper.mocKValidationRule().configValidationTrue(client).build())
+                        .grantTypeRule(OAuth2ClientTestsHelper.mocKValidationRule().configValidationTrue(client).build())
+                        .scopeRule(OAuth2ClientTestsHelper.mocKValidationRule().configValidationTrue(client).build())
+                        .ownerRule(OAuth2ClientTestsHelper.mocKValidationRule().configValidationTrue(client).build())
                         .build();
             }
 
@@ -221,14 +213,14 @@ class OAuth2ClientTest {
             @BeforeEach
             void setup() {
                 this.passwordError = new ValidationError("secret", "invalid secret");
-                this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET);
-                ValidationRule<OAuth2Client> secretRule = mocKValidationRule().configValidationFalse(client).error(passwordError).build();
-                this.policy = mockValidationPolicy().clientIdRule(mocKValidationRule().configValidationTrue(client).build())
+                this.client = new OAuth2Client(OAuth2ClientTestsHelper.RAW_CLIENT_ID, OAuth2ClientTestsHelper.RAW_SECRET);
+                ValidationRule<OAuth2Client> secretRule = OAuth2ClientTestsHelper.mocKValidationRule().configValidationFalse(client).error(passwordError).build();
+                this.policy = OAuth2ClientTestsHelper.mockValidationPolicy().clientIdRule(OAuth2ClientTestsHelper.mocKValidationRule().configValidationTrue(client).build())
                         .secretRule(secretRule)
-                        .clientNameRule(mocKValidationRule().configValidationTrue(client).build())
-                        .grantTypeRule(mocKValidationRule().configValidationTrue(client).build())
-                        .scopeRule(mocKValidationRule().configValidationTrue(client).build())
-                        .ownerRule(mocKValidationRule().configValidationTrue(client).build())
+                        .clientNameRule(OAuth2ClientTestsHelper.mocKValidationRule().configValidationTrue(client).build())
+                        .grantTypeRule(OAuth2ClientTestsHelper.mocKValidationRule().configValidationTrue(client).build())
+                        .scopeRule(OAuth2ClientTestsHelper.mocKValidationRule().configValidationTrue(client).build())
+                        .ownerRule(OAuth2ClientTestsHelper.mocKValidationRule().configValidationTrue(client).build())
                         .build();
             }
 
@@ -257,14 +249,14 @@ class OAuth2ClientTest {
             @BeforeEach
             void setup() {
                 this.nameError = new ValidationError("clientName", "invalid client name");
-                this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET);
-                ValidationRule<OAuth2Client> clientNameRule = mocKValidationRule().configValidationFalse(client).error(nameError).build();
-                this.policy = mockValidationPolicy().clientIdRule(mocKValidationRule().configValidationTrue(client).build())
-                        .secretRule(mocKValidationRule().configValidationTrue(client).build())
+                this.client = new OAuth2Client(OAuth2ClientTestsHelper.RAW_CLIENT_ID, OAuth2ClientTestsHelper.RAW_SECRET);
+                ValidationRule<OAuth2Client> clientNameRule = OAuth2ClientTestsHelper.mocKValidationRule().configValidationFalse(client).error(nameError).build();
+                this.policy = OAuth2ClientTestsHelper.mockValidationPolicy().clientIdRule(OAuth2ClientTestsHelper.mocKValidationRule().configValidationTrue(client).build())
+                        .secretRule(OAuth2ClientTestsHelper.mocKValidationRule().configValidationTrue(client).build())
                         .clientNameRule(clientNameRule)
-                        .grantTypeRule(mocKValidationRule().configValidationTrue(client).build())
-                        .scopeRule(mocKValidationRule().configValidationTrue(client).build())
-                        .ownerRule(mocKValidationRule().configValidationTrue(client).build())
+                        .grantTypeRule(OAuth2ClientTestsHelper.mocKValidationRule().configValidationTrue(client).build())
+                        .scopeRule(OAuth2ClientTestsHelper.mocKValidationRule().configValidationTrue(client).build())
+                        .ownerRule(OAuth2ClientTestsHelper.mocKValidationRule().configValidationTrue(client).build())
                         .build();
             }
 
@@ -293,14 +285,14 @@ class OAuth2ClientTest {
             @BeforeEach
             void setup() {
                 this.grantError = new ValidationError("grantType", "invalid grant type");
-                this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET);
-                ValidationRule<OAuth2Client> grantRule = mocKValidationRule().configValidationFalse(client).error(grantError).build();
-                this.policy = mockValidationPolicy().clientIdRule(mocKValidationRule().configValidationTrue(client).build())
-                        .secretRule(mocKValidationRule().configValidationTrue(client).build())
-                        .clientNameRule(mocKValidationRule().configValidationTrue(client).build())
+                this.client = new OAuth2Client(OAuth2ClientTestsHelper.RAW_CLIENT_ID, OAuth2ClientTestsHelper.RAW_SECRET);
+                ValidationRule<OAuth2Client> grantRule = OAuth2ClientTestsHelper.mocKValidationRule().configValidationFalse(client).error(grantError).build();
+                this.policy = OAuth2ClientTestsHelper.mockValidationPolicy().clientIdRule(OAuth2ClientTestsHelper.mocKValidationRule().configValidationTrue(client).build())
+                        .secretRule(OAuth2ClientTestsHelper.mocKValidationRule().configValidationTrue(client).build())
+                        .clientNameRule(OAuth2ClientTestsHelper.mocKValidationRule().configValidationTrue(client).build())
                         .grantTypeRule(grantRule)
-                        .scopeRule(mocKValidationRule().configValidationTrue(client).build())
-                        .ownerRule(mocKValidationRule().configValidationTrue(client).build())
+                        .scopeRule(OAuth2ClientTestsHelper.mocKValidationRule().configValidationTrue(client).build())
+                        .ownerRule(OAuth2ClientTestsHelper.mocKValidationRule().configValidationTrue(client).build())
                         .build();
             }
 
@@ -329,14 +321,14 @@ class OAuth2ClientTest {
             @BeforeEach
             void setup() {
                 this.scopeError = new ValidationError("scope", "invalid scope");
-                this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET);
-                ValidationRule<OAuth2Client> scopeRule = mocKValidationRule().configValidationFalse(client).error(scopeError).build();
-                this.policy = mockValidationPolicy().clientIdRule(mocKValidationRule().configValidationTrue(client).build())
-                        .secretRule(mocKValidationRule().configValidationTrue(client).build())
-                        .clientNameRule(mocKValidationRule().configValidationTrue(client).build())
-                        .grantTypeRule(mocKValidationRule().configValidationTrue(client).build())
+                this.client = new OAuth2Client(OAuth2ClientTestsHelper.RAW_CLIENT_ID, OAuth2ClientTestsHelper.RAW_SECRET);
+                ValidationRule<OAuth2Client> scopeRule = OAuth2ClientTestsHelper.mocKValidationRule().configValidationFalse(client).error(scopeError).build();
+                this.policy = OAuth2ClientTestsHelper.mockValidationPolicy().clientIdRule(OAuth2ClientTestsHelper.mocKValidationRule().configValidationTrue(client).build())
+                        .secretRule(OAuth2ClientTestsHelper.mocKValidationRule().configValidationTrue(client).build())
+                        .clientNameRule(OAuth2ClientTestsHelper.mocKValidationRule().configValidationTrue(client).build())
+                        .grantTypeRule(OAuth2ClientTestsHelper.mocKValidationRule().configValidationTrue(client).build())
                         .scopeRule(scopeRule)
-                        .ownerRule(mocKValidationRule().configValidationTrue(client).build())
+                        .ownerRule(OAuth2ClientTestsHelper.mocKValidationRule().configValidationTrue(client).build())
                         .build();
             }
 
@@ -365,13 +357,13 @@ class OAuth2ClientTest {
             @BeforeEach
             void setup() {
                 this.ownerError = new ValidationError("owner", "invalid owner");
-                this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET);
-                ValidationRule<OAuth2Client> ownerRule = mocKValidationRule().configValidationFalse(client).error(ownerError).build();
-                this.policy = mockValidationPolicy().clientIdRule(mocKValidationRule().configValidationTrue(client).build())
-                        .secretRule(mocKValidationRule().configValidationTrue(client).build())
-                        .clientNameRule(mocKValidationRule().configValidationTrue(client).build())
-                        .grantTypeRule(mocKValidationRule().configValidationTrue(client).build())
-                        .scopeRule(mocKValidationRule().configValidationTrue(client).build())
+                this.client = new OAuth2Client(OAuth2ClientTestsHelper.RAW_CLIENT_ID, OAuth2ClientTestsHelper.RAW_SECRET);
+                ValidationRule<OAuth2Client> ownerRule = OAuth2ClientTestsHelper.mocKValidationRule().configValidationFalse(client).error(ownerError).build();
+                this.policy = OAuth2ClientTestsHelper.mockValidationPolicy().clientIdRule(OAuth2ClientTestsHelper.mocKValidationRule().configValidationTrue(client).build())
+                        .secretRule(OAuth2ClientTestsHelper.mocKValidationRule().configValidationTrue(client).build())
+                        .clientNameRule(OAuth2ClientTestsHelper.mocKValidationRule().configValidationTrue(client).build())
+                        .grantTypeRule(OAuth2ClientTestsHelper.mocKValidationRule().configValidationTrue(client).build())
+                        .scopeRule(OAuth2ClientTestsHelper.mocKValidationRule().configValidationTrue(client).build())
                         .ownerRule(ownerRule)
                         .build();
             }
@@ -404,15 +396,15 @@ class OAuth2ClientTest {
 
             @BeforeEach
             void setup() {
-                this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET);
-                this.passwordEncoder = mockPasswordEncoder().mismatches().build();
+                this.client = new OAuth2Client(OAuth2ClientTestsHelper.RAW_CLIENT_ID, OAuth2ClientTestsHelper.RAW_SECRET);
+                this.passwordEncoder = OAuth2ClientTestsHelper.mockPasswordEncoder().mismatches().build();
             }
 
             @Test
             @DisplayName("ClientAuthorizationException 이 발생해야 해야 하며 에러 코드는 INVALID_PASSWORD 이어야 한다.")
             void shouldThrowsClientAuthorizationException() {
-                ClientAuthorizationException e = assertThrows(ClientAuthorizationException.class, () -> client.changeSecret(RAW_SECRET, RAW_CHANGE_SECRET, passwordEncoder));
-                assertEquals(ClientErrorCodes.INVALID_PASSWORD, e.getCode());
+                ClientAuthorizationException e = assertThrows(ClientAuthorizationException.class, () -> client.changeSecret(OAuth2ClientTestsHelper.RAW_SECRET, OAuth2ClientTestsHelper.RAW_CHANGE_SECRET, passwordEncoder));
+                Assertions.assertEquals(ClientErrorCodes.INVALID_PASSWORD, e.getCode());
             }
         }
 
@@ -425,8 +417,8 @@ class OAuth2ClientTest {
 
             @BeforeEach
             void setup() {
-                this.client = new OAuth2Client(RAW_CLIENT_ID, RAW_SECRET);
-                this.encoder = mockPasswordEncoder().encode().matches().build();
+                this.client = new OAuth2Client(OAuth2ClientTestsHelper.RAW_CLIENT_ID, OAuth2ClientTestsHelper.RAW_SECRET);
+                this.encoder = OAuth2ClientTestsHelper.mockPasswordEncoder().encode().matches().build();
 
                 this.client.encrypted(encoder);
             }
@@ -434,9 +426,9 @@ class OAuth2ClientTest {
             @Test
             @DisplayName("요청 받은 패스워드로 클라이언트의 패스워드를 변경해야 한다.")
             void shouldChangeSecretWithRequestingSecret() {
-                client.changeSecret(RAW_SECRET, RAW_CHANGE_SECRET, encoder);
+                client.changeSecret(OAuth2ClientTestsHelper.RAW_SECRET, OAuth2ClientTestsHelper.RAW_CHANGE_SECRET, encoder);
 
-                assertEquals(RAW_CHANGE_SECRET, client.getSecret());
+                Assertions.assertEquals(OAuth2ClientTestsHelper.RAW_CHANGE_SECRET, client.getSecret());
             }
         }
     }

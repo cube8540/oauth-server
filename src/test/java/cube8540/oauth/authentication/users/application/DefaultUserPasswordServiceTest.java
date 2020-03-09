@@ -11,6 +11,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
+import org.mockito.Mockito;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.security.Principal;
@@ -79,7 +80,7 @@ class DefaultUserPasswordServiceTest {
             void shouldValidationPasswordAfterChangeUserPassword() {
                 service.changePassword(principal, changeRequest);
 
-                InOrder inOrder = inOrder(user);
+                InOrder inOrder = Mockito.inOrder(user);
                 inOrder.verify(user, times(1)).changePassword(PASSWORD, NEW_PASSWORD, encoder);
                 inOrder.verify(user, times(1)).validation(policy);
             }
@@ -89,7 +90,7 @@ class DefaultUserPasswordServiceTest {
             void shouldPasswordEncryptingAfterChangeUserPasswordValidate() {
                 service.changePassword(principal, changeRequest);
 
-                InOrder inOrder = inOrder(user);
+                InOrder inOrder = Mockito.inOrder(user);
                 inOrder.verify(user, times(1)).validation(policy);
                 inOrder.verify(user, times(1)).encrypted(encoder);
             }

@@ -11,6 +11,7 @@ import cube8540.oauth.authentication.credentials.oauth.error.InvalidRequestExcep
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTranslator;
 import cube8540.oauth.authentication.credentials.oauth.error.RedirectMismatchException;
 import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2AuthorizationCodeGenerator;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -32,40 +33,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import static cube8540.oauth.authentication.credentials.oauth.authorize.endpoint.AuthorizationEndpointTestHelper.CLIENT_NAME;
-import static cube8540.oauth.authentication.credentials.oauth.authorize.endpoint.AuthorizationEndpointTestHelper.CLIENT_SCOPE;
-import static cube8540.oauth.authentication.credentials.oauth.authorize.endpoint.AuthorizationEndpointTestHelper.CLIENT_SCOPE_DETAILS;
-import static cube8540.oauth.authentication.credentials.oauth.authorize.endpoint.AuthorizationEndpointTestHelper.FORWARD_PAGE;
-import static cube8540.oauth.authentication.credentials.oauth.authorize.endpoint.AuthorizationEndpointTestHelper.INVALID_GRANT_ERROR;
-import static cube8540.oauth.authentication.credentials.oauth.authorize.endpoint.AuthorizationEndpointTestHelper.INVALID_GRANT_RESPONSE;
-import static cube8540.oauth.authentication.credentials.oauth.authorize.endpoint.AuthorizationEndpointTestHelper.INVALID_REQUEST_ERROR;
-import static cube8540.oauth.authentication.credentials.oauth.authorize.endpoint.AuthorizationEndpointTestHelper.INVALID_REQUEST_RESPONSE;
-import static cube8540.oauth.authentication.credentials.oauth.authorize.endpoint.AuthorizationEndpointTestHelper.RAW_AUTHORIZATION_CODE;
-import static cube8540.oauth.authentication.credentials.oauth.authorize.endpoint.AuthorizationEndpointTestHelper.RAW_CLIENT_ID;
-import static cube8540.oauth.authentication.credentials.oauth.authorize.endpoint.AuthorizationEndpointTestHelper.RAW_REDIRECT_URI;
-import static cube8540.oauth.authentication.credentials.oauth.authorize.endpoint.AuthorizationEndpointTestHelper.RAW_RESOLVED_REDIRECT_URI;
-import static cube8540.oauth.authentication.credentials.oauth.authorize.endpoint.AuthorizationEndpointTestHelper.RAW_RESOLVED_SCOPES;
-import static cube8540.oauth.authentication.credentials.oauth.authorize.endpoint.AuthorizationEndpointTestHelper.RAW_USERNAME;
-import static cube8540.oauth.authentication.credentials.oauth.authorize.endpoint.AuthorizationEndpointTestHelper.RESOLVED_REDIRECT_URI;
-import static cube8540.oauth.authentication.credentials.oauth.authorize.endpoint.AuthorizationEndpointTestHelper.SCOPE;
-import static cube8540.oauth.authentication.credentials.oauth.authorize.endpoint.AuthorizationEndpointTestHelper.SCOPE_DETAILS;
-import static cube8540.oauth.authentication.credentials.oauth.authorize.endpoint.AuthorizationEndpointTestHelper.STATE;
-import static cube8540.oauth.authentication.credentials.oauth.authorize.endpoint.AuthorizationEndpointTestHelper.UNAUTHORIZED_CLIENT_ERROR;
-import static cube8540.oauth.authentication.credentials.oauth.authorize.endpoint.AuthorizationEndpointTestHelper.UNAUTHORIZED_CLIENT_RESPONSE;
-import static cube8540.oauth.authentication.credentials.oauth.authorize.endpoint.AuthorizationEndpointTestHelper.mockAuthorizationRequest;
-import static cube8540.oauth.authentication.credentials.oauth.authorize.endpoint.AuthorizationEndpointTestHelper.mockAuthorizationRequestMap;
-import static cube8540.oauth.authentication.credentials.oauth.authorize.endpoint.AuthorizationEndpointTestHelper.mockAuthorizedAuthentication;
-import static cube8540.oauth.authentication.credentials.oauth.authorize.endpoint.AuthorizationEndpointTestHelper.mockClientDetails;
-import static cube8540.oauth.authentication.credentials.oauth.authorize.endpoint.AuthorizationEndpointTestHelper.mockClientDetailsService;
-import static cube8540.oauth.authentication.credentials.oauth.authorize.endpoint.AuthorizationEndpointTestHelper.mockCodeGenerator;
-import static cube8540.oauth.authentication.credentials.oauth.authorize.endpoint.AuthorizationEndpointTestHelper.mockExceptionTranslator;
-import static cube8540.oauth.authentication.credentials.oauth.authorize.endpoint.AuthorizationEndpointTestHelper.mockHttpServletRequest;
-import static cube8540.oauth.authentication.credentials.oauth.authorize.endpoint.AuthorizationEndpointTestHelper.mockNotAuthorizedAuthentication;
-import static cube8540.oauth.authentication.credentials.oauth.authorize.endpoint.AuthorizationEndpointTestHelper.mockRedirectResolver;
-import static cube8540.oauth.authentication.credentials.oauth.authorize.endpoint.AuthorizationEndpointTestHelper.mockRequestValidator;
-import static cube8540.oauth.authentication.credentials.oauth.authorize.endpoint.AuthorizationEndpointTestHelper.mockScopeApprovalResolver;
-import static cube8540.oauth.authentication.credentials.oauth.authorize.endpoint.AuthorizationEndpointTestHelper.mockScopeDetailsService;
-import static cube8540.oauth.authentication.credentials.oauth.authorize.endpoint.AuthorizationEndpointTestHelper.mockSessionAttributeStore;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -95,10 +62,10 @@ class AuthorizationEndpointTest {
 
             @BeforeEach
             void setup() {
-                this.parameter = mockAuthorizationRequestMap().build();
+                this.parameter = AuthorizationEndpointTestHelper.mockAuthorizationRequestMap().build();
                 this.model = new HashMap<>();
                 this.principal = mock(Principal.class);
-                this.endpoint = new AuthorizationEndpoint(mockClientDetailsService().build(), mockScopeDetailsService().build(), mockCodeGenerator().build());
+                this.endpoint = new AuthorizationEndpoint(AuthorizationEndpointTestHelper.mockClientDetailsService().build(), AuthorizationEndpointTestHelper.mockScopeDetailsService().build(), AuthorizationEndpointTestHelper.mockCodeGenerator().build());
             }
 
             @Test
@@ -118,10 +85,10 @@ class AuthorizationEndpointTest {
 
             @BeforeEach
             void setup() {
-                this.parameter = mockAuthorizationRequestMap().build();
+                this.parameter = AuthorizationEndpointTestHelper.mockAuthorizationRequestMap().build();
                 this.model = new HashMap<>();
-                this.principal = mockNotAuthorizedAuthentication();
-                this.endpoint = new AuthorizationEndpoint(mockClientDetailsService().build(), mockScopeDetailsService().build(), mockCodeGenerator().build());
+                this.principal = AuthorizationEndpointTestHelper.mockNotAuthorizedAuthentication();
+                this.endpoint = new AuthorizationEndpoint(AuthorizationEndpointTestHelper.mockClientDetailsService().build(), AuthorizationEndpointTestHelper.mockScopeDetailsService().build(), AuthorizationEndpointTestHelper.mockCodeGenerator().build());
             }
 
             @Test
@@ -145,10 +112,10 @@ class AuthorizationEndpointTest {
 
                 @BeforeEach
                 void setup() {
-                    this.parameter = mockAuthorizationRequestMap().configDefault().configResponseType(null).build();
+                    this.parameter = AuthorizationEndpointTestHelper.mockAuthorizationRequestMap().configDefault().configResponseType(null).build();
                     this.model = new HashMap<>();
-                    this.principal = mockAuthorizedAuthentication();
-                    this.endpoint = new AuthorizationEndpoint(mockClientDetailsService().build(), mockScopeDetailsService().build(), mockCodeGenerator().build());
+                    this.principal = AuthorizationEndpointTestHelper.mockAuthorizedAuthentication();
+                    this.endpoint = new AuthorizationEndpoint(AuthorizationEndpointTestHelper.mockClientDetailsService().build(), AuthorizationEndpointTestHelper.mockScopeDetailsService().build(), AuthorizationEndpointTestHelper.mockCodeGenerator().build());
                 }
 
                 @Test
@@ -171,10 +138,10 @@ class AuthorizationEndpointTest {
 
                 @BeforeEach
                 void setup() {
-                    this.parameter = mockAuthorizationRequestMap().configDefault().configResponseType("token").build();
+                    this.parameter = AuthorizationEndpointTestHelper.mockAuthorizationRequestMap().configDefault().configResponseType("token").build();
                     this.model = new HashMap<>();
-                    this.principal = mockAuthorizedAuthentication();
-                    this.endpoint = new AuthorizationEndpoint(mockClientDetailsService().build(), mockScopeDetailsService().build(), mockCodeGenerator().build());
+                    this.principal = AuthorizationEndpointTestHelper.mockAuthorizedAuthentication();
+                    this.endpoint = new AuthorizationEndpoint(AuthorizationEndpointTestHelper.mockClientDetailsService().build(), AuthorizationEndpointTestHelper.mockScopeDetailsService().build(), AuthorizationEndpointTestHelper.mockCodeGenerator().build());
                 }
 
                 @Test
@@ -201,15 +168,15 @@ class AuthorizationEndpointTest {
 
                     @BeforeEach
                     void setup() {
-                        OAuth2ClientDetails clientDetails = mockClientDetails().configDefault().build();
-                        OAuth2ClientDetailsService clientDetailsService = mockClientDetailsService().registerClient(clientDetails).build();
-                        RedirectResolver redirectResolver = mockRedirectResolver().configResolve(clientDetails, RAW_REDIRECT_URI, RESOLVED_REDIRECT_URI).build();
-                        OAuth2RequestValidator requestValidator = mockRequestValidator().configNotAllowedScopes(clientDetails, SCOPE).build();
+                        OAuth2ClientDetails clientDetails = AuthorizationEndpointTestHelper.mockClientDetails().configDefault().build();
+                        OAuth2ClientDetailsService clientDetailsService = AuthorizationEndpointTestHelper.mockClientDetailsService().registerClient(clientDetails).build();
+                        RedirectResolver redirectResolver = AuthorizationEndpointTestHelper.mockRedirectResolver().configResolve(clientDetails, AuthorizationEndpointTestHelper.RAW_REDIRECT_URI, AuthorizationEndpointTestHelper.RESOLVED_REDIRECT_URI).build();
+                        OAuth2RequestValidator requestValidator = AuthorizationEndpointTestHelper.mockRequestValidator().configNotAllowedScopes(clientDetails, AuthorizationEndpointTestHelper.SCOPE).build();
 
-                        this.parameter = mockAuthorizationRequestMap().configDefault().build();
+                        this.parameter = AuthorizationEndpointTestHelper.mockAuthorizationRequestMap().configDefault().build();
                         this.model = new HashMap<>();
-                        this.principal = mockAuthorizedAuthentication();
-                        this.endpoint = new AuthorizationEndpoint(clientDetailsService, mockScopeDetailsService().build(), mockCodeGenerator().build());
+                        this.principal = AuthorizationEndpointTestHelper.mockAuthorizedAuthentication();
+                        this.endpoint = new AuthorizationEndpoint(clientDetailsService, AuthorizationEndpointTestHelper.mockScopeDetailsService().build(), AuthorizationEndpointTestHelper.mockCodeGenerator().build());
                         this.endpoint.setRedirectResolver(redirectResolver);
                         this.endpoint.setRequestValidator(requestValidator);
                     }
@@ -238,7 +205,7 @@ class AuthorizationEndpointTest {
                         endpoint.authorize(parameter, model, principal);
 
                         AuthorizationRequest storedRequest = (AuthorizationRequest) model.get(AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE);
-                        assertEquals(CLIENT_SCOPE, storedRequest.getRequestScopes());
+                        Assertions.assertEquals(AuthorizationEndpointTestHelper.CLIENT_SCOPE, storedRequest.getRequestScopes());
                     }
 
                     @Test
@@ -246,7 +213,7 @@ class AuthorizationEndpointTest {
                     void shouldSaveClientScopeToModelAndView() {
                         ModelAndView modelAndView = endpoint.authorize(parameter, model, principal);
 
-                        assertEquals(CLIENT_SCOPE_DETAILS, modelAndView.getModel().get(AuthorizationEndpoint.AUTHORIZATION_REQUEST_SCOPES_NAME));
+                        Assertions.assertEquals(AuthorizationEndpointTestHelper.CLIENT_SCOPE_DETAILS, modelAndView.getModel().get(AuthorizationEndpoint.AUTHORIZATION_REQUEST_SCOPES_NAME));
                     }
                 }
 
@@ -260,7 +227,7 @@ class AuthorizationEndpointTest {
                         endpoint.authorize(parameter, model, principal);
 
                         AuthorizationRequest storedRequest = (AuthorizationRequest) model.get(AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE);
-                        assertEquals(SCOPE, storedRequest.getRequestScopes());
+                        Assertions.assertEquals(AuthorizationEndpointTestHelper.SCOPE, storedRequest.getRequestScopes());
                     }
 
                     @Test
@@ -268,7 +235,7 @@ class AuthorizationEndpointTest {
                     void shouldSaveRequestingScopeToModelAndView() {
                         ModelAndView modelAndView = endpoint.authorize(parameter, model, principal);
 
-                        assertEquals(SCOPE_DETAILS, modelAndView.getModel().get(AuthorizationEndpoint.AUTHORIZATION_REQUEST_SCOPES_NAME));
+                        Assertions.assertEquals(AuthorizationEndpointTestHelper.SCOPE_DETAILS, modelAndView.getModel().get(AuthorizationEndpoint.AUTHORIZATION_REQUEST_SCOPES_NAME));
                     }
                 }
             }
@@ -294,7 +261,7 @@ class AuthorizationEndpointTest {
                 this.model = new HashMap<>();
                 this.sessionStatus = mock(SessionStatus.class);
                 this.principal = mock(Principal.class);
-                this.endpoint = new AuthorizationEndpoint(mockClientDetailsService().build(), mockScopeDetailsService().build(), mockCodeGenerator().build());
+                this.endpoint = new AuthorizationEndpoint(AuthorizationEndpointTestHelper.mockClientDetailsService().build(), AuthorizationEndpointTestHelper.mockScopeDetailsService().build(), AuthorizationEndpointTestHelper.mockCodeGenerator().build());
             }
 
             @Test
@@ -318,8 +285,8 @@ class AuthorizationEndpointTest {
                 this.approvalParameter = new HashMap<>();
                 this.model = new HashMap<>();
                 this.sessionStatus = mock(SessionStatus.class);
-                this.principal = mockNotAuthorizedAuthentication();
-                this.endpoint = new AuthorizationEndpoint(mockClientDetailsService().build(), mockScopeDetailsService().build(), mockCodeGenerator().build());
+                this.principal = AuthorizationEndpointTestHelper.mockNotAuthorizedAuthentication();
+                this.endpoint = new AuthorizationEndpoint(AuthorizationEndpointTestHelper.mockClientDetailsService().build(), AuthorizationEndpointTestHelper.mockScopeDetailsService().build(), AuthorizationEndpointTestHelper.mockCodeGenerator().build());
             }
 
             @Test
@@ -345,8 +312,8 @@ class AuthorizationEndpointTest {
                 this.approvalParameter = new HashMap<>();
                 this.model = new HashMap<>();
                 this.sessionStatus = mock(SessionStatus.class);
-                this.principal = mockAuthorizedAuthentication();
-                this.endpoint = new AuthorizationEndpoint(mockClientDetailsService().build(), mockScopeDetailsService().build(), mockCodeGenerator().build());
+                this.principal = AuthorizationEndpointTestHelper.mockAuthorizedAuthentication();
+                this.endpoint = new AuthorizationEndpoint(AuthorizationEndpointTestHelper.mockClientDetailsService().build(), AuthorizationEndpointTestHelper.mockScopeDetailsService().build(), AuthorizationEndpointTestHelper.mockCodeGenerator().build());
 
                 this.model.put(AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE, null);
                 this.model.put(AuthorizationEndpoint.ORIGINAL_AUTHORIZATION_REQUEST_ATTRIBUTE, originalAuthorizationMap);
@@ -377,8 +344,8 @@ class AuthorizationEndpointTest {
                 this.approvalParameter = new HashMap<>();
                 this.model = new HashMap<>();
                 this.sessionStatus = mock(SessionStatus.class);
-                this.principal = mockAuthorizedAuthentication();
-                this.endpoint = new AuthorizationEndpoint(mockClientDetailsService().build(), mockScopeDetailsService().build(), mockCodeGenerator().build());
+                this.principal = AuthorizationEndpointTestHelper.mockAuthorizedAuthentication();
+                this.endpoint = new AuthorizationEndpoint(AuthorizationEndpointTestHelper.mockClientDetailsService().build(), AuthorizationEndpointTestHelper.mockScopeDetailsService().build(), AuthorizationEndpointTestHelper.mockCodeGenerator().build());
 
                 this.model.put(AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE, originalAuthorizationRequest);
                 this.model.put(AuthorizationEndpoint.ORIGINAL_AUTHORIZATION_REQUEST_ATTRIBUTE, null);
@@ -419,7 +386,7 @@ class AuthorizationEndpointTest {
 
             @Override
             protected void configOriginalAuthorizationRequestMap(Map<String, String> originalRequestMap) {
-                originalAuthorizationRequestMap.put(OAuth2Utils.AuthorizationRequestKey.REDIRECT_URI, RESOLVED_REDIRECT_URI.toString());
+                originalAuthorizationRequestMap.put(OAuth2Utils.AuthorizationRequestKey.REDIRECT_URI, AuthorizationEndpointTestHelper.RESOLVED_REDIRECT_URI.toString());
             }
 
             @Test
@@ -429,7 +396,7 @@ class AuthorizationEndpointTest {
 
                 endpoint.approval(approvalParameter, model, sessionStatus, authentication);
                 verify(codeGenerator, times(1)).generateNewAuthorizationCode(requestCaptor.capture());
-                assertEquals(RESOLVED_REDIRECT_URI, requestCaptor.getValue().getRedirectUri());
+                Assertions.assertEquals(AuthorizationEndpointTestHelper.RESOLVED_REDIRECT_URI, requestCaptor.getValue().getRedirectUri());
             }
         }
 
@@ -449,7 +416,7 @@ class AuthorizationEndpointTest {
 
                 endpoint.approval(approvalParameter, model, sessionStatus, authentication);
                 verify(codeGenerator, times(1)).generateNewAuthorizationCode(requestCaptor.capture());
-                assertEquals(STATE, requestCaptor.getValue().getState());
+                Assertions.assertEquals(AuthorizationEndpointTestHelper.STATE, requestCaptor.getValue().getState());
             }
 
             @Test
@@ -457,7 +424,7 @@ class AuthorizationEndpointTest {
             void shouldSaveStateTokenToModelAndView() {
                 ModelAndView modelAndView = endpoint.approval(approvalParameter, model, sessionStatus, authentication);
 
-                assertEquals(STATE, modelAndView.getModel().get(OAuth2Utils.AuthorizationResponseKey.STATE));
+                Assertions.assertEquals(AuthorizationEndpointTestHelper.STATE, modelAndView.getModel().get(OAuth2Utils.AuthorizationResponseKey.STATE));
             }
         }
 
@@ -503,9 +470,9 @@ class AuthorizationEndpointTest {
             this.redirectMismatchException = new RedirectMismatchException("TEST");
             this.servletResponse = mock(HttpServletResponse.class);
             this.servletWebRequest = new ServletWebRequest(mock(HttpServletRequest.class), servletResponse);
-            this.endpoint = new AuthorizationEndpoint(mockClientDetailsService().build(), mockScopeDetailsService().build(), mockCodeGenerator().build());
+            this.endpoint = new AuthorizationEndpoint(AuthorizationEndpointTestHelper.mockClientDetailsService().build(), AuthorizationEndpointTestHelper.mockScopeDetailsService().build(), AuthorizationEndpointTestHelper.mockCodeGenerator().build());
 
-            OAuth2ExceptionTranslator exceptionTranslator = mockExceptionTranslator().configTranslate(redirectMismatchException, INVALID_GRANT_RESPONSE).build();
+            OAuth2ExceptionTranslator exceptionTranslator = AuthorizationEndpointTestHelper.mockExceptionTranslator().configTranslate(redirectMismatchException, AuthorizationEndpointTestHelper.INVALID_GRANT_RESPONSE).build();
             this.endpoint.setExceptionTranslator(exceptionTranslator);
         }
 
@@ -530,7 +497,7 @@ class AuthorizationEndpointTest {
         void shouldSaveOAuth2ErrorCodeToModelAndView() {
             ModelAndView modelAndView = endpoint.handleOAuth2AuthenticationException(redirectMismatchException, servletWebRequest);
 
-            assertEquals(INVALID_GRANT_ERROR, modelAndView.getModel().get("error"));
+            Assertions.assertEquals(AuthorizationEndpointTestHelper.INVALID_GRANT_ERROR, modelAndView.getModel().get("error"));
         }
     }
 
@@ -544,12 +511,12 @@ class AuthorizationEndpointTest {
 
         @BeforeEach
         void setup() {
-            this.clientRegistrationException = new ClientNotFoundException("TEST");
+            this.clientRegistrationException = ClientNotFoundException.instance("TEST");
             this.servletResponse = mock(HttpServletResponse.class);
             this.servletWebRequest = new ServletWebRequest(mock(HttpServletRequest.class), servletResponse);
-            this.endpoint = new AuthorizationEndpoint(mockClientDetailsService().build(), mockScopeDetailsService().build(), mockCodeGenerator().build());
+            this.endpoint = new AuthorizationEndpoint(AuthorizationEndpointTestHelper.mockClientDetailsService().build(), AuthorizationEndpointTestHelper.mockScopeDetailsService().build(), AuthorizationEndpointTestHelper.mockCodeGenerator().build());
 
-            OAuth2ExceptionTranslator exceptionTranslator = mockExceptionTranslator().configTranslate(clientRegistrationException, UNAUTHORIZED_CLIENT_RESPONSE).build();
+            OAuth2ExceptionTranslator exceptionTranslator = AuthorizationEndpointTestHelper.mockExceptionTranslator().configTranslate(clientRegistrationException, AuthorizationEndpointTestHelper.UNAUTHORIZED_CLIENT_RESPONSE).build();
             this.endpoint.setExceptionTranslator(exceptionTranslator);
         }
 
@@ -574,7 +541,7 @@ class AuthorizationEndpointTest {
         void shouldSaveOAuth2ErrorCodeToModelAndView() {
             ModelAndView modelAndView = endpoint.handleClientRegistrationException(clientRegistrationException, servletWebRequest);
 
-            assertEquals(UNAUTHORIZED_CLIENT_ERROR, modelAndView.getModel().get("error"));
+            Assertions.assertEquals(AuthorizationEndpointTestHelper.UNAUTHORIZED_CLIENT_ERROR, modelAndView.getModel().get("error"));
         }
     }
 
@@ -595,15 +562,15 @@ class AuthorizationEndpointTest {
 
                 @BeforeEach
                 void setup() {
-                    OAuth2ClientDetailsService clientDetailsService = mockClientDetailsService().emptyClient().build();
-                    HttpServletRequest servletRequest = mockHttpServletRequest().configDefault().build();
+                    OAuth2ClientDetailsService clientDetailsService = AuthorizationEndpointTestHelper.mockClientDetailsService().emptyClient().build();
+                    HttpServletRequest servletRequest = AuthorizationEndpointTestHelper.mockHttpServletRequest().configDefault().build();
 
                     this.exception = new Exception("TEST");
                     this.servletWebRequest = new ServletWebRequest(servletRequest, mock(HttpServletResponse.class));
 
-                    this.endpoint = new AuthorizationEndpoint(clientDetailsService, mockScopeDetailsService().build(), mockCodeGenerator().build());
-                    this.endpoint.setSessionAttributeStore(mockSessionAttributeStore().configRetrieveAttribute(servletWebRequest, AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE, null).build());
-                    this.endpoint.setExceptionTranslator(mockExceptionTranslator().configTranslate(exception, INVALID_REQUEST_RESPONSE).build());
+                    this.endpoint = new AuthorizationEndpoint(clientDetailsService, AuthorizationEndpointTestHelper.mockScopeDetailsService().build(), AuthorizationEndpointTestHelper.mockCodeGenerator().build());
+                    this.endpoint.setSessionAttributeStore(AuthorizationEndpointTestHelper.mockSessionAttributeStore().configRetrieveAttribute(servletWebRequest, AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE, null).build());
+                    this.endpoint.setExceptionTranslator(AuthorizationEndpointTestHelper.mockExceptionTranslator().configTranslate(exception, AuthorizationEndpointTestHelper.INVALID_REQUEST_RESPONSE).build());
                 }
 
                 @Test
@@ -619,7 +586,7 @@ class AuthorizationEndpointTest {
                 void shouldSaveOAuth2ErrorCodeToModelAndView() {
                     ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
 
-                    assertEquals(INVALID_REQUEST_ERROR, modelAndView.getModel().get("error"));
+                    Assertions.assertEquals(AuthorizationEndpointTestHelper.INVALID_REQUEST_ERROR, modelAndView.getModel().get("error"));
                 }
             }
 
@@ -632,17 +599,17 @@ class AuthorizationEndpointTest {
 
                 @BeforeEach
                 void setup() {
-                    OAuth2ClientDetails clientDetails = mockClientDetails().configDefault().build();
-                    OAuth2ClientDetailsService clientDetailsService = mockClientDetailsService().registerClient(clientDetails).build();
-                    HttpServletRequest servletRequest = mockHttpServletRequest().configDefault().build();
+                    OAuth2ClientDetails clientDetails = AuthorizationEndpointTestHelper.mockClientDetails().configDefault().build();
+                    OAuth2ClientDetailsService clientDetailsService = AuthorizationEndpointTestHelper.mockClientDetailsService().registerClient(clientDetails).build();
+                    HttpServletRequest servletRequest = AuthorizationEndpointTestHelper.mockHttpServletRequest().configDefault().build();
 
                     this.exception = new Exception("TEST");
                     this.servletWebRequest = new ServletWebRequest(servletRequest, mock(HttpServletResponse.class));
 
-                    this.endpoint = new AuthorizationEndpoint(clientDetailsService, mockScopeDetailsService().build(), mockCodeGenerator().build());
-                    this.endpoint.setRedirectResolver(mockRedirectResolver().configMismatched(clientDetails, RAW_REDIRECT_URI).build());
-                    this.endpoint.setSessionAttributeStore(mockSessionAttributeStore().configRetrieveAttribute(servletWebRequest, AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE, null).build());
-                    this.endpoint.setExceptionTranslator(mockExceptionTranslator().configTranslate(exception, INVALID_REQUEST_RESPONSE).build());
+                    this.endpoint = new AuthorizationEndpoint(clientDetailsService, AuthorizationEndpointTestHelper.mockScopeDetailsService().build(), AuthorizationEndpointTestHelper.mockCodeGenerator().build());
+                    this.endpoint.setRedirectResolver(AuthorizationEndpointTestHelper.mockRedirectResolver().configMismatched(clientDetails, AuthorizationEndpointTestHelper.RAW_REDIRECT_URI).build());
+                    this.endpoint.setSessionAttributeStore(AuthorizationEndpointTestHelper.mockSessionAttributeStore().configRetrieveAttribute(servletWebRequest, AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE, null).build());
+                    this.endpoint.setExceptionTranslator(AuthorizationEndpointTestHelper.mockExceptionTranslator().configTranslate(exception, AuthorizationEndpointTestHelper.INVALID_REQUEST_RESPONSE).build());
                 }
 
                 @Test
@@ -658,7 +625,7 @@ class AuthorizationEndpointTest {
                 void shouldSaveOAuth2ErrorCodeToModelAndView() {
                     ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
 
-                    assertEquals(INVALID_REQUEST_ERROR, modelAndView.getModel().get("error"));
+                    Assertions.assertEquals(AuthorizationEndpointTestHelper.INVALID_REQUEST_ERROR, modelAndView.getModel().get("error"));
                 }
             }
 
@@ -675,17 +642,17 @@ class AuthorizationEndpointTest {
 
                     @BeforeEach
                     void setup() {
-                        OAuth2ClientDetails clientDetails = mockClientDetails().configDefault().build();
-                        OAuth2ClientDetailsService clientDetailsService = mockClientDetailsService().registerClient(clientDetails).build();
-                        HttpServletRequest servletRequest = mockHttpServletRequest().configDefault().configState().build();
+                        OAuth2ClientDetails clientDetails = AuthorizationEndpointTestHelper.mockClientDetails().configDefault().build();
+                        OAuth2ClientDetailsService clientDetailsService = AuthorizationEndpointTestHelper.mockClientDetailsService().registerClient(clientDetails).build();
+                        HttpServletRequest servletRequest = AuthorizationEndpointTestHelper.mockHttpServletRequest().configDefault().configState().build();
 
                         this.exception = new Exception("TEST");
                         this.servletWebRequest = new ServletWebRequest(servletRequest, mock(HttpServletResponse.class));
 
-                        this.endpoint = new AuthorizationEndpoint(clientDetailsService, mockScopeDetailsService().build(), mockCodeGenerator().build());
-                        this.endpoint.setRedirectResolver(mockRedirectResolver().configResolve(clientDetails, RAW_REDIRECT_URI, RESOLVED_REDIRECT_URI).build());
-                        this.endpoint.setSessionAttributeStore(mockSessionAttributeStore().configRetrieveAttribute(servletWebRequest, AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE, null).build());
-                        this.endpoint.setExceptionTranslator(mockExceptionTranslator().configTranslate(exception, INVALID_REQUEST_RESPONSE).build());
+                        this.endpoint = new AuthorizationEndpoint(clientDetailsService, AuthorizationEndpointTestHelper.mockScopeDetailsService().build(), AuthorizationEndpointTestHelper.mockCodeGenerator().build());
+                        this.endpoint.setRedirectResolver(AuthorizationEndpointTestHelper.mockRedirectResolver().configResolve(clientDetails, AuthorizationEndpointTestHelper.RAW_REDIRECT_URI, AuthorizationEndpointTestHelper.RESOLVED_REDIRECT_URI).build());
+                        this.endpoint.setSessionAttributeStore(AuthorizationEndpointTestHelper.mockSessionAttributeStore().configRetrieveAttribute(servletWebRequest, AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE, null).build());
+                        this.endpoint.setExceptionTranslator(AuthorizationEndpointTestHelper.mockExceptionTranslator().configTranslate(exception, AuthorizationEndpointTestHelper.INVALID_REQUEST_RESPONSE).build());
                     }
 
                     @Test
@@ -695,7 +662,7 @@ class AuthorizationEndpointTest {
 
                         assertNotNull(modelAndView.getView());
                         assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
-                        assertEquals(INVALID_REQUEST_ERROR.getErrorCode(), modelAndView.getModel().get("error_code"));
+                        Assertions.assertEquals(AuthorizationEndpointTestHelper.INVALID_REQUEST_ERROR.getErrorCode(), modelAndView.getModel().get("error_code"));
                     }
 
                     @Test
@@ -705,7 +672,7 @@ class AuthorizationEndpointTest {
 
                         assertNotNull(modelAndView.getView());
                         assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
-                        assertEquals(INVALID_REQUEST_ERROR.getDescription(), modelAndView.getModel().get("error_description"));
+                        Assertions.assertEquals(AuthorizationEndpointTestHelper.INVALID_REQUEST_ERROR.getDescription(), modelAndView.getModel().get("error_description"));
                     }
 
                     @Test
@@ -715,7 +682,7 @@ class AuthorizationEndpointTest {
 
                         assertNotNull(modelAndView.getView());
                         assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
-                        assertEquals(STATE, modelAndView.getModel().get("state"));
+                        Assertions.assertEquals(AuthorizationEndpointTestHelper.STATE, modelAndView.getModel().get("state"));
                     }
                 }
 
@@ -728,17 +695,17 @@ class AuthorizationEndpointTest {
 
                     @BeforeEach
                     void setup() {
-                        OAuth2ClientDetails clientDetails = mockClientDetails().configDefault().build();
-                        OAuth2ClientDetailsService clientDetailsService = mockClientDetailsService().registerClient(clientDetails).build();
-                        HttpServletRequest servletRequest = mockHttpServletRequest().configDefault().configNullState().build();
+                        OAuth2ClientDetails clientDetails = AuthorizationEndpointTestHelper.mockClientDetails().configDefault().build();
+                        OAuth2ClientDetailsService clientDetailsService = AuthorizationEndpointTestHelper.mockClientDetailsService().registerClient(clientDetails).build();
+                        HttpServletRequest servletRequest = AuthorizationEndpointTestHelper.mockHttpServletRequest().configDefault().configNullState().build();
 
                         this.exception = new Exception("TEST");
                         this.servletWebRequest = new ServletWebRequest(servletRequest, mock(HttpServletResponse.class));
 
-                        this.endpoint = new AuthorizationEndpoint(clientDetailsService, mockScopeDetailsService().build(), mockCodeGenerator().build());
-                        this.endpoint.setRedirectResolver(mockRedirectResolver().configResolve(clientDetails, RAW_REDIRECT_URI, RESOLVED_REDIRECT_URI).build());
-                        this.endpoint.setSessionAttributeStore(mockSessionAttributeStore().configRetrieveAttribute(servletWebRequest, AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE, null).build());
-                        this.endpoint.setExceptionTranslator(mockExceptionTranslator().configTranslate(exception, INVALID_REQUEST_RESPONSE).build());
+                        this.endpoint = new AuthorizationEndpoint(clientDetailsService, AuthorizationEndpointTestHelper.mockScopeDetailsService().build(), AuthorizationEndpointTestHelper.mockCodeGenerator().build());
+                        this.endpoint.setRedirectResolver(AuthorizationEndpointTestHelper.mockRedirectResolver().configResolve(clientDetails, AuthorizationEndpointTestHelper.RAW_REDIRECT_URI, AuthorizationEndpointTestHelper.RESOLVED_REDIRECT_URI).build());
+                        this.endpoint.setSessionAttributeStore(AuthorizationEndpointTestHelper.mockSessionAttributeStore().configRetrieveAttribute(servletWebRequest, AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE, null).build());
+                        this.endpoint.setExceptionTranslator(AuthorizationEndpointTestHelper.mockExceptionTranslator().configTranslate(exception, AuthorizationEndpointTestHelper.INVALID_REQUEST_RESPONSE).build());
                     }
 
                     @Test
@@ -748,7 +715,7 @@ class AuthorizationEndpointTest {
 
                         assertNotNull(modelAndView.getView());
                         assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
-                        assertEquals(INVALID_REQUEST_ERROR.getErrorCode(), modelAndView.getModel().get("error_code"));
+                        Assertions.assertEquals(AuthorizationEndpointTestHelper.INVALID_REQUEST_ERROR.getErrorCode(), modelAndView.getModel().get("error_code"));
                     }
 
                     @Test
@@ -758,7 +725,7 @@ class AuthorizationEndpointTest {
 
                         assertNotNull(modelAndView.getView());
                         assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
-                        assertEquals(INVALID_REQUEST_ERROR.getDescription(), modelAndView.getModel().get("error_description"));
+                        Assertions.assertEquals(AuthorizationEndpointTestHelper.INVALID_REQUEST_ERROR.getDescription(), modelAndView.getModel().get("error_description"));
                     }
 
                     @Test
@@ -787,15 +754,15 @@ class AuthorizationEndpointTest {
 
                 @BeforeEach
                 void setup() {
-                    OAuth2ClientDetailsService clientDetailsService = mockClientDetailsService().emptyClient().build();
-                    AuthorizationRequest storedRequest = mockAuthorizationRequest().configDefault().build();
+                    OAuth2ClientDetailsService clientDetailsService = AuthorizationEndpointTestHelper.mockClientDetailsService().emptyClient().build();
+                    AuthorizationRequest storedRequest = AuthorizationEndpointTestHelper.mockAuthorizationRequest().configDefault().build();
 
                     this.exception = new Exception("TEST");
                     this.servletWebRequest = new ServletWebRequest(mock(HttpServletRequest.class), mock(HttpServletResponse.class));
 
-                    this.endpoint = new AuthorizationEndpoint(clientDetailsService, mockScopeDetailsService().build(), mockCodeGenerator().build());
-                    this.endpoint.setSessionAttributeStore(mockSessionAttributeStore().configRetrieveAttribute(servletWebRequest, AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE, storedRequest).build());
-                    this.endpoint.setExceptionTranslator(mockExceptionTranslator().configTranslate(exception, INVALID_REQUEST_RESPONSE).build());
+                    this.endpoint = new AuthorizationEndpoint(clientDetailsService, AuthorizationEndpointTestHelper.mockScopeDetailsService().build(), AuthorizationEndpointTestHelper.mockCodeGenerator().build());
+                    this.endpoint.setSessionAttributeStore(AuthorizationEndpointTestHelper.mockSessionAttributeStore().configRetrieveAttribute(servletWebRequest, AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE, storedRequest).build());
+                    this.endpoint.setExceptionTranslator(AuthorizationEndpointTestHelper.mockExceptionTranslator().configTranslate(exception, AuthorizationEndpointTestHelper.INVALID_REQUEST_RESPONSE).build());
                 }
 
                 @Test
@@ -811,7 +778,7 @@ class AuthorizationEndpointTest {
                 void shouldSaveOAuth2ErrorCodeToModelAndView() {
                     ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
 
-                    assertEquals(INVALID_REQUEST_ERROR, modelAndView.getModel().get("error"));
+                    Assertions.assertEquals(AuthorizationEndpointTestHelper.INVALID_REQUEST_ERROR, modelAndView.getModel().get("error"));
                 }
             }
 
@@ -824,17 +791,17 @@ class AuthorizationEndpointTest {
 
                 @BeforeEach
                 void setup() {
-                    OAuth2ClientDetails clientDetails = mockClientDetails().configDefault().build();
-                    OAuth2ClientDetailsService clientDetailsService = mockClientDetailsService().registerClient(clientDetails).build();
-                    AuthorizationRequest storedRequest = mockAuthorizationRequest().configDefault().build();
+                    OAuth2ClientDetails clientDetails = AuthorizationEndpointTestHelper.mockClientDetails().configDefault().build();
+                    OAuth2ClientDetailsService clientDetailsService = AuthorizationEndpointTestHelper.mockClientDetailsService().registerClient(clientDetails).build();
+                    AuthorizationRequest storedRequest = AuthorizationEndpointTestHelper.mockAuthorizationRequest().configDefault().build();
 
                     this.exception = new Exception("TEST");
                     this.servletWebRequest = new ServletWebRequest(mock(HttpServletRequest.class), mock(HttpServletResponse.class));
 
-                    this.endpoint = new AuthorizationEndpoint(clientDetailsService, mockScopeDetailsService().build(), mockCodeGenerator().build());
-                    this.endpoint.setSessionAttributeStore(mockSessionAttributeStore().configRetrieveAttribute(servletWebRequest, AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE, storedRequest).build());
-                    this.endpoint.setRedirectResolver(mockRedirectResolver().configMismatched(clientDetails, RAW_RESOLVED_REDIRECT_URI).build());
-                    this.endpoint.setExceptionTranslator(mockExceptionTranslator().configTranslate(exception, INVALID_REQUEST_RESPONSE).build());
+                    this.endpoint = new AuthorizationEndpoint(clientDetailsService, AuthorizationEndpointTestHelper.mockScopeDetailsService().build(), AuthorizationEndpointTestHelper.mockCodeGenerator().build());
+                    this.endpoint.setSessionAttributeStore(AuthorizationEndpointTestHelper.mockSessionAttributeStore().configRetrieveAttribute(servletWebRequest, AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE, storedRequest).build());
+                    this.endpoint.setRedirectResolver(AuthorizationEndpointTestHelper.mockRedirectResolver().configMismatched(clientDetails, AuthorizationEndpointTestHelper.RAW_RESOLVED_REDIRECT_URI).build());
+                    this.endpoint.setExceptionTranslator(AuthorizationEndpointTestHelper.mockExceptionTranslator().configTranslate(exception, AuthorizationEndpointTestHelper.INVALID_REQUEST_RESPONSE).build());
                 }
 
                 @Test
@@ -850,7 +817,7 @@ class AuthorizationEndpointTest {
                 void shouldSaveOAuth2ErrorCodeToModelAndView() {
                     ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
 
-                    assertEquals(INVALID_REQUEST_ERROR, modelAndView.getModel().get("error"));
+                    Assertions.assertEquals(AuthorizationEndpointTestHelper.INVALID_REQUEST_ERROR, modelAndView.getModel().get("error"));
                 }
             }
 
@@ -867,17 +834,17 @@ class AuthorizationEndpointTest {
 
                     @BeforeEach
                     void setup() {
-                        OAuth2ClientDetails clientDetails = mockClientDetails().configDefault().build();
-                        OAuth2ClientDetailsService clientDetailsService = mockClientDetailsService().registerClient(clientDetails).build();
-                        AuthorizationRequest storedRequest = mockAuthorizationRequest().configDefault().configState().build();
+                        OAuth2ClientDetails clientDetails = AuthorizationEndpointTestHelper.mockClientDetails().configDefault().build();
+                        OAuth2ClientDetailsService clientDetailsService = AuthorizationEndpointTestHelper.mockClientDetailsService().registerClient(clientDetails).build();
+                        AuthorizationRequest storedRequest = AuthorizationEndpointTestHelper.mockAuthorizationRequest().configDefault().configState().build();
 
                         this.exception = new Exception("TEST");
                         this.servletWebRequest = new ServletWebRequest(mock(HttpServletRequest.class), mock(HttpServletResponse.class));
 
-                        this.endpoint = new AuthorizationEndpoint(clientDetailsService, mockScopeDetailsService().build(), mockCodeGenerator().build());
-                        this.endpoint.setSessionAttributeStore(mockSessionAttributeStore().configRetrieveAttribute(servletWebRequest, AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE, storedRequest).build());
-                        this.endpoint.setRedirectResolver(mockRedirectResolver().configResolve(clientDetails, RAW_RESOLVED_REDIRECT_URI, RESOLVED_REDIRECT_URI).build());
-                        this.endpoint.setExceptionTranslator(mockExceptionTranslator().configTranslate(exception, INVALID_REQUEST_RESPONSE).build());
+                        this.endpoint = new AuthorizationEndpoint(clientDetailsService, AuthorizationEndpointTestHelper.mockScopeDetailsService().build(), AuthorizationEndpointTestHelper.mockCodeGenerator().build());
+                        this.endpoint.setSessionAttributeStore(AuthorizationEndpointTestHelper.mockSessionAttributeStore().configRetrieveAttribute(servletWebRequest, AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE, storedRequest).build());
+                        this.endpoint.setRedirectResolver(AuthorizationEndpointTestHelper.mockRedirectResolver().configResolve(clientDetails, AuthorizationEndpointTestHelper.RAW_RESOLVED_REDIRECT_URI, AuthorizationEndpointTestHelper.RESOLVED_REDIRECT_URI).build());
+                        this.endpoint.setExceptionTranslator(AuthorizationEndpointTestHelper.mockExceptionTranslator().configTranslate(exception, AuthorizationEndpointTestHelper.INVALID_REQUEST_RESPONSE).build());
                     }
 
                     @Test
@@ -887,7 +854,7 @@ class AuthorizationEndpointTest {
 
                         assertNotNull(modelAndView.getView());
                         assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
-                        assertEquals(INVALID_REQUEST_ERROR.getErrorCode(), modelAndView.getModel().get("error_code"));
+                        Assertions.assertEquals(AuthorizationEndpointTestHelper.INVALID_REQUEST_ERROR.getErrorCode(), modelAndView.getModel().get("error_code"));
                     }
 
                     @Test
@@ -897,7 +864,7 @@ class AuthorizationEndpointTest {
 
                         assertNotNull(modelAndView.getView());
                         assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
-                        assertEquals(INVALID_REQUEST_ERROR.getDescription(), modelAndView.getModel().get("error_description"));
+                        Assertions.assertEquals(AuthorizationEndpointTestHelper.INVALID_REQUEST_ERROR.getDescription(), modelAndView.getModel().get("error_description"));
                     }
 
                     @Test
@@ -907,7 +874,7 @@ class AuthorizationEndpointTest {
 
                         assertNotNull(modelAndView.getView());
                         assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
-                        assertEquals(STATE, modelAndView.getModel().get("state"));
+                        Assertions.assertEquals(AuthorizationEndpointTestHelper.STATE, modelAndView.getModel().get("state"));
                     }
                 }
 
@@ -920,17 +887,17 @@ class AuthorizationEndpointTest {
 
                     @BeforeEach
                     void setup() {
-                        OAuth2ClientDetails clientDetails = mockClientDetails().configDefault().build();
-                        OAuth2ClientDetailsService clientDetailsService = mockClientDetailsService().registerClient(clientDetails).build();
-                        AuthorizationRequest storedRequest = mockAuthorizationRequest().configDefault().configNullState().build();
+                        OAuth2ClientDetails clientDetails = AuthorizationEndpointTestHelper.mockClientDetails().configDefault().build();
+                        OAuth2ClientDetailsService clientDetailsService = AuthorizationEndpointTestHelper.mockClientDetailsService().registerClient(clientDetails).build();
+                        AuthorizationRequest storedRequest = AuthorizationEndpointTestHelper.mockAuthorizationRequest().configDefault().configNullState().build();
 
                         this.exception = new Exception("TEST");
                         this.servletWebRequest = new ServletWebRequest(mock(HttpServletRequest.class), mock(HttpServletResponse.class));
 
-                        this.endpoint = new AuthorizationEndpoint(clientDetailsService, mockScopeDetailsService().build(), mockCodeGenerator().build());
-                        this.endpoint.setSessionAttributeStore(mockSessionAttributeStore().configRetrieveAttribute(servletWebRequest, AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE, storedRequest).build());
-                        this.endpoint.setRedirectResolver(mockRedirectResolver().configResolve(clientDetails, RAW_RESOLVED_REDIRECT_URI, RESOLVED_REDIRECT_URI).build());
-                        this.endpoint.setExceptionTranslator(mockExceptionTranslator().configTranslate(exception, INVALID_REQUEST_RESPONSE).build());
+                        this.endpoint = new AuthorizationEndpoint(clientDetailsService, AuthorizationEndpointTestHelper.mockScopeDetailsService().build(), AuthorizationEndpointTestHelper.mockCodeGenerator().build());
+                        this.endpoint.setSessionAttributeStore(AuthorizationEndpointTestHelper.mockSessionAttributeStore().configRetrieveAttribute(servletWebRequest, AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE, storedRequest).build());
+                        this.endpoint.setRedirectResolver(AuthorizationEndpointTestHelper.mockRedirectResolver().configResolve(clientDetails, AuthorizationEndpointTestHelper.RAW_RESOLVED_REDIRECT_URI, AuthorizationEndpointTestHelper.RESOLVED_REDIRECT_URI).build());
+                        this.endpoint.setExceptionTranslator(AuthorizationEndpointTestHelper.mockExceptionTranslator().configTranslate(exception, AuthorizationEndpointTestHelper.INVALID_REQUEST_RESPONSE).build());
                     }
 
                     @Test
@@ -940,7 +907,7 @@ class AuthorizationEndpointTest {
 
                         assertNotNull(modelAndView.getView());
                         assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
-                        assertEquals(INVALID_REQUEST_ERROR.getErrorCode(), modelAndView.getModel().get("error_code"));
+                        Assertions.assertEquals(AuthorizationEndpointTestHelper.INVALID_REQUEST_ERROR.getErrorCode(), modelAndView.getModel().get("error_code"));
                     }
 
                     @Test
@@ -950,7 +917,7 @@ class AuthorizationEndpointTest {
 
                         assertNotNull(modelAndView.getView());
                         assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
-                        assertEquals(INVALID_REQUEST_ERROR.getDescription(), modelAndView.getModel().get("error_description"));
+                        Assertions.assertEquals(AuthorizationEndpointTestHelper.INVALID_REQUEST_ERROR.getDescription(), modelAndView.getModel().get("error_description"));
                     }
 
                     @Test
@@ -975,26 +942,26 @@ class AuthorizationEndpointTest {
 
         @BeforeEach
         void setup() {
-            OAuth2ClientDetails clientDetails = mockClientDetails().configDefault().build();
-            OAuth2ClientDetailsService clientDetailsService = mockClientDetailsService().registerClient(clientDetails).build();
-            OAuth2RequestValidator requestValidator = mockRequestValidator()
-                    .configAllowedScopes(clientDetails, SCOPE)
+            OAuth2ClientDetails clientDetails = AuthorizationEndpointTestHelper.mockClientDetails().configDefault().build();
+            OAuth2ClientDetailsService clientDetailsService = AuthorizationEndpointTestHelper.mockClientDetailsService().registerClient(clientDetails).build();
+            OAuth2RequestValidator requestValidator = AuthorizationEndpointTestHelper.mockRequestValidator()
+                    .configAllowedScopes(clientDetails, AuthorizationEndpointTestHelper.SCOPE)
                     .configAllowedScopes(clientDetails, null)
                     .configAllowedScopes(clientDetails, Collections.emptySet()).build();
-            RedirectResolver redirectResolver = mockRedirectResolver().configResolve(clientDetails, RAW_REDIRECT_URI, RESOLVED_REDIRECT_URI).build();
+            RedirectResolver redirectResolver = AuthorizationEndpointTestHelper.mockRedirectResolver().configResolve(clientDetails, AuthorizationEndpointTestHelper.RAW_REDIRECT_URI, AuthorizationEndpointTestHelper.RESOLVED_REDIRECT_URI).build();
 
-            AuthorizationEndpointTestHelper.MockScopeDetailsService scopeDetailsService = mockScopeDetailsService().registerScopes(SCOPE, SCOPE_DETAILS).registerScopes(CLIENT_SCOPE, CLIENT_SCOPE_DETAILS);
-            AuthorizationEndpointTestHelper.MockAuthorizationRequestMap requestMap = mockAuthorizationRequestMap().configDefault();
+            AuthorizationEndpointTestHelper.MockScopeDetailsService scopeDetailsService = AuthorizationEndpointTestHelper.mockScopeDetailsService().registerScopes(AuthorizationEndpointTestHelper.SCOPE, AuthorizationEndpointTestHelper.SCOPE_DETAILS).registerScopes(AuthorizationEndpointTestHelper.CLIENT_SCOPE, AuthorizationEndpointTestHelper.CLIENT_SCOPE_DETAILS);
+            AuthorizationEndpointTestHelper.MockAuthorizationRequestMap requestMap = AuthorizationEndpointTestHelper.mockAuthorizationRequestMap().configDefault();
             configRequestMap(requestMap);
             configScopeDetailsService(scopeDetailsService);
 
             this.parameter = requestMap.build();
             this.model = new HashMap<>();
-            this.principal = mockAuthorizedAuthentication();
-            this.endpoint = new AuthorizationEndpoint(clientDetailsService, scopeDetailsService.build(), mockCodeGenerator().build());
+            this.principal = AuthorizationEndpointTestHelper.mockAuthorizedAuthentication();
+            this.endpoint = new AuthorizationEndpoint(clientDetailsService, scopeDetailsService.build(), AuthorizationEndpointTestHelper.mockCodeGenerator().build());
             this.endpoint.setRequestValidator(requestValidator);
             this.endpoint.setRedirectResolver(redirectResolver);
-            this.endpoint.setApprovalPage(FORWARD_PAGE);
+            this.endpoint.setApprovalPage(AuthorizationEndpointTestHelper.FORWARD_PAGE);
         }
 
         protected void configRequestMap(AuthorizationEndpointTestHelper.MockAuthorizationRequestMap requestMap) {}
@@ -1007,10 +974,10 @@ class AuthorizationEndpointTest {
             endpoint.authorize(parameter, model, principal);
 
             AuthorizationRequest storedRequest = (AuthorizationRequest) model.get(AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE);
-            assertEquals(RAW_CLIENT_ID, storedRequest.getClientId());
-            assertEquals(RAW_USERNAME, storedRequest.getUsername());
-            assertEquals(STATE, storedRequest.getState());
-            assertEquals(RESOLVED_REDIRECT_URI, storedRequest.getRedirectUri());
+            Assertions.assertEquals(AuthorizationEndpointTestHelper.RAW_CLIENT_ID, storedRequest.getClientId());
+            Assertions.assertEquals(AuthorizationEndpointTestHelper.RAW_USERNAME, storedRequest.getUsername());
+            Assertions.assertEquals(AuthorizationEndpointTestHelper.STATE, storedRequest.getState());
+            Assertions.assertEquals(AuthorizationEndpointTestHelper.RESOLVED_REDIRECT_URI, storedRequest.getRedirectUri());
         }
 
         @Test
@@ -1026,7 +993,7 @@ class AuthorizationEndpointTest {
         void shouldForwardingConfigApprovalPage() {
             ModelAndView modelAndView = endpoint.authorize(parameter, model, principal);
 
-            assertEquals("forward:" + FORWARD_PAGE, modelAndView.getViewName());
+            Assertions.assertEquals("forward:" + AuthorizationEndpointTestHelper.FORWARD_PAGE, modelAndView.getViewName());
         }
 
         @Test
@@ -1034,7 +1001,7 @@ class AuthorizationEndpointTest {
         void shouldSaveClientNameToModeAndView() {
             ModelAndView modelAndView = endpoint.authorize(parameter, model, principal);
 
-            assertEquals(CLIENT_NAME, modelAndView.getModel().get(AuthorizationEndpoint.AUTHORIZATION_REQUEST_CLIENT_NAME));
+            Assertions.assertEquals(AuthorizationEndpointTestHelper.CLIENT_NAME, modelAndView.getModel().get(AuthorizationEndpoint.AUTHORIZATION_REQUEST_CLIENT_NAME));
         }
     }
 
@@ -1050,7 +1017,7 @@ class AuthorizationEndpointTest {
 
         @BeforeEach
         void setup() {
-            AuthorizationEndpointTestHelper.MockAuthorizationRequest originalRequest = mockAuthorizationRequest().configDefault();
+            AuthorizationEndpointTestHelper.MockAuthorizationRequest originalRequest = AuthorizationEndpointTestHelper.mockAuthorizationRequest().configDefault();
 
             configOriginalAuthorizationRequest(originalRequest);
 
@@ -1058,16 +1025,16 @@ class AuthorizationEndpointTest {
             this.originalAuthorizationRequestMap = new HashMap<>();
             this.model = new HashMap<>();
             this.sessionStatus = mock(SessionStatus.class);
-            this.authentication = mockAuthorizedAuthentication();
+            this.authentication = AuthorizationEndpointTestHelper.mockAuthorizedAuthentication();
             this.originalAuthorizationRequest = originalRequest.build();
-            this.codeGenerator = mockCodeGenerator().configGenerated().build();
-            this.endpoint = new AuthorizationEndpoint(mockClientDetailsService().build(), mockScopeDetailsService().build(), codeGenerator);
+            this.codeGenerator = AuthorizationEndpointTestHelper.mockCodeGenerator().configGenerated().build();
+            this.endpoint = new AuthorizationEndpoint(AuthorizationEndpointTestHelper.mockClientDetailsService().build(), AuthorizationEndpointTestHelper.mockScopeDetailsService().build(), codeGenerator);
 
             configOriginalAuthorizationRequestMap(originalAuthorizationRequestMap);
 
             this.model.put(AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE, originalAuthorizationRequest);
             this.model.put(AuthorizationEndpoint.ORIGINAL_AUTHORIZATION_REQUEST_ATTRIBUTE, originalAuthorizationRequestMap);
-            this.endpoint.setApprovalResolver(mockScopeApprovalResolver().configResolve(originalAuthorizationRequest, approvalParameter, RAW_RESOLVED_SCOPES).build());
+            this.endpoint.setApprovalResolver(AuthorizationEndpointTestHelper.mockScopeApprovalResolver().configResolve(originalAuthorizationRequest, approvalParameter, AuthorizationEndpointTestHelper.RAW_RESOLVED_SCOPES).build());
         }
 
         protected void configOriginalAuthorizationRequest(AuthorizationEndpointTestHelper.MockAuthorizationRequest request) {}
@@ -1090,7 +1057,7 @@ class AuthorizationEndpointTest {
 
             endpoint.approval(approvalParameter, model, sessionStatus, authentication);
             verify(codeGenerator, times(1)).generateNewAuthorizationCode(requestCaptor.capture());
-            assertEquals(RAW_CLIENT_ID, requestCaptor.getValue().getClientId());
+            Assertions.assertEquals(AuthorizationEndpointTestHelper.RAW_CLIENT_ID, requestCaptor.getValue().getClientId());
         }
 
         @Test
@@ -1100,7 +1067,7 @@ class AuthorizationEndpointTest {
 
             endpoint.approval(approvalParameter, model, sessionStatus, authentication);
             verify(codeGenerator, times(1)).generateNewAuthorizationCode(requestCaptor.capture());
-            assertEquals(RAW_RESOLVED_SCOPES, requestCaptor.getValue().getRequestScopes());
+            Assertions.assertEquals(AuthorizationEndpointTestHelper.RAW_RESOLVED_SCOPES, requestCaptor.getValue().getRequestScopes());
         }
 
         @Test
@@ -1109,7 +1076,7 @@ class AuthorizationEndpointTest {
             ModelAndView modelAndView = endpoint.approval(approvalParameter, model, sessionStatus, authentication);
 
             assertTrue(modelAndView.getView() instanceof RedirectView);
-            assertEquals(RESOLVED_REDIRECT_URI.toString(), ((RedirectView) modelAndView.getView()).getUrl());
+            Assertions.assertEquals(AuthorizationEndpointTestHelper.RESOLVED_REDIRECT_URI.toString(), ((RedirectView) modelAndView.getView()).getUrl());
         }
 
         @Test
@@ -1117,7 +1084,7 @@ class AuthorizationEndpointTest {
         void shouldSaveStateTokenToModelAndView() {
             ModelAndView modelAndView = endpoint.approval(approvalParameter, model, sessionStatus, authentication);
 
-            assertEquals(RAW_AUTHORIZATION_CODE, modelAndView.getModel().get(OAuth2Utils.AuthorizationResponseKey.CODE));
+            Assertions.assertEquals(AuthorizationEndpointTestHelper.RAW_AUTHORIZATION_CODE, modelAndView.getModel().get(OAuth2Utils.AuthorizationResponseKey.CODE));
         }
     }
 }

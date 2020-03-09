@@ -164,25 +164,19 @@ public class AuthorizationEndpoint {
 
     @ExceptionHandler(ClientNotFoundException.class)
     public ModelAndView handleClientRegistrationException(ClientNotFoundException e, ServletWebRequest webRequest) {
-        if (log.isWarnEnabled()) {
-            log.warn("Handling error client registration exception : {}, {}", e.getClass().getName(), e.getMessage());
-        }
+        log.warn("Handling error client registration exception : {}, {}", e.getClass().getName(), e.getMessage());
         return handleException(e, webRequest);
     }
 
     @ExceptionHandler(AbstractOAuth2AuthenticationException.class)
     public ModelAndView handleOAuth2AuthenticationException(AbstractOAuth2AuthenticationException e, ServletWebRequest webRequest) {
-        if (log.isWarnEnabled()) {
-            log.warn("Handling error : {}, {}", e.getClass().getName(), e.getMessage());
-        }
+        log.warn("Handling error : {}, {}", e.getClass().getName(), e.getMessage());
         return handleException(e, webRequest);
     }
 
     @ExceptionHandler(Exception.class)
     public ModelAndView handleOtherException(Exception e, ServletWebRequest webRequest) {
-        if (log.isWarnEnabled()) {
-            log.warn("Handling error : {}, {}", e.getClass().getName(), e.getMessage());
-        }
+        log.warn("Handling error : {}, {}", e.getClass().getName(), e.getMessage());
         return handleException(e, webRequest);
     }
 
@@ -211,9 +205,7 @@ public class AuthorizationEndpoint {
             URI redirectURI = redirectResolver.resolveRedirectURI(storedRedirectURI, clientDetails);
             return getUnsuccessfulRedirectView(redirectURI, responseEntity.getBody(), authorizationRequest);
         } catch (Exception exception) {
-            if (log.isErrorEnabled()) {
-                log.error("An exception occurred during error handling {} {}", exception.getClass().getName(), exception.getMessage());
-            }
+            log.error("An exception occurred during error handling {} {}", exception.getClass().getName(), exception.getMessage());
             return new ModelAndView(errorPage, Collections.singletonMap("error", responseEntity.getBody()));
         }
     }

@@ -18,9 +18,7 @@ public class AuthorityExceptionTranslator implements ExceptionTranslator<ErrorMe
             AuthorityRegisterException e = ((AuthorityRegisterException) exception);
             return response(HttpStatus.BAD_REQUEST, ErrorMessage.instance(e.getCode(), e.getDescription()));
         } else {
-            if (log.isErrorEnabled()) {
-                log.error("Handle exception {}, {}", exception.getClass(), exception.getMessage());
-            }
+            log.error("Handle exception {}, {}", exception.getClass(), exception.getMessage());
             return response(HttpStatus.INTERNAL_SERVER_ERROR, UNKNOWN_SERVER_ERROR);
         }
     }

@@ -23,9 +23,7 @@ public class ClientExceptionTranslator implements ExceptionTranslator<ErrorMessa
             ClientAuthorizationException e = ((ClientAuthorizationException) exception);
             return response(HttpStatus.UNAUTHORIZED, ErrorMessage.instance(e.getCode(), e.getDescription()));
         } else {
-            if (log.isErrorEnabled()) {
-                log.error("Handle exception {}, {}", exception.getClass(), exception.getMessage());
-            }
+            log.error("Handle exception {}, {}", exception.getClass(), exception.getMessage());
             return response(HttpStatus.INTERNAL_SERVER_ERROR, UNKNOWN_SERVER_ERROR);
         }
     }

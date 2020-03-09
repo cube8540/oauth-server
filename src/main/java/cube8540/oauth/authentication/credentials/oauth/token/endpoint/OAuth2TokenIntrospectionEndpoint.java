@@ -1,13 +1,13 @@
 package cube8540.oauth.authentication.credentials.oauth.token.endpoint;
 
+import cube8540.oauth.authentication.credentials.oauth.client.provider.ClientCredentialsToken;
+import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2AccessTokenReadService;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2Utils;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
-import cube8540.oauth.authentication.credentials.oauth.client.provider.ClientCredentialsToken;
 import cube8540.oauth.authentication.credentials.oauth.error.AbstractOAuth2AuthenticationException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidRequestException;
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTranslator;
 import cube8540.oauth.authentication.credentials.oauth.token.OAuth2AccessTokenDetails;
-import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2AccessTokenReadService;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenRegistrationException;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -77,25 +77,19 @@ public class OAuth2TokenIntrospectionEndpoint {
 
     @ExceptionHandler(OAuth2AccessTokenRegistrationException.class)
     public ResponseEntity<OAuth2Error> handleException(OAuth2AccessTokenRegistrationException e) {
-        if (log.isWarnEnabled()) {
-            log.warn("Handling error {}, {}", e.getClass(), e.getMessage());
-        }
+        log.warn("Handling error {}, {}", e.getClass(), e.getMessage());
         return exceptionTranslator.translate(e);
     }
 
     @ExceptionHandler(AbstractOAuth2AuthenticationException.class)
     public ResponseEntity<OAuth2Error> handleException(AbstractOAuth2AuthenticationException e) {
-        if (log.isWarnEnabled()) {
-            log.warn("Handling error {}, {}", e.getClass(), e.getMessage());
-        }
+        log.warn("Handling error {}, {}", e.getClass(), e.getMessage());
         return exceptionTranslator.translate(e);
     }
 
     @ExceptionHandler(Exception.class)
     public Map<String, Boolean> handleServerException(Exception e) {
-        if (log.isErrorEnabled()) {
-            log.error("Handling error {}, {}", e.getClass(), e.getMessage());
-        }
+        log.error("Handling error {}, {}", e.getClass(), e.getMessage());
         return Collections.singletonMap(OAuth2Utils.AccessTokenIntrospectionKey.ACTIVE, false);
     }
 }

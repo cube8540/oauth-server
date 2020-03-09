@@ -1,9 +1,9 @@
 package cube8540.oauth.authentication.credentials.authority.endpoint;
 
-import cube8540.oauth.authentication.credentials.authority.AuthorityDetails;
 import cube8540.oauth.authentication.credentials.authority.application.AuthorityManagementService;
 import cube8540.oauth.authentication.credentials.authority.application.AuthorityModifyRequest;
 import cube8540.oauth.authentication.credentials.authority.application.AuthorityRegisterRequest;
+import cube8540.oauth.authentication.credentials.authority.AuthorityDetails;
 import cube8540.oauth.authentication.credentials.authority.error.AuthorityExceptionTranslator;
 import cube8540.oauth.authentication.error.message.ErrorMessage;
 import lombok.Setter;

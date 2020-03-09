@@ -3,6 +3,7 @@ package cube8540.oauth.authentication.credentials.oauth.token.application;
 import cube8540.oauth.authentication.credentials.oauth.AuthorizationRequest;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.AuthorizationCodeRepository;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizationCode;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -11,16 +12,6 @@ import org.mockito.ArgumentCaptor;
 
 import java.util.Optional;
 
-import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.AUTHORIZATION_CODE;
-import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.CLIENT_ID;
-import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.REDIRECT_URI;
-import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.SCOPES;
-import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.STATE;
-import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.USERNAME;
-import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.mockAuthorizationCode;
-import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.mockAuthorizationCodeRepository;
-import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.mockAuthorizationRequest;
-import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.mockCodeGenerator;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
@@ -42,14 +33,14 @@ class CompositionAuthorizationCodeServiceTest {
 
             @BeforeEach
             void setup() {
-                this.repository = mockAuthorizationCodeRepository().emptyCode().build();
+                this.repository = OAuth2TokenApplicationTestHelper.mockAuthorizationCodeRepository().emptyCode().build();
                 this.service = new CompositionAuthorizationCodeService(repository);
             }
 
             @Test
             @DisplayName("Optional.empty 가 반환되어야 한다.")
             void shouldReturnsOptionalEmpty() {
-                Optional<OAuth2AuthorizationCode> result = this.service.consume(AUTHORIZATION_CODE);
+                Optional<OAuth2AuthorizationCode> result = this.service.consume(OAuth2TokenApplicationTestHelper.AUTHORIZATION_CODE);
 
                 assertEquals(Optional.empty(), result);
             }
@@ -57,7 +48,7 @@ class CompositionAuthorizationCodeServiceTest {
             @Test
             @DisplayName("어떤 코드도 삭제하지 않는다.")
             void shouldNotRemovedAnything() {
-                this.service.consume(AUTHORIZATION_CODE);
+                this.service.consume(OAuth2TokenApplicationTestHelper.AUTHORIZATION_CODE);
 
                 verify(repository, never()).delete(any());
             }
@@ -72,15 +63,15 @@ class CompositionAuthorizationCodeServiceTest {
 
             @BeforeEach
             void setup() {
-                this.authorizationCode = mockAuthorizationCode().configDefault().build();
-                this.repository = mockAuthorizationCodeRepository().registerCode(authorizationCode).build();
+                this.authorizationCode = OAuth2TokenApplicationTestHelper.mockAuthorizationCode().configDefault().build();
+                this.repository = OAuth2TokenApplicationTestHelper.mockAuthorizationCodeRepository().registerCode(authorizationCode).build();
                 this.service = new CompositionAuthorizationCodeService(repository);
             }
 
             @Test
             @DisplayName("저장소에서 반환된 인증 코드를 포함한 Optional 이 반환되어야 한다.")
             void shouldReturnsOptionalIncludingAuthorizationCode() {
-                Optional<OAuth2AuthorizationCode> result = service.consume(AUTHORIZATION_CODE);
+                Optional<OAuth2AuthorizationCode> result = service.consume(OAuth2TokenApplicationTestHelper.AUTHORIZATION_CODE);
 
                 assertEquals(Optional.of(authorizationCode), result);
             }
@@ -88,7 +79,7 @@ class CompositionAuthorizationCodeServiceTest {
             @Test
             @DisplayName("저장소에서 반환된 인증 코드를 삭제해야 한다.")
             void shouldRemovedAuthorizationCode() {
-                this.service.consume(AUTHORIZATION_CODE);
+                this.service.consume(OAuth2TokenApplicationTestHelper.AUTHORIZATION_CODE);
 
                 verify(repository, times(1)).delete(authorizationCode);
             }
@@ -104,10 +95,10 @@ class CompositionAuthorizationCodeServiceTest {
 
         @BeforeEach
         void setup() {
-            this.authorizationRequest = mockAuthorizationRequest().configDefault().build();
-            this.repository = mockAuthorizationCodeRepository().build();
+            this.authorizationRequest = OAuth2TokenApplicationTestHelper.mockAuthorizationRequest().configDefault().build();
+            this.repository = OAuth2TokenApplicationTestHelper.mockAuthorizationCodeRepository().build();
             this.service = new CompositionAuthorizationCodeService(repository);
-            this.service.setCodeGenerator(mockCodeGenerator(AUTHORIZATION_CODE));
+            this.service.setCodeGenerator(OAuth2TokenApplicationTestHelper.mockCodeGenerator(OAuth2TokenApplicationTestHelper.AUTHORIZATION_CODE));
         }
 
         @Test
@@ -117,7 +108,7 @@ class CompositionAuthorizationCodeServiceTest {
 
             this.service.generateNewAuthorizationCode(authorizationRequest);
             verify(this.repository, times(1)).save(codeArgumentCaptor.capture());
-            assertEquals(AUTHORIZATION_CODE, codeArgumentCaptor.getValue().getCode());
+            Assertions.assertEquals(OAuth2TokenApplicationTestHelper.AUTHORIZATION_CODE, codeArgumentCaptor.getValue().getCode());
         }
 
         @Test
@@ -127,7 +118,7 @@ class CompositionAuthorizationCodeServiceTest {
 
             this.service.generateNewAuthorizationCode(authorizationRequest);
             verify(this.repository, times(1)).save(codeArgumentCaptor.capture());
-            assertEquals(CLIENT_ID, codeArgumentCaptor.getValue().getClientId());
+            Assertions.assertEquals(OAuth2TokenApplicationTestHelper.CLIENT_ID, codeArgumentCaptor.getValue().getClientId());
         }
 
         @Test
@@ -137,7 +128,7 @@ class CompositionAuthorizationCodeServiceTest {
 
             this.service.generateNewAuthorizationCode(authorizationRequest);
             verify(this.repository, times(1)).save(codeArgumentCaptor.capture());
-            assertEquals(SCOPES, codeArgumentCaptor.getValue().getApprovedScopes());
+            Assertions.assertEquals(OAuth2TokenApplicationTestHelper.SCOPES, codeArgumentCaptor.getValue().getApprovedScopes());
         }
 
         @Test
@@ -147,7 +138,7 @@ class CompositionAuthorizationCodeServiceTest {
 
             this.service.generateNewAuthorizationCode(authorizationRequest);
             verify(this.repository, times(1)).save(codeArgumentCaptor.capture());
-            assertEquals(REDIRECT_URI, codeArgumentCaptor.getValue().getRedirectURI());
+            Assertions.assertEquals(OAuth2TokenApplicationTestHelper.REDIRECT_URI, codeArgumentCaptor.getValue().getRedirectURI());
         }
 
         @Test
@@ -157,7 +148,7 @@ class CompositionAuthorizationCodeServiceTest {
 
             this.service.generateNewAuthorizationCode(authorizationRequest);
             verify(this.repository, times(1)).save(codeArgumentCaptor.capture());
-            assertEquals(STATE, codeArgumentCaptor.getValue().getState());
+            Assertions.assertEquals(OAuth2TokenApplicationTestHelper.STATE, codeArgumentCaptor.getValue().getState());
         }
 
         @Test
@@ -167,7 +158,7 @@ class CompositionAuthorizationCodeServiceTest {
 
             this.service.generateNewAuthorizationCode(authorizationRequest);
             verify(this.repository, times(1)).save(codeArgumentCaptor.capture());
-            assertEquals(USERNAME, codeArgumentCaptor.getValue().getUsername());
+            Assertions.assertEquals(OAuth2TokenApplicationTestHelper.USERNAME, codeArgumentCaptor.getValue().getUsername());
         }
     }
 }

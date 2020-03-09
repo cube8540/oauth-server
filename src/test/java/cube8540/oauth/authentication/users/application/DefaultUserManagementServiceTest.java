@@ -7,6 +7,7 @@ import cube8540.oauth.authentication.users.error.UserErrorCodes;
 import cube8540.oauth.authentication.users.error.UserNotFoundException;
 import cube8540.oauth.authentication.users.error.UserRegisterException;
 import cube8540.validator.core.ValidationRule;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -96,7 +97,7 @@ class DefaultUserManagementServiceTest {
             @DisplayName("에러가 발생해야 하며, 에러 코드는 EXISTS_IDENTIFIER 이어야 한다.")
             void shouldThrowsErrorAndErrorCodeIsExistsIdentifier() {
                 UserRegisterException e = assertThrows(UserRegisterException.class, () -> service.registerUser(registerRequest));
-                assertEquals(UserErrorCodes.EXISTS_IDENTIFIER, e.getCode());
+                Assertions.assertEquals(UserErrorCodes.EXISTS_IDENTIFIER, e.getCode());
             }
         }
 

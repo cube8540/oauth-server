@@ -1,17 +1,17 @@
 package cube8540.oauth.authentication.credentials.oauth.token.endpoint;
 
+import cube8540.oauth.authentication.credentials.oauth.client.provider.ClientCredentialsToken;
+import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2AccessTokenGrantService;
+import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenRevokeService;
 import cube8540.oauth.authentication.credentials.oauth.DefaultOAuth2TokenRequest;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2TokenRequest;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2Utils;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
-import cube8540.oauth.authentication.credentials.oauth.client.provider.ClientCredentialsToken;
 import cube8540.oauth.authentication.credentials.oauth.error.AbstractOAuth2AuthenticationException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidGrantException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidRequestException;
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTranslator;
 import cube8540.oauth.authentication.credentials.oauth.token.OAuth2AccessTokenDetails;
-import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2AccessTokenGrantService;
-import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenRevokeService;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,17 +88,13 @@ public class OAuth2TokenEndpoint {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<OAuth2Error> handleException(Exception e) {
-        if (log.isErrorEnabled()) {
-            log.error("Handling error: {}, {}", e.getClass(), e.getMessage());
-        }
+        log.error("Handling error: {}, {}", e.getClass(), e.getMessage());
         return exceptionTranslator.translate(e);
     }
 
     @ExceptionHandler(AbstractOAuth2AuthenticationException.class)
     public ResponseEntity<OAuth2Error> handleException(AbstractOAuth2AuthenticationException e) {
-        if (log.isWarnEnabled()) {
-            log.warn("Handling error: {}, {}", e.getClass(), e.getMessage());
-        }
+        log.warn("Handling error: {}, {}", e.getClass(), e.getMessage());
         return exceptionTranslator.translate(e);
     }
 

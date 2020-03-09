@@ -11,8 +11,8 @@ import java.util.regex.Pattern;
 
 public class DefaultUserEmailValidationRule implements ValidationRule<User> {
 
-    private static final String PROPERTY = "email";
-    private static final String MESSAGE = "이메일 형식을 다시 확인해 주세요.";
+    private static final String DEFAULT_PROPERTY = "email";
+    private static final String DEFAULT_MESSAGE = "이메일 형식을 다시 확인해 주세요.";
 
     private static final String PATTERN = "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\""
             + "(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@"
@@ -24,7 +24,7 @@ public class DefaultUserEmailValidationRule implements ValidationRule<User> {
     private String errorMessage;
 
     public DefaultUserEmailValidationRule() {
-        this(PROPERTY, MESSAGE);
+        this(DEFAULT_PROPERTY, DEFAULT_MESSAGE);
     }
 
     public DefaultUserEmailValidationRule(String property, String errorMessage) {

@@ -22,9 +22,9 @@ public class DefaultOAuth2ClientDetailsService implements OAuth2ClientDetailsSer
     }
 
     @Override
-    public OAuth2ClientDetails loadClientDetailsByClientId(String clientId) throws ClientNotFoundException {
+    public OAuth2ClientDetails loadClientDetailsByClientId(String clientId) {
         return repository.findByClientId(new OAuth2ClientId(clientId))
                 .map(DefaultOAuth2ClientDetails::of)
-                .orElseThrow(() -> new ClientNotFoundException(clientId + " is not found"));
+                .orElseThrow(() -> ClientNotFoundException.instance(clientId + " is not found"));
     }
 }

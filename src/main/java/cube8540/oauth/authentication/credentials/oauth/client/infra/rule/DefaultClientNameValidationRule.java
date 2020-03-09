@@ -6,14 +6,14 @@ import cube8540.validator.core.ValidationRule;
 
 public class DefaultClientNameValidationRule implements ValidationRule<OAuth2Client> {
 
-    private static final String PROPERTY = "clientName";
-    private static final String MESSAGE = "클라이언트명을 입력해 주세요.";
+    private static final String DEFAULT_PROPERTY = "clientName";
+    private static final String DEFAULT_MESSAGE = "클라이언트명을 입력해 주세요.";
 
     private String property;
     private String message;
 
     public DefaultClientNameValidationRule() {
-        this(PROPERTY, MESSAGE);
+        this(DEFAULT_PROPERTY, DEFAULT_MESSAGE);
     }
 
     public DefaultClientNameValidationRule(String property, String message) {

@@ -8,8 +8,8 @@ import lombok.Getter;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class UserAuthorizationException extends RuntimeException {
 
-    private String code;
-    private String description;
+    private final String code;
+    private final String description;
 
     public static UserAuthorizationException invalidPassword(String description) {
         return new UserAuthorizationException(UserErrorCodes.INVALID_PASSWORD, description);

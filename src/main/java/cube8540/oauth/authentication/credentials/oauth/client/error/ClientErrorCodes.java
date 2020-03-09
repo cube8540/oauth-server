@@ -1,11 +1,14 @@
 package cube8540.oauth.authentication.credentials.oauth.client.error;
 
 import cube8540.oauth.authentication.error.message.ErrorCodes;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
-public interface ClientErrorCodes extends ErrorCodes {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class ClientErrorCodes extends ErrorCodes {
 
-    String INVALID_OWNER = "invalid_owner";
+    public static final String INVALID_OWNER = "invalid_owner";
 
-    String INVALID_PASSWORD = "invalid_password";
+    public static final String INVALID_PASSWORD = "invalid_password";
 
 }

@@ -4,7 +4,7 @@ import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
@@ -17,7 +17,7 @@ public class ErrorHandlingController implements ErrorController {
         return "/error";
     }
 
-    @RequestMapping(value = "/error")
+    @GetMapping(value = "/error")
     public String errorPage(HttpServletRequest request, Model model) {
         String status = request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE).toString();
 

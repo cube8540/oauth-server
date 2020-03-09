@@ -32,7 +32,7 @@ public class DefaultOAuth2AccessTokenReadService implements OAuth2AccessTokenRea
     @Override
     public OAuth2AccessTokenDetails readAccessToken(String tokenValue) {
         OAuth2AuthorizedAccessToken accessToken = tokenRepository.findById(new OAuth2TokenId(tokenValue))
-                .orElseThrow(() -> new OAuth2AccessTokenNotFoundException("[" + tokenValue + "] token is not found"));
+                .orElseThrow(() -> new OAuth2AccessTokenNotFoundException(tokenValue));
         if (accessToken.isExpired()) {
             throw new OAuth2AccessTokenExpiredException("[" + tokenValue + "] is expired");
         }
@@ -43,7 +43,7 @@ public class DefaultOAuth2AccessTokenReadService implements OAuth2AccessTokenRea
     @Override
     public UserDetails readAccessTokenUser(String tokenValue) {
         OAuth2AuthorizedAccessToken accessToken = tokenRepository.findById(new OAuth2TokenId(tokenValue))
-                .orElseThrow(() -> new OAuth2AccessTokenNotFoundException("[" + tokenValue + "] token is not found"));
+                .orElseThrow(() -> new OAuth2AccessTokenNotFoundException(tokenValue));
 
         assertTokenClient(accessToken);
         UserDetails user = userDetailsService.loadUserByUsername(accessToken.getUsername().getValue());

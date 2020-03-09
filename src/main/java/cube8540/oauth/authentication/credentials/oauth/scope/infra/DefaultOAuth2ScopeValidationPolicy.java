@@ -1,8 +1,8 @@
 package cube8540.oauth.authentication.credentials.oauth.scope.infra;
 
+import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeValidationPolicy;
 import cube8540.oauth.authentication.credentials.authority.AuthorityDetailsService;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2Scope;
-import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeValidationPolicy;
 import cube8540.oauth.authentication.credentials.oauth.scope.infra.rule.DefaultScopeAccessibleAuthorityValidationRule;
 import cube8540.oauth.authentication.credentials.oauth.scope.infra.rule.DefaultScopeIdValidationRule;
 import cube8540.validator.core.ValidationRule;

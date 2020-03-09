@@ -1,5 +1,6 @@
 package cube8540.oauth.authentication.credentials.oauth.scope.error;
 
+import cube8540.oauth.authentication.error.message.ErrorCodes;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,11 +9,11 @@ import lombok.Getter;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class ScopeRegisterException extends RuntimeException {
 
-    private String code;
-    private String description;
+    private final String code;
+    private final String description;
 
     public static ScopeRegisterException existsIdentifier(String description) {
-        return new ScopeRegisterException(ScopeErrorCodes.EXISTS_IDENTIFIER, description);
+        return new ScopeRegisterException(ErrorCodes.EXISTS_IDENTIFIER, description);
     }
 
 }

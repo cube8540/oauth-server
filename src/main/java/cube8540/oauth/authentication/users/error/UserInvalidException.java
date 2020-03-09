@@ -11,9 +11,13 @@ public class UserInvalidException extends ValidateException {
 
     private String code;
 
-    public UserInvalidException(List<ValidationError> errors) {
+    private UserInvalidException(String code, List<ValidationError> errors) {
         super(errors);
-        this.code = UserErrorCodes.INVALID_REQUEST;
+        this.code = code;
+    }
+
+    public static UserInvalidException instance(List<ValidationError> errors) {
+        return new UserInvalidException(UserErrorCodes.INVALID_REQUEST, errors);
     }
 
 }

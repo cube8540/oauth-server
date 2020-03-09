@@ -1,10 +1,10 @@
 package cube8540.oauth.authentication.credentials.oauth.scope.endpoint;
 
-import cube8540.oauth.authentication.credentials.oauth.scope.OAuth2AccessibleScopeDetailsService;
-import cube8540.oauth.authentication.credentials.oauth.scope.OAuth2ScopeDetails;
 import cube8540.oauth.authentication.credentials.oauth.scope.application.OAuth2ScopeManagementService;
 import cube8540.oauth.authentication.credentials.oauth.scope.application.OAuth2ScopeModifyRequest;
 import cube8540.oauth.authentication.credentials.oauth.scope.application.OAuth2ScopeRegisterRequest;
+import cube8540.oauth.authentication.credentials.oauth.scope.OAuth2AccessibleScopeDetailsService;
+import cube8540.oauth.authentication.credentials.oauth.scope.OAuth2ScopeDetails;
 import cube8540.oauth.authentication.credentials.oauth.scope.error.ScopeExceptionTranslator;
 import cube8540.oauth.authentication.error.message.ErrorMessage;
 import lombok.Setter;

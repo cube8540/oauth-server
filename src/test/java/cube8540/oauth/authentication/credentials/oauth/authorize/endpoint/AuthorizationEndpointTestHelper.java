@@ -199,7 +199,7 @@ public class AuthorizationEndpointTestHelper {
         }
 
         MockClientDetailsService emptyClient() {
-            when(service.loadClientDetailsByClientId(RAW_CLIENT_ID)).thenThrow(new ClientNotFoundException("NOT FOUND"));
+            when(service.loadClientDetailsByClientId(RAW_CLIENT_ID)).thenThrow(ClientNotFoundException.instance("NOT FOUND"));
             return this;
         }
 

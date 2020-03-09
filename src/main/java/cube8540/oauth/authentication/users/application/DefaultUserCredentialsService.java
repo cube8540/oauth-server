@@ -32,8 +32,7 @@ public class DefaultUserCredentialsService implements UserCredentialsService {
     @Override
     @Transactional
     public UserProfile grantCredentialsKey(String email) {
-        User user = repository.findByEmail(new UserEmail(email))
-                .orElseThrow(() -> new UserNotFoundException(email + " user not found"));
+        User user = getUser(email);
 
         user.generateCredentialsKey(keyGenerator);
         return UserProfile.of(repository.save(user));
@@ -42,11 +41,15 @@ public class DefaultUserCredentialsService implements UserCredentialsService {
     @Override
     @Transactional
     public UserProfile accountCredentials(String email, String credentialsKey) {
-        User user = repository.findByEmail(new UserEmail(email))
-                .orElseThrow(() -> new UserNotFoundException(email + " user not found"));
+        User user = getUser(email);
         List<AuthorityCode> authorityCodes = authorityService.getBasicAuthority();
 
         user.credentials(credentialsKey, authorityCodes);
         return UserProfile.of(repository.save(user));
+    }
+
+    private User getUser(String email) {
+        return repository.findByEmail(new UserEmail(email))
+                .orElseThrow(() -> UserNotFoundException.instance(email + " is not found"));
     }
 }

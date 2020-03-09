@@ -1,8 +1,10 @@
 package cube8540.oauth.authentication.credentials.oauth.token.endpoint;
 
+import cube8540.oauth.authentication.AuthenticationApplication;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2Utils;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import cube8540.oauth.authentication.credentials.oauth.token.OAuth2AccessTokenDetails;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -11,11 +13,6 @@ import org.junit.jupiter.api.Test;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static cube8540.oauth.authentication.AuthenticationApplication.DEFAULT_TIME_ZONE;
-import static cube8540.oauth.authentication.credentials.oauth.token.endpoint.TokenEndpointTestHelper.EXPIRATION;
-import static cube8540.oauth.authentication.credentials.oauth.token.endpoint.TokenEndpointTestHelper.RAW_CLIENT_ID;
-import static cube8540.oauth.authentication.credentials.oauth.token.endpoint.TokenEndpointTestHelper.RAW_USERNAME;
-import static cube8540.oauth.authentication.credentials.oauth.token.endpoint.TokenEndpointTestHelper.SCOPES;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -54,7 +51,7 @@ class DefaultOAuth2AccessTokenIntrospectionConverterTest {
             void shouldReturnsUsernameInAccessToken() {
                 Map<String, Object> result = converter.convertAccessToken(accessToken);
 
-                assertEquals(RAW_USERNAME, result.get(OAuth2Utils.AccessTokenIntrospectionKey.USERNAME));
+                Assertions.assertEquals(TokenEndpointTestHelper.RAW_USERNAME, result.get(OAuth2Utils.AccessTokenIntrospectionKey.USERNAME));
             }
         }
     }
@@ -88,7 +85,7 @@ class DefaultOAuth2AccessTokenIntrospectionConverterTest {
         void shouldReturnsClientIdInAccessToken() {
             Map<String, Object> result = converter.convertAccessToken(accessToken);
 
-            assertEquals(RAW_CLIENT_ID, result.get(OAuth2Utils.AccessTokenIntrospectionKey.CLIENT_ID));
+            Assertions.assertEquals(TokenEndpointTestHelper.RAW_CLIENT_ID, result.get(OAuth2Utils.AccessTokenIntrospectionKey.CLIENT_ID));
         }
 
         @Test
@@ -96,7 +93,7 @@ class DefaultOAuth2AccessTokenIntrospectionConverterTest {
         void shouldReturnsTokenExpirationUnixTimestamp() {
             Map<String, Object> result = converter.convertAccessToken(accessToken);
 
-            long expected = EXPIRATION.atZone(DEFAULT_TIME_ZONE.toZoneId()).toEpochSecond();
+            long expected = TokenEndpointTestHelper.EXPIRATION.atZone(AuthenticationApplication.DEFAULT_TIME_ZONE.toZoneId()).toEpochSecond();
             assertEquals(expected, result.get(OAuth2Utils.AccessTokenIntrospectionKey.EXPIRATION));
         }
 
@@ -105,7 +102,7 @@ class DefaultOAuth2AccessTokenIntrospectionConverterTest {
         void shouldReturnsAccessTokenScope() {
             Map<String, Object> result = converter.convertAccessToken(accessToken);
 
-            String expected = String.join(" ", SCOPES.stream().map(OAuth2ScopeId::getValue).collect(Collectors.toSet()));
+            String expected = String.join(" ", TokenEndpointTestHelper.SCOPES.stream().map(OAuth2ScopeId::getValue).collect(Collectors.toSet()));
             assertEquals(expected, result.get(OAuth2Utils.AccessTokenIntrospectionKey.SCOPE));
         }
     }

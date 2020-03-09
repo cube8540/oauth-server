@@ -1,9 +1,11 @@
 package cube8540.oauth.authentication.credentials.oauth.token.domain;
 
+import cube8540.oauth.authentication.AuthenticationApplication;
 import cube8540.oauth.authentication.credentials.oauth.AuthorizationRequest;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidClientException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidGrantException;
 import cube8540.oauth.authentication.credentials.oauth.error.RedirectMismatchException;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -13,18 +15,6 @@ import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 
 import java.time.Clock;
 
-import static cube8540.oauth.authentication.AuthenticationApplication.DEFAULT_TIME_ZONE;
-import static cube8540.oauth.authentication.AuthenticationApplication.DEFAULT_ZONE_OFFSET;
-import static cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizationCodeTestHelper.CLIENT_ID;
-import static cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizationCodeTestHelper.CODE;
-import static cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizationCodeTestHelper.EXPIRATION_DATETIME;
-import static cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizationCodeTestHelper.NOW;
-import static cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizationCodeTestHelper.REDIRECT_URI;
-import static cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizationCodeTestHelper.SCOPES;
-import static cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizationCodeTestHelper.STATE;
-import static cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizationCodeTestHelper.USERNAME;
-import static cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizationCodeTestHelper.configDefaultCodeGenerator;
-import static cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizationCodeTestHelper.mockAuthorizationRequest;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -39,22 +29,22 @@ class OAuth2AuthorizationCodeTest {
 
         @BeforeEach
         void setup() {
-            Clock createdClock = Clock.fixed(NOW.toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
+            Clock createdClock = Clock.fixed(OAuth2AuthorizationCodeTestHelper.NOW.toInstant(AuthenticationApplication.DEFAULT_ZONE_OFFSET), AuthenticationApplication.DEFAULT_TIME_ZONE.toZoneId());
             OAuth2AuthorizationCode.setClock(createdClock);
 
-            this.code = new OAuth2AuthorizationCode(configDefaultCodeGenerator());
+            this.code = new OAuth2AuthorizationCode(OAuth2AuthorizationCodeTestHelper.configDefaultCodeGenerator());
         }
 
         @Test
         @DisplayName("생성기에서 반환된 코드를 저장해야 한다.")
         void shouldSaveCodeCreatedByGenerator() {
-            assertEquals(CODE, code.getCode());
+            Assertions.assertEquals(OAuth2AuthorizationCodeTestHelper.CODE, code.getCode());
         }
 
         @Test
         @DisplayName("만료일은 현재시간으로 부터 + 5분 이어야 한다.")
         void shouldExpirationDateTimeIsNowPlus5Minute() {
-            assertEquals(EXPIRATION_DATETIME, code.getExpirationDateTime());
+            Assertions.assertEquals(OAuth2AuthorizationCodeTestHelper.EXPIRATION_DATETIME, code.getExpirationDateTime());
         }
     }
 
@@ -66,8 +56,8 @@ class OAuth2AuthorizationCodeTest {
 
         @BeforeEach
         void setup() {
-            this.request = mockAuthorizationRequest().configDefaultSetup().build();
-            this.code = new OAuth2AuthorizationCode(configDefaultCodeGenerator());
+            this.request = OAuth2AuthorizationCodeTestHelper.mockAuthorizationRequest().configDefaultSetup().build();
+            this.code = new OAuth2AuthorizationCode(OAuth2AuthorizationCodeTestHelper.configDefaultCodeGenerator());
         }
 
         @Test
@@ -75,7 +65,7 @@ class OAuth2AuthorizationCodeTest {
         void shouldSaveGivenClientId() {
             this.code.setAuthorizationRequest(request);
 
-            assertEquals(CLIENT_ID, this.code.getClientId());
+            Assertions.assertEquals(OAuth2AuthorizationCodeTestHelper.CLIENT_ID, this.code.getClientId());
         }
 
         @Test
@@ -83,7 +73,7 @@ class OAuth2AuthorizationCodeTest {
         void shouldSaveGivenUserEmail() {
             this.code.setAuthorizationRequest(request);
 
-            assertEquals(USERNAME, this.code.getUsername());
+            Assertions.assertEquals(OAuth2AuthorizationCodeTestHelper.USERNAME, this.code.getUsername());
         }
 
         @Test
@@ -91,7 +81,7 @@ class OAuth2AuthorizationCodeTest {
         void shouldSaveGivenStateProperty() {
             this.code.setAuthorizationRequest(request);
 
-            assertEquals(STATE, this.code.getState());
+            Assertions.assertEquals(OAuth2AuthorizationCodeTestHelper.STATE, this.code.getState());
         }
 
         @Test
@@ -99,7 +89,7 @@ class OAuth2AuthorizationCodeTest {
         void shouldSaveGivenRedirectUri() {
             this.code.setAuthorizationRequest(request);
 
-            assertEquals(REDIRECT_URI, this.code.getRedirectURI());
+            Assertions.assertEquals(OAuth2AuthorizationCodeTestHelper.REDIRECT_URI, this.code.getRedirectURI());
         }
 
         @Test
@@ -107,7 +97,7 @@ class OAuth2AuthorizationCodeTest {
         void shouldSaveGivenScopes() {
             this.code.setAuthorizationRequest(request);
 
-            assertEquals(SCOPES, this.code.getApprovedScopes());
+            Assertions.assertEquals(OAuth2AuthorizationCodeTestHelper.SCOPES, this.code.getApprovedScopes());
         }
     }
 
@@ -123,13 +113,13 @@ class OAuth2AuthorizationCodeTest {
 
             @BeforeEach
             void setup() {
-                Clock createdClock = Clock.fixed(NOW.toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
+                Clock createdClock = Clock.fixed(OAuth2AuthorizationCodeTestHelper.NOW.toInstant(AuthenticationApplication.DEFAULT_ZONE_OFFSET), AuthenticationApplication.DEFAULT_TIME_ZONE.toZoneId());
                 OAuth2AuthorizationCode.setClock(createdClock);
 
-                this.storedRequest = mockAuthorizationRequest().configDefaultSetup().build();
-                this.code = new OAuth2AuthorizationCode(configDefaultCodeGenerator());
+                this.storedRequest = OAuth2AuthorizationCodeTestHelper.mockAuthorizationRequest().configDefaultSetup().build();
+                this.code = new OAuth2AuthorizationCode(OAuth2AuthorizationCodeTestHelper.configDefaultCodeGenerator());
 
-                Clock clock = Clock.fixed(EXPIRATION_DATETIME.plusNanos(1).toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
+                Clock clock = Clock.fixed(OAuth2AuthorizationCodeTestHelper.EXPIRATION_DATETIME.plusNanos(1).toInstant(AuthenticationApplication.DEFAULT_ZONE_OFFSET), AuthenticationApplication.DEFAULT_TIME_ZONE.toZoneId());
                 OAuth2AuthorizationCode.setClock(clock);
             }
 
@@ -156,13 +146,13 @@ class OAuth2AuthorizationCodeTest {
 
             @BeforeEach
             void setup() {
-                AuthorizationRequest storedRequest = mockAuthorizationRequest().configDefaultSetup().build();
+                AuthorizationRequest storedRequest = OAuth2AuthorizationCodeTestHelper.mockAuthorizationRequest().configDefaultSetup().build();
 
-                this.request = mockAuthorizationRequest().configDefaultSetup().configMismatchesState().build();
-                this.code = new OAuth2AuthorizationCode(configDefaultCodeGenerator());
+                this.request = OAuth2AuthorizationCodeTestHelper.mockAuthorizationRequest().configDefaultSetup().configMismatchesState().build();
+                this.code = new OAuth2AuthorizationCode(OAuth2AuthorizationCodeTestHelper.configDefaultCodeGenerator());
                 this.code.setAuthorizationRequest(storedRequest);
 
-                Clock clock = Clock.fixed(EXPIRATION_DATETIME.minusNanos(1).toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
+                Clock clock = Clock.fixed(OAuth2AuthorizationCodeTestHelper.EXPIRATION_DATETIME.minusNanos(1).toInstant(AuthenticationApplication.DEFAULT_ZONE_OFFSET), AuthenticationApplication.DEFAULT_TIME_ZONE.toZoneId());
                 OAuth2AuthorizationCode.setClock(clock);
             }
 
@@ -187,13 +177,13 @@ class OAuth2AuthorizationCodeTest {
 
                 @BeforeEach
                 void setup() {
-                    AuthorizationRequest storedRequest = mockAuthorizationRequest().configDefaultSetup().configRedirectUriNull().build();
+                    AuthorizationRequest storedRequest = OAuth2AuthorizationCodeTestHelper.mockAuthorizationRequest().configDefaultSetup().configRedirectUriNull().build();
 
-                    this.request = mockAuthorizationRequest().configDefaultSetup().configMismatchesRedirectUri().build();
-                    this.code = new OAuth2AuthorizationCode(configDefaultCodeGenerator());
+                    this.request = OAuth2AuthorizationCodeTestHelper.mockAuthorizationRequest().configDefaultSetup().configMismatchesRedirectUri().build();
+                    this.code = new OAuth2AuthorizationCode(OAuth2AuthorizationCodeTestHelper.configDefaultCodeGenerator());
                     this.code.setAuthorizationRequest(storedRequest);
 
-                    Clock clock = Clock.fixed(EXPIRATION_DATETIME.minusNanos(1).toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
+                    Clock clock = Clock.fixed(OAuth2AuthorizationCodeTestHelper.EXPIRATION_DATETIME.minusNanos(1).toInstant(AuthenticationApplication.DEFAULT_ZONE_OFFSET), AuthenticationApplication.DEFAULT_TIME_ZONE.toZoneId());
                     OAuth2AuthorizationCode.setClock(clock);
                 }
 
@@ -212,13 +202,13 @@ class OAuth2AuthorizationCodeTest {
 
                 @BeforeEach
                 void setup() {
-                    AuthorizationRequest storedRequest = mockAuthorizationRequest().configDefaultSetup().build();
+                    AuthorizationRequest storedRequest = OAuth2AuthorizationCodeTestHelper.mockAuthorizationRequest().configDefaultSetup().build();
 
-                    this.request = mockAuthorizationRequest().configDefaultSetup().configMismatchesRedirectUri().build();
-                    this.code = new OAuth2AuthorizationCode(configDefaultCodeGenerator());
+                    this.request = OAuth2AuthorizationCodeTestHelper.mockAuthorizationRequest().configDefaultSetup().configMismatchesRedirectUri().build();
+                    this.code = new OAuth2AuthorizationCode(OAuth2AuthorizationCodeTestHelper.configDefaultCodeGenerator());
                     this.code.setAuthorizationRequest(storedRequest);
 
-                    Clock clock = Clock.fixed(EXPIRATION_DATETIME.minusNanos(1).toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
+                    Clock clock = Clock.fixed(OAuth2AuthorizationCodeTestHelper.EXPIRATION_DATETIME.minusNanos(1).toInstant(AuthenticationApplication.DEFAULT_ZONE_OFFSET), AuthenticationApplication.DEFAULT_TIME_ZONE.toZoneId());
                     OAuth2AuthorizationCode.setClock(clock);
                 }
 
@@ -238,13 +228,13 @@ class OAuth2AuthorizationCodeTest {
 
             @BeforeEach
             void setup() {
-                AuthorizationRequest storedRequest = mockAuthorizationRequest().configDefaultSetup().build();
+                AuthorizationRequest storedRequest = OAuth2AuthorizationCodeTestHelper.mockAuthorizationRequest().configDefaultSetup().build();
 
-                this.request = mockAuthorizationRequest().configDefaultSetup().configMismatchesClientId().build();
-                this.code = new OAuth2AuthorizationCode(configDefaultCodeGenerator());
+                this.request = OAuth2AuthorizationCodeTestHelper.mockAuthorizationRequest().configDefaultSetup().configMismatchesClientId().build();
+                this.code = new OAuth2AuthorizationCode(OAuth2AuthorizationCodeTestHelper.configDefaultCodeGenerator());
                 this.code.setAuthorizationRequest(storedRequest);
 
-                Clock clock = Clock.fixed(EXPIRATION_DATETIME.minusNanos(1).toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
+                Clock clock = Clock.fixed(OAuth2AuthorizationCodeTestHelper.EXPIRATION_DATETIME.minusNanos(1).toInstant(AuthenticationApplication.DEFAULT_ZONE_OFFSET), AuthenticationApplication.DEFAULT_TIME_ZONE.toZoneId());
                 OAuth2AuthorizationCode.setClock(clock);
             }
 
@@ -269,15 +259,15 @@ class OAuth2AuthorizationCodeTest {
 
                 @BeforeEach
                 void setup() {
-                    Clock createdClock = Clock.fixed(NOW.toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
+                    Clock createdClock = Clock.fixed(OAuth2AuthorizationCodeTestHelper.NOW.toInstant(AuthenticationApplication.DEFAULT_ZONE_OFFSET), AuthenticationApplication.DEFAULT_TIME_ZONE.toZoneId());
                     OAuth2AuthorizationCode.setClock(createdClock);
-                    AuthorizationRequest storedRequest = mockAuthorizationRequest().configDefaultSetup().configRedirectUriNull().build();
+                    AuthorizationRequest storedRequest = OAuth2AuthorizationCodeTestHelper.mockAuthorizationRequest().configDefaultSetup().configRedirectUriNull().build();
 
-                    this.request = mockAuthorizationRequest().configDefaultSetup().configRedirectUriNull().build();
-                    this.code = new OAuth2AuthorizationCode(configDefaultCodeGenerator());
+                    this.request = OAuth2AuthorizationCodeTestHelper.mockAuthorizationRequest().configDefaultSetup().configRedirectUriNull().build();
+                    this.code = new OAuth2AuthorizationCode(OAuth2AuthorizationCodeTestHelper.configDefaultCodeGenerator());
                     this.code.setAuthorizationRequest(storedRequest);
 
-                    Clock clock = Clock.fixed(EXPIRATION_DATETIME.minusNanos(1).toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
+                    Clock clock = Clock.fixed(OAuth2AuthorizationCodeTestHelper.EXPIRATION_DATETIME.minusNanos(1).toInstant(AuthenticationApplication.DEFAULT_ZONE_OFFSET), AuthenticationApplication.DEFAULT_TIME_ZONE.toZoneId());
                     OAuth2AuthorizationCode.setClock(clock);
                 }
 
@@ -296,15 +286,15 @@ class OAuth2AuthorizationCodeTest {
 
                 @BeforeEach
                 void setup() {
-                    Clock createdClock = Clock.fixed(NOW.toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
+                    Clock createdClock = Clock.fixed(OAuth2AuthorizationCodeTestHelper.NOW.toInstant(AuthenticationApplication.DEFAULT_ZONE_OFFSET), AuthenticationApplication.DEFAULT_TIME_ZONE.toZoneId());
                     OAuth2AuthorizationCode.setClock(createdClock);
-                    AuthorizationRequest storedRequest = mockAuthorizationRequest().configDefaultSetup().build();
+                    AuthorizationRequest storedRequest = OAuth2AuthorizationCodeTestHelper.mockAuthorizationRequest().configDefaultSetup().build();
 
-                    this.request = mockAuthorizationRequest().configDefaultSetup().build();
-                    this.code = new OAuth2AuthorizationCode(configDefaultCodeGenerator());
+                    this.request = OAuth2AuthorizationCodeTestHelper.mockAuthorizationRequest().configDefaultSetup().build();
+                    this.code = new OAuth2AuthorizationCode(OAuth2AuthorizationCodeTestHelper.configDefaultCodeGenerator());
                     this.code.setAuthorizationRequest(storedRequest);
 
-                    Clock clock = Clock.fixed(EXPIRATION_DATETIME.minusNanos(1).toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
+                    Clock clock = Clock.fixed(OAuth2AuthorizationCodeTestHelper.EXPIRATION_DATETIME.minusNanos(1).toInstant(AuthenticationApplication.DEFAULT_ZONE_OFFSET), AuthenticationApplication.DEFAULT_TIME_ZONE.toZoneId());
                     OAuth2AuthorizationCode.setClock(clock);
                 }
 

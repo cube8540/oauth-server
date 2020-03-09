@@ -6,14 +6,14 @@ import cube8540.validator.core.ValidationRule;
 
 public class DefaultClientSecretValidationRule implements ValidationRule<OAuth2Client> {
 
-    private static final String PROPERTY = "secret";
-    private static final String MESSAGE = "클라이언트으 패스워드를 입력해 주세요.";
+    private static final String DEFAULT_PROPERTY = "secret";
+    private static final String DEFAULT_MESSAGE = "클라이언트으 패스워드를 입력해 주세요.";
 
     private String property;
     private String message;
 
     public DefaultClientSecretValidationRule() {
-        this(PROPERTY, MESSAGE);
+        this(DEFAULT_PROPERTY, DEFAULT_MESSAGE);
     }
 
     public DefaultClientSecretValidationRule(String property, String message) {
