@@ -3,6 +3,7 @@ plugins {
     id 'io.spring.dependency-management' version '1.0.8.RELEASE'
     id 'java'
     id 'org.sonarqube' version '2.7'
+    id 'jacoco'
 }
 
 group = 'cube8540.oauth'
@@ -27,6 +28,22 @@ sonarqube {
         property 'sonarqube.language', 'java'
         property 'sonar.host.url', 'http://192.168.0.5:9000'
         property 'sonar.login', '8388394f9a8839e8a676ad3ad9f2487fef29412d'
+        property 'sonar.jacoco.reportPaths', 'build/jacoco/jacoco.exec'
+    }
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+        csv.enabled false
+        html.destination file("${buildDir}/jacocoHtml")
+    }
+}
+
+test {
+    jacoco {
+        enabled = true
+        destinationFile = file("${buildDir}/jacoco/jacoco.exec")
     }
 }
 
