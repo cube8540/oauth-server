@@ -1,13 +1,13 @@
 package cube8540.oauth.authentication.credentials.oauth.token.endpoint;
 
-import cube8540.oauth.authentication.credentials.oauth.client.provider.ClientCredentialsToken;
+import cube8540.oauth.authentication.credentials.oauth.security.provider.ClientCredentialsToken;
 import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2AccessTokenReadService;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2Utils;
-import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
+import cube8540.oauth.authentication.credentials.oauth.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.error.AbstractOAuth2AuthenticationException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidRequestException;
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTranslator;
-import cube8540.oauth.authentication.credentials.oauth.token.OAuth2AccessTokenDetails;
+import cube8540.oauth.authentication.credentials.oauth.OAuth2AccessTokenDetails;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenRegistrationException;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;

@@ -1,6 +1,6 @@
 package cube8540.oauth.authentication.credentials.oauth.token.endpoint;
 
-import cube8540.oauth.authentication.credentials.oauth.token.OAuth2AccessTokenDetails;
+import cube8540.oauth.authentication.credentials.oauth.OAuth2AccessTokenDetails;
 
 import java.util.Map;
 

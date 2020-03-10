@@ -8,7 +8,7 @@ import cube8540.oauth.authentication.credentials.oauth.client.infra.rule.Default
 import cube8540.oauth.authentication.credentials.oauth.client.infra.rule.DefaultClientNameValidationRule;
 import cube8540.oauth.authentication.credentials.oauth.client.infra.rule.DefaultClientSecretValidationRule;
 import cube8540.oauth.authentication.credentials.oauth.client.infra.rule.DefaultOAuth2ClientOwnerValidationRule;
-import cube8540.oauth.authentication.credentials.oauth.scope.OAuth2AccessibleScopeDetailsService;
+import cube8540.oauth.authentication.credentials.oauth.OAuth2AccessibleScopeDetailsService;
 import cube8540.validator.core.ValidationRule;
 import lombok.Setter;
 import org.springframework.security.core.context.SecurityContextHolder;

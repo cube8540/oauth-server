@@ -3,9 +3,9 @@ package cube8540.oauth.authentication.credentials.oauth.scope.endpoint;
 import cube8540.oauth.authentication.credentials.oauth.scope.application.OAuth2ScopeManagementService;
 import cube8540.oauth.authentication.credentials.oauth.scope.application.OAuth2ScopeModifyRequest;
 import cube8540.oauth.authentication.credentials.oauth.scope.application.OAuth2ScopeRegisterRequest;
-import cube8540.oauth.authentication.credentials.oauth.scope.OAuth2AccessibleScopeDetailsService;
-import cube8540.oauth.authentication.credentials.oauth.scope.OAuth2ScopeDetails;
-import cube8540.oauth.authentication.credentials.oauth.scope.error.ScopeExceptionTranslator;
+import cube8540.oauth.authentication.credentials.oauth.OAuth2AccessibleScopeDetailsService;
+import cube8540.oauth.authentication.credentials.oauth.OAuth2ScopeDetails;
+import cube8540.oauth.authentication.credentials.oauth.error.ScopeAPIExceptionTranslator;
 import cube8540.oauth.authentication.error.message.ErrorMessage;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +33,7 @@ public class ScopeManagementAPIEndpoint {
     private final OAuth2AccessibleScopeDetailsService accessibleScopeDetailsService;
 
     @Setter
-    private ScopeExceptionTranslator translator = new ScopeExceptionTranslator();
+    private ScopeAPIExceptionTranslator translator = new ScopeAPIExceptionTranslator();
 
     @Autowired
     public ScopeManagementAPIEndpoint(OAuth2ScopeManagementService managementService, OAuth2AccessibleScopeDetailsService accessibleScopeDetailsService) {

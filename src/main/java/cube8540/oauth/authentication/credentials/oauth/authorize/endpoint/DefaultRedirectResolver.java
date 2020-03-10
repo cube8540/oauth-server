@@ -1,6 +1,6 @@
 package cube8540.oauth.authentication.credentials.oauth.authorize.endpoint;
 
-import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
+import cube8540.oauth.authentication.credentials.oauth.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidRequestException;
 import cube8540.oauth.authentication.credentials.oauth.error.RedirectMismatchException;
 

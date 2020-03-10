@@ -1,7 +1,7 @@
 package cube8540.oauth.authentication.credentials.oauth.token.application;
 
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidClientException;
-import cube8540.oauth.authentication.credentials.oauth.token.OAuth2AccessTokenDetails;
+import cube8540.oauth.authentication.credentials.oauth.OAuth2AccessTokenDetails;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenExpiredException;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenNotFoundException;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenRepository;
