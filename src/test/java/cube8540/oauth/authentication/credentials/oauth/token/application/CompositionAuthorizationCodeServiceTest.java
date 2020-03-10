@@ -15,7 +15,6 @@ import static cube8540.oauth.authentication.credentials.oauth.token.application.
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.CLIENT_ID;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.REDIRECT_URI;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.SCOPES;
-import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.STATE;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.USERNAME;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.mockAuthorizationCode;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.mockAuthorizationCodeRepository;
@@ -148,16 +147,6 @@ class CompositionAuthorizationCodeServiceTest {
             this.service.generateNewAuthorizationCode(authorizationRequest);
             verify(this.repository, times(1)).save(codeArgumentCaptor.capture());
             assertEquals(REDIRECT_URI, codeArgumentCaptor.getValue().getRedirectURI());
-        }
-
-        @Test
-        @DisplayName("인증 코드의 STATE 는 인증 요청 객체에 담긴 STATE 어야 한다.")
-        void shouldStateIsAuthorizationRequestState() {
-            ArgumentCaptor<OAuth2AuthorizationCode> codeArgumentCaptor = ArgumentCaptor.forClass(OAuth2AuthorizationCode.class);
-
-            this.service.generateNewAuthorizationCode(authorizationRequest);
-            verify(this.repository, times(1)).save(codeArgumentCaptor.capture());
-            assertEquals(STATE, codeArgumentCaptor.getValue().getState());
         }
 
         @Test
