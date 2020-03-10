@@ -1,8 +1,8 @@
 package cube8540.oauth.authentication.users.endpoint;
 
-import cube8540.oauth.authentication.error.message.ErrorMessage;
 import cube8540.oauth.authentication.users.application.UserCredentialsService;
 import cube8540.oauth.authentication.users.application.UserProfile;
+import cube8540.oauth.authentication.error.message.ErrorMessage;
 import cube8540.oauth.authentication.users.error.UserExceptionTranslator;
 import cube8540.oauth.authentication.users.error.UserNotFoundException;
 import lombok.Setter;
@@ -35,7 +35,7 @@ public class UserCredentialsAPIEndpoint {
     public UserProfile credentials(@RequestParam String credentialsKey, Map<String, Object> model, SessionStatus sessionStatus) {
         try {
             if (model.get(UserManagementAPIEndpoint.NEW_REGISTERED_USER_ATTRIBUTE) == null) {
-                throw new UserNotFoundException("Registered user not found");
+                throw UserNotFoundException.instance("Registered user is not found");
             }
             UserProfile registeredUser = (UserProfile) model.get(UserManagementAPIEndpoint.NEW_REGISTERED_USER_ATTRIBUTE);
             return service.accountCredentials(registeredUser.getEmail(), credentialsKey);

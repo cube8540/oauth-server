@@ -10,14 +10,14 @@ public class DefaultClientIdValidationRule implements ValidationRule<OAuth2Clien
 
     private static final String WHITELIST_PATTERN_VALUE = "^[_\\-a-zA-Z0-9]+$";
 
-    private static final String PROPERTY = "clientId";
-    private static final String MESSAGE = "아이디는 8 ~ 30글자 사이의 문자열로 입력해 주세요. (특수문자는 '-', '_' 만 가능합니다.)";
+    private static final String DEFAULT_PROPERTY = "clientId";
+    private static final String DEFAULT_MESSAGE = "아이디는 8 ~ 30글자 사이의 문자열로 입력해 주세요. (특수문자는 '-', '_' 만 가능합니다.)";
 
     private String property;
     private String message;
 
     public DefaultClientIdValidationRule() {
-        this(PROPERTY, MESSAGE);
+        this(DEFAULT_PROPERTY, DEFAULT_MESSAGE);
     }
 
     public DefaultClientIdValidationRule(String property, String message) {

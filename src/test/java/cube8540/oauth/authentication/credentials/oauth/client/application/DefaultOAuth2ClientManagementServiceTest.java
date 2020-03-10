@@ -9,6 +9,7 @@ import cube8540.oauth.authentication.credentials.oauth.client.error.ClientNotFou
 import cube8540.oauth.authentication.credentials.oauth.client.error.ClientRegisterException;
 import cube8540.validator.core.ValidationRule;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -18,39 +19,6 @@ import org.mockito.InOrder;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.CLIENT_ID;
-import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.CLIENT_NAME;
-import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.ENCODING_SECRET;
-import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.GRANT_TYPES;
-import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.MODIFY_CLIENT_NAME;
-import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.MODIFY_SECRET;
-import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.NEW_GRANT_TYPES;
-import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.NEW_REDIRECT_URIS;
-import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.NEW_SCOPES;
-import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.OWNER;
-import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.RAW_CLIENT_ID;
-import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.RAW_GRANT_TYPES;
-import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.RAW_NEW_GRANT_TYPES;
-import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.RAW_NEW_REDIRECT_URIS;
-import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.RAW_NEW_SCOPES;
-import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.RAW_REDIRECT_URIS;
-import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.RAW_REMOVE_GRANT_TYPES;
-import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.RAW_REMOVE_REDIRECT_URIS;
-import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.RAW_REMOVE_SCOPES;
-import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.RAW_SCOPES;
-import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.REDIRECT_URIS;
-import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.REMOVE_GRANT_TYPES;
-import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.REMOVE_REDIRECT_URIS;
-import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.REMOVE_SCOPES;
-import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.SCOPES;
-import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.SECRET;
-import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.mocKValidationRule;
-import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.mockAuthentication;
-import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.mockDifferentAuthentication;
-import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.mockOAuth2Client;
-import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.mockOAuth2ClientRepository;
-import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.mockPasswordEncoder;
-import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.mockValidationPolicy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -76,8 +44,8 @@ class DefaultOAuth2ClientManagementServiceTest {
 
             @BeforeEach
             void setup() {
-                this.request = new OAuth2ClientRegisterRequest(RAW_CLIENT_ID, SECRET, CLIENT_NAME, RAW_REDIRECT_URIS, RAW_SCOPES, RAW_GRANT_TYPES);
-                OAuth2ClientRepository repository = mockOAuth2ClientRepository().registerClient(mockOAuth2Client().build()).build();
+                this.request = new OAuth2ClientRegisterRequest(OAuth2ClientApplicationTestHelper.RAW_CLIENT_ID, OAuth2ClientApplicationTestHelper.SECRET, OAuth2ClientApplicationTestHelper.CLIENT_NAME, OAuth2ClientApplicationTestHelper.RAW_REDIRECT_URIS, OAuth2ClientApplicationTestHelper.RAW_SCOPES, OAuth2ClientApplicationTestHelper.RAW_GRANT_TYPES);
+                OAuth2ClientRepository repository = OAuth2ClientApplicationTestHelper.mockOAuth2ClientRepository().registerClient(OAuth2ClientApplicationTestHelper.mockOAuth2Client().build()).build();
 
                 this.service = new DefaultOAuth2ClientManagementService(repository);
             }
@@ -86,7 +54,7 @@ class DefaultOAuth2ClientManagementServiceTest {
             @DisplayName("ClientRegisterException 이 발생해야 하며 에러 코드는 EXISTS_IDENTIFIER 이어야 한다.")
             void shouldThrowsClientRegisterException() {
                 ClientRegisterException e = assertThrows(ClientRegisterException.class, () -> service.registerNewClient(request));
-                assertEquals(ClientErrorCodes.EXISTS_IDENTIFIER, e.getCode());
+                Assertions.assertEquals(ClientErrorCodes.EXISTS_IDENTIFIER, e.getCode());
             }
         }
 
@@ -106,23 +74,23 @@ class DefaultOAuth2ClientManagementServiceTest {
 
             @BeforeEach
             void setup() {
-                this.request = new OAuth2ClientRegisterRequest(RAW_CLIENT_ID, SECRET, CLIENT_NAME, RAW_REDIRECT_URIS, RAW_SCOPES, RAW_GRANT_TYPES);
-                this.clientIdRule = mocKValidationRule().configValidationTrue().build();
-                this.secretRule = mocKValidationRule().configValidationTrue().build();
-                this.clientNameRule = mocKValidationRule().configValidationTrue().build();
-                this.grantTypeRule = mocKValidationRule().configValidationTrue().build();
-                this.scopeRule = mocKValidationRule().configValidationTrue().build();
-                this.ownerRule = mocKValidationRule().configValidationTrue().build();
-                this.repository = mockOAuth2ClientRepository().emptyClient().build();
+                this.request = new OAuth2ClientRegisterRequest(OAuth2ClientApplicationTestHelper.RAW_CLIENT_ID, OAuth2ClientApplicationTestHelper.SECRET, OAuth2ClientApplicationTestHelper.CLIENT_NAME, OAuth2ClientApplicationTestHelper.RAW_REDIRECT_URIS, OAuth2ClientApplicationTestHelper.RAW_SCOPES, OAuth2ClientApplicationTestHelper.RAW_GRANT_TYPES);
+                this.clientIdRule = OAuth2ClientApplicationTestHelper.mocKValidationRule().configValidationTrue().build();
+                this.secretRule = OAuth2ClientApplicationTestHelper.mocKValidationRule().configValidationTrue().build();
+                this.clientNameRule = OAuth2ClientApplicationTestHelper.mocKValidationRule().configValidationTrue().build();
+                this.grantTypeRule = OAuth2ClientApplicationTestHelper.mocKValidationRule().configValidationTrue().build();
+                this.scopeRule = OAuth2ClientApplicationTestHelper.mocKValidationRule().configValidationTrue().build();
+                this.ownerRule = OAuth2ClientApplicationTestHelper.mocKValidationRule().configValidationTrue().build();
+                this.repository = OAuth2ClientApplicationTestHelper.mockOAuth2ClientRepository().emptyClient().build();
 
-                OAuth2ClientValidatePolicy policy = mockValidationPolicy().clientIdRule(clientIdRule).secretRule(secretRule)
+                OAuth2ClientValidatePolicy policy = OAuth2ClientApplicationTestHelper.mockValidationPolicy().clientIdRule(clientIdRule).secretRule(secretRule)
                         .clientNameRule(clientNameRule).grantTypeRule(grantTypeRule).scopeRule(scopeRule).ownerRule(ownerRule).build();
 
                 this.service = new DefaultOAuth2ClientManagementService(repository);
-                this.service.setPasswordEncoder(mockPasswordEncoder().encode(SECRET, ENCODING_SECRET).build());
+                this.service.setPasswordEncoder(OAuth2ClientApplicationTestHelper.mockPasswordEncoder().encode(OAuth2ClientApplicationTestHelper.SECRET, OAuth2ClientApplicationTestHelper.ENCODING_SECRET).build());
                 this.service.setValidatePolicy(policy);
 
-                SecurityContextHolder.getContext().setAuthentication(mockAuthentication());
+                SecurityContextHolder.getContext().setAuthentication(OAuth2ClientApplicationTestHelper.mockAuthentication());
             }
 
             @Test
@@ -132,7 +100,7 @@ class DefaultOAuth2ClientManagementServiceTest {
 
                 service.registerNewClient(request);
                 verifySaveAfterValidation(clientIdRule, clientCaptor);
-                assertEquals(CLIENT_ID, clientCaptor.getValue().getClientId());
+                Assertions.assertEquals(OAuth2ClientApplicationTestHelper.CLIENT_ID, clientCaptor.getValue().getClientId());
             }
 
             @Test
@@ -142,7 +110,7 @@ class DefaultOAuth2ClientManagementServiceTest {
 
                 service.registerNewClient(request);
                 verifySaveAfterValidation(secretRule, clientCaptor);
-                assertEquals(ENCODING_SECRET, clientCaptor.getValue().getSecret());
+                Assertions.assertEquals(OAuth2ClientApplicationTestHelper.ENCODING_SECRET, clientCaptor.getValue().getSecret());
             }
 
             @Test
@@ -152,7 +120,7 @@ class DefaultOAuth2ClientManagementServiceTest {
 
                 service.registerNewClient(request);
                 verifySaveAfterValidation(clientNameRule, clientCaptor);
-                assertEquals(CLIENT_NAME, clientCaptor.getValue().getClientName());
+                Assertions.assertEquals(OAuth2ClientApplicationTestHelper.CLIENT_NAME, clientCaptor.getValue().getClientName());
             }
 
             @Nested
@@ -162,7 +130,7 @@ class DefaultOAuth2ClientManagementServiceTest {
 
                 @BeforeEach
                 void setup() {
-                    this.request = new OAuth2ClientRegisterRequest(RAW_CLIENT_ID, SECRET, CLIENT_NAME, RAW_REDIRECT_URIS, RAW_SCOPES, null);
+                    this.request = new OAuth2ClientRegisterRequest(OAuth2ClientApplicationTestHelper.RAW_CLIENT_ID, OAuth2ClientApplicationTestHelper.SECRET, OAuth2ClientApplicationTestHelper.CLIENT_NAME, OAuth2ClientApplicationTestHelper.RAW_REDIRECT_URIS, OAuth2ClientApplicationTestHelper.RAW_SCOPES, null);
                 }
 
                 @Test
@@ -183,7 +151,7 @@ class DefaultOAuth2ClientManagementServiceTest {
 
                 service.registerNewClient(request);
                 verifySaveAfterValidation(grantTypeRule, clientCaptor);
-                assertEquals(GRANT_TYPES, clientCaptor.getValue().getGrantTypes());
+                Assertions.assertEquals(OAuth2ClientApplicationTestHelper.GRANT_TYPES, clientCaptor.getValue().getGrantTypes());
             }
 
             @Nested
@@ -193,7 +161,7 @@ class DefaultOAuth2ClientManagementServiceTest {
 
                 @BeforeEach
                 void setup() {
-                    this.request = new OAuth2ClientRegisterRequest(RAW_CLIENT_ID, SECRET, CLIENT_NAME, RAW_REDIRECT_URIS, null, RAW_GRANT_TYPES);
+                    this.request = new OAuth2ClientRegisterRequest(OAuth2ClientApplicationTestHelper.RAW_CLIENT_ID, OAuth2ClientApplicationTestHelper.SECRET, OAuth2ClientApplicationTestHelper.CLIENT_NAME, OAuth2ClientApplicationTestHelper.RAW_REDIRECT_URIS, null, OAuth2ClientApplicationTestHelper.RAW_GRANT_TYPES);
                 }
 
                 @Test
@@ -214,7 +182,7 @@ class DefaultOAuth2ClientManagementServiceTest {
 
                 service.registerNewClient(request);
                 verifySaveAfterValidation(scopeRule, clientCaptor);
-                assertEquals(SCOPES, clientCaptor.getValue().getScopes());
+                Assertions.assertEquals(OAuth2ClientApplicationTestHelper.SCOPES, clientCaptor.getValue().getScopes());
             }
 
             @Test
@@ -224,7 +192,7 @@ class DefaultOAuth2ClientManagementServiceTest {
 
                 service.registerNewClient(request);
                 verifySaveAfterValidation(ownerRule, clientCaptor);
-                assertEquals(OWNER, clientCaptor.getValue().getOwner());
+                Assertions.assertEquals(OAuth2ClientApplicationTestHelper.OWNER, clientCaptor.getValue().getOwner());
             }
 
             @Nested
@@ -234,7 +202,7 @@ class DefaultOAuth2ClientManagementServiceTest {
 
                 @BeforeEach
                 void setup() {
-                    this.request = new OAuth2ClientRegisterRequest(RAW_CLIENT_ID, SECRET, CLIENT_NAME, null, RAW_SCOPES, RAW_GRANT_TYPES);
+                    this.request = new OAuth2ClientRegisterRequest(OAuth2ClientApplicationTestHelper.RAW_CLIENT_ID, OAuth2ClientApplicationTestHelper.SECRET, OAuth2ClientApplicationTestHelper.CLIENT_NAME, null, OAuth2ClientApplicationTestHelper.RAW_SCOPES, OAuth2ClientApplicationTestHelper.RAW_GRANT_TYPES);
                 }
 
                 @Test
@@ -255,7 +223,7 @@ class DefaultOAuth2ClientManagementServiceTest {
 
                 service.registerNewClient(request);
                 verify(repository, times(1)).save(clientCaptor.capture());
-                assertEquals(REDIRECT_URIS, clientCaptor.getValue().getRedirectUris());
+                Assertions.assertEquals(OAuth2ClientApplicationTestHelper.REDIRECT_URIS, clientCaptor.getValue().getRedirectUris());
             }
 
             private void verifySaveAfterValidation(ValidationRule<OAuth2Client> rule, ArgumentCaptor<OAuth2Client> argumentCaptor) {
@@ -283,10 +251,10 @@ class DefaultOAuth2ClientManagementServiceTest {
             @Test
             @DisplayName("ClientNotFoundException 이 발생해야 한다.")
             void shouldThrowsClientNotFoundException() {
-                OAuth2ClientModifyRequest modifyRequest = new OAuth2ClientModifyRequest(MODIFY_CLIENT_NAME, RAW_NEW_REDIRECT_URIS, RAW_REMOVE_REDIRECT_URIS,
-                        RAW_NEW_GRANT_TYPES, RAW_REMOVE_GRANT_TYPES, RAW_NEW_SCOPES, RAW_REMOVE_SCOPES);
+                OAuth2ClientModifyRequest modifyRequest = new OAuth2ClientModifyRequest(OAuth2ClientApplicationTestHelper.MODIFY_CLIENT_NAME, OAuth2ClientApplicationTestHelper.RAW_NEW_REDIRECT_URIS, OAuth2ClientApplicationTestHelper.RAW_REMOVE_REDIRECT_URIS,
+                        OAuth2ClientApplicationTestHelper.RAW_NEW_GRANT_TYPES, OAuth2ClientApplicationTestHelper.RAW_REMOVE_GRANT_TYPES, OAuth2ClientApplicationTestHelper.RAW_NEW_SCOPES, OAuth2ClientApplicationTestHelper.RAW_REMOVE_SCOPES);
 
-                assertThrows(ClientNotFoundException.class, () -> service.modifyClient(RAW_CLIENT_ID, modifyRequest));
+                assertThrows(ClientNotFoundException.class, () -> service.modifyClient(OAuth2ClientApplicationTestHelper.RAW_CLIENT_ID, modifyRequest));
             }
         }
 
@@ -301,10 +269,10 @@ class DefaultOAuth2ClientManagementServiceTest {
                 @Test
                 @DisplayName("ClientAuthorizationException 이 발생해야 하며 에러 코드는 INVALID_OWNER 이어야 한다.")
                 void shouldThrowsClientAuthorizationException() {
-                    OAuth2ClientModifyRequest modifyRequest = new OAuth2ClientModifyRequest(MODIFY_CLIENT_NAME, RAW_NEW_REDIRECT_URIS, RAW_REMOVE_REDIRECT_URIS,
-                            RAW_NEW_GRANT_TYPES, RAW_REMOVE_GRANT_TYPES, RAW_NEW_SCOPES, RAW_REMOVE_SCOPES);
+                    OAuth2ClientModifyRequest modifyRequest = new OAuth2ClientModifyRequest(OAuth2ClientApplicationTestHelper.MODIFY_CLIENT_NAME, OAuth2ClientApplicationTestHelper.RAW_NEW_REDIRECT_URIS, OAuth2ClientApplicationTestHelper.RAW_REMOVE_REDIRECT_URIS,
+                            OAuth2ClientApplicationTestHelper.RAW_NEW_GRANT_TYPES, OAuth2ClientApplicationTestHelper.RAW_REMOVE_GRANT_TYPES, OAuth2ClientApplicationTestHelper.RAW_NEW_SCOPES, OAuth2ClientApplicationTestHelper.RAW_REMOVE_SCOPES);
 
-                    ClientAuthorizationException e = assertThrows(ClientAuthorizationException.class, () -> service.modifyClient(RAW_CLIENT_ID, modifyRequest));
+                    ClientAuthorizationException e = assertThrows(ClientAuthorizationException.class, () -> service.modifyClient(OAuth2ClientApplicationTestHelper.RAW_CLIENT_ID, modifyRequest));
                     assertEquals(ClientErrorCodes.INVALID_OWNER, e.getCode());
                 }
             }
@@ -317,9 +285,9 @@ class DefaultOAuth2ClientManagementServiceTest {
 
                 @BeforeEach
                 void setupConfig() {
-                    this.modifyRequest = new OAuth2ClientModifyRequest(MODIFY_CLIENT_NAME, RAW_NEW_REDIRECT_URIS, RAW_REMOVE_REDIRECT_URIS,
-                            RAW_NEW_GRANT_TYPES, RAW_REMOVE_GRANT_TYPES, RAW_NEW_SCOPES, RAW_REMOVE_SCOPES);
-                    this.policy = mockValidationPolicy().build();
+                    this.modifyRequest = new OAuth2ClientModifyRequest(OAuth2ClientApplicationTestHelper.MODIFY_CLIENT_NAME, OAuth2ClientApplicationTestHelper.RAW_NEW_REDIRECT_URIS, OAuth2ClientApplicationTestHelper.RAW_REMOVE_REDIRECT_URIS,
+                            OAuth2ClientApplicationTestHelper.RAW_NEW_GRANT_TYPES, OAuth2ClientApplicationTestHelper.RAW_REMOVE_GRANT_TYPES, OAuth2ClientApplicationTestHelper.RAW_NEW_SCOPES, OAuth2ClientApplicationTestHelper.RAW_REMOVE_SCOPES);
+                    this.policy = OAuth2ClientApplicationTestHelper.mockValidationPolicy().build();
                     this.service.setValidatePolicy(policy);
                 }
 
@@ -328,8 +296,8 @@ class DefaultOAuth2ClientManagementServiceTest {
                 void shouldModifyClientNameToRequestingClientName() {
                     InOrder inOrder = inOrder(client);
 
-                    service.modifyClient(RAW_CLIENT_ID, modifyRequest);
-                    inOrder.verify(client, times(1)).setClientName(MODIFY_CLIENT_NAME);
+                    service.modifyClient(OAuth2ClientApplicationTestHelper.RAW_CLIENT_ID, modifyRequest);
+                    inOrder.verify(client, times(1)).setClientName(OAuth2ClientApplicationTestHelper.MODIFY_CLIENT_NAME);
                     inOrder.verify(client, times(1)).validate(policy);
                 }
 
@@ -340,14 +308,14 @@ class DefaultOAuth2ClientManagementServiceTest {
 
                     @BeforeEach
                     void setup() {
-                        this.request = new OAuth2ClientModifyRequest(MODIFY_CLIENT_NAME, RAW_NEW_REDIRECT_URIS, null,
-                                RAW_NEW_GRANT_TYPES, RAW_REMOVE_GRANT_TYPES, RAW_NEW_SCOPES, RAW_REMOVE_SCOPES);
+                        this.request = new OAuth2ClientModifyRequest(OAuth2ClientApplicationTestHelper.MODIFY_CLIENT_NAME, OAuth2ClientApplicationTestHelper.RAW_NEW_REDIRECT_URIS, null,
+                                OAuth2ClientApplicationTestHelper.RAW_NEW_GRANT_TYPES, OAuth2ClientApplicationTestHelper.RAW_REMOVE_GRANT_TYPES, OAuth2ClientApplicationTestHelper.RAW_NEW_SCOPES, OAuth2ClientApplicationTestHelper.RAW_REMOVE_SCOPES);
                     }
 
                     @Test
                     @DisplayName("클라이언트의 리다이렉트 URI 를 삭제하지 않아야 한다.")
                     void shouldNotRemoveClientsRedirectUri() {
-                        service.modifyClient(RAW_CLIENT_ID, request);
+                        service.modifyClient(OAuth2ClientApplicationTestHelper.RAW_CLIENT_ID, request);
                         verify(client, never()).removeRedirectUri(any());
                     }
                 }
@@ -359,14 +327,14 @@ class DefaultOAuth2ClientManagementServiceTest {
 
                     @BeforeEach
                     void setup() {
-                        this.request = new OAuth2ClientModifyRequest(MODIFY_CLIENT_NAME, null, RAW_REMOVE_REDIRECT_URIS,
-                                RAW_NEW_GRANT_TYPES, RAW_REMOVE_GRANT_TYPES, RAW_NEW_SCOPES, RAW_REMOVE_SCOPES);
+                        this.request = new OAuth2ClientModifyRequest(OAuth2ClientApplicationTestHelper.MODIFY_CLIENT_NAME, null, OAuth2ClientApplicationTestHelper.RAW_REMOVE_REDIRECT_URIS,
+                                OAuth2ClientApplicationTestHelper.RAW_NEW_GRANT_TYPES, OAuth2ClientApplicationTestHelper.RAW_REMOVE_GRANT_TYPES, OAuth2ClientApplicationTestHelper.RAW_NEW_SCOPES, OAuth2ClientApplicationTestHelper.RAW_REMOVE_SCOPES);
                     }
 
                     @Test
                     @DisplayName("클라이언트의 리다이렉트 URI를 추가하지 않아야 한다.")
                     void shouldNotAddClientsRedirectUri() {
-                        service.modifyClient(RAW_CLIENT_ID, request);
+                        service.modifyClient(OAuth2ClientApplicationTestHelper.RAW_CLIENT_ID, request);
                         verify(client, never()).addRedirectUri(any());
                     }
                 }
@@ -378,14 +346,14 @@ class DefaultOAuth2ClientManagementServiceTest {
 
                     @BeforeEach
                     void setup() {
-                        this.request = new OAuth2ClientModifyRequest(MODIFY_CLIENT_NAME, RAW_NEW_REDIRECT_URIS, RAW_REMOVE_REDIRECT_URIS,
-                                RAW_NEW_GRANT_TYPES, null, RAW_NEW_SCOPES, RAW_REMOVE_SCOPES);
+                        this.request = new OAuth2ClientModifyRequest(OAuth2ClientApplicationTestHelper.MODIFY_CLIENT_NAME, OAuth2ClientApplicationTestHelper.RAW_NEW_REDIRECT_URIS, OAuth2ClientApplicationTestHelper.RAW_REMOVE_REDIRECT_URIS,
+                                OAuth2ClientApplicationTestHelper.RAW_NEW_GRANT_TYPES, null, OAuth2ClientApplicationTestHelper.RAW_NEW_SCOPES, OAuth2ClientApplicationTestHelper.RAW_REMOVE_SCOPES);
                     }
 
                     @Test
                     @DisplayName("클라이언트의 권한 부여 방식을 삭제하지 않아야 한다.")
                     void shouldNotRemoveClientsGrantType() {
-                        service.modifyClient(RAW_CLIENT_ID, request);
+                        service.modifyClient(OAuth2ClientApplicationTestHelper.RAW_CLIENT_ID, request);
                         verify(client, never()).removeGrantType(any());
                     }
                 }
@@ -397,14 +365,14 @@ class DefaultOAuth2ClientManagementServiceTest {
 
                     @BeforeEach
                     void setup() {
-                        this.request = new OAuth2ClientModifyRequest(MODIFY_CLIENT_NAME, RAW_NEW_REDIRECT_URIS, RAW_REMOVE_REDIRECT_URIS,
-                                null, RAW_REMOVE_GRANT_TYPES, RAW_NEW_SCOPES, RAW_REMOVE_SCOPES);
+                        this.request = new OAuth2ClientModifyRequest(OAuth2ClientApplicationTestHelper.MODIFY_CLIENT_NAME, OAuth2ClientApplicationTestHelper.RAW_NEW_REDIRECT_URIS, OAuth2ClientApplicationTestHelper.RAW_REMOVE_REDIRECT_URIS,
+                                null, OAuth2ClientApplicationTestHelper.RAW_REMOVE_GRANT_TYPES, OAuth2ClientApplicationTestHelper.RAW_NEW_SCOPES, OAuth2ClientApplicationTestHelper.RAW_REMOVE_SCOPES);
                     }
 
                     @Test
                     @DisplayName("클라이언트의 권한 부여 방식을 추가하지 않아야 한다.")
                     void shouldNotAddClientsGrantType() {
-                        service.modifyClient(RAW_CLIENT_ID, request);
+                        service.modifyClient(OAuth2ClientApplicationTestHelper.RAW_CLIENT_ID, request);
                         verify(client, never()).addGrantType(any());
                     }
                 }
@@ -416,14 +384,14 @@ class DefaultOAuth2ClientManagementServiceTest {
 
                     @BeforeEach
                     void setup() {
-                        this.request = new OAuth2ClientModifyRequest(MODIFY_CLIENT_NAME, RAW_NEW_REDIRECT_URIS, RAW_REMOVE_REDIRECT_URIS,
-                                RAW_NEW_GRANT_TYPES, RAW_REMOVE_GRANT_TYPES, RAW_NEW_SCOPES, null);
+                        this.request = new OAuth2ClientModifyRequest(OAuth2ClientApplicationTestHelper.MODIFY_CLIENT_NAME, OAuth2ClientApplicationTestHelper.RAW_NEW_REDIRECT_URIS, OAuth2ClientApplicationTestHelper.RAW_REMOVE_REDIRECT_URIS,
+                                OAuth2ClientApplicationTestHelper.RAW_NEW_GRANT_TYPES, OAuth2ClientApplicationTestHelper.RAW_REMOVE_GRANT_TYPES, OAuth2ClientApplicationTestHelper.RAW_NEW_SCOPES, null);
                     }
 
                     @Test
                     @DisplayName("클라이언트의 스코프를 삭제하지 않아야 한다.")
                     void shouldNotRemoveClientsScope() {
-                        service.modifyClient(RAW_CLIENT_ID, request);
+                        service.modifyClient(OAuth2ClientApplicationTestHelper.RAW_CLIENT_ID, request);
                         verify(client, never()).removeScope(any());
                     }
                 }
@@ -435,14 +403,14 @@ class DefaultOAuth2ClientManagementServiceTest {
 
                     @BeforeEach
                     void setup() {
-                        this.request = new OAuth2ClientModifyRequest(MODIFY_CLIENT_NAME, RAW_NEW_REDIRECT_URIS, RAW_REMOVE_REDIRECT_URIS,
-                                RAW_NEW_GRANT_TYPES, RAW_REMOVE_GRANT_TYPES, null, RAW_REMOVE_SCOPES);
+                        this.request = new OAuth2ClientModifyRequest(OAuth2ClientApplicationTestHelper.MODIFY_CLIENT_NAME, OAuth2ClientApplicationTestHelper.RAW_NEW_REDIRECT_URIS, OAuth2ClientApplicationTestHelper.RAW_REMOVE_REDIRECT_URIS,
+                                OAuth2ClientApplicationTestHelper.RAW_NEW_GRANT_TYPES, OAuth2ClientApplicationTestHelper.RAW_REMOVE_GRANT_TYPES, null, OAuth2ClientApplicationTestHelper.RAW_REMOVE_SCOPES);
                     }
 
                     @Test
                     @DisplayName("클라이언트의 스코프를 추가하지 않아야 한다.")
                     void shouldNotAddClientsScope() {
-                        service.modifyClient(RAW_CLIENT_ID, request);
+                        service.modifyClient(OAuth2ClientApplicationTestHelper.RAW_CLIENT_ID, request);
                         verify(client, never()).addScope(any());
                     }
                 }
@@ -452,9 +420,9 @@ class DefaultOAuth2ClientManagementServiceTest {
                 void shouldRemoveRequestingRedirectUrisAndAddRequestingNewRedirectUris() {
                     InOrder inOrder = inOrder(client);
 
-                    service.modifyClient(RAW_CLIENT_ID, modifyRequest);
-                    REMOVE_REDIRECT_URIS.forEach(uri -> inOrder.verify(client, times(1)).removeRedirectUri(uri));
-                    NEW_REDIRECT_URIS.forEach(uri -> inOrder.verify(client, times(1)).addRedirectUri(uri));
+                    service.modifyClient(OAuth2ClientApplicationTestHelper.RAW_CLIENT_ID, modifyRequest);
+                    OAuth2ClientApplicationTestHelper.REMOVE_REDIRECT_URIS.forEach(uri -> inOrder.verify(client, times(1)).removeRedirectUri(uri));
+                    OAuth2ClientApplicationTestHelper.NEW_REDIRECT_URIS.forEach(uri -> inOrder.verify(client, times(1)).addRedirectUri(uri));
                 }
 
                 @Test
@@ -462,9 +430,9 @@ class DefaultOAuth2ClientManagementServiceTest {
                 void shouldValidationClientAfterRemoveRequestingGrantTypeAndAddRequestingGrant() {
                     InOrder inOrder = inOrder(client);
 
-                    service.modifyClient(RAW_CLIENT_ID, modifyRequest);
-                    REMOVE_GRANT_TYPES.forEach(grant -> inOrder.verify(client, times(1)).removeGrantType(grant));
-                    NEW_GRANT_TYPES.forEach(grant -> inOrder.verify(client, times(1)).addGrantType(grant));
+                    service.modifyClient(OAuth2ClientApplicationTestHelper.RAW_CLIENT_ID, modifyRequest);
+                    OAuth2ClientApplicationTestHelper.REMOVE_GRANT_TYPES.forEach(grant -> inOrder.verify(client, times(1)).removeGrantType(grant));
+                    OAuth2ClientApplicationTestHelper.NEW_GRANT_TYPES.forEach(grant -> inOrder.verify(client, times(1)).addGrantType(grant));
                     inOrder.verify(client, times(1)).validate(policy);
                 }
 
@@ -473,9 +441,9 @@ class DefaultOAuth2ClientManagementServiceTest {
                 void shouldValidationClientAfterRemoveRequestingScopeAndAddRequestingNewScope() {
                     InOrder inOrder = inOrder(client);
 
-                    service.modifyClient(RAW_CLIENT_ID, modifyRequest);
-                    REMOVE_SCOPES.forEach(scope -> inOrder.verify(client, times(1)).removeScope(scope));
-                    NEW_SCOPES.forEach(scope -> inOrder.verify(client, times(1)).addScope(scope));
+                    service.modifyClient(OAuth2ClientApplicationTestHelper.RAW_CLIENT_ID, modifyRequest);
+                    OAuth2ClientApplicationTestHelper.REMOVE_SCOPES.forEach(scope -> inOrder.verify(client, times(1)).removeScope(scope));
+                    OAuth2ClientApplicationTestHelper.NEW_SCOPES.forEach(scope -> inOrder.verify(client, times(1)).addScope(scope));
                     inOrder.verify(client, times(1)).validate(policy);
                 }
 
@@ -484,7 +452,7 @@ class DefaultOAuth2ClientManagementServiceTest {
                 void shouldSaveModifiedClientAfterValidation() {
                     InOrder inOrder = inOrder(client, repository);
 
-                    service.modifyClient(RAW_CLIENT_ID, modifyRequest);
+                    service.modifyClient(OAuth2ClientApplicationTestHelper.RAW_CLIENT_ID, modifyRequest);
                     inOrder.verify(client, times(1)).validate(policy);
                     inOrder.verify(repository, times(1)).save(client);
                 }
@@ -503,9 +471,9 @@ class DefaultOAuth2ClientManagementServiceTest {
             @Test
             @DisplayName("ClientNotFoundException 이 발생해야 한다.")
             void shouldThrowsClientNotFoundException() {
-                OAuth2ChangeSecretRequest changeRequest = new OAuth2ChangeSecretRequest(SECRET, MODIFY_SECRET);
+                OAuth2ChangeSecretRequest changeRequest = new OAuth2ChangeSecretRequest(OAuth2ClientApplicationTestHelper.SECRET, OAuth2ClientApplicationTestHelper.MODIFY_SECRET);
 
-                assertThrows(ClientNotFoundException.class, () -> service.changeSecret(RAW_CLIENT_ID, changeRequest));
+                assertThrows(ClientNotFoundException.class, () -> service.changeSecret(OAuth2ClientApplicationTestHelper.RAW_CLIENT_ID, changeRequest));
             }
         }
 
@@ -520,9 +488,9 @@ class DefaultOAuth2ClientManagementServiceTest {
                 @Test
                 @DisplayName("ClientAuthorizationException 이 발생해야 하며 에러 코드는 INVALID_OWNER 이어야 한다.")
                 void shouldThrowsClientAuthorizationException() {
-                    OAuth2ChangeSecretRequest changeRequest = new OAuth2ChangeSecretRequest(SECRET, MODIFY_SECRET);
+                    OAuth2ChangeSecretRequest changeRequest = new OAuth2ChangeSecretRequest(OAuth2ClientApplicationTestHelper.SECRET, OAuth2ClientApplicationTestHelper.MODIFY_SECRET);
 
-                    ClientAuthorizationException e = assertThrows(ClientAuthorizationException.class, () -> service.changeSecret(RAW_CLIENT_ID, changeRequest));
+                    ClientAuthorizationException e = assertThrows(ClientAuthorizationException.class, () -> service.changeSecret(OAuth2ClientApplicationTestHelper.RAW_CLIENT_ID, changeRequest));
                     assertEquals(ClientErrorCodes.INVALID_OWNER, e.getCode());
                 }
             }
@@ -536,9 +504,9 @@ class DefaultOAuth2ClientManagementServiceTest {
 
                 @BeforeEach
                 void setupConfig() {
-                    this.changeRequest = new OAuth2ChangeSecretRequest(SECRET, MODIFY_SECRET);
-                    this.passwordEncoder = mockPasswordEncoder().build();
-                    this.policy = mockValidationPolicy().build();
+                    this.changeRequest = new OAuth2ChangeSecretRequest(OAuth2ClientApplicationTestHelper.SECRET, OAuth2ClientApplicationTestHelper.MODIFY_SECRET);
+                    this.passwordEncoder = OAuth2ClientApplicationTestHelper.mockPasswordEncoder().build();
+                    this.policy = OAuth2ClientApplicationTestHelper.mockValidationPolicy().build();
                     this.service.setValidatePolicy(policy);
                     this.service.setPasswordEncoder(passwordEncoder);
                 }
@@ -548,8 +516,8 @@ class DefaultOAuth2ClientManagementServiceTest {
                 void shouldChangeClientSecretToRequestingSecret() {
                     InOrder inOrder = inOrder(client);
 
-                    service.changeSecret(RAW_CLIENT_ID, changeRequest);
-                    inOrder.verify(client, times(1)).changeSecret(SECRET, MODIFY_SECRET, passwordEncoder);
+                    service.changeSecret(OAuth2ClientApplicationTestHelper.RAW_CLIENT_ID, changeRequest);
+                    inOrder.verify(client, times(1)).changeSecret(OAuth2ClientApplicationTestHelper.SECRET, OAuth2ClientApplicationTestHelper.MODIFY_SECRET, passwordEncoder);
                     inOrder.verify(client, times(1)).validate(policy);
                 }
 
@@ -558,7 +526,7 @@ class DefaultOAuth2ClientManagementServiceTest {
                 void shouldEncryptedSecretAfterValidation() {
                     InOrder inOrder = inOrder(client);
 
-                    service.changeSecret(RAW_CLIENT_ID, changeRequest);
+                    service.changeSecret(OAuth2ClientApplicationTestHelper.RAW_CLIENT_ID, changeRequest);
                     inOrder.verify(client, times(1)).validate(policy);
                     inOrder.verify(client, times(1)).encrypted(passwordEncoder);
                 }
@@ -568,7 +536,7 @@ class DefaultOAuth2ClientManagementServiceTest {
                 void shouldSaveClientInRepositoryAfterEncrypted() {
                     InOrder inOrder = inOrder(client, repository);
 
-                    service.changeSecret(RAW_CLIENT_ID, changeRequest);
+                    service.changeSecret(OAuth2ClientApplicationTestHelper.RAW_CLIENT_ID, changeRequest);
                     inOrder.verify(client, times(1)).encrypted(passwordEncoder);
                     inOrder.verify(repository, times(1)).save(client);
                 }
@@ -587,7 +555,7 @@ class DefaultOAuth2ClientManagementServiceTest {
             @Test
             @DisplayName("ClientNotFoundException 이 발생해야 한다.")
             void shouldThrowsClientNotFoundException() {
-                assertThrows(ClientNotFoundException.class, () -> service.removeClient(RAW_CLIENT_ID));
+                assertThrows(ClientNotFoundException.class, () -> service.removeClient(OAuth2ClientApplicationTestHelper.RAW_CLIENT_ID));
             }
         }
 
@@ -602,7 +570,7 @@ class DefaultOAuth2ClientManagementServiceTest {
                 @Test
                 @DisplayName("ClientAuthorizationException 이 발생해야 하며 에러 코드는 INVALID_OWNER 이어야 한다.")
                 void shouldThrowsClientAuthorizationException() {
-                    ClientAuthorizationException e = assertThrows(ClientAuthorizationException.class, () -> service.removeClient(RAW_CLIENT_ID));
+                    ClientAuthorizationException e = assertThrows(ClientAuthorizationException.class, () -> service.removeClient(OAuth2ClientApplicationTestHelper.RAW_CLIENT_ID));
                     assertEquals(ClientErrorCodes.INVALID_OWNER, e.getCode());
                 }
             }
@@ -614,7 +582,7 @@ class DefaultOAuth2ClientManagementServiceTest {
                 @Test
                 @DisplayName("검색된 클라이언트를 저장소에서 삭제 해야 한다.")
                 void shouldRemoveSearchedClient() {
-                    service.removeClient(RAW_CLIENT_ID);
+                    service.removeClient(OAuth2ClientApplicationTestHelper.RAW_CLIENT_ID);
 
                     verify(repository, times(1)).delete(client);
                 }
@@ -627,7 +595,7 @@ class DefaultOAuth2ClientManagementServiceTest {
 
         @BeforeEach
         void setup() {
-            this.service = new DefaultOAuth2ClientManagementService(mockOAuth2ClientRepository().emptyClient().build());
+            this.service = new DefaultOAuth2ClientManagementService(OAuth2ClientApplicationTestHelper.mockOAuth2ClientRepository().emptyClient().build());
         }
     }
 
@@ -636,9 +604,9 @@ class DefaultOAuth2ClientManagementServiceTest {
 
         @BeforeEach
         void setup() {
-            OAuth2Client client = mockOAuth2Client().configDefault().build();
-            this.service = new DefaultOAuth2ClientManagementService(mockOAuth2ClientRepository().registerClient(client).build());
-            SecurityContextHolder.getContext().setAuthentication(mockDifferentAuthentication());
+            OAuth2Client client = OAuth2ClientApplicationTestHelper.mockOAuth2Client().configDefault().build();
+            this.service = new DefaultOAuth2ClientManagementService(OAuth2ClientApplicationTestHelper.mockOAuth2ClientRepository().registerClient(client).build());
+            SecurityContextHolder.getContext().setAuthentication(OAuth2ClientApplicationTestHelper.mockDifferentAuthentication());
         }
 
         @AfterEach
@@ -654,11 +622,11 @@ class DefaultOAuth2ClientManagementServiceTest {
 
         @BeforeEach
         void setup() {
-            this.client = mockOAuth2Client().configDefault().build();
-            this.repository = mockOAuth2ClientRepository().registerClient(client).build();
+            this.client = OAuth2ClientApplicationTestHelper.mockOAuth2Client().configDefault().build();
+            this.repository = OAuth2ClientApplicationTestHelper.mockOAuth2ClientRepository().registerClient(client).build();
             this.service = new DefaultOAuth2ClientManagementService(repository);
 
-            SecurityContextHolder.getContext().setAuthentication(mockAuthentication());
+            SecurityContextHolder.getContext().setAuthentication(OAuth2ClientApplicationTestHelper.mockAuthentication());
         }
 
         @AfterEach

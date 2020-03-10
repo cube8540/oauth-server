@@ -1,5 +1,6 @@
 package cube8540.oauth.authentication.credentials.oauth.token.domain;
 
+import cube8540.oauth.authentication.AuthenticationApplication;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -7,8 +8,6 @@ import org.junit.jupiter.api.Test;
 
 import java.time.Clock;
 
-import static cube8540.oauth.authentication.AuthenticationApplication.DEFAULT_TIME_ZONE;
-import static cube8540.oauth.authentication.AuthenticationApplication.DEFAULT_ZONE_OFFSET;
 import static cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenTestHelper.CLIENT_ID;
 import static cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenTestHelper.EXPIRATION_DATETIME;
 import static cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenTestHelper.GRANT_TYPE;
@@ -38,7 +37,7 @@ class OAuth2AuthorizedAccessTokenTest {
                 this.accessToken = OAuth2AuthorizedAccessToken.builder(configAccessTokenIdGenerator())
                         .username(USERNAME).client(CLIENT_ID).tokenGrantType(GRANT_TYPE).expiration(EXPIRATION_DATETIME).build();
 
-                Clock clock = Clock.fixed(EXPIRATION_DATETIME.plusNanos(1).toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
+                Clock clock = Clock.fixed(EXPIRATION_DATETIME.plusNanos(1).toInstant(AuthenticationApplication.DEFAULT_ZONE_OFFSET), AuthenticationApplication.DEFAULT_TIME_ZONE.toZoneId());
                 OAuth2AuthorizedAccessToken.setClock(clock);
             }
 
@@ -61,7 +60,7 @@ class OAuth2AuthorizedAccessTokenTest {
                 this.accessToken = OAuth2AuthorizedAccessToken.builder(configAccessTokenIdGenerator())
                         .username(USERNAME).client(CLIENT_ID).tokenGrantType(GRANT_TYPE).expiration(EXPIRATION_DATETIME).build();
 
-                Clock clock = Clock.fixed(EXPIRATION_DATETIME.minusNanos(1).toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
+                Clock clock = Clock.fixed(EXPIRATION_DATETIME.minusNanos(1).toInstant(AuthenticationApplication.DEFAULT_ZONE_OFFSET), AuthenticationApplication.DEFAULT_TIME_ZONE.toZoneId());
                 OAuth2AuthorizedAccessToken.setClock(clock);
             }
 
@@ -89,7 +88,7 @@ class OAuth2AuthorizedAccessTokenTest {
                 this.accessToken = OAuth2AuthorizedAccessToken.builder(configAccessTokenIdGenerator())
                         .username(USERNAME).client(CLIENT_ID).tokenGrantType(GRANT_TYPE).expiration(EXPIRATION_DATETIME).build();
 
-                Clock clock = Clock.fixed(EXPIRATION_DATETIME.plusNanos(1).toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
+                Clock clock = Clock.fixed(EXPIRATION_DATETIME.plusNanos(1).toInstant(AuthenticationApplication.DEFAULT_ZONE_OFFSET), AuthenticationApplication.DEFAULT_TIME_ZONE.toZoneId());
                 OAuth2AuthorizedAccessToken.setClock(clock);
             }
 
@@ -113,7 +112,7 @@ class OAuth2AuthorizedAccessTokenTest {
                 this.accessToken = OAuth2AuthorizedAccessToken.builder(configAccessTokenIdGenerator())
                         .username(USERNAME).client(CLIENT_ID).tokenGrantType(GRANT_TYPE).expiration(EXPIRATION_DATETIME).build();
 
-                Clock clock = Clock.fixed(EXPIRATION_DATETIME.minusSeconds(expiresIn).toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
+                Clock clock = Clock.fixed(EXPIRATION_DATETIME.minusSeconds(expiresIn).toInstant(AuthenticationApplication.DEFAULT_ZONE_OFFSET), AuthenticationApplication.DEFAULT_TIME_ZONE.toZoneId());
                 OAuth2AuthorizedAccessToken.setClock(clock);
             }
 

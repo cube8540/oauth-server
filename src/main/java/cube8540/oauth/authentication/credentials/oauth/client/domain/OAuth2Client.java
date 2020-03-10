@@ -132,7 +132,7 @@ public class OAuth2Client extends AbstractAggregateRoot<OAuth2Client> {
 
     public void removeScope(OAuth2ScopeId scope) {
         Optional.ofNullable(this.scopes)
-                .ifPresent(scopes -> scopes.remove(scope));
+                .ifPresent(s -> s.remove(scope));
     }
 
     public void validate(OAuth2ClientValidatePolicy policy) {
@@ -142,7 +142,7 @@ public class OAuth2Client extends AbstractAggregateRoot<OAuth2Client> {
                 .registerRule(policy.clientNameRule())
                 .registerRule(policy.grantTypeRule())
                 .registerRule(policy.scopeRule())
-                .getResult().hasErrorThrows(ClientInvalidException::new);
+                .getResult().hasErrorThrows(ClientInvalidException::instance);
     }
 
     public void changeSecret(String existsSecret, String changeSecret, PasswordEncoder encoder) {

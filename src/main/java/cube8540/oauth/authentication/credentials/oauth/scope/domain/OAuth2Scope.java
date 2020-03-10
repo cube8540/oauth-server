@@ -75,6 +75,6 @@ public class OAuth2Scope extends AbstractAggregateRoot<OAuth2Scope> {
     public void validate(OAuth2ScopeValidationPolicy policy) {
         Validator.of(this).registerRule(policy.scopeIdRule())
                 .registerRule(policy.accessibleRule())
-                .getResult().hasErrorThrows(ScopeInvalidException::new);
+                .getResult().hasErrorThrows(ScopeInvalidException::instance);
     }
 }

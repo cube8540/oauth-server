@@ -1,13 +1,17 @@
 package cube8540.oauth.authentication.error.message;
 
-public interface ErrorCodes {
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
-    String NOT_FOUND = "not_found";
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class ErrorCodes {
 
-    String EXISTS_IDENTIFIER = "exists_identifier";
+    public static final String NOT_FOUND = "not_found";
 
-    String INVALID_REQUEST = "invalid_request";
+    public static final String EXISTS_IDENTIFIER = "exists_identifier";
 
-    String SERVER_ERROR = "server_error";
+    public static final String INVALID_REQUEST = "invalid_request";
+
+    public static final String SERVER_ERROR = "server_error";
 
 }

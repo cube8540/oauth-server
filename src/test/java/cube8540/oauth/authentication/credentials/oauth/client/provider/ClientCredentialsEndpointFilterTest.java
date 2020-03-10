@@ -1,6 +1,7 @@
 package cube8540.oauth.authentication.credentials.oauth.client.provider;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -17,16 +18,6 @@ import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import static cube8540.oauth.authentication.credentials.oauth.client.provider.ClientCredentialsProviderTestHelper.BASIC_AUTH_CLIENT_ID;
-import static cube8540.oauth.authentication.credentials.oauth.client.provider.ClientCredentialsProviderTestHelper.BASIC_AUTH_CLIENT_SECRET;
-import static cube8540.oauth.authentication.credentials.oauth.client.provider.ClientCredentialsProviderTestHelper.CLIENT_SECRET;
-import static cube8540.oauth.authentication.credentials.oauth.client.provider.ClientCredentialsProviderTestHelper.FILTER_PATH;
-import static cube8540.oauth.authentication.credentials.oauth.client.provider.ClientCredentialsProviderTestHelper.RAW_CLIENT_ID;
-import static cube8540.oauth.authentication.credentials.oauth.client.provider.ClientCredentialsProviderTestHelper.mockAuthentication;
-import static cube8540.oauth.authentication.credentials.oauth.client.provider.ClientCredentialsProviderTestHelper.mockAuthenticationManager;
-import static cube8540.oauth.authentication.credentials.oauth.client.provider.ClientCredentialsProviderTestHelper.mockFilterChain;
-import static cube8540.oauth.authentication.credentials.oauth.client.provider.ClientCredentialsProviderTestHelper.mockHttpServletRequest;
-import static cube8540.oauth.authentication.credentials.oauth.client.provider.ClientCredentialsProviderTestHelper.mockHttpServletResponse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.times;
@@ -46,15 +37,15 @@ class ClientCredentialsEndpointFilterTest {
 
             @BeforeEach
             void setup() {
-                this.filter = new ClientCredentialsEndpointFilter(FILTER_PATH);
+                this.filter = new ClientCredentialsEndpointFilter(ClientCredentialsProviderTestHelper.FILTER_PATH);
                 this.filter.setOnlyPost(true);
             }
 
             @Test
             @DisplayName("HttpRequestMethodNotSupportedException 이 발생해야 한다.")
             void shouldThrowsHttpRequestMethodNotSupportedException() {
-                HttpServletRequest request = mockHttpServletRequest().configMethod(HttpMethod.GET).build();
-                HttpServletResponse response = mockHttpServletResponse();
+                HttpServletRequest request = ClientCredentialsProviderTestHelper.mockHttpServletRequest().configMethod(HttpMethod.GET).build();
+                HttpServletResponse response = ClientCredentialsProviderTestHelper.mockHttpServletResponse();
 
                 assertThrows(HttpRequestMethodNotSupportedException.class, () -> filter.attemptAuthentication(request, response));
             }
@@ -70,7 +61,7 @@ class ClientCredentialsEndpointFilterTest {
 
                 @Override
                 protected HttpServletRequest configRequest() {
-                    return mockHttpServletRequest().configDefaultBasicAuthentication().build();
+                    return ClientCredentialsProviderTestHelper.mockHttpServletRequest().configDefaultBasicAuthentication().build();
                 }
 
                 @Override
@@ -85,8 +76,8 @@ class ClientCredentialsEndpointFilterTest {
 
                     filter.attemptAuthentication(httpServletRequest, httpServletResponse);
                     verify(authenticationManager, times(1)).authenticate(authenticationCaptor.capture());
-                    assertEquals(BASIC_AUTH_CLIENT_ID, authenticationCaptor.getValue().getPrincipal());
-                    assertEquals(BASIC_AUTH_CLIENT_SECRET, authenticationCaptor.getValue().getCredentials());
+                    Assertions.assertEquals(ClientCredentialsProviderTestHelper.BASIC_AUTH_CLIENT_ID, authenticationCaptor.getValue().getPrincipal());
+                    Assertions.assertEquals(ClientCredentialsProviderTestHelper.BASIC_AUTH_CLIENT_SECRET, authenticationCaptor.getValue().getCredentials());
                 }
             }
 
@@ -96,7 +87,7 @@ class ClientCredentialsEndpointFilterTest {
 
                 @Override
                 protected HttpServletRequest configRequest() {
-                    return mockHttpServletRequest().configDefaultClientId().configDefaultClientSecret().build();
+                    return ClientCredentialsProviderTestHelper.mockHttpServletRequest().configDefaultClientId().configDefaultClientSecret().build();
                 }
 
                 @Override
@@ -111,8 +102,8 @@ class ClientCredentialsEndpointFilterTest {
 
                     filter.attemptAuthentication(httpServletRequest, httpServletResponse);
                     verify(authenticationManager, times(1)).authenticate(authenticationCaptor.capture());
-                    assertEquals(RAW_CLIENT_ID, authenticationCaptor.getValue().getPrincipal());
-                    assertEquals(CLIENT_SECRET, authenticationCaptor.getValue().getCredentials());
+                    Assertions.assertEquals(ClientCredentialsProviderTestHelper.RAW_CLIENT_ID, authenticationCaptor.getValue().getPrincipal());
+                    Assertions.assertEquals(ClientCredentialsProviderTestHelper.CLIENT_SECRET, authenticationCaptor.getValue().getCredentials());
                 }
             }
 
@@ -123,15 +114,15 @@ class ClientCredentialsEndpointFilterTest {
 
                 @BeforeEach
                 void setup() {
-                    this.filter = new ClientCredentialsEndpointFilter(FILTER_PATH);
+                    this.filter = new ClientCredentialsEndpointFilter(ClientCredentialsProviderTestHelper.FILTER_PATH);
                 }
 
                 @Test
                 @DisplayName("BadCredentialsException 이 발생해야 한다.")
                 void shouldThrowsBadCredentialsException() {
-                    HttpServletRequest request = mockHttpServletRequest().configDefaultClientSecret().build();
+                    HttpServletRequest request = ClientCredentialsProviderTestHelper.mockHttpServletRequest().configDefaultClientSecret().build();
 
-                    assertThrows(BadCredentialsException.class, () -> filter.attemptAuthentication(request, mockHttpServletResponse()));
+                    assertThrows(BadCredentialsException.class, () -> filter.attemptAuthentication(request, ClientCredentialsProviderTestHelper.mockHttpServletResponse()));
                 }
             }
         }
@@ -148,8 +139,8 @@ class ClientCredentialsEndpointFilterTest {
 
                 @BeforeEach
                 void setup() {
-                    this.authentication = mockAuthentication().configAuthenticated().build();
-                    this.filter = new ClientCredentialsEndpointFilter(FILTER_PATH);
+                    this.authentication = ClientCredentialsProviderTestHelper.mockAuthentication().configAuthenticated().build();
+                    this.filter = new ClientCredentialsEndpointFilter(ClientCredentialsProviderTestHelper.FILTER_PATH);
 
                     SecurityContextHolder.getContext().setAuthentication(this.authentication);
                 }
@@ -157,9 +148,9 @@ class ClientCredentialsEndpointFilterTest {
                 @Test
                 @DisplayName("이미 인증이 완료된 객체를 반환해야 한다.")
                 void shouldReturnsAlreadyAuthenticatedObject() throws Exception {
-                    HttpServletRequest request = mockHttpServletRequest().configDefaultBasicAuthentication().build();
+                    HttpServletRequest request = ClientCredentialsProviderTestHelper.mockHttpServletRequest().configDefaultBasicAuthentication().build();
 
-                    Authentication result = filter.attemptAuthentication(request, mockHttpServletResponse());
+                    Authentication result = filter.attemptAuthentication(request, ClientCredentialsProviderTestHelper.mockHttpServletResponse());
 
                     assertEquals(authentication, result);
                 }
@@ -180,12 +171,12 @@ class ClientCredentialsEndpointFilterTest {
 
                     @Override
                     protected HttpServletRequest configRequest() {
-                        return mockHttpServletRequest().configDefaultBasicAuthentication().build();
+                        return ClientCredentialsProviderTestHelper.mockHttpServletRequest().configDefaultBasicAuthentication().build();
                     }
 
                     @Override
                     protected void configSecurityContext() {
-                        SecurityContextHolder.getContext().setAuthentication(mockAuthentication().configNotAuthenticated().build());
+                        SecurityContextHolder.getContext().setAuthentication(ClientCredentialsProviderTestHelper.mockAuthentication().configNotAuthenticated().build());
                     }
 
                     @Test
@@ -195,8 +186,8 @@ class ClientCredentialsEndpointFilterTest {
 
                         filter.attemptAuthentication(httpServletRequest, httpServletResponse);
                         verify(authenticationManager, times(1)).authenticate(authenticationCaptor.capture());
-                        assertEquals(BASIC_AUTH_CLIENT_ID, authenticationCaptor.getValue().getPrincipal());
-                        assertEquals(BASIC_AUTH_CLIENT_SECRET, authenticationCaptor.getValue().getCredentials());
+                        Assertions.assertEquals(ClientCredentialsProviderTestHelper.BASIC_AUTH_CLIENT_ID, authenticationCaptor.getValue().getPrincipal());
+                        Assertions.assertEquals(ClientCredentialsProviderTestHelper.BASIC_AUTH_CLIENT_SECRET, authenticationCaptor.getValue().getCredentials());
                     }
                 }
 
@@ -206,12 +197,12 @@ class ClientCredentialsEndpointFilterTest {
 
                     @Override
                     protected HttpServletRequest configRequest() {
-                        return mockHttpServletRequest().configDefaultClientId().configDefaultClientSecret().build();
+                        return ClientCredentialsProviderTestHelper.mockHttpServletRequest().configDefaultClientId().configDefaultClientSecret().build();
                     }
 
                     @Override
                     protected void configSecurityContext() {
-                        SecurityContextHolder.getContext().setAuthentication(mockAuthentication().configNotAuthenticated().build());
+                        SecurityContextHolder.getContext().setAuthentication(ClientCredentialsProviderTestHelper.mockAuthentication().configNotAuthenticated().build());
                     }
 
                     @Test
@@ -221,8 +212,8 @@ class ClientCredentialsEndpointFilterTest {
 
                         filter.attemptAuthentication(httpServletRequest, httpServletResponse);
                         verify(authenticationManager, times(1)).authenticate(authenticationCaptor.capture());
-                        assertEquals(RAW_CLIENT_ID, authenticationCaptor.getValue().getPrincipal());
-                        assertEquals(CLIENT_SECRET, authenticationCaptor.getValue().getCredentials());
+                        Assertions.assertEquals(ClientCredentialsProviderTestHelper.RAW_CLIENT_ID, authenticationCaptor.getValue().getPrincipal());
+                        Assertions.assertEquals(ClientCredentialsProviderTestHelper.CLIENT_SECRET, authenticationCaptor.getValue().getCredentials());
                     }
                 }
 
@@ -233,15 +224,15 @@ class ClientCredentialsEndpointFilterTest {
 
                     @BeforeEach
                     void setup() {
-                        this.filter = new ClientCredentialsEndpointFilter(FILTER_PATH);
+                        this.filter = new ClientCredentialsEndpointFilter(ClientCredentialsProviderTestHelper.FILTER_PATH);
                     }
 
                     @Test
                     @DisplayName("BadCredentialsException 이 발생해야 한다.")
                     void shouldThrowsBadCredentialsException() {
-                        HttpServletRequest request = mockHttpServletRequest().configDefaultClientSecret().build();
+                        HttpServletRequest request = ClientCredentialsProviderTestHelper.mockHttpServletRequest().configDefaultClientSecret().build();
 
-                        assertThrows(BadCredentialsException.class, () -> filter.attemptAuthentication(request, mockHttpServletResponse()));
+                        assertThrows(BadCredentialsException.class, () -> filter.attemptAuthentication(request, ClientCredentialsProviderTestHelper.mockHttpServletResponse()));
                     }
                 }
             }
@@ -260,12 +251,12 @@ class ClientCredentialsEndpointFilterTest {
 
         @BeforeEach
         void setup() {
-            this.request = mockHttpServletRequest().build();
-            this.response = mockHttpServletResponse();
-            this.chain = mockFilterChain();
-            this.authentication = mockAuthentication().build();
+            this.request = ClientCredentialsProviderTestHelper.mockHttpServletRequest().build();
+            this.response = ClientCredentialsProviderTestHelper.mockHttpServletResponse();
+            this.chain = ClientCredentialsProviderTestHelper.mockFilterChain();
+            this.authentication = ClientCredentialsProviderTestHelper.mockAuthentication().build();
 
-            this.filter = new ClientCredentialsEndpointFilter(FILTER_PATH);
+            this.filter = new ClientCredentialsEndpointFilter(ClientCredentialsProviderTestHelper.FILTER_PATH);
         }
 
         @Test
@@ -296,10 +287,10 @@ class ClientCredentialsEndpointFilterTest {
         @BeforeEach
         void setup() {
             this.httpServletRequest = configRequest();
-            this.httpServletResponse = mockHttpServletResponse();
-            this.authentication = mockAuthentication().configAuthenticated().build();
-            this.authenticationManager = mockAuthenticationManager(this.authentication);
-            this.filter = new ClientCredentialsEndpointFilter(FILTER_PATH);
+            this.httpServletResponse = ClientCredentialsProviderTestHelper.mockHttpServletResponse();
+            this.authentication = ClientCredentialsProviderTestHelper.mockAuthentication().configAuthenticated().build();
+            this.authenticationManager = ClientCredentialsProviderTestHelper.mockAuthenticationManager(this.authentication);
+            this.filter = new ClientCredentialsEndpointFilter(ClientCredentialsProviderTestHelper.FILTER_PATH);
             this.filter.setAuthenticationManager(authenticationManager);
 
             configSecurityContext();

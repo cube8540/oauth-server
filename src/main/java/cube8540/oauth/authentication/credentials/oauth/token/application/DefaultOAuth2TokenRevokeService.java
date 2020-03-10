@@ -24,7 +24,7 @@ public class DefaultOAuth2TokenRevokeService implements OAuth2TokenRevokeService
     @Override
     public OAuth2AccessTokenDetails revoke(String tokenValue) {
         OAuth2AuthorizedAccessToken accessToken = repository.findById(new OAuth2TokenId(tokenValue))
-                .orElseThrow(() -> new OAuth2AccessTokenNotFoundException(tokenValue + " is not found"));
+                .orElseThrow(() -> new OAuth2AccessTokenNotFoundException(tokenValue));
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (!authentication.getName().equals(accessToken.getClient().getValue())) {
             throw InvalidClientException.invalidClient("client and access token client is different");

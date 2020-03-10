@@ -117,7 +117,7 @@ class ClientCredentialsProviderTestHelper {
         }
 
         MockOAuth2ClientDetailsService emptyClient() {
-            when(service.loadClientDetailsByClientId(RAW_CLIENT_ID)).thenThrow(new ClientNotFoundException(RAW_CLIENT_ID + " is not found"));
+            when(service.loadClientDetailsByClientId(RAW_CLIENT_ID)).thenThrow(ClientNotFoundException.instance(RAW_CLIENT_ID + " is not found"));
             return this;
         }
 

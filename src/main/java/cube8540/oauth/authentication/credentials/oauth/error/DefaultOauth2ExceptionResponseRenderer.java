@@ -36,16 +36,17 @@ public class DefaultOauth2ExceptionResponseRenderer implements OAuth2ExceptionRe
         if (responseEntity == null) {
             return;
         }
-        ServletServerHttpResponse outputMessage = new ServletServerHttpResponse(Objects.requireNonNull(webRequest.getResponse()));
-        outputMessage.setStatusCode(responseEntity.getStatusCode());
-        if (!responseEntity.getHeaders().isEmpty()) {
-            outputMessage.getHeaders().putAll(responseEntity.getHeaders());
-        }
-        OAuth2Error body = responseEntity.getBody();
-        if (body != null) {
-            messageConverter.write(body, supportMediaType, outputMessage);
-        } else {
-            outputMessage.getBody();
+        try (ServletServerHttpResponse outputMessage = new ServletServerHttpResponse(Objects.requireNonNull(webRequest.getResponse()))) {
+            outputMessage.setStatusCode(responseEntity.getStatusCode());
+            if (!responseEntity.getHeaders().isEmpty()) {
+                outputMessage.getHeaders().putAll(responseEntity.getHeaders());
+            }
+            OAuth2Error body = responseEntity.getBody();
+            if (body != null) {
+                messageConverter.write(body, supportMediaType, outputMessage);
+            } else {
+                outputMessage.getBody();
+            }
         }
     }
 }

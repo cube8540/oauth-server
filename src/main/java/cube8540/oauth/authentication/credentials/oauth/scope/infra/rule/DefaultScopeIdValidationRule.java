@@ -6,14 +6,14 @@ import cube8540.validator.core.ValidationRule;
 
 public class DefaultScopeIdValidationRule implements ValidationRule<OAuth2Scope> {
 
-    private static final String PROPERTY = "id";
-    private static final String MESSAGE = "스코프 아이디를 입력해 주세요.";
+    private static final String DEFAULT_PROPERTY = "id";
+    private static final String DEFAULT_MESSAGE = "스코프 아이디를 입력해 주세요.";
 
     private String property;
     private String message;
 
     public DefaultScopeIdValidationRule() {
-        this(PROPERTY, MESSAGE);
+        this(DEFAULT_PROPERTY, DEFAULT_MESSAGE);
     }
 
     public DefaultScopeIdValidationRule(String property, String message) {

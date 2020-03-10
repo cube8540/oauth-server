@@ -2,15 +2,14 @@
 권한 서버로 부터 인증을 받고 토큰을 부여 받는 API 입니다.
 
 ## 구현되어 있는 인증 타입
-- [Authorization Code](#authorization-code-flow)
-- [Resource Owner Password Credentials (Password)](#resource-owner-password-credentials-flow)
-- [Client Credentials](#client-credentials-flow)
-- [Refresh Token](#refresh-token-flow)
+[Authorization Code](#authorization-code-flow)  
+[Resource Owner Password Credentials (Password)](#resource-owner-password-credentials-flow)  
+[Client Credentials](#client-credentials-flow)  
+[Refresh Token](#refresh-token-flow)  
 
 ## 에러
-- [에러 코드](#에러-코드)
+[에러 코드](#에러-코드)
 
-위의 네가지 인증 타입을 구현하였으며 Implicit 인증 타입은 현재 구현되어 있지 않습니다. 아래는 각 인증 타입의 Access Token 을 얻는 과정 입니다.
 ### Authorization Code Flow
 OAuth2에서 가장 많이 볼 수 있는 인증 유형 입니다. 클라이언트가 직접 자원 소유자에게 권한을 부여하며 자원 소유자는 권한 서버에 인증을 받고
 인가를 허용 합니다. 자원 소유자가 인가를 허용하게 되면 권한 코드가 발급되며, 이 권한 코드를 클라이언트에 전달합니다. 클라이언트는 받은

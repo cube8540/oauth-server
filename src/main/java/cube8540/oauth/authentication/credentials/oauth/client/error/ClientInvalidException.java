@@ -1,5 +1,6 @@
 package cube8540.oauth.authentication.credentials.oauth.client.error;
 
+import cube8540.oauth.authentication.error.message.ErrorCodes;
 import cube8540.validator.core.ValidationError;
 import cube8540.validator.core.exception.ValidateException;
 import lombok.Getter;
@@ -9,11 +10,15 @@ import java.util.List;
 @Getter
 public class ClientInvalidException extends ValidateException {
 
-    private String code;
+    private final String code;
 
-    public ClientInvalidException(List<ValidationError> errors) {
+    private ClientInvalidException(String code, List<ValidationError> errors) {
         super(errors);
-        this.code = ClientErrorCodes.INVALID_REQUEST;
+        this.code = code;
+    }
+
+    public static ClientInvalidException instance(List<ValidationError> errors) {
+        return new ClientInvalidException(ErrorCodes.INVALID_REQUEST, errors);
     }
 
 }

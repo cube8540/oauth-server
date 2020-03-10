@@ -1,10 +1,12 @@
 package cube8540.oauth.authentication.error.aop;
 
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Aspect
 @Component
 public class ExceptionLoggingAspect {
@@ -18,7 +20,7 @@ public class ExceptionLoggingAspect {
     private void printStackTrace(Object[] args) {
         for (Object arg : args) {
             if (arg instanceof Exception) {
-                ((Exception) arg).printStackTrace();
+                log.error("throws error ", (Exception) arg);
             }
         }
     }

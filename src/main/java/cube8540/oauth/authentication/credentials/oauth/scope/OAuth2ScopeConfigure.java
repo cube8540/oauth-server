@@ -1,9 +1,9 @@
 package cube8540.oauth.authentication.credentials.oauth.scope;
 
-import cube8540.oauth.authentication.credentials.authority.AuthorityDetailsService;
 import cube8540.oauth.authentication.credentials.oauth.scope.application.DefaultScopeDetailsService;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeRepository;
 import cube8540.oauth.authentication.credentials.oauth.scope.infra.DefaultOAuth2ScopeValidationPolicy;
+import cube8540.oauth.authentication.credentials.authority.AuthorityDetailsService;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

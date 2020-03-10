@@ -6,14 +6,14 @@ import cube8540.validator.core.ValidationRule;
 
 public class DefaultOAuth2ClientOwnerValidationRule implements ValidationRule<OAuth2Client> {
 
-    private static final String PROPERTY = "owner";
-    private static final String MESSAGE = "클라이언트의 소유자를 입력해 주세요.";
+    private static final String DEFAULT_PROPERTY = "owner";
+    private static final String DEFAULT_MESSAGE = "클라이언트의 소유자를 입력해 주세요.";
 
     private String property;
     private String message;
 
     public DefaultOAuth2ClientOwnerValidationRule() {
-        this(PROPERTY, MESSAGE);
+        this(DEFAULT_PROPERTY, DEFAULT_MESSAGE);
     }
 
     public DefaultOAuth2ClientOwnerValidationRule(String property, String message) {

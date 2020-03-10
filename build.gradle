@@ -2,6 +2,12 @@ plugins {
     id 'org.springframework.boot' version '2.2.2.RELEASE'
     id 'io.spring.dependency-management' version '1.0.8.RELEASE'
     id 'java'
+    id 'org.sonarqube' version '2.7'
+    id 'jacoco'
+}
+
+jacoco {
+    toolVersion = "0.8.5"
 }
 
 group = 'cube8540.oauth'
@@ -17,6 +23,30 @@ configurations {
 repositories {
     mavenCentral()
     jcenter()
+}
+
+sonarqube {
+    properties {
+        property 'sonarqube.sourceEncoding', 'UTF-8'
+        property 'sonarqube.source', 'src'
+        property 'sonarqube.language', 'java'
+        property 'sonar.jacoco.reportPaths', 'build/jacoco/jacoco.exec'
+    }
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+        csv.enabled false
+        html.destination file("${buildDir}/jacocoHtml")
+    }
+}
+
+test {
+    jacoco {
+        enabled = true
+        destinationFile = file("${buildDir}/jacoco/jacoco.exec")
+    }
 }
 
 dependencies {

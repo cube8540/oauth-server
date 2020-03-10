@@ -29,8 +29,7 @@ public class DefaultAuthorityManagementService implements AuthorityManagementSer
 
     @Override
     public AuthorityDetails getAuthority(String code) {
-        return repository.findById(new AuthorityCode(code)).map(DefaultAuthorityDetails::of)
-                .orElseThrow(() -> new AuthorityNotFoundException(code + " is not found"));
+        return DefaultAuthorityDetails.of(getRegisteredAuthority(code));
     }
 
     @Override
@@ -53,8 +52,7 @@ public class DefaultAuthorityManagementService implements AuthorityManagementSer
 
     @Override
     public AuthorityDetails modifyAuthority(String code, AuthorityModifyRequest modifyRequest) {
-        Authority authority = repository.findById(new AuthorityCode(code))
-                .orElseThrow(() -> new AuthorityNotFoundException(code + " is not found"));
+        Authority authority = getRegisteredAuthority(code);
         authority.setDescription(modifyRequest.getDescription());
         if (modifyRequest.isBasic()) {
             authority.settingBasicAuthority();
@@ -66,9 +64,13 @@ public class DefaultAuthorityManagementService implements AuthorityManagementSer
 
     @Override
     public AuthorityDetails removeAuthority(String code) {
-        Authority authority = repository.findById(new AuthorityCode(code))
-                .orElseThrow(() -> new AuthorityNotFoundException(code + " is not found"));
+        Authority authority = getRegisteredAuthority(code);
         repository.delete(authority);
         return DefaultAuthorityDetails.of(authority);
+    }
+
+    private Authority getRegisteredAuthority(String code) {
+        return repository.findById(new AuthorityCode(code))
+                .orElseThrow(() -> AuthorityNotFoundException.instance(code + " is not found"));
     }
 }

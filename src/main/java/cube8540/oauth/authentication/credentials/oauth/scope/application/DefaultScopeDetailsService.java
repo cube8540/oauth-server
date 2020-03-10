@@ -66,8 +66,7 @@ public class DefaultScopeDetailsService implements OAuth2ScopeManagementService,
     @Override
     @Transactional
     public OAuth2ScopeDetails modifyScope(String scopeId, OAuth2ScopeModifyRequest modifyRequest) {
-        OAuth2Scope scope = repository.findById(new OAuth2ScopeId(scopeId))
-                .orElseThrow(() -> new ScopeNotFoundException(scopeId + " is not found"));
+        OAuth2Scope scope = getScope(scopeId);
 
         scope.setDescription(modifyRequest.getDescription());
         Optional.ofNullable(modifyRequest.getRemoveAccessibleAuthority())
@@ -82,11 +81,14 @@ public class DefaultScopeDetailsService implements OAuth2ScopeManagementService,
     @Override
     @Transactional
     public OAuth2ScopeDetails removeScope(String scopeId) {
-        OAuth2Scope scope = repository.findById(new OAuth2ScopeId(scopeId))
-                .orElseThrow(() -> new ScopeNotFoundException(scopeId + " is not found"));
+        OAuth2Scope scope = getScope(scopeId);
 
         repository.delete(scope);
-
         return DefaultOAuth2ScopeDetails.of(scope);
+    }
+
+    private OAuth2Scope getScope(String scopeId) {
+        return repository.findById(new OAuth2ScopeId(scopeId))
+                .orElseThrow(() -> ScopeNotFoundException.instance(scopeId));
     }
 }

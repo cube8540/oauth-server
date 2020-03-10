@@ -8,9 +8,8 @@ import lombok.Getter;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class ClientAuthorizationException extends RuntimeException {
 
-    private String code;
-
-    private String description;
+    private final String code;
+    private final String description;
 
     public static ClientAuthorizationException invalidOwner(String description) {
         return new ClientAuthorizationException(ClientErrorCodes.INVALID_OWNER, description);

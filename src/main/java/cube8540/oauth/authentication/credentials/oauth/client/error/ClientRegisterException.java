@@ -8,8 +8,8 @@ import lombok.Getter;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class ClientRegisterException extends RuntimeException {
 
-    private String code;
-    private String description;
+    private final String code;
+    private final String description;
 
     public static ClientRegisterException existsIdentifier(String description) {
         return new ClientRegisterException(ClientErrorCodes.EXISTS_IDENTIFIER, description);

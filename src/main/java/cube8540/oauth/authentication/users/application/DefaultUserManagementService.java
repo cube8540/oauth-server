@@ -35,8 +35,7 @@ public class DefaultUserManagementService implements UserManagementService {
 
     @Override
     public UserProfile loadUserProfile(String email) {
-        return repository.findByEmail(new UserEmail(email))
-                .map(UserProfile::of).orElseThrow(() -> new UserNotFoundException(email + " user not found"));
+        return UserProfile.of(getUser(email));
     }
 
     @Override
@@ -54,9 +53,14 @@ public class DefaultUserManagementService implements UserManagementService {
     @Override
     @Transactional
     public UserProfile removeUser(String email) {
-        User registerUser = repository.findByEmail(new UserEmail(email))
-                .orElseThrow(() -> new UserNotFoundException(email + " user not found"));
+        User registerUser = getUser(email);
+
         repository.delete(registerUser);
         return UserProfile.of(registerUser);
+    }
+
+    private User getUser(String email) {
+        return repository.findByEmail(new UserEmail(email))
+                .orElseThrow(() -> UserNotFoundException.instance(email + " is not found"));
     }
 }

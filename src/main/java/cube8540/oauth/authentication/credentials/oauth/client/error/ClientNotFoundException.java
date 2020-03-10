@@ -1,15 +1,18 @@
 package cube8540.oauth.authentication.credentials.oauth.client.error;
 
+import cube8540.oauth.authentication.error.message.ErrorCodes;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class ClientNotFoundException extends RuntimeException {
 
-    private String code;
-    private String description;
+    private final String code;
+    private final String description;
 
-    public ClientNotFoundException(String description) {
-        this.code = ClientErrorCodes.NOT_FOUND;
-        this.description = description;
+    public static ClientNotFoundException instance(String description) {
+        return new ClientNotFoundException(ErrorCodes.NOT_FOUND, description);
     }
 }

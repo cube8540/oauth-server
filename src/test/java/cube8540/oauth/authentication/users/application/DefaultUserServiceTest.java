@@ -12,11 +12,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.util.Set;
 
-import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.AUTHORITIES;
-import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.RAW_EMAIL;
-import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.configDefaultMockUser;
-import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.convertGrantAuthority;
-import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.mockUserRepository;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -36,14 +31,14 @@ class DefaultUserServiceTest {
 
             @BeforeEach
             void setup() {
-                UserRepository repository = mockUserRepository().emptyUser().build();
+                UserRepository repository = UserApplicationTestHelper.mockUserRepository().emptyUser().build();
                 this.service = new DefaultUserService(repository);
             }
 
             @Test
             @DisplayName("UsernameNotFoundException 이 발생해야 한다.")
             void shouldThrowsUsernameNotFoundException() {
-                assertThrows(UsernameNotFoundException.class, () -> service.loadUserByUsername(RAW_EMAIL));
+                assertThrows(UsernameNotFoundException.class, () -> service.loadUserByUsername(UserApplicationTestHelper.RAW_EMAIL));
             }
         }
 
@@ -58,15 +53,15 @@ class DefaultUserServiceTest {
 
                 @BeforeEach
                 void setup() {
-                    User user = configDefaultMockUser().build();
-                    UserRepository repository = mockUserRepository().registerUser(user).build();
+                    User user = UserApplicationTestHelper.configDefaultMockUser().build();
+                    UserRepository repository = UserApplicationTestHelper.mockUserRepository().registerUser(user).build();
                     this.service = new DefaultUserService(repository);
                 }
 
                 @Test
                 @DisplayName("계정의 잠금된 설정으로 반환되어야 한다.")
                 void shouldAccountIsNotLocked() {
-                    UserDetails result = service.loadUserByUsername(RAW_EMAIL);
+                    UserDetails result = service.loadUserByUsername(UserApplicationTestHelper.RAW_EMAIL);
 
                     assertFalse(result.isAccountNonLocked());
                 }
@@ -79,24 +74,24 @@ class DefaultUserServiceTest {
 
                 @BeforeEach
                 void setup() {
-                    User user = configDefaultMockUser().certified().build();
-                    UserRepository repository = mockUserRepository().registerUser(user).build();
+                    User user = UserApplicationTestHelper.configDefaultMockUser().certified().build();
+                    UserRepository repository = UserApplicationTestHelper.mockUserRepository().registerUser(user).build();
                     this.service = new DefaultUserService(repository);
                 }
 
                 @Test
                 @DisplayName("저장소에서 찾은 유저의 권한을 반환해야 한다.")
                 void shouldReturnsGrantedAuthority() {
-                    UserDetails result = service.loadUserByUsername(RAW_EMAIL);
+                    UserDetails result = service.loadUserByUsername(UserApplicationTestHelper.RAW_EMAIL);
 
-                    Set<GrantedAuthority> expectedAuthorities = convertGrantAuthority(AUTHORITIES);
+                    Set<GrantedAuthority> expectedAuthorities = UserApplicationTestHelper.convertGrantAuthority(UserApplicationTestHelper.AUTHORITIES);
                     assertEquals(expectedAuthorities, result.getAuthorities());
                 }
 
                 @Test
                 @DisplayName("계정의 잠금되지 않은 설정으로 반환되어야 한다.")
                 void shouldAccountIsNotLocked() {
-                    UserDetails result = service.loadUserByUsername(RAW_EMAIL);
+                    UserDetails result = service.loadUserByUsername(UserApplicationTestHelper.RAW_EMAIL);
 
                     assertTrue(result.isAccountNonLocked());
                 }

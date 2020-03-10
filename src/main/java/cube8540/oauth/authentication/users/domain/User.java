@@ -86,7 +86,7 @@ public class User extends AbstractAggregateRoot<User> {
     public void validation(UserValidationPolicy policy) {
         Validator.of(this).registerRule(policy.emailRule())
                 .registerRule(policy.passwordRule())
-                .getResult().hasErrorThrows(UserInvalidException::new);
+                .getResult().hasErrorThrows(UserInvalidException::instance);
     }
 
     public void generateCredentialsKey(UserCredentialsKeyGenerator keyGenerator) {

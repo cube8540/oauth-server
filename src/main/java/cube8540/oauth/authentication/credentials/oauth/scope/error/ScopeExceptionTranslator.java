@@ -21,9 +21,7 @@ public class ScopeExceptionTranslator implements ExceptionTranslator<ErrorMessag
             ScopeNotFoundException e = ((ScopeNotFoundException) exception);
             return response(HttpStatus.NOT_FOUND, ErrorMessage.instance(e.getCode(), e.getDescription()));
         } else {
-            if (log.isErrorEnabled()) {
-                log.error("Handle exception {}, {}", exception.getClass(), exception.getMessage());
-            }
+            log.error("Handle exception {}, {}", exception.getClass(), exception.getMessage());
             return response(HttpStatus.INTERNAL_SERVER_ERROR, UNKNOWN_SERVER_ERROR);
         }
     }

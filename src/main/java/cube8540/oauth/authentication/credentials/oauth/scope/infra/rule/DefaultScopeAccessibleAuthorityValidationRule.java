@@ -12,8 +12,8 @@ import java.util.stream.Collectors;
 
 public class DefaultScopeAccessibleAuthorityValidationRule implements ValidationRule<OAuth2Scope> {
 
-    private static final String PROPERTY = "accessibleAuthority";
-    private static final String MESSAGE = "부여할 수 없는 접근 권한입니다.";
+    private static final String DEFAULT_PROPERTY = "accessibleAuthority";
+    private static final String DEFAULT_MESSAGE = "부여할 수 없는 접근 권한입니다.";
 
     private String property;
     private String message;
@@ -22,7 +22,7 @@ public class DefaultScopeAccessibleAuthorityValidationRule implements Validation
     private AuthorityDetailsService authorityService;
 
     public DefaultScopeAccessibleAuthorityValidationRule() {
-        this(PROPERTY, MESSAGE);
+        this(DEFAULT_PROPERTY, DEFAULT_MESSAGE);
     }
 
     public DefaultScopeAccessibleAuthorityValidationRule(String property, String message) {

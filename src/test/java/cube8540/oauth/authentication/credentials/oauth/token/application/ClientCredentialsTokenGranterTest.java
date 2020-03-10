@@ -1,11 +1,13 @@
 package cube8540.oauth.authentication.credentials.oauth.token.application;
 
+import cube8540.oauth.authentication.AuthenticationApplication;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2RequestValidator;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2TokenRequest;
 import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidGrantException;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedAccessToken;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -19,20 +21,6 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static cube8540.oauth.authentication.AuthenticationApplication.DEFAULT_TIME_ZONE;
-import static cube8540.oauth.authentication.AuthenticationApplication.DEFAULT_ZONE_OFFSET;
-import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.ACCESS_TOKEN_ID;
-import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.ACCESS_TOKEN_VALIDITY_SECONDS;
-import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.CLIENT_ID;
-import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.CLIENT_SCOPES;
-import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.RAW_SCOPES;
-import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.REFRESH_TOKEN_ID;
-import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.REFRESH_TOKEN_VALIDITY_SECONDS;
-import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.TOKEN_CREATED_DATETIME;
-import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.mockAccessTokenRepository;
-import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.mockClientDetails;
-import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.mockTokenIdGenerator;
-import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.mockTokenRequestValidator;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -50,7 +38,7 @@ class ClientCredentialsTokenGranterTest {
 
             @Override
             protected void configGranter(ClientCredentialsTokenGranter granter) {
-                OAuth2RequestValidator validator = mockTokenRequestValidator().configValidationFalse(clientDetails, RAW_SCOPES).build();
+                OAuth2RequestValidator validator = OAuth2TokenApplicationTestHelper.mockTokenRequestValidator().configValidationFalse(clientDetails, OAuth2TokenApplicationTestHelper.RAW_SCOPES).build();
                 this.granter.setTokenRequestValidator(validator);
             }
 
@@ -84,7 +72,7 @@ class ClientCredentialsTokenGranterTest {
 
                 @Override
                 protected void configGranter(ClientCredentialsTokenGranter granter) {
-                    OAuth2RequestValidator validator = mockTokenRequestValidator().configValidationTrue(clientDetails, null).build();
+                    OAuth2RequestValidator validator = OAuth2TokenApplicationTestHelper.mockTokenRequestValidator().configValidationTrue(clientDetails, null).build();
                     this.granter.setTokenRequestValidator(validator);
                 }
 
@@ -93,7 +81,7 @@ class ClientCredentialsTokenGranterTest {
                 void shouldScopeIsStoredInClientDetails() {
                     OAuth2AuthorizedAccessToken accessToken = granter.createAccessToken(clientDetails, tokenRequest);
 
-                    assertEquals(CLIENT_SCOPES, accessToken.getScopes());
+                    Assertions.assertEquals(OAuth2TokenApplicationTestHelper.CLIENT_SCOPES, accessToken.getScopes());
                 }
             }
 
@@ -108,7 +96,7 @@ class ClientCredentialsTokenGranterTest {
 
                 @Override
                 protected void configGranter(ClientCredentialsTokenGranter granter) {
-                    OAuth2RequestValidator validator = mockTokenRequestValidator().configValidationTrue(clientDetails, Collections.emptySet()).build();
+                    OAuth2RequestValidator validator = OAuth2TokenApplicationTestHelper.mockTokenRequestValidator().configValidationTrue(clientDetails, Collections.emptySet()).build();
                     this.granter.setTokenRequestValidator(validator);
                 }
 
@@ -117,7 +105,7 @@ class ClientCredentialsTokenGranterTest {
                 void shouldScopeIsStoredInClientDetails() {
                     OAuth2AuthorizedAccessToken accessToken = granter.createAccessToken(clientDetails, tokenRequest);
 
-                    assertEquals(CLIENT_SCOPES, accessToken.getScopes());
+                    Assertions.assertEquals(OAuth2TokenApplicationTestHelper.CLIENT_SCOPES, accessToken.getScopes());
                 }
             }
 
@@ -128,7 +116,7 @@ class ClientCredentialsTokenGranterTest {
                 @Test
                 @DisplayName("토큰의 스코프는 토큰 요청 정보에 저장된 스코프이어야 한다.")
                 void shouldScopeIsStoredInRequest() {
-                    Set<OAuth2ScopeId> exceptedScopes = RAW_SCOPES.stream().map(OAuth2ScopeId::new).collect(Collectors.toSet());
+                    Set<OAuth2ScopeId> exceptedScopes = OAuth2TokenApplicationTestHelper.RAW_SCOPES.stream().map(OAuth2ScopeId::new).collect(Collectors.toSet());
 
                     OAuth2AuthorizedAccessToken accessToken = granter.createAccessToken(clientDetails, tokenRequest);
                     assertEquals(exceptedScopes, accessToken.getScopes());
@@ -154,7 +142,7 @@ class ClientCredentialsTokenGranterTest {
                     void shouldRefreshTokenIdIsCreatedByTokenIdGenerator() {
                         OAuth2AuthorizedAccessToken accessToken = granter.createAccessToken(clientDetails, tokenRequest);
 
-                        assertEquals(ACCESS_TOKEN_ID, accessToken.getRefreshToken().getTokenId());
+                        Assertions.assertEquals(OAuth2TokenApplicationTestHelper.ACCESS_TOKEN_ID, accessToken.getRefreshToken().getTokenId());
                     }
 
                     @Test
@@ -162,7 +150,7 @@ class ClientCredentialsTokenGranterTest {
                     void shouldRefreshTokenExpirationIsCurrentTimePlusStoredInClientRefreshTokenValidity() {
                         OAuth2AuthorizedAccessToken accessToken = granter.createAccessToken(clientDetails, tokenRequest);
 
-                        assertEquals(TOKEN_CREATED_DATETIME.plusSeconds(REFRESH_TOKEN_VALIDITY_SECONDS), accessToken.getRefreshToken().getExpiration());
+                        Assertions.assertEquals(OAuth2TokenApplicationTestHelper.TOKEN_CREATED_DATETIME.plusSeconds(OAuth2TokenApplicationTestHelper.REFRESH_TOKEN_VALIDITY_SECONDS), accessToken.getRefreshToken().getExpiration());
                     }
                 }
 
@@ -173,7 +161,7 @@ class ClientCredentialsTokenGranterTest {
                     @Override
                     protected void configGranter(ClientCredentialsTokenGranter granter) {
                         super.configGranter(granter);
-                        granter.setRefreshTokenIdGenerator(mockTokenIdGenerator(REFRESH_TOKEN_ID));
+                        granter.setRefreshTokenIdGenerator(OAuth2TokenApplicationTestHelper.mockTokenIdGenerator(OAuth2TokenApplicationTestHelper.REFRESH_TOKEN_ID));
                         granter.setAllowedRefreshToken(true);
                     }
 
@@ -182,7 +170,7 @@ class ClientCredentialsTokenGranterTest {
                     void shouldRefreshTokenIdIsCreatedByRefreshTokenIdGenerator() {
                         OAuth2AuthorizedAccessToken accessToken = granter.createAccessToken(clientDetails, tokenRequest);
 
-                        assertEquals(REFRESH_TOKEN_ID, accessToken.getRefreshToken().getTokenId());
+                        Assertions.assertEquals(OAuth2TokenApplicationTestHelper.REFRESH_TOKEN_ID, accessToken.getRefreshToken().getTokenId());
                     }
 
                     @Test
@@ -190,7 +178,7 @@ class ClientCredentialsTokenGranterTest {
                     void shouldRefreshTokenExpirationIsCurrentTimePlusStoredInClientRefreshTokenValidity() {
                         OAuth2AuthorizedAccessToken accessToken = granter.createAccessToken(clientDetails, tokenRequest);
 
-                        assertEquals(TOKEN_CREATED_DATETIME.plusSeconds(REFRESH_TOKEN_VALIDITY_SECONDS), accessToken.getRefreshToken().getExpiration());
+                        Assertions.assertEquals(OAuth2TokenApplicationTestHelper.TOKEN_CREATED_DATETIME.plusSeconds(OAuth2TokenApplicationTestHelper.REFRESH_TOKEN_VALIDITY_SECONDS), accessToken.getRefreshToken().getExpiration());
                     }
                 }
             }
@@ -209,11 +197,11 @@ class ClientCredentialsTokenGranterTest {
 
             configRequest(mockTokenRequest);
 
-            this.clientDetails = mockClientDetails().configDefault().build();
+            this.clientDetails = OAuth2TokenApplicationTestHelper.mockClientDetails().configDefault().build();
             this.tokenRequest = mockTokenRequest.build();
-            this.granter = new ClientCredentialsTokenGranter(mockTokenIdGenerator(ACCESS_TOKEN_ID), mockAccessTokenRepository().build());
+            this.granter = new ClientCredentialsTokenGranter(OAuth2TokenApplicationTestHelper.mockTokenIdGenerator(OAuth2TokenApplicationTestHelper.ACCESS_TOKEN_ID), OAuth2TokenApplicationTestHelper.mockAccessTokenRepository().build());
 
-            Clock clock = Clock.fixed(TOKEN_CREATED_DATETIME.toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
+            Clock clock = Clock.fixed(OAuth2TokenApplicationTestHelper.TOKEN_CREATED_DATETIME.toInstant(AuthenticationApplication.DEFAULT_ZONE_OFFSET), AuthenticationApplication.DEFAULT_TIME_ZONE.toZoneId());
             AbstractOAuth2TokenGranter.setClock(clock);
             configGranter(granter);
         }
@@ -231,7 +219,7 @@ class ClientCredentialsTokenGranterTest {
 
         @Override
         protected void configGranter(ClientCredentialsTokenGranter granter) {
-            OAuth2RequestValidator validator = mockTokenRequestValidator().configValidationTrue(clientDetails, RAW_SCOPES).build();
+            OAuth2RequestValidator validator = OAuth2TokenApplicationTestHelper.mockTokenRequestValidator().configValidationTrue(clientDetails, OAuth2TokenApplicationTestHelper.RAW_SCOPES).build();
             this.granter.setTokenRequestValidator(validator);
         }
 
@@ -240,7 +228,7 @@ class ClientCredentialsTokenGranterTest {
         void shouldTokenIdIsCreatedByTokenIdGenerator() {
             OAuth2AuthorizedAccessToken accessToken = granter.createAccessToken(clientDetails, tokenRequest);
 
-            assertEquals(ACCESS_TOKEN_ID, accessToken.getTokenId());
+            Assertions.assertEquals(OAuth2TokenApplicationTestHelper.ACCESS_TOKEN_ID, accessToken.getTokenId());
         }
 
         @Test
@@ -256,7 +244,7 @@ class ClientCredentialsTokenGranterTest {
         void shouldClientIdIsStoredInClientDetails() {
             OAuth2AuthorizedAccessToken accessToken = granter.createAccessToken(clientDetails, tokenRequest);
 
-            assertEquals(CLIENT_ID, accessToken.getClient());
+            Assertions.assertEquals(OAuth2TokenApplicationTestHelper.CLIENT_ID, accessToken.getClient());
         }
 
         @Test
@@ -272,7 +260,7 @@ class ClientCredentialsTokenGranterTest {
         void shouldSetTokenValidity() {
             OAuth2AuthorizedAccessToken accessToken = granter.createAccessToken(clientDetails, tokenRequest);
 
-            assertEquals(TOKEN_CREATED_DATETIME.plusSeconds(ACCESS_TOKEN_VALIDITY_SECONDS), accessToken.getExpiration());
+            Assertions.assertEquals(OAuth2TokenApplicationTestHelper.TOKEN_CREATED_DATETIME.plusSeconds(OAuth2TokenApplicationTestHelper.ACCESS_TOKEN_VALIDITY_SECONDS), accessToken.getExpiration());
         }
     }
 }

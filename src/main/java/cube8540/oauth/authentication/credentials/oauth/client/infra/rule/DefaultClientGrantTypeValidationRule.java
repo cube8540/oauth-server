@@ -6,14 +6,14 @@ import cube8540.validator.core.ValidationRule;
 
 public class DefaultClientGrantTypeValidationRule implements ValidationRule<OAuth2Client> {
 
-    private static final String PROPERTY = "grantType";
-    private static final String MESSAGE = "클라이언트의 인증 타입은 한개 이상이어야 합니다.";
+    private static final String DEFAULT_PROPERTY = "grantType";
+    private static final String DEFAULT_MESSAGE = "클라이언트의 인증 타입은 한개 이상이어야 합니다.";
 
     private String property;
     private String message;
 
     public DefaultClientGrantTypeValidationRule() {
-        this(PROPERTY, MESSAGE);
+        this(DEFAULT_PROPERTY, DEFAULT_MESSAGE);
     }
 
     public DefaultClientGrantTypeValidationRule(String property, String message) {
