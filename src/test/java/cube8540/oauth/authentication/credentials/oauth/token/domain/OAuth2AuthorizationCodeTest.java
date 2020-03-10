@@ -21,7 +21,6 @@ import static cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth
 import static cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizationCodeTestHelper.NOW;
 import static cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizationCodeTestHelper.REDIRECT_URI;
 import static cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizationCodeTestHelper.SCOPES;
-import static cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizationCodeTestHelper.STATE;
 import static cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizationCodeTestHelper.USERNAME;
 import static cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizationCodeTestHelper.configDefaultCodeGenerator;
 import static cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizationCodeTestHelper.mockAuthorizationRequest;
@@ -87,14 +86,6 @@ class OAuth2AuthorizationCodeTest {
         }
 
         @Test
-        @DisplayName("인자로 받은 STATE 속성을 저장해야 한다.")
-        void shouldSaveGivenStateProperty() {
-            this.code.setAuthorizationRequest(request);
-
-            assertEquals(STATE, this.code.getState());
-        }
-
-        @Test
         @DisplayName("인자로 받은 리다이렉트 주소를 저장해야 한다.")
         void shouldSaveGivenRedirectUri() {
             this.code.setAuthorizationRequest(request);
@@ -143,33 +134,6 @@ class OAuth2AuthorizationCodeTest {
             @DisplayName("에러 코드는 INVALID_GRANT 이어야 한다.")
             void shouldErrorCodeIsInvalidGrant() {
                 OAuth2Error error = assertThrows(InvalidGrantException.class, () -> code.validateWithAuthorizationRequest(storedRequest))
-                        .getError();
-                assertEquals(OAuth2ErrorCodes.INVALID_GRANT, error.getErrorCode());
-            }
-        }
-
-        @Nested
-        @DisplayName("State 값이 일치 하지 않을시")
-        class WhenStateMismatch {
-            private AuthorizationRequest request;
-            private OAuth2AuthorizationCode code;
-
-            @BeforeEach
-            void setup() {
-                AuthorizationRequest storedRequest = mockAuthorizationRequest().configDefaultSetup().build();
-
-                this.request = mockAuthorizationRequest().configDefaultSetup().configMismatchesState().build();
-                this.code = new OAuth2AuthorizationCode(configDefaultCodeGenerator());
-                this.code.setAuthorizationRequest(storedRequest);
-
-                Clock clock = Clock.fixed(EXPIRATION_DATETIME.minusNanos(1).toInstant(DEFAULT_ZONE_OFFSET), DEFAULT_TIME_ZONE.toZoneId());
-                OAuth2AuthorizationCode.setClock(clock);
-            }
-
-            @Test
-            @DisplayName("InvalidGrantException 이 발생해야 하며 에러 코드는 INVALID_GRANT 이어야 한다.")
-            void shouldThrowsInvalidGrantExceptionAndErrorCodeIsInvalidGrant() {
-                OAuth2Error error = assertThrows(InvalidGrantException.class, () -> code.validateWithAuthorizationRequest(request))
                         .getError();
                 assertEquals(OAuth2ErrorCodes.INVALID_GRANT, error.getErrorCode());
             }
