@@ -6,6 +6,10 @@ plugins {
     id 'jacoco'
 }
 
+jacoco {
+    toolVersion = "0.8.5"
+}
+
 group = 'cube8540.oauth'
 version = '1.3.1'
 sourceCompatibility = '13'
@@ -26,8 +30,6 @@ sonarqube {
         property 'sonarqube.sourceEncoding', 'UTF-8'
         property 'sonarqube.source', 'src'
         property 'sonarqube.language', 'java'
-        property 'sonar.host.url', 'http://192.168.0.5:9000'
-        property 'sonar.login', '8388394f9a8839e8a676ad3ad9f2487fef29412d'
         property 'sonar.jacoco.reportPaths', 'build/jacoco/jacoco.exec'
     }
 }
