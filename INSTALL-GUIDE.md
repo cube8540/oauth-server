@@ -1,8 +1,8 @@
 ## 환경
-- Java 13 (+)
-- Gradle 6.0.1 (+)
-- Spring Boot 2.2.2
-- Spring Security 5.2.1
+Java 13 (+)  
+Gradle 6.0.1 (+)  
+Spring Boot 2.2.2  
+Spring Security 5.2.1  
 
 ## Getting Started
 git 을 이용하여 프로젝트를 Pulling 한다. 그레들 배치 스크립트를 생성한다.
