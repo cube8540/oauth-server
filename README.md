@@ -1,11 +1,8 @@
 # OAuth2 권한 서버
 Spring Boot + Spring Security 를 이용하여 구현한 OAuth2 권한 서버 입니다. 
 
-# 환경
-- Java 13
-- Gradle 6.0.1
-- Spring Boot 2.2.2
-- Spring Security 5.2.1
+# Quickstart
+- [환경 및 실행 방법](./INSTALL-GUIDE.md)
 
 # OAuth2 API
 - [토큰 부여 API](./OAUTH-AUTHORIZATION-API.md)
