@@ -83,7 +83,6 @@ public class OAuth2AuthorizationCode extends AbstractAggregateRoot<OAuth2Authori
     public void setAuthorizationRequest(AuthorizationRequest request) {
         this.clientId = new OAuth2ClientId(request.getClientId());
         this.username = new UserEmail(request.getUsername());
-        this.state = request.getState();
         this.redirectURI = request.getRedirectUri();
         this.approvedScopes = request.getRequestScopes().stream()
                 .map(OAuth2ScopeId::new).collect(Collectors.toSet());
@@ -92,10 +91,6 @@ public class OAuth2AuthorizationCode extends AbstractAggregateRoot<OAuth2Authori
     public void validateWithAuthorizationRequest(AuthorizationRequest request) {
         if (expirationDateTime.isBefore(LocalDateTime.now(clock))) {
             throw InvalidGrantException.invalidGrant("Authorization code is expired");
-        }
-
-        if (state != null && !state.equals(request.getState())) {
-            throw InvalidGrantException.invalidGrant("State is not matched");
         }
 
         if ((redirectURI == null && request.getRedirectUri() != null) ||
