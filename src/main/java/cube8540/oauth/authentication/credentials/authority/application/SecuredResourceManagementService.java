@@ -1,0 +1,11 @@
+package cube8540.oauth.authentication.credentials.authority.application;
+
+import java.util.List;
+
+public interface SecuredResourceManagementService {
+
+    List<SecuredResourceDetails> getResources();
+
+    SecuredResourceDetails registerNewResource(SecuredResourceRegisterRequest registerRequest);
+
+}
