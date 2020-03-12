@@ -25,6 +25,11 @@ public class DefaultSecuredResourceManagementService implements SecuredResourceM
     }
 
     @Override
+    public Long count(String resourceId) {
+        return repository.countByResourceId(new SecuredResourceId(resourceId));
+    }
+
+    @Override
     public List<SecuredResourceDetails> getResources() {
         return repository.findAll().stream().map(SecuredResourceDetails::of).collect(Collectors.toList());
     }

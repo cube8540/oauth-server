@@ -4,6 +4,8 @@ import java.util.List;
 
 public interface SecuredResourceManagementService {
 
+    Long count(String resourceId);
+
     List<SecuredResourceDetails> getResources();
 
     SecuredResourceDetails registerNewResource(SecuredResourceRegisterRequest registerRequest);

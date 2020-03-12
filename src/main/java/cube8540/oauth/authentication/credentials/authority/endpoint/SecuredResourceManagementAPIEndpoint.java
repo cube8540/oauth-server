@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collections;
@@ -33,6 +34,12 @@ public class SecuredResourceManagementAPIEndpoint {
     @Autowired
     public SecuredResourceManagementAPIEndpoint(SecuredResourceManagementService service) {
         this.service = service;
+    }
+
+    @GetMapping(value = "/api/secured-resources/attributes/resource-id")
+    public Map<String, Long> countResourceId(@RequestParam String resourceId) {
+        long count = service.count(resourceId);
+        return Collections.singletonMap("count", count);
     }
 
     @GetMapping(value = "/api/secured-resources")
