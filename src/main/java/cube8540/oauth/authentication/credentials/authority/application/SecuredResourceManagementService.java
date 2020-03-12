@@ -8,4 +8,6 @@ public interface SecuredResourceManagementService {
 
     SecuredResourceDetails registerNewResource(SecuredResourceRegisterRequest registerRequest);
 
+    SecuredResourceDetails modifyResource(String resourceId, SecuredResourceModifyRequest modifyRequest);
+
 }

@@ -5,6 +5,7 @@ import cube8540.oauth.authentication.credentials.authority.domain.SecuredResourc
 import cube8540.oauth.authentication.credentials.authority.domain.SecuredResourceId;
 import cube8540.oauth.authentication.credentials.authority.domain.SecuredResourceRepository;
 import cube8540.oauth.authentication.credentials.authority.domain.SecuredResourceValidationPolicy;
+import cube8540.oauth.authentication.credentials.authority.error.ResourceNotFoundException;
 import cube8540.oauth.authentication.credentials.authority.error.ResourceRegisterException;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +40,15 @@ public class DefaultSecuredResourceManagementService implements SecuredResourceM
         }
         SecuredResource resource = new SecuredResource(new SecuredResourceId(registerRequest.getResourceId()),
                 URI.create(registerRequest.getResource()), ResourceMethod.of(registerRequest.getMethod()));
+        resource.validation(policy);
+        return SecuredResourceDetails.of(repository.save(resource));
+    }
+
+    @Override
+    public SecuredResourceDetails modifyResource(String resourceId, SecuredResourceModifyRequest modifyRequest) {
+        SecuredResource resource = repository.findById(new SecuredResourceId(resourceId))
+                .orElseThrow(() -> ResourceNotFoundException.instance(resourceId + " is not found"));
+        resource.changeResourceInfo(URI.create(modifyRequest.getResource()), ResourceMethod.of(modifyRequest.getMethod()));
         resource.validation(policy);
         return SecuredResourceDetails.of(repository.save(resource));
     }

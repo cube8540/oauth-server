@@ -34,6 +34,8 @@ class AuthorityApplicationTestHelper {
 
     static final String RAW_RESOURCE_URI = "/resource/**";
     static final URI RESOURCE_URI = URI.create(RAW_RESOURCE_URI);
+    static final String RAW_MODIFY_RESOURCE_URI = "/modify-resource/**";
+    static final URI MODIFY_RESOURCE_URI = URI.create(RAW_MODIFY_RESOURCE_URI);
 
     static MockAuthorityRepository mockAuthorityRepository() {
         return new MockAuthorityRepository();

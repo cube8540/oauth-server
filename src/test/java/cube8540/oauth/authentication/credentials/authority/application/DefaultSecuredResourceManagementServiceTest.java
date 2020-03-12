@@ -4,6 +4,7 @@ import cube8540.oauth.authentication.credentials.authority.domain.ResourceMethod
 import cube8540.oauth.authentication.credentials.authority.domain.SecuredResource;
 import cube8540.oauth.authentication.credentials.authority.domain.SecuredResourceRepository;
 import cube8540.oauth.authentication.credentials.authority.domain.SecuredResourceValidationPolicy;
+import cube8540.oauth.authentication.credentials.authority.error.ResourceNotFoundException;
 import cube8540.oauth.authentication.credentials.authority.error.ResourceRegisterException;
 import cube8540.oauth.authentication.error.message.ErrorCodes;
 import cube8540.validator.core.ValidationRule;
@@ -14,6 +15,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 
+import static cube8540.oauth.authentication.credentials.authority.application.AuthorityApplicationTestHelper.MODIFY_RESOURCE_URI;
+import static cube8540.oauth.authentication.credentials.authority.application.AuthorityApplicationTestHelper.RAW_MODIFY_RESOURCE_URI;
 import static cube8540.oauth.authentication.credentials.authority.application.AuthorityApplicationTestHelper.RAW_RESOURCE_ID;
 import static cube8540.oauth.authentication.credentials.authority.application.AuthorityApplicationTestHelper.RAW_RESOURCE_URI;
 import static cube8540.oauth.authentication.credentials.authority.application.AuthorityApplicationTestHelper.RESOURCE_ID;
@@ -54,26 +57,20 @@ class DefaultSecuredResourceManagementServiceTest {
 
         @Nested
         @DisplayName("저장소에 저장되지 않은 권한일시")
-        class WhenNotRegisterInRepository {
-            private SecuredResourceRepository repository;
+        class WhenNotRegisterInRepository extends SecuredResourceNotFoundSetup {
             private SecuredResourceRegisterRequest registerRequest;
             private ValidationRule<SecuredResource> resourceIdRule;
             private ValidationRule<SecuredResource> resourceRule;
             private ValidationRule<SecuredResource> methodRule;
 
-            private DefaultSecuredResourceManagementService service;
-
             @BeforeEach
-            void setup() {
+            void setupRequest() {
                 this.registerRequest = new SecuredResourceRegisterRequest(RAW_RESOURCE_ID, RAW_RESOURCE_URI, "POST");
-                this.repository = mockResourceRepository().emptyResource().build();
                 this.resourceIdRule = mockResourceValidationRule().configReturnTrue().build();
                 this.resourceRule = mockResourceValidationRule().configReturnTrue().build();
                 this.methodRule = mockResourceValidationRule().configReturnTrue().build();
 
                 SecuredResourceValidationPolicy policy = mockResourceValidationPolicy().resourceIdRule(resourceIdRule).resourceRule(resourceRule).methodRule(methodRule).build();
-
-                this.service = new DefaultSecuredResourceManagementService(repository);
                 this.service.setPolicy(policy);
             }
 
@@ -113,6 +110,65 @@ class DefaultSecuredResourceManagementServiceTest {
                 inOrder.verify(repository, times(1)).save(argumentCaptor.capture());
                 assertEquals(argumentCaptor.getAllValues().get(0), argumentCaptor.getAllValues().get(1));
             }
+        }
+    }
+
+    @Nested
+    @DisplayName("리소스 수정")
+    class ModifyResource {
+
+        @Nested
+        @DisplayName("수정할 리소스가 저장소에 등록되어 있지 않을시")
+        class WhenModifyResourceIsNotRegisteredInRepository extends SecuredResourceNotFoundSetup {
+            private SecuredResourceModifyRequest modifyRequest;
+
+            @BeforeEach
+            void setupRequest() {
+                this.modifyRequest = new SecuredResourceModifyRequest(RAW_MODIFY_RESOURCE_URI, "PUT");
+            }
+
+            @Test
+            @DisplayName("ResourceNotFoundException 이 발생해야 하며 에러 코드는 NOT_FOUND 이어야 한다.")
+            void shouldThrowsResourceNotFoundExceptionAndErrorCodeIsNotFound() {
+                assertThrows(ResourceNotFoundException.class, () -> service.modifyResource(RAW_RESOURCE_ID, modifyRequest));
+            }
+        }
+
+        @Nested
+        @DisplayName("수정할 리소스가 저장소에 등록되어 있을시")
+        class WhenModifyResourceIsRegisteredInRepository extends SecuredResourceFoundSetup {
+            private SecuredResourceValidationPolicy policy;
+            private SecuredResourceModifyRequest modifyRequest;
+
+            @BeforeEach
+            void setupRequest() {
+                this.policy = mockResourceValidationPolicy().build();
+                this.modifyRequest = new SecuredResourceModifyRequest(RAW_MODIFY_RESOURCE_URI, "PUT");
+
+                this.service.setPolicy(policy);
+            }
+
+            @Test
+            @DisplayName("리소스의 정보를 변경한 후 유효성을 검사하여 저장소에 등록해야 한다.")
+            void shouldChangeResourceInfoAndSavedRepositoryAfterValidation() {
+                InOrder inOrder = inOrder(securedResource, repository);
+
+                service.modifyResource(RAW_RESOURCE_ID, modifyRequest);
+                inOrder.verify(securedResource, times(1)).changeResourceInfo(MODIFY_RESOURCE_URI, ResourceMethod.PUT);
+                inOrder.verify(securedResource, times(1)).validation(policy);
+                inOrder.verify(repository, times(1)).save(securedResource);
+            }
+        }
+    }
+
+    private static abstract class SecuredResourceNotFoundSetup {
+        protected SecuredResourceRepository repository;
+        protected DefaultSecuredResourceManagementService service;
+
+        @BeforeEach
+        void setup() {
+            this.repository = mockResourceRepository().emptyResource().build();
+            this.service = new DefaultSecuredResourceManagementService(repository);
         }
     }
 
