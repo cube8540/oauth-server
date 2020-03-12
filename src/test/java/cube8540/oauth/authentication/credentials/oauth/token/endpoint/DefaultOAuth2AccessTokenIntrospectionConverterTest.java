@@ -3,7 +3,7 @@ package cube8540.oauth.authentication.credentials.oauth.token.endpoint;
 import cube8540.oauth.authentication.AuthenticationApplication;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2Utils;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
-import cube8540.oauth.authentication.credentials.oauth.token.OAuth2AccessTokenDetails;
+import cube8540.oauth.authentication.credentials.oauth.OAuth2AccessTokenDetails;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

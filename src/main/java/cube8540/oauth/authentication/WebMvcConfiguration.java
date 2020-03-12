@@ -1,5 +1,6 @@
 package cube8540.oauth.authentication;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -8,9 +9,9 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.navercorp.lucy.security.xss.servletfilter.XssEscapeServletFilter;
+import cube8540.oauth.authentication.credentials.oauth.OAuth2AccessTokenDetails;
+import cube8540.oauth.authentication.credentials.oauth.converter.OAuth2AccessTokenDetailsSerializer;
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ErrorSerializer;
-import cube8540.oauth.authentication.credentials.oauth.token.OAuth2AccessTokenDetails;
-import cube8540.oauth.authentication.credentials.oauth.token.OAuth2AccessTokenDetailsSerializer;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -58,7 +59,8 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
         ObjectMapper objectMapper = new ObjectMapper()
                 .registerModule(timeModule)
                 .registerModule(oauth2Module)
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
         objectMapper.getFactory().setCharacterEscapes(new HtmlCharacterEscapes());
         return objectMapper;

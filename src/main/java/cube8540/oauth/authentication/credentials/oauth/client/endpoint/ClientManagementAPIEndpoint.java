@@ -4,8 +4,8 @@ import cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2
 import cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientManagementService;
 import cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientModifyRequest;
 import cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientRegisterRequest;
-import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
-import cube8540.oauth.authentication.credentials.oauth.client.error.ClientExceptionTranslator;
+import cube8540.oauth.authentication.credentials.oauth.OAuth2ClientDetails;
+import cube8540.oauth.authentication.credentials.oauth.error.ClientAPIExceptionTranslator;
 import cube8540.oauth.authentication.error.message.ErrorMessage;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +35,7 @@ public class ClientManagementAPIEndpoint {
     private final OAuth2ClientManagementService service;
 
     @Setter
-    private ClientExceptionTranslator translator = new ClientExceptionTranslator();
+    private ClientAPIExceptionTranslator translator = new ClientAPIExceptionTranslator();
 
     @Setter
     private int clientPageSize;

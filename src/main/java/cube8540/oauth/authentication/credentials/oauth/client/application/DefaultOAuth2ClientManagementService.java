@@ -1,14 +1,14 @@
 package cube8540.oauth.authentication.credentials.oauth.client.application;
 
 import cube8540.oauth.authentication.credentials.oauth.OAuth2Utils;
-import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
+import cube8540.oauth.authentication.credentials.oauth.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2Client;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientRepository;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientValidatePolicy;
-import cube8540.oauth.authentication.credentials.oauth.client.error.ClientAuthorizationException;
-import cube8540.oauth.authentication.credentials.oauth.client.error.ClientNotFoundException;
-import cube8540.oauth.authentication.credentials.oauth.client.error.ClientRegisterException;
+import cube8540.oauth.authentication.credentials.oauth.error.ClientAuthorizationException;
+import cube8540.oauth.authentication.credentials.oauth.error.ClientNotFoundException;
+import cube8540.oauth.authentication.credentials.oauth.error.ClientRegisterException;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import cube8540.oauth.authentication.users.domain.UserEmail;
 import lombok.Setter;
