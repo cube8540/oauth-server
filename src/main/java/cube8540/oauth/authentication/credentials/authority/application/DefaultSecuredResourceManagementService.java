@@ -8,14 +8,11 @@ import cube8540.oauth.authentication.credentials.authority.domain.SecuredResourc
 import cube8540.oauth.authentication.credentials.authority.error.ResourceNotFoundException;
 import cube8540.oauth.authentication.credentials.authority.error.ResourceRegisterException;
 import lombok.Setter;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.net.URI;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Service
 public class DefaultSecuredResourceManagementService implements SecuredResourceManagementService {
 
     private final SecuredResourceRepository repository;
@@ -23,7 +20,6 @@ public class DefaultSecuredResourceManagementService implements SecuredResourceM
     @Setter
     private SecuredResourceValidationPolicy policy;
 
-    @Autowired
     public DefaultSecuredResourceManagementService(SecuredResourceRepository repository) {
         this.repository = repository;
     }
