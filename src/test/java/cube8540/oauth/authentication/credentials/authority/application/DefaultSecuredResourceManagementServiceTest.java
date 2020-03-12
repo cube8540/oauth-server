@@ -29,6 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @DisplayName("기본 자원 관리 서비스 테스트")
 class DefaultSecuredResourceManagementServiceTest {
@@ -130,7 +131,9 @@ class DefaultSecuredResourceManagementServiceTest {
             @Test
             @DisplayName("ResourceNotFoundException 이 발생해야 하며 에러 코드는 NOT_FOUND 이어야 한다.")
             void shouldThrowsResourceNotFoundExceptionAndErrorCodeIsNotFound() {
-                assertThrows(ResourceNotFoundException.class, () -> service.modifyResource(RAW_RESOURCE_ID, modifyRequest));
+                ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
+                        () -> service.modifyResource(RAW_RESOURCE_ID, modifyRequest));
+                assertEquals(ErrorCodes.NOT_FOUND, exception.getCode());
             }
         }
 
@@ -157,6 +160,36 @@ class DefaultSecuredResourceManagementServiceTest {
                 inOrder.verify(securedResource, times(1)).changeResourceInfo(MODIFY_RESOURCE_URI, ResourceMethod.PUT);
                 inOrder.verify(securedResource, times(1)).validation(policy);
                 inOrder.verify(repository, times(1)).save(securedResource);
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("리소스 삭제")
+    class RemoveResource {
+
+        @Nested
+        @DisplayName("삭제할 리소스가 저장소에 등록되어 있지 않을시")
+        class WhenRemoveResourceIsNotRegisteredInRepository extends SecuredResourceNotFoundSetup {
+
+            @Test
+            @DisplayName("ResourceNotFoundException 이 발생해야 하며 에러 코드는 NOT_FOUND 이어야 한다.")
+            void shouldThrowsResourceNotFoundExceptionAndErrorCodeIsNotFound() {
+                ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> service.removeResource(RAW_RESOURCE_ID));
+                assertEquals(ErrorCodes.NOT_FOUND, exception.getCode());
+            }
+        }
+
+        @Nested
+        @DisplayName("삭제할 리소스가 저장소에 등록되어 있을시")
+        class WhenRemoveResourceIsRegisteredInRepository extends SecuredResourceFoundSetup {
+
+            @Test
+            @DisplayName("검색된 리소스를 저장소에서 삭제해야 한다.")
+            void shouldRemoveSearchedResource() {
+                service.removeResource(RAW_RESOURCE_ID);
+
+                verify(repository, times(1)).delete(securedResource);
             }
         }
     }

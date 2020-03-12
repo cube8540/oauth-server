@@ -10,4 +10,6 @@ public interface SecuredResourceManagementService {
 
     SecuredResourceDetails modifyResource(String resourceId, SecuredResourceModifyRequest modifyRequest);
 
+    SecuredResourceDetails removeResource(String resourceId);
+
 }

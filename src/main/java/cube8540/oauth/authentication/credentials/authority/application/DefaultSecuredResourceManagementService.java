@@ -46,10 +46,22 @@ public class DefaultSecuredResourceManagementService implements SecuredResourceM
 
     @Override
     public SecuredResourceDetails modifyResource(String resourceId, SecuredResourceModifyRequest modifyRequest) {
-        SecuredResource resource = repository.findById(new SecuredResourceId(resourceId))
-                .orElseThrow(() -> ResourceNotFoundException.instance(resourceId + " is not found"));
+        SecuredResource resource = getResource(resourceId);
         resource.changeResourceInfo(URI.create(modifyRequest.getResource()), ResourceMethod.of(modifyRequest.getMethod()));
         resource.validation(policy);
         return SecuredResourceDetails.of(repository.save(resource));
+    }
+
+    @Override
+    public SecuredResourceDetails removeResource(String resourceId) {
+        SecuredResource resource = getResource(resourceId);
+
+        repository.delete(resource);
+        return SecuredResourceDetails.of(resource);
+    }
+
+    private SecuredResource getResource(String resourceId) {
+        return repository.findById(new SecuredResourceId(resourceId))
+                .orElseThrow(() -> ResourceNotFoundException.instance(resourceId + " is not found"));
     }
 }
