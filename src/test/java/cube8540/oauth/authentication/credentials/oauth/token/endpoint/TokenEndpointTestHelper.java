@@ -3,12 +3,13 @@ package cube8540.oauth.authentication.credentials.oauth.token.endpoint;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2Utils;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
+import cube8540.oauth.authentication.credentials.oauth.security.endpoint.OAuth2AccessTokenIntrospectionConverter;
 import cube8540.oauth.authentication.credentials.oauth.security.provider.ClientCredentialsToken;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
-import cube8540.oauth.authentication.credentials.oauth.OAuth2AccessTokenDetails;
-import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2AccessTokenGranter;
-import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2AccessTokenReadService;
-import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenRevoker;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AccessTokenDetails;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AccessTokenGranter;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AccessTokenDetailsService;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2TokenRevoker;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 
 import java.net.URI;
@@ -132,10 +133,10 @@ class TokenEndpointTestHelper {
     }
 
     static class MockAccessTokenReadService {
-        private OAuth2AccessTokenReadService service;
+        private OAuth2AccessTokenDetailsService service;
 
         private MockAccessTokenReadService() {
-            this.service = mock(OAuth2AccessTokenReadService.class);
+            this.service = mock(OAuth2AccessTokenDetailsService.class);
         }
 
         MockAccessTokenReadService registerToken(OAuth2AccessTokenDetails token) {
@@ -143,7 +144,7 @@ class TokenEndpointTestHelper {
             return this;
         }
 
-        OAuth2AccessTokenReadService build() {
+        OAuth2AccessTokenDetailsService build() {
             return service;
         }
     }

@@ -2,8 +2,8 @@ package cube8540.oauth.authentication.credentials.oauth.converter;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import cube8540.oauth.authentication.credentials.oauth.OAuth2AccessTokenDetails;
-import cube8540.oauth.authentication.credentials.oauth.OAuth2RefreshTokenDetails;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AccessTokenDetails;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2RefreshTokenDetails;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2Utils;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import org.junit.jupiter.api.BeforeEach;

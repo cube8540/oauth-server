@@ -1,14 +1,14 @@
-package cube8540.oauth.authentication.credentials.oauth.token.endpoint;
+package cube8540.oauth.authentication.credentials.oauth.security.endpoint;
 
-import cube8540.oauth.authentication.credentials.oauth.security.provider.ClientCredentialsToken;
-import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2AccessTokenReadService;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2Utils;
-import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.error.AbstractOAuth2AuthenticationException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidRequestException;
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTranslator;
-import cube8540.oauth.authentication.credentials.oauth.OAuth2AccessTokenDetails;
-import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenRegistrationException;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AccessTokenDetails;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AccessTokenDetailsService;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetails;
+import cube8540.oauth.authentication.credentials.oauth.security.provider.ClientCredentialsToken;
+import cube8540.oauth.authentication.credentials.oauth.error.OAuth2AccessTokenRegistrationException;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +30,7 @@ import java.util.Map;
 @RestController
 public class OAuth2TokenIntrospectionEndpoint {
 
-    private final OAuth2AccessTokenReadService service;
+    private final OAuth2AccessTokenDetailsService service;
 
     @Setter
     private OAuth2ExceptionTranslator exceptionTranslator = new OAuth2ExceptionTranslator();
@@ -39,7 +39,7 @@ public class OAuth2TokenIntrospectionEndpoint {
     private OAuth2AccessTokenIntrospectionConverter converter = new DefaultOAuth2AccessTokenIntrospectionConverter();
 
     @Autowired
-    public OAuth2TokenIntrospectionEndpoint(OAuth2AccessTokenReadService service) {
+    public OAuth2TokenIntrospectionEndpoint(OAuth2AccessTokenDetailsService service) {
         this.service = service;
     }
 

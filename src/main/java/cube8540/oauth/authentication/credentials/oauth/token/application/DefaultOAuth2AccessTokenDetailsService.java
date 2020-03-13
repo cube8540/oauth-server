@@ -1,7 +1,8 @@
 package cube8540.oauth.authentication.credentials.oauth.token.application;
 
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidClientException;
-import cube8540.oauth.authentication.credentials.oauth.OAuth2AccessTokenDetails;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AccessTokenDetails;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AccessTokenDetailsService;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenExpiredException;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenNotFoundException;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenRepository;
@@ -17,14 +18,14 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
 @Service
-public class DefaultOAuth2AccessTokenReadService implements OAuth2AccessTokenReadService {
+public class DefaultOAuth2AccessTokenDetailsService implements OAuth2AccessTokenDetailsService {
 
     private final OAuth2AccessTokenRepository tokenRepository;
     private final UserDetailsService userDetailsService;
 
     @Autowired
-    public DefaultOAuth2AccessTokenReadService(OAuth2AccessTokenRepository tokenRepository,
-                                               @Qualifier("defaultUserService") UserDetailsService userDetailsService) {
+    public DefaultOAuth2AccessTokenDetailsService(OAuth2AccessTokenRepository tokenRepository,
+                                                  @Qualifier("defaultUserService") UserDetailsService userDetailsService) {
         this.tokenRepository = tokenRepository;
         this.userDetailsService = userDetailsService;
     }

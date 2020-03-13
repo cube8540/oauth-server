@@ -1,7 +1,7 @@
 package cube8540.oauth.authentication.credentials.oauth.token.application;
 
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidClientException;
-import cube8540.oauth.authentication.credentials.oauth.OAuth2AccessTokenDetails;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AccessTokenDetails;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenExpiredException;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenNotFoundException;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenRepository;
@@ -31,7 +31,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @DisplayName("기본 토큰 부여 서비스 테스트")
-class DefaultOAuth2AccessTokenReadServiceTest {
+class DefaultOAuth2AccessTokenDetailsServiceTest {
 
     @Nested
     @DisplayName("엑세스 토큰 읽기")
@@ -40,12 +40,12 @@ class DefaultOAuth2AccessTokenReadServiceTest {
         @Nested
         @DisplayName("저장소에서 엑세스 토큰을 찾을 수 없을시")
         class WhenAccessTokenNotFound {
-            private DefaultOAuth2AccessTokenReadService service;
+            private DefaultOAuth2AccessTokenDetailsService service;
 
             @BeforeEach
             void setup() {
                 OAuth2AccessTokenRepository repository = mockAccessTokenRepository().emptyAccessToken().build();
-                this.service = new DefaultOAuth2AccessTokenReadService(repository, mockUserDetailsService().build());
+                this.service = new DefaultOAuth2AccessTokenDetailsService(repository, mockUserDetailsService().build());
             }
 
             @Test
@@ -62,13 +62,13 @@ class DefaultOAuth2AccessTokenReadServiceTest {
             @Nested
             @DisplayName("엑세스 토큰이 만료되었을시")
             class WhenAccessTokenIsExpired {
-                private DefaultOAuth2AccessTokenReadService service;
+                private DefaultOAuth2AccessTokenDetailsService service;
 
                 @BeforeEach
                 void setup() {
                     OAuth2AuthorizedAccessToken accessToken = mockAccessToken().configDefault().configExpired().build();
                     OAuth2AccessTokenRepository repository = mockAccessTokenRepository().registerAccessToken(accessToken).build();
-                    this.service = new DefaultOAuth2AccessTokenReadService(repository, mockUserDetailsService().build());
+                    this.service = new DefaultOAuth2AccessTokenDetailsService(repository, mockUserDetailsService().build());
                 }
 
                 @Test
@@ -81,7 +81,7 @@ class DefaultOAuth2AccessTokenReadServiceTest {
             @Nested
             @DisplayName("엑세스 토큰의 클라이언트와 요청한 클라이언트의 정보가 일치하지 않을시")
             class WhenDifferentSearchedAccessTokensClientAndRequestingClient {
-                private DefaultOAuth2AccessTokenReadService service;
+                private DefaultOAuth2AccessTokenDetailsService service;
 
                 @BeforeEach
                 void setup() {
@@ -89,7 +89,7 @@ class DefaultOAuth2AccessTokenReadServiceTest {
                     OAuth2AccessTokenRepository repository = mockAccessTokenRepository().registerAccessToken(accessToken).build();
                     SecurityContextHolder.getContext().setAuthentication(mockAuthentication(RAW_DIFFERENT_CLIENT));
 
-                    this.service = new DefaultOAuth2AccessTokenReadService(repository, mockUserDetailsService().build());
+                    this.service = new DefaultOAuth2AccessTokenDetailsService(repository, mockUserDetailsService().build());
                 }
 
                 @Test
@@ -109,7 +109,7 @@ class DefaultOAuth2AccessTokenReadServiceTest {
             @Nested
             @DisplayName("엑세스 토큰의 리플래시 토큰이 null 일시")
             class WhenAccessTokensRefreshTokenIsNull {
-                private DefaultOAuth2AccessTokenReadService service;
+                private DefaultOAuth2AccessTokenDetailsService service;
 
                 @BeforeEach
                 void setup() {
@@ -118,7 +118,7 @@ class DefaultOAuth2AccessTokenReadServiceTest {
                     OAuth2AccessTokenRepository repository = mockAccessTokenRepository().registerAccessToken(accessToken).build();
                     SecurityContextHolder.getContext().setAuthentication(mockAuthentication(RAW_CLIENT_ID));
 
-                    this.service = new DefaultOAuth2AccessTokenReadService(repository, mockUserDetailsService().build());
+                    this.service = new DefaultOAuth2AccessTokenDetailsService(repository, mockUserDetailsService().build());
                 }
 
                 @Test
@@ -138,7 +138,7 @@ class DefaultOAuth2AccessTokenReadServiceTest {
             @Nested
             @DisplayName("엑세스 토큰의 추가 확장 정보가 null 일시")
             class WhenAccessTokenAdditionalInformationIsNull {
-                private DefaultOAuth2AccessTokenReadService service;
+                private DefaultOAuth2AccessTokenDetailsService service;
 
                 @BeforeEach
                 void setup() {
@@ -147,7 +147,7 @@ class DefaultOAuth2AccessTokenReadServiceTest {
                     OAuth2AccessTokenRepository repository = mockAccessTokenRepository().registerAccessToken(accessToken).build();
                     SecurityContextHolder.getContext().setAuthentication(mockAuthentication(RAW_CLIENT_ID));
 
-                    this.service = new DefaultOAuth2AccessTokenReadService(repository, mockUserDetailsService().build());
+                    this.service = new DefaultOAuth2AccessTokenDetailsService(repository, mockUserDetailsService().build());
                 }
 
                 @Test
@@ -173,12 +173,12 @@ class DefaultOAuth2AccessTokenReadServiceTest {
         @Nested
         @DisplayName("검색하려는 엑세스 토큰의 저장소에 저장되어 있지 않을시")
         class WhenReadAccessTokenIsNotRegisteredInRepository {
-            private DefaultOAuth2AccessTokenReadService service;
+            private DefaultOAuth2AccessTokenDetailsService service;
 
             @BeforeEach
             void setup() {
                 OAuth2AccessTokenRepository repository = mockAccessTokenRepository().emptyAccessToken().build();
-                this.service = new DefaultOAuth2AccessTokenReadService(repository, mockUserDetailsService().build());
+                this.service = new DefaultOAuth2AccessTokenDetailsService(repository, mockUserDetailsService().build());
             }
 
             @Test
@@ -195,7 +195,7 @@ class DefaultOAuth2AccessTokenReadServiceTest {
             @Nested
             @DisplayName("검색된 토큰의 클라이언트 정보와 요청한 클라이언트 정보가 일치하지 않을시")
             class WhenDifferentSearchedAccessTokenClientAndRequestingClient {
-                private DefaultOAuth2AccessTokenReadService service;
+                private DefaultOAuth2AccessTokenDetailsService service;
 
                 @BeforeEach
                 void setup() {
@@ -203,7 +203,7 @@ class DefaultOAuth2AccessTokenReadServiceTest {
                     OAuth2AccessTokenRepository repository = mockAccessTokenRepository().registerAccessToken(accessToken).build();
                     SecurityContextHolder.getContext().setAuthentication(mockAuthentication(RAW_DIFFERENT_CLIENT));
 
-                    this.service = new DefaultOAuth2AccessTokenReadService(repository, mockUserDetailsService().build());
+                    this.service = new DefaultOAuth2AccessTokenDetailsService(repository, mockUserDetailsService().build());
                 }
 
                 @Test
@@ -224,7 +224,7 @@ class DefaultOAuth2AccessTokenReadServiceTest {
             @DisplayName("검색된 유저 객체가 CredentialsContainer 를 구현하고 있을시")
             class WhenUserDetailsObjectImplementCredentialsContainer {
                 private User userDetails;
-                private DefaultOAuth2AccessTokenReadService service;
+                private DefaultOAuth2AccessTokenDetailsService service;
 
                 @BeforeEach
                 void setup() {
@@ -235,7 +235,7 @@ class DefaultOAuth2AccessTokenReadServiceTest {
                     UserDetailsService userDetailsService = mockUserDetailsService().registerUser(userDetails).build();
                     SecurityContextHolder.getContext().setAuthentication(mockAuthentication(RAW_CLIENT_ID));
 
-                    this.service = new DefaultOAuth2AccessTokenReadService(repository, userDetailsService);
+                    this.service = new DefaultOAuth2AccessTokenDetailsService(repository, userDetailsService);
                 }
 
                 @Test

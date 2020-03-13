@@ -9,7 +9,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.navercorp.lucy.security.xss.servletfilter.XssEscapeServletFilter;
-import cube8540.oauth.authentication.credentials.oauth.OAuth2AccessTokenDetails;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AccessTokenDetails;
 import cube8540.oauth.authentication.credentials.oauth.converter.OAuth2AccessTokenDetailsSerializer;
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ErrorSerializer;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;

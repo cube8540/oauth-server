@@ -1,17 +1,17 @@
-package cube8540.oauth.authentication.credentials.oauth.token.endpoint;
+package cube8540.oauth.authentication.credentials.oauth.security.endpoint;
 
-import cube8540.oauth.authentication.credentials.oauth.security.provider.ClientCredentialsToken;
-import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2AccessTokenGranter;
-import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenRevoker;
-import cube8540.oauth.authentication.credentials.oauth.security.DefaultOAuth2TokenRequest;
-import cube8540.oauth.authentication.credentials.oauth.security.OAuth2TokenRequest;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2Utils;
-import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.error.AbstractOAuth2AuthenticationException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidGrantException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidRequestException;
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTranslator;
-import cube8540.oauth.authentication.credentials.oauth.OAuth2AccessTokenDetails;
+import cube8540.oauth.authentication.credentials.oauth.security.DefaultOAuth2TokenRequest;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AccessTokenDetails;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AccessTokenGranter;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetails;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2TokenRequest;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2TokenRevoker;
+import cube8540.oauth.authentication.credentials.oauth.security.provider.ClientCredentialsToken;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
