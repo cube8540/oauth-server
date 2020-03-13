@@ -1,4 +1,4 @@
-package cube8540.oauth.authentication.users.error;
+package cube8540.oauth.authentication.users.domain.exception;
 
 import cube8540.oauth.authentication.error.message.ErrorCodes;
 import lombok.AccessLevel;
