@@ -27,7 +27,7 @@ public class CompositionAuthorizationCodeService implements OAuth2AuthorizationC
     }
 
     @Override
-    public Optional<OAuth2AuthorizationCode> consume(AuthorizationCode code) {
+    public Optional<OAuth2AuthorizationCode> consume(String code) {
         Optional<OAuth2AuthorizationCode> authorizationCode = codeRepository.findById(code);
         authorizationCode.ifPresent(codeRepository::delete);
 
@@ -42,6 +42,6 @@ public class CompositionAuthorizationCodeService implements OAuth2AuthorizationC
         authorizationCode.setAuthorizationRequest(request);
         codeRepository.save(authorizationCode);
 
-        return authorizationCode.getCode();
+        return new AuthorizationCode(authorizationCode.getCode());
     }
 }

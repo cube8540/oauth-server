@@ -1,8 +1,8 @@
 package cube8540.oauth.authentication.credentials.oauth.token.domain;
 
-import cube8540.oauth.authentication.credentials.oauth.security.AuthorizationRequest;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
+import cube8540.oauth.authentication.credentials.oauth.security.AuthorizationRequest;
 import cube8540.oauth.authentication.users.domain.UserEmail;
 
 import java.net.URI;
@@ -38,7 +38,7 @@ class OAuth2AuthorizationCodeTestHelper {
 
     static AuthorizationCodeGenerator configDefaultCodeGenerator() {
         AuthorizationCodeGenerator generator = mock(AuthorizationCodeGenerator.class);
-        when(generator.generate()).thenReturn(CODE);
+        when(generator.generate()).thenReturn(RAW_CODE);
         return generator;
     }
 

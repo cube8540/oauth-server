@@ -1,9 +1,9 @@
 package cube8540.oauth.authentication.credentials.oauth.token.domain;
 
-import cube8540.oauth.authentication.credentials.oauth.security.AuthorizationRequest;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidClientException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidGrantException;
 import cube8540.oauth.authentication.credentials.oauth.error.RedirectMismatchException;
+import cube8540.oauth.authentication.credentials.oauth.security.AuthorizationRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -16,9 +16,9 @@ import java.time.Clock;
 import static cube8540.oauth.authentication.AuthenticationApplication.DEFAULT_TIME_ZONE;
 import static cube8540.oauth.authentication.AuthenticationApplication.DEFAULT_ZONE_OFFSET;
 import static cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizationCodeTestHelper.CLIENT_ID;
-import static cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizationCodeTestHelper.CODE;
 import static cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizationCodeTestHelper.EXPIRATION_DATETIME;
 import static cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizationCodeTestHelper.NOW;
+import static cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizationCodeTestHelper.RAW_CODE;
 import static cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizationCodeTestHelper.REDIRECT_URI;
 import static cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizationCodeTestHelper.SCOPES;
 import static cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizationCodeTestHelper.USERNAME;
@@ -47,7 +47,7 @@ class OAuth2AuthorizationCodeTest {
         @Test
         @DisplayName("생성기에서 반환된 코드를 저장해야 한다.")
         void shouldSaveCodeCreatedByGenerator() {
-            assertEquals(CODE, code.getCode());
+            assertEquals(RAW_CODE, code.getCode());
         }
 
         @Test
