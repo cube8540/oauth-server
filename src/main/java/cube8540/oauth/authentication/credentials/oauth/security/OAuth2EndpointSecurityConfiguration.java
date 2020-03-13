@@ -10,7 +10,7 @@ import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTran
 import cube8540.oauth.authentication.credentials.oauth.token.application.AuthorizationCodeTokenGranter;
 import cube8540.oauth.authentication.credentials.oauth.token.application.ClientCredentialsTokenGranter;
 import cube8540.oauth.authentication.credentials.oauth.token.application.CompositeOAuth2AccessTokenGranter;
-import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2AccessTokenGrantService;
+import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2AccessTokenGranter;
 import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2AuthorizationCodeConsumer;
 import cube8540.oauth.authentication.credentials.oauth.token.application.RefreshTokenGranter;
 import cube8540.oauth.authentication.credentials.oauth.token.application.ResourceOwnerPasswordTokenGranter;
@@ -109,7 +109,7 @@ public class OAuth2EndpointSecurityConfiguration extends WebSecurityConfigurerAd
     }
 
     @Bean
-    public OAuth2AccessTokenGrantService accessTokenGranter() throws Exception {
+    public OAuth2AccessTokenGranter accessTokenGranter() throws Exception {
         CompositeOAuth2AccessTokenGranter tokenGranter = new CompositeOAuth2AccessTokenGranter();
 
         tokenGranter.putTokenGranterMap(AuthorizationGrantType.AUTHORIZATION_CODE,

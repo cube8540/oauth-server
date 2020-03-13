@@ -6,9 +6,9 @@ import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2Clien
 import cube8540.oauth.authentication.credentials.oauth.security.provider.ClientCredentialsToken;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2AccessTokenDetails;
-import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2AccessTokenGrantService;
+import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2AccessTokenGranter;
 import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2AccessTokenReadService;
-import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenRevokeService;
+import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenRevoker;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 
 import java.net.URI;
@@ -86,15 +86,15 @@ class TokenEndpointTestHelper {
         return new MockTokenRequestMap();
     }
 
-    static OAuth2AccessTokenGrantService mockTokenGrantService(OAuth2AccessTokenDetails token) {
-        OAuth2AccessTokenGrantService service = mock(OAuth2AccessTokenGrantService.class);
+    static OAuth2AccessTokenGranter mockTokenGrantService(OAuth2AccessTokenDetails token) {
+        OAuth2AccessTokenGranter service = mock(OAuth2AccessTokenGranter.class);
 
         when(service.grant(any(), any())).thenReturn(token);
         return service;
     }
 
-    static OAuth2TokenRevokeService mockRevokeService(OAuth2AccessTokenDetails accessToken) {
-        OAuth2TokenRevokeService service = mock(OAuth2TokenRevokeService.class);
+    static OAuth2TokenRevoker mockRevokeService(OAuth2AccessTokenDetails accessToken) {
+        OAuth2TokenRevoker service = mock(OAuth2TokenRevoker.class);
 
         when(service.revoke(any())).thenReturn(accessToken);
         return service;

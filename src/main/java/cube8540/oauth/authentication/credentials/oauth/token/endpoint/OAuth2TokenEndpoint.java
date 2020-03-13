@@ -1,8 +1,8 @@
 package cube8540.oauth.authentication.credentials.oauth.token.endpoint;
 
 import cube8540.oauth.authentication.credentials.oauth.security.provider.ClientCredentialsToken;
-import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2AccessTokenGrantService;
-import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenRevokeService;
+import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2AccessTokenGranter;
+import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenRevoker;
 import cube8540.oauth.authentication.credentials.oauth.security.DefaultOAuth2TokenRequest;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2TokenRequest;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2Utils;
@@ -36,14 +36,14 @@ import java.util.Map;
 @RestController
 public class OAuth2TokenEndpoint {
 
-    private final OAuth2AccessTokenGrantService tokenGrantService;
-    private final OAuth2TokenRevokeService tokenRevokeService;
+    private final OAuth2AccessTokenGranter tokenGrantService;
+    private final OAuth2TokenRevoker tokenRevokeService;
 
     @Setter
     private OAuth2ExceptionTranslator exceptionTranslator = new OAuth2ExceptionTranslator();
 
     @Autowired
-    public OAuth2TokenEndpoint(OAuth2AccessTokenGrantService tokenGrantService, OAuth2TokenRevokeService tokenRevokeService) {
+    public OAuth2TokenEndpoint(OAuth2AccessTokenGranter tokenGrantService, OAuth2TokenRevoker tokenRevokeService) {
         this.tokenGrantService = tokenGrantService;
         this.tokenRevokeService = tokenRevokeService;
     }

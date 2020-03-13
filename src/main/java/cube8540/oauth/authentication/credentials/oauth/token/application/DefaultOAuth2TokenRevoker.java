@@ -12,12 +12,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
-public class DefaultOAuth2TokenRevokeService implements OAuth2TokenRevokeService {
+public class DefaultOAuth2TokenRevoker implements OAuth2TokenRevoker {
 
     private final OAuth2AccessTokenRepository repository;
 
     @Autowired
-    public DefaultOAuth2TokenRevokeService(OAuth2AccessTokenRepository repository) {
+    public DefaultOAuth2TokenRevoker(OAuth2AccessTokenRepository repository) {
         this.repository = repository;
     }
 

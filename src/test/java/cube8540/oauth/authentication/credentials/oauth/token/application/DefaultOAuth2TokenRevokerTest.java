@@ -24,7 +24,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @DisplayName("기본 토큰 삭제 서비스")
-class DefaultOAuth2TokenRevokeServiceTest {
+class DefaultOAuth2TokenRevokerTest {
 
     @Nested
     @DisplayName("토큰 삭제")
@@ -33,11 +33,11 @@ class DefaultOAuth2TokenRevokeServiceTest {
         @Nested
         @DisplayName("삭제하려는 토큰이 저장소에 등록되어 있지 않을시")
         class RevokeTokenIsNotRegisteredInRepository {
-            private DefaultOAuth2TokenRevokeService service;
+            private DefaultOAuth2TokenRevoker service;
 
             @BeforeEach
             void setup() {
-                this.service = new DefaultOAuth2TokenRevokeService(mockAccessTokenRepository().emptyAccessToken().build());
+                this.service = new DefaultOAuth2TokenRevoker(mockAccessTokenRepository().emptyAccessToken().build());
             }
 
             @Test
@@ -54,13 +54,13 @@ class DefaultOAuth2TokenRevokeServiceTest {
             @Nested
             @DisplayName("검색된 엑세스 토큰의 클라이언트와 요청한 클라이언트의 정보가 일치하지 않을시")
             class WhenDifferentSearchedAccessTokensClientAndRequestingClient {
-                private DefaultOAuth2TokenRevokeService service;
+                private DefaultOAuth2TokenRevoker service;
 
                 @BeforeEach
                 void setup() {
                     OAuth2AuthorizedAccessToken token = mockAccessToken().configDefault().build();
                     OAuth2AccessTokenRepository repository = mockAccessTokenRepository().registerAccessToken(token).build();
-                    this.service = new DefaultOAuth2TokenRevokeService(repository);
+                    this.service = new DefaultOAuth2TokenRevoker(repository);
 
                     SecurityContextHolder.getContext().setAuthentication(mockAuthentication(RAW_DIFFERENT_CLIENT));
                 }
@@ -84,13 +84,13 @@ class DefaultOAuth2TokenRevokeServiceTest {
             class WhenSameSearchedAccessTokensClientAndRequestingClient {
                 private OAuth2AuthorizedAccessToken token;
                 private OAuth2AccessTokenRepository repository;
-                private DefaultOAuth2TokenRevokeService service;
+                private DefaultOAuth2TokenRevoker service;
 
                 @BeforeEach
                 void setup() {
                     this.token = mockAccessToken().configDefault().build();
                     this.repository = mockAccessTokenRepository().registerAccessToken(token).build();
-                    this.service = new DefaultOAuth2TokenRevokeService(repository);
+                    this.service = new DefaultOAuth2TokenRevoker(repository);
 
                     SecurityContextHolder.getContext().setAuthentication(mockAuthentication(RAW_CLIENT_ID));
                 }

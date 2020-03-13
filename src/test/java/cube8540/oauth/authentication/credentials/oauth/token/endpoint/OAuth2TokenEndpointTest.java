@@ -5,8 +5,8 @@ import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDeta
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidGrantException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidRequestException;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2AccessTokenDetails;
-import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2AccessTokenGrantService;
-import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenRevokeService;
+import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2AccessTokenGranter;
+import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenRevoker;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -153,7 +153,7 @@ class OAuth2TokenEndpointTest {
             private Principal principal;
             private OAuth2ClientDetails clientDetails;
             private Map<String, String> requestMap;
-            private OAuth2AccessTokenGrantService grantService;
+            private OAuth2AccessTokenGranter grantService;
             private OAuth2TokenEndpoint endpoint;
 
             @BeforeEach
@@ -249,7 +249,7 @@ class OAuth2TokenEndpointTest {
         @DisplayName("요청이 옳바를시")
         class WhenAllowedRequesting {
             private Principal principal;
-            private OAuth2TokenRevokeService revokeService;
+            private OAuth2TokenRevoker revokeService;
             private OAuth2TokenEndpoint endpoint;
 
             @BeforeEach

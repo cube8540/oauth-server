@@ -9,15 +9,15 @@ import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CompositeOAuth2AccessTokenGranter implements OAuth2AccessTokenGrantService {
+public class CompositeOAuth2AccessTokenGranter implements OAuth2AccessTokenGranter {
 
-    private Map<AuthorizationGrantType, OAuth2AccessTokenGrantService> tokenGranterMap;
+    private Map<AuthorizationGrantType, OAuth2AccessTokenGranter> tokenGranterMap;
 
     public CompositeOAuth2AccessTokenGranter() {
         this.tokenGranterMap = new HashMap<>();
     }
 
-    public void putTokenGranterMap(AuthorizationGrantType grantType, OAuth2AccessTokenGrantService tokenGranter) {
+    public void putTokenGranterMap(AuthorizationGrantType grantType, OAuth2AccessTokenGranter tokenGranter) {
         this.tokenGranterMap.put(grantType, tokenGranter);
     }
 

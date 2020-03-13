@@ -20,7 +20,7 @@ import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public abstract class AbstractOAuth2TokenGranter implements OAuth2AccessTokenGrantService {
+public abstract class AbstractOAuth2TokenGranter implements OAuth2AccessTokenGranter {
 
     @Setter(AccessLevel.PROTECTED)
     private static Clock clock = AuthenticationApplication.DEFAULT_CLOCK;
