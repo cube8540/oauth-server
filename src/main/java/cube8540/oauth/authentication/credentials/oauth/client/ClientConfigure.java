@@ -1,11 +1,11 @@
 package cube8540.oauth.authentication.credentials.oauth.client;
 
-import cube8540.oauth.authentication.credentials.oauth.OAuth2AccessibleScopeDetailsService;
 import cube8540.oauth.authentication.credentials.oauth.client.application.DefaultOAuth2ClientManagementService;
 import cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientManagementService;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientRepository;
 import cube8540.oauth.authentication.credentials.oauth.client.infra.ClientAPIExceptionTranslator;
 import cube8540.oauth.authentication.credentials.oauth.client.infra.DefaultOAuth2ClientValidatePolicy;
+import cube8540.oauth.authentication.credentials.oauth.scope.application.OAuth2AccessibleScopeDetailsService;
 import cube8540.oauth.authentication.error.message.ErrorMessage;
 import cube8540.oauth.authentication.error.message.ExceptionTranslator;
 import lombok.Setter;

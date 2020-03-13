@@ -5,7 +5,6 @@ import cube8540.oauth.authentication.users.domain.exception.UserAuthorizationExc
 import cube8540.oauth.authentication.users.domain.exception.UserInvalidException;
 import cube8540.oauth.authentication.users.domain.exception.UserNotFoundException;
 import cube8540.oauth.authentication.users.domain.exception.UserRegisterException;
-import cube8540.oauth.authentication.users.infra.UserExceptionTranslator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

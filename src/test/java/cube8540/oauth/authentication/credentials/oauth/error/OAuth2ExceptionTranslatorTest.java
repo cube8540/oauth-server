@@ -1,7 +1,5 @@
 package cube8540.oauth.authentication.credentials.oauth.error;
 
-import cube8540.oauth.authentication.credentials.oauth.client.domain.exception.ClientNotFoundException;
-import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -123,11 +121,11 @@ class OAuth2ExceptionTranslatorTest {
     @Nested
     @DisplayName("클라이언트 등록 관련 예외일시")
     class WhenClientRegistrationException {
-        private ClientNotFoundException clientRegistrationException;
+        private OAuth2ClientRegistrationException clientRegistrationException;
 
         @BeforeEach
         void setup() {
-            this.clientRegistrationException = mock(ClientNotFoundException.class);
+            this.clientRegistrationException = mock(OAuth2ClientRegistrationException.class);
         }
 
         @Test
@@ -158,11 +156,11 @@ class OAuth2ExceptionTranslatorTest {
     @Nested
     @DisplayName("OAuth2AccessTokenNotFoundException 에러 일시")
     class WhenOAuth2AccessTokenNotFoundException {
-        private OAuth2AccessTokenNotFoundException exception;
+        private OAuth2AccessTokenRegistrationException exception;
 
         @BeforeEach
         void setup() {
-            this.exception = new OAuth2AccessTokenNotFoundException("TEST");
+            this.exception = new OAuth2AccessTokenRegistrationException("TEST");
         }
 
         @Test

@@ -2,10 +2,10 @@ package cube8540.oauth.authentication.credentials.oauth.converter;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import cube8540.oauth.authentication.credentials.oauth.OAuth2AccessTokenDetails;
-import cube8540.oauth.authentication.credentials.oauth.OAuth2RefreshTokenDetails;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2Utils;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AccessTokenDetails;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2RefreshTokenDetails;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -32,6 +32,7 @@ class OAuth2AccessTokenDetailsSerializerTest {
         protected static final String REFRESH_TOKEN_VALUE = "REFRESH-TOKEN";
         protected static final long EXPIRES_IN = 60000L;
         protected static final String TOKEN_TYPE = "TOKEN_TYPE";
+        protected static final Set<String> RAW_SCOPES = new HashSet<>(Arrays.asList("SCOPE-1", "SCOPE-2", "SCOPE-3"));
         protected static final Set<OAuth2ScopeId> SCOPE = new HashSet<>(Arrays.asList(new OAuth2ScopeId("SCOPE-1"), new OAuth2ScopeId("SCOPE-2"), new OAuth2ScopeId("SCOPE-3")));
         protected static final Map<String, String> ADDITIONAL_INFORMATION = new HashMap<>();
 
@@ -54,7 +55,7 @@ class OAuth2AccessTokenDetailsSerializerTest {
             when(accessToken.getTokenValue()).thenReturn(TOKEN_VALUE);
             when(accessToken.getTokenType()).thenReturn(TOKEN_TYPE);
             when(accessToken.getExpiresIn()).thenReturn(EXPIRES_IN);
-            when(accessToken.getScopes()).thenReturn(SCOPE);
+            when(accessToken.getScopes()).thenReturn(RAW_SCOPES);
             when(accessToken.getAdditionalInformation()).thenReturn(null);
             when(accessToken.getRefreshToken()).thenReturn(null);
 

@@ -1,8 +1,7 @@
 package cube8540.oauth.authentication.credentials.oauth.scope.application;
 
 import cube8540.oauth.authentication.credentials.authority.domain.AuthorityCode;
-import cube8540.oauth.authentication.credentials.oauth.OAuth2AccessibleScopeDetailsService;
-import cube8540.oauth.authentication.credentials.oauth.OAuth2ScopeDetails;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ScopeDetails;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2Scope;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeRepository;

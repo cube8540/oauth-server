@@ -1,17 +1,15 @@
 package cube8540.oauth.authentication.credentials.oauth.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import cube8540.oauth.authentication.credentials.oauth.OAuth2ClientDetailsService;
-import cube8540.oauth.authentication.credentials.oauth.security.provider.ClientCredentialsAuthenticationProvider;
-import cube8540.oauth.authentication.credentials.oauth.security.provider.ClientCredentialsEndpointFilter;
 import cube8540.oauth.authentication.credentials.oauth.error.DefaultOauth2ExceptionResponseRenderer;
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2AuthenticationExceptionEntryPoint;
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionResponseRenderer;
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTranslator;
+import cube8540.oauth.authentication.credentials.oauth.security.provider.ClientCredentialsAuthenticationProvider;
+import cube8540.oauth.authentication.credentials.oauth.security.provider.ClientCredentialsEndpointFilter;
 import cube8540.oauth.authentication.credentials.oauth.token.application.AuthorizationCodeTokenGranter;
 import cube8540.oauth.authentication.credentials.oauth.token.application.ClientCredentialsTokenGranter;
 import cube8540.oauth.authentication.credentials.oauth.token.application.CompositeOAuth2AccessTokenGranter;
-import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2AccessTokenGrantService;
 import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2AuthorizationCodeConsumer;
 import cube8540.oauth.authentication.credentials.oauth.token.application.RefreshTokenGranter;
 import cube8540.oauth.authentication.credentials.oauth.token.application.ResourceOwnerPasswordTokenGranter;
@@ -110,7 +108,7 @@ public class OAuth2EndpointSecurityConfiguration extends WebSecurityConfigurerAd
     }
 
     @Bean
-    public OAuth2AccessTokenGrantService accessTokenGranter() throws Exception {
+    public OAuth2AccessTokenGranter accessTokenGranter() throws Exception {
         CompositeOAuth2AccessTokenGranter tokenGranter = new CompositeOAuth2AccessTokenGranter();
 
         tokenGranter.putTokenGranterMap(AuthorizationGrantType.AUTHORIZATION_CODE,

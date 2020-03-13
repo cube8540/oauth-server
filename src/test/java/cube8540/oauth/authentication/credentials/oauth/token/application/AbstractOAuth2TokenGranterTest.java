@@ -1,8 +1,8 @@
 package cube8540.oauth.authentication.credentials.oauth.token.application;
 
-import cube8540.oauth.authentication.credentials.oauth.OAuth2TokenRequest;
-import cube8540.oauth.authentication.credentials.oauth.OAuth2ClientDetails;
-import cube8540.oauth.authentication.credentials.oauth.OAuth2AccessTokenDetails;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AccessTokenDetails;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetails;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2TokenRequest;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenRepository;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedAccessToken;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2TokenEnhancer;
@@ -14,7 +14,17 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.ADDITIONAL_INFO;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.EXPIRATION_DATETIME;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.EXPIRATION_IN;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.RAW_ACCESS_TOKEN_ID;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.RAW_CLIENT_ID;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.RAW_REFRESH_TOKEN_ID;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.RAW_SCOPES;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.RAW_USERNAME;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.TOKEN_TYPE;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.mockAccessToken;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.mockRefreshToken;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.mock;
@@ -36,7 +46,7 @@ class AbstractOAuth2TokenGranterTest {
 
             @Override
             protected void configRepository(OAuth2TokenApplicationTestHelper.MockAccessTokenRepository repository) {
-                this.existsAccessToken = OAuth2TokenApplicationTestHelper.mockAccessToken().configDefault().build();
+                this.existsAccessToken = mockAccessToken().configDefault().build();
                 repository.registerAuthentication(existsAccessToken);
             }
 
@@ -72,7 +82,7 @@ class AbstractOAuth2TokenGranterTest {
         class WhenAccessTokenHaveRefreshToken extends GrantAccessTokenAssertSetup {
             @Override
             protected void configAccessToken(OAuth2TokenApplicationTestHelper.MockAccessToken accessToken) {
-                accessToken.configRefreshToken(OAuth2TokenApplicationTestHelper.mockRefreshToken().configDefault().build());
+                accessToken.configRefreshToken(mockRefreshToken().configDefault().build());
             }
 
             @Test
@@ -80,9 +90,9 @@ class AbstractOAuth2TokenGranterTest {
             void shouldReturnsRegisteredAccessTokensRefreshTokenInfo() {
                 OAuth2AccessTokenDetails token = granter.grant(clientDetails, tokenRequest);
 
-                Assertions.assertEquals(OAuth2TokenApplicationTestHelper.RAW_REFRESH_TOKEN_ID, token.getRefreshToken().getTokenValue());
-                Assertions.assertEquals(OAuth2TokenApplicationTestHelper.EXPIRATION_DATETIME, token.getRefreshToken().getExpiration());
-                Assertions.assertEquals(OAuth2TokenApplicationTestHelper.EXPIRATION_IN, token.getExpiresIn());
+                Assertions.assertEquals(RAW_REFRESH_TOKEN_ID, token.getRefreshToken().getTokenValue());
+                Assertions.assertEquals(EXPIRATION_DATETIME, token.getRefreshToken().getExpiration());
+                Assertions.assertEquals(EXPIRATION_IN, token.getExpiresIn());
             }
         }
     }
@@ -100,7 +110,7 @@ class AbstractOAuth2TokenGranterTest {
         void setup() {
             OAuth2TokenApplicationTestHelper.MockAccessTokenRepository mockRepository = OAuth2TokenApplicationTestHelper.mockAccessTokenRepository();
             configRepository(mockRepository);
-            OAuth2TokenApplicationTestHelper.MockAccessToken mockAccessToken = OAuth2TokenApplicationTestHelper.mockAccessToken().configDefault();
+            OAuth2TokenApplicationTestHelper.MockAccessToken mockAccessToken = mockAccessToken().configDefault();
             configAccessToken(mockAccessToken);
 
             this.accessToken = mockAccessToken.build();
@@ -139,14 +149,14 @@ class AbstractOAuth2TokenGranterTest {
         void shouldReturnsRegisteredTokenInfo() {
             OAuth2AccessTokenDetails token = granter.grant(clientDetails, tokenRequest);
 
-            Assertions.assertEquals(OAuth2TokenApplicationTestHelper.RAW_ACCESS_TOKEN_ID, token.getTokenValue());
-            Assertions.assertEquals(OAuth2TokenApplicationTestHelper.EXPIRATION_DATETIME, token.getExpiration());
-            Assertions.assertEquals(OAuth2TokenApplicationTestHelper.EXPIRATION_IN, token.getExpiresIn());
-            Assertions.assertEquals(OAuth2TokenApplicationTestHelper.CLIENT_ID, token.getClientId());
-            Assertions.assertEquals(OAuth2TokenApplicationTestHelper.SCOPES, token.getScopes());
-            Assertions.assertEquals(OAuth2TokenApplicationTestHelper.RAW_USERNAME, token.getUsername());
-            Assertions.assertEquals(OAuth2TokenApplicationTestHelper.ADDITIONAL_INFO, token.getAdditionalInformation());
-            Assertions.assertEquals(OAuth2TokenApplicationTestHelper.TOKEN_TYPE, token.getTokenType());
+            Assertions.assertEquals(RAW_ACCESS_TOKEN_ID, token.getTokenValue());
+            Assertions.assertEquals(EXPIRATION_DATETIME, token.getExpiration());
+            Assertions.assertEquals(EXPIRATION_IN, token.getExpiresIn());
+            Assertions.assertEquals(RAW_CLIENT_ID, token.getClientId());
+            Assertions.assertEquals(RAW_SCOPES, token.getScopes());
+            Assertions.assertEquals(RAW_USERNAME, token.getUsername());
+            Assertions.assertEquals(ADDITIONAL_INFO, token.getAdditionalInformation());
+            Assertions.assertEquals(TOKEN_TYPE, token.getTokenType());
         }
 
         protected void configRepository(OAuth2TokenApplicationTestHelper.MockAccessTokenRepository repository) {}

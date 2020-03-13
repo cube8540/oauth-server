@@ -1,12 +1,12 @@
 package cube8540.oauth.authentication.credentials.oauth.token.application;
 
-import cube8540.oauth.authentication.credentials.oauth.AuthorizationRequest;
-import cube8540.oauth.authentication.credentials.oauth.OAuth2RequestValidator;
-import cube8540.oauth.authentication.credentials.oauth.OAuth2TokenRequest;
-import cube8540.oauth.authentication.credentials.oauth.OAuth2ClientDetails;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetails;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2TokenRequest;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
-import cube8540.oauth.authentication.credentials.oauth.token.domain.AuthorizationCode;
+import cube8540.oauth.authentication.credentials.oauth.security.AuthorizationRequest;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2RequestValidator;
+import cube8540.oauth.authentication.credentials.oauth.security.AuthorizationCode;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.AuthorizationCodeGenerator;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.AuthorizationCodeRepository;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenRepository;
@@ -135,7 +135,7 @@ class OAuth2TokenApplicationTestHelper {
         return generator;
     }
 
-    static AuthorizationCodeGenerator mockCodeGenerator(AuthorizationCode code) {
+    static AuthorizationCodeGenerator mockCodeGenerator(String code) {
         AuthorizationCodeGenerator generator = mock(AuthorizationCodeGenerator.class);
         when(generator.generate()).thenReturn(code);
         return generator;
@@ -436,7 +436,7 @@ class OAuth2TokenApplicationTestHelper {
         }
 
         MockAuthorizationCode configDefault() {
-            when(code.getCode()).thenReturn(AUTHORIZATION_CODE);
+            when(code.getCode()).thenReturn(RAW_AUTHORIZATION_CODE);
             when(code.getClientId()).thenReturn(CLIENT_ID);
             when(code.getUsername()).thenReturn(USERNAME);
             when(code.getApprovedScopes()).thenReturn(APPROVED_SCOPES);
@@ -466,12 +466,12 @@ class OAuth2TokenApplicationTestHelper {
         }
 
         MockAuthorizationConsumer consume(OAuth2AuthorizationCode code) {
-            when(consumer.consume(AUTHORIZATION_CODE)).thenReturn(Optional.of(code));
+            when(consumer.consume(RAW_AUTHORIZATION_CODE)).thenReturn(Optional.of(code));
             return this;
         }
 
         MockAuthorizationConsumer empty() {
-            when(consumer.consume(AUTHORIZATION_CODE)).thenReturn(Optional.empty());
+            when(consumer.consume(RAW_AUTHORIZATION_CODE)).thenReturn(Optional.empty());
             return this;
         }
 
@@ -568,12 +568,12 @@ class OAuth2TokenApplicationTestHelper {
         }
 
         MockAuthorizationCodeRepository registerCode(OAuth2AuthorizationCode code) {
-            when(repository.findById(AUTHORIZATION_CODE)).thenReturn(Optional.of(code));
+            when(repository.findById(RAW_AUTHORIZATION_CODE)).thenReturn(Optional.of(code));
             return this;
         }
 
         MockAuthorizationCodeRepository emptyCode() {
-            when(repository.findById(AUTHORIZATION_CODE)).thenReturn(Optional.empty());
+            when(repository.findById(RAW_AUTHORIZATION_CODE)).thenReturn(Optional.empty());
             return this;
         }
 
