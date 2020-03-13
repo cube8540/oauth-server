@@ -1,6 +1,6 @@
-package cube8540.oauth.authentication.credentials.oauth.authorize.endpoint;
+package cube8540.oauth.authentication.credentials.oauth.security.endpoint;
 
-import cube8540.oauth.authentication.credentials.oauth.AuthorizationRequest;
+import cube8540.oauth.authentication.credentials.oauth.security.AuthorizationRequest;
 
 import java.util.Map;
 import java.util.Set;

@@ -1,6 +1,6 @@
 package cube8540.oauth.authentication.credentials.oauth.token.infra;
 
-import cube8540.oauth.authentication.credentials.oauth.DefaultOAuth2RequestValidator;
+import cube8540.oauth.authentication.credentials.oauth.security.DefaultOAuth2RequestValidator;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2ClientDetails;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

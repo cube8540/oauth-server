@@ -1,6 +1,6 @@
 package cube8540.oauth.authentication.credentials.oauth.token.application;
 
-import cube8540.oauth.authentication.credentials.oauth.AuthorizationRequest;
+import cube8540.oauth.authentication.credentials.oauth.security.AuthorizationRequest;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.AuthorizationCodeRepository;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizationCode;
 import org.junit.jupiter.api.BeforeEach;

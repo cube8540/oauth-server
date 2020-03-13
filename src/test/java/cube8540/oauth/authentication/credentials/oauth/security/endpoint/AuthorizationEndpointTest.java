@@ -1,10 +1,10 @@
-package cube8540.oauth.authentication.credentials.oauth.authorize.endpoint;
+package cube8540.oauth.authentication.credentials.oauth.security.endpoint;
 
-import cube8540.oauth.authentication.credentials.oauth.AuthorizationRequest;
-import cube8540.oauth.authentication.credentials.oauth.OAuth2RequestValidator;
+import cube8540.oauth.authentication.credentials.oauth.security.AuthorizationRequest;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2RequestValidator;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2Utils;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2ClientDetails;
-import cube8540.oauth.authentication.credentials.oauth.OAuth2ClientDetailsService;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetailsService;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.exception.ClientNotFoundException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidGrantException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidRequestException;

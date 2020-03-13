@@ -2,7 +2,7 @@ package cube8540.oauth.authentication.credentials.oauth.token.domain;
 
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
 import cube8540.oauth.authentication.AuthenticationApplication;
-import cube8540.oauth.authentication.credentials.oauth.AuthorizationRequest;
+import cube8540.oauth.authentication.credentials.oauth.security.AuthorizationRequest;
 import cube8540.oauth.authentication.credentials.oauth.converter.RedirectUriConverter;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidClientException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidGrantException;
