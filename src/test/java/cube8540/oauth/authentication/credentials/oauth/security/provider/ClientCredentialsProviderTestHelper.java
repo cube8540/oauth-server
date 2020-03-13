@@ -1,8 +1,8 @@
 package cube8540.oauth.authentication.credentials.oauth.security.provider;
 
+import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ClientRegistrationException;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetailsService;
-import cube8540.oauth.authentication.credentials.oauth.client.domain.exception.ClientNotFoundException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -117,7 +117,7 @@ class ClientCredentialsProviderTestHelper {
         }
 
         MockOAuth2ClientDetailsService emptyClient() {
-            when(service.loadClientDetailsByClientId(RAW_CLIENT_ID)).thenThrow(ClientNotFoundException.instance(RAW_CLIENT_ID + " is not found"));
+            when(service.loadClientDetailsByClientId(RAW_CLIENT_ID)).thenThrow(new OAuth2ClientRegistrationException(RAW_CLIENT_ID + " is not found"));
             return this;
         }
 

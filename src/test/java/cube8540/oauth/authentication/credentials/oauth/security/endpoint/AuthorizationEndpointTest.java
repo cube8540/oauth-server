@@ -1,16 +1,16 @@
 package cube8540.oauth.authentication.credentials.oauth.security.endpoint;
 
-import cube8540.oauth.authentication.credentials.oauth.security.AuthorizationRequest;
-import cube8540.oauth.authentication.credentials.oauth.security.OAuth2RequestValidator;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2Utils;
-import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetails;
-import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetailsService;
-import cube8540.oauth.authentication.credentials.oauth.client.domain.exception.ClientNotFoundException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidGrantException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidRequestException;
+import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ClientRegistrationException;
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTranslator;
 import cube8540.oauth.authentication.credentials.oauth.error.RedirectMismatchException;
+import cube8540.oauth.authentication.credentials.oauth.security.AuthorizationRequest;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AuthorizationCodeGenerator;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetails;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetailsService;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2RequestValidator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -504,14 +504,14 @@ class AuthorizationEndpointTest {
     @Nested
     @DisplayName("OAuth 클라이언트 인증 예외 발생시")
     class WhenThrowsClientAuthenticationException {
-        private ClientNotFoundException clientRegistrationException;
+        private OAuth2ClientRegistrationException clientRegistrationException;
         private ServletWebRequest servletWebRequest;
         private HttpServletResponse servletResponse;
         private AuthorizationEndpoint endpoint;
 
         @BeforeEach
         void setup() {
-            this.clientRegistrationException = ClientNotFoundException.instance("TEST");
+            this.clientRegistrationException = new OAuth2ClientRegistrationException("TEST");
             this.servletResponse = mock(HttpServletResponse.class);
             this.servletWebRequest = new ServletWebRequest(mock(HttpServletRequest.class), servletResponse);
             this.endpoint = new AuthorizationEndpoint(AuthorizationEndpointTestHelper.mockClientDetailsService().build(), AuthorizationEndpointTestHelper.mockScopeDetailsService().build(), AuthorizationEndpointTestHelper.mockCodeGenerator().build());

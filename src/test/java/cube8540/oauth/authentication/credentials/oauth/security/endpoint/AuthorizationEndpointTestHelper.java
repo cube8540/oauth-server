@@ -1,17 +1,17 @@
 package cube8540.oauth.authentication.credentials.oauth.security.endpoint;
 
-import cube8540.oauth.authentication.credentials.oauth.security.AuthorizationRequest;
-import cube8540.oauth.authentication.credentials.oauth.security.OAuth2RequestValidator;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2Utils;
-import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetails;
-import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetailsService;
-import cube8540.oauth.authentication.credentials.oauth.client.domain.exception.ClientNotFoundException;
+import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ClientRegistrationException;
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTranslator;
 import cube8540.oauth.authentication.credentials.oauth.error.RedirectMismatchException;
+import cube8540.oauth.authentication.credentials.oauth.security.AuthorizationCode;
+import cube8540.oauth.authentication.credentials.oauth.security.AuthorizationRequest;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AuthorizationCodeGenerator;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetails;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetailsService;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2RequestValidator;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ScopeDetails;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ScopeDetailsService;
-import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AuthorizationCodeGenerator;
-import cube8540.oauth.authentication.credentials.oauth.security.AuthorizationCode;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -199,7 +199,7 @@ public class AuthorizationEndpointTestHelper {
         }
 
         MockClientDetailsService emptyClient() {
-            when(service.loadClientDetailsByClientId(RAW_CLIENT_ID)).thenThrow(ClientNotFoundException.instance("NOT FOUND"));
+            when(service.loadClientDetailsByClientId(RAW_CLIENT_ID)).thenThrow(new OAuth2ClientRegistrationException("NOT FOUND"));
             return this;
         }
 

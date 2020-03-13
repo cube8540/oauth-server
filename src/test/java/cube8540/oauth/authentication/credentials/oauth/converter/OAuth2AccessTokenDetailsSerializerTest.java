@@ -3,7 +3,6 @@ package cube8540.oauth.authentication.credentials.oauth.converter;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2Utils;
-import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AccessTokenDetails;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2RefreshTokenDetails;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,7 +15,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -33,7 +31,6 @@ class OAuth2AccessTokenDetailsSerializerTest {
         protected static final long EXPIRES_IN = 60000L;
         protected static final String TOKEN_TYPE = "TOKEN_TYPE";
         protected static final Set<String> RAW_SCOPES = new HashSet<>(Arrays.asList("SCOPE-1", "SCOPE-2", "SCOPE-3"));
-        protected static final Set<OAuth2ScopeId> SCOPE = new HashSet<>(Arrays.asList(new OAuth2ScopeId("SCOPE-1"), new OAuth2ScopeId("SCOPE-2"), new OAuth2ScopeId("SCOPE-3")));
         protected static final Map<String, String> ADDITIONAL_INFORMATION = new HashMap<>();
 
         protected OAuth2AccessTokenDetails accessToken;
@@ -99,7 +96,7 @@ class OAuth2AccessTokenDetailsSerializerTest {
         void shouldWriteScopeInJsonGenerator() throws Exception {
             serializer.serialize(accessToken, jsonGenerator, provider);
 
-            String excepted = String.join(" ", SCOPE.stream().map(OAuth2ScopeId::getValue).collect(Collectors.toSet()));
+            String excepted = String.join(" ", new HashSet<>(RAW_SCOPES));
             verify(jsonGenerator, times(1))
                     .writeStringField(OAuth2Utils.AccessTokenSerializeKey.SCOPE, excepted);
         }
