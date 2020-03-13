@@ -1,6 +1,6 @@
 package cube8540.oauth.authentication.credentials.oauth.security.provider;
 
-import cube8540.oauth.authentication.credentials.oauth.OAuth2ClientDetails;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetails;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.springframework.security.authentication.AbstractAuthenticationToken;

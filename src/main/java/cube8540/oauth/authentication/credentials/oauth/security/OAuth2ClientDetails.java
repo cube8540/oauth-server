@@ -1,4 +1,4 @@
-package cube8540.oauth.authentication.credentials.oauth;
+package cube8540.oauth.authentication.credentials.oauth.security;
 
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 

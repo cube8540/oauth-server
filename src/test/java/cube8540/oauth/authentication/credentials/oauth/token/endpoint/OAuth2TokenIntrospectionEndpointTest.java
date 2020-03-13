@@ -1,6 +1,6 @@
 package cube8540.oauth.authentication.credentials.oauth.token.endpoint;
 
-import cube8540.oauth.authentication.credentials.oauth.OAuth2ClientDetails;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidRequestException;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2AccessTokenDetails;
 import org.junit.jupiter.api.BeforeEach;

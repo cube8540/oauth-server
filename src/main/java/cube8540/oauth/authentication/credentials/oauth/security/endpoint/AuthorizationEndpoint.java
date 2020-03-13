@@ -5,7 +5,7 @@ import cube8540.oauth.authentication.credentials.oauth.security.DefaultAuthoriza
 import cube8540.oauth.authentication.credentials.oauth.security.DefaultOAuth2RequestValidator;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2RequestValidator;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2Utils;
-import cube8540.oauth.authentication.credentials.oauth.OAuth2ClientDetails;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetailsService;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.exception.ClientNotFoundException;
 import cube8540.oauth.authentication.credentials.oauth.error.AbstractOAuth2AuthenticationException;
@@ -13,10 +13,10 @@ import cube8540.oauth.authentication.credentials.oauth.error.InvalidGrantExcepti
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidRequestException;
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTranslator;
 import cube8540.oauth.authentication.credentials.oauth.error.RedirectMismatchException;
-import cube8540.oauth.authentication.credentials.oauth.OAuth2ScopeDetails;
-import cube8540.oauth.authentication.credentials.oauth.OAuth2ScopeDetailsService;
-import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2AuthorizationCodeGenerator;
-import cube8540.oauth.authentication.credentials.oauth.token.domain.AuthorizationCode;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ScopeDetails;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ScopeDetailsService;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AuthorizationCodeGenerator;
+import cube8540.oauth.authentication.credentials.oauth.security.AuthorizationCode;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

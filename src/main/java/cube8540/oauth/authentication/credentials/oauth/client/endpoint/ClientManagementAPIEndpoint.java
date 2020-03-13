@@ -1,6 +1,6 @@
 package cube8540.oauth.authentication.credentials.oauth.client.endpoint;
 
-import cube8540.oauth.authentication.credentials.oauth.OAuth2ClientDetails;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ChangeSecretRequest;
 import cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientManagementService;
 import cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientModifyRequest;

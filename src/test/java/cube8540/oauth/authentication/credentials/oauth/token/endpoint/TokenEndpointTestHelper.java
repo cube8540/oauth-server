@@ -1,7 +1,7 @@
 package cube8540.oauth.authentication.credentials.oauth.token.endpoint;
 
 import cube8540.oauth.authentication.credentials.oauth.OAuth2Utils;
-import cube8540.oauth.authentication.credentials.oauth.OAuth2ClientDetails;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
 import cube8540.oauth.authentication.credentials.oauth.security.provider.ClientCredentialsToken;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
