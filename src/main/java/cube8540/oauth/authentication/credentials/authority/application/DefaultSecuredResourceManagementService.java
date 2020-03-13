@@ -5,8 +5,8 @@ import cube8540.oauth.authentication.credentials.authority.domain.SecuredResourc
 import cube8540.oauth.authentication.credentials.authority.domain.SecuredResourceId;
 import cube8540.oauth.authentication.credentials.authority.domain.SecuredResourceRepository;
 import cube8540.oauth.authentication.credentials.authority.domain.SecuredResourceValidationPolicy;
-import cube8540.oauth.authentication.credentials.authority.error.ResourceNotFoundException;
-import cube8540.oauth.authentication.credentials.authority.error.ResourceRegisterException;
+import cube8540.oauth.authentication.credentials.authority.domain.exception.ResourceNotFoundException;
+import cube8540.oauth.authentication.credentials.authority.domain.exception.ResourceRegisterException;
 import lombok.Setter;
 
 import java.net.URI;

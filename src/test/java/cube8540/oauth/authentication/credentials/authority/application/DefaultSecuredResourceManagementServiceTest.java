@@ -4,8 +4,8 @@ import cube8540.oauth.authentication.credentials.authority.domain.ResourceMethod
 import cube8540.oauth.authentication.credentials.authority.domain.SecuredResource;
 import cube8540.oauth.authentication.credentials.authority.domain.SecuredResourceRepository;
 import cube8540.oauth.authentication.credentials.authority.domain.SecuredResourceValidationPolicy;
-import cube8540.oauth.authentication.credentials.authority.error.ResourceNotFoundException;
-import cube8540.oauth.authentication.credentials.authority.error.ResourceRegisterException;
+import cube8540.oauth.authentication.credentials.authority.domain.exception.ResourceNotFoundException;
+import cube8540.oauth.authentication.credentials.authority.domain.exception.ResourceRegisterException;
 import cube8540.oauth.authentication.error.message.ErrorCodes;
 import cube8540.validator.core.ValidationRule;
 import org.junit.jupiter.api.BeforeEach;

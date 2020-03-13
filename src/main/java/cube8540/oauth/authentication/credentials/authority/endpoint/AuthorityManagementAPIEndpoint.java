@@ -1,13 +1,14 @@
 package cube8540.oauth.authentication.credentials.authority.endpoint;
 
+import cube8540.oauth.authentication.credentials.authority.AuthorityDetails;
 import cube8540.oauth.authentication.credentials.authority.application.AuthorityManagementService;
 import cube8540.oauth.authentication.credentials.authority.application.AuthorityModifyRequest;
 import cube8540.oauth.authentication.credentials.authority.application.AuthorityRegisterRequest;
-import cube8540.oauth.authentication.credentials.authority.AuthorityDetails;
-import cube8540.oauth.authentication.credentials.authority.error.AuthorityExceptionTranslator;
 import cube8540.oauth.authentication.error.message.ErrorMessage;
+import cube8540.oauth.authentication.error.message.ExceptionTranslator;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -28,8 +30,8 @@ public class AuthorityManagementAPIEndpoint {
 
     private final AuthorityManagementService service;
 
-    @Setter
-    private AuthorityExceptionTranslator translator = new AuthorityExceptionTranslator();
+    @Setter(onMethod_ = {@Autowired, @Qualifier("authorityExceptionTranslator")})
+    private ExceptionTranslator<ErrorMessage<? extends Serializable>> translator;
 
     @Autowired
     public AuthorityManagementAPIEndpoint(AuthorityManagementService service) {
@@ -71,7 +73,7 @@ public class AuthorityManagementAPIEndpoint {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorMessage<?>> handle(Exception e) {
+    public ResponseEntity<ErrorMessage<? extends Serializable>> handle(Exception e) {
         return translator.translate(e);
     }
 }

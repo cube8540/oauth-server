@@ -4,8 +4,8 @@ import cube8540.oauth.authentication.credentials.authority.AuthorityDetails;
 import cube8540.oauth.authentication.credentials.authority.domain.Authority;
 import cube8540.oauth.authentication.credentials.authority.domain.AuthorityCode;
 import cube8540.oauth.authentication.credentials.authority.domain.AuthorityRepository;
-import cube8540.oauth.authentication.credentials.authority.error.AuthorityNotFoundException;
-import cube8540.oauth.authentication.credentials.authority.error.AuthorityRegisterException;
+import cube8540.oauth.authentication.credentials.authority.domain.exception.AuthorityNotFoundException;
+import cube8540.oauth.authentication.credentials.authority.domain.exception.AuthorityRegisterException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

@@ -4,10 +4,11 @@ import cube8540.oauth.authentication.credentials.authority.application.SecuredRe
 import cube8540.oauth.authentication.credentials.authority.application.SecuredResourceManagementService;
 import cube8540.oauth.authentication.credentials.authority.application.SecuredResourceModifyRequest;
 import cube8540.oauth.authentication.credentials.authority.application.SecuredResourceRegisterRequest;
-import cube8540.oauth.authentication.credentials.authority.error.SecuredResourceExceptionTranslator;
 import cube8540.oauth.authentication.error.message.ErrorMessage;
+import cube8540.oauth.authentication.error.message.ExceptionTranslator;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -28,8 +30,8 @@ public class SecuredResourceManagementAPIEndpoint {
 
     private final SecuredResourceManagementService service;
 
-    @Setter
-    private SecuredResourceExceptionTranslator translator = new SecuredResourceExceptionTranslator();
+    @Setter(onMethod_ = {@Autowired, @Qualifier("securedResourceExceptionTranslator")})
+    private ExceptionTranslator<ErrorMessage<? extends Serializable>> translator;
 
     @Autowired
     public SecuredResourceManagementAPIEndpoint(SecuredResourceManagementService service) {
@@ -64,7 +66,7 @@ public class SecuredResourceManagementAPIEndpoint {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorMessage<?>> handle(Exception e) {
+    public ResponseEntity<ErrorMessage<? extends Serializable>> handle(Exception e) {
         return translator.translate(e);
     }
 }

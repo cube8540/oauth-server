@@ -6,7 +6,7 @@ import cube8540.oauth.authentication.users.domain.UserEmail;
 import cube8540.oauth.authentication.users.domain.UserKeyMatchedResult;
 import cube8540.oauth.authentication.users.domain.UserRepository;
 import cube8540.oauth.authentication.users.domain.UserValidationPolicy;
-import cube8540.oauth.authentication.users.error.UserNotFoundException;
+import cube8540.oauth.authentication.users.domain.exception.UserNotFoundException;
 import cube8540.oauth.authentication.users.infra.DefaultUserCredentialsKeyGenerator;
 import cube8540.oauth.authentication.users.infra.DefaultUserValidationPolicy;
 import lombok.Setter;

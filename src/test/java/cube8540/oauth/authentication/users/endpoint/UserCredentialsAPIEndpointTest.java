@@ -2,7 +2,7 @@ package cube8540.oauth.authentication.users.endpoint;
 
 import cube8540.oauth.authentication.users.application.UserCredentialsService;
 import cube8540.oauth.authentication.users.application.UserProfile;
-import cube8540.oauth.authentication.users.error.UserNotFoundException;
+import cube8540.oauth.authentication.users.domain.exception.UserNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

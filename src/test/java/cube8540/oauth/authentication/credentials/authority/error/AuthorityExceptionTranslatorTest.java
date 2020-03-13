@@ -1,5 +1,8 @@
 package cube8540.oauth.authentication.credentials.authority.error;
 
+import cube8540.oauth.authentication.credentials.authority.domain.exception.AuthorityNotFoundException;
+import cube8540.oauth.authentication.credentials.authority.domain.exception.AuthorityRegisterException;
+import cube8540.oauth.authentication.credentials.authority.infra.AuthorityExceptionTranslator;
 import cube8540.oauth.authentication.error.message.ErrorMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -7,6 +10,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
+import java.io.Serializable;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -41,7 +46,7 @@ class AuthorityExceptionTranslatorTest {
         @Test
         @DisplayName("상태 코드는 404 이어야 한다.")
         void shouldHttpStatusCodeIs404() {
-            ResponseEntity<ErrorMessage<?>> response = translator.translate(e);
+            ResponseEntity<ErrorMessage<? extends Serializable>> response = translator.translate(e);
             assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         }
     }
@@ -60,7 +65,7 @@ class AuthorityExceptionTranslatorTest {
         @Test
         @DisplayName("상태 코드는 400 이어야 한다.")
         void shouldHttpStatusCodeIs400() {
-            ResponseEntity<ErrorMessage<?>> response = translator.translate(e);
+            ResponseEntity<ErrorMessage<? extends Serializable>> response = translator.translate(e);
             assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         }
     }
@@ -78,7 +83,7 @@ class AuthorityExceptionTranslatorTest {
         @Test
         @DisplayName("HTTP 상태 코드는 500 이어야 한다.")
         void shouldHttpStatusCodeIs500() {
-            ResponseEntity<ErrorMessage<?>> response = translator.translate(e);
+            ResponseEntity<ErrorMessage<? extends Serializable>> response = translator.translate(e);
             assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         }
     }

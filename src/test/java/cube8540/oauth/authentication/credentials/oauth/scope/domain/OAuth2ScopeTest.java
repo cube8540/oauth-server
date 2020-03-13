@@ -1,6 +1,6 @@
 package cube8540.oauth.authentication.credentials.oauth.scope.domain;
 
-import cube8540.oauth.authentication.credentials.oauth.error.ScopeInvalidException;
+import cube8540.oauth.authentication.credentials.oauth.scope.domain.exception.ScopeInvalidException;
 import cube8540.validator.core.ValidationError;
 import cube8540.validator.core.ValidationRule;
 import org.junit.jupiter.api.BeforeEach;

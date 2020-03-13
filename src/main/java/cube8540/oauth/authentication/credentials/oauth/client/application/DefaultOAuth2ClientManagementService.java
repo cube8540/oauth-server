@@ -6,9 +6,9 @@ import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2Clien
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientRepository;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientValidatePolicy;
-import cube8540.oauth.authentication.credentials.oauth.error.ClientAuthorizationException;
-import cube8540.oauth.authentication.credentials.oauth.error.ClientNotFoundException;
-import cube8540.oauth.authentication.credentials.oauth.error.ClientRegisterException;
+import cube8540.oauth.authentication.credentials.oauth.client.domain.exception.ClientAuthorizationException;
+import cube8540.oauth.authentication.credentials.oauth.client.domain.exception.ClientNotFoundException;
+import cube8540.oauth.authentication.credentials.oauth.client.domain.exception.ClientRegisterException;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import cube8540.oauth.authentication.users.domain.UserEmail;
 import lombok.Setter;

@@ -1,8 +1,8 @@
 package cube8540.oauth.authentication.users.domain;
 
 import cube8540.oauth.authentication.credentials.authority.domain.AuthorityCode;
-import cube8540.oauth.authentication.users.error.UserAuthorizationException;
-import cube8540.oauth.authentication.users.error.UserInvalidException;
+import cube8540.oauth.authentication.users.domain.exception.UserAuthorizationException;
+import cube8540.oauth.authentication.users.domain.exception.UserInvalidException;
 import cube8540.validator.core.Validator;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;

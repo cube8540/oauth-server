@@ -1,6 +1,6 @@
 package cube8540.oauth.authentication.credentials.authority.domain;
 
-import cube8540.oauth.authentication.credentials.authority.error.ResourceInvalidException;
+import cube8540.oauth.authentication.credentials.authority.domain.exception.ResourceInvalidException;
 import cube8540.validator.core.ValidationError;
 import cube8540.validator.core.ValidationRule;
 import org.junit.jupiter.api.BeforeEach;

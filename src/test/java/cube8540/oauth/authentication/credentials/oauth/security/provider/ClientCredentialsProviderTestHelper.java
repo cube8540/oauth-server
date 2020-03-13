@@ -2,7 +2,7 @@ package cube8540.oauth.authentication.credentials.oauth.security.provider;
 
 import cube8540.oauth.authentication.credentials.oauth.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2ClientDetailsService;
-import cube8540.oauth.authentication.credentials.oauth.error.ClientNotFoundException;
+import cube8540.oauth.authentication.credentials.oauth.client.domain.exception.ClientNotFoundException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;

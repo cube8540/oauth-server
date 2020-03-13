@@ -1,12 +1,13 @@
 package cube8540.oauth.authentication.users.endpoint;
 
+import cube8540.oauth.authentication.error.message.ErrorMessage;
+import cube8540.oauth.authentication.error.message.ExceptionTranslator;
 import cube8540.oauth.authentication.users.application.UserCredentialsService;
 import cube8540.oauth.authentication.users.application.UserProfile;
-import cube8540.oauth.authentication.error.message.ErrorMessage;
-import cube8540.oauth.authentication.users.error.UserExceptionTranslator;
-import cube8540.oauth.authentication.users.error.UserNotFoundException;
+import cube8540.oauth.authentication.users.domain.exception.UserNotFoundException;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.SessionStatus;
 
+import java.io.Serializable;
 import java.util.Map;
 
 @RestController
@@ -23,8 +25,8 @@ public class UserCredentialsAPIEndpoint {
 
     private final UserCredentialsService service;
 
-    @Setter
-    private UserExceptionTranslator translator = new UserExceptionTranslator();
+    @Setter(onMethod_ = {@Autowired, @Qualifier("userExceptionTranslator")})
+    private ExceptionTranslator<ErrorMessage<? extends Serializable>> translator;
 
     @Autowired
     public UserCredentialsAPIEndpoint(UserCredentialsService service) {
@@ -45,7 +47,7 @@ public class UserCredentialsAPIEndpoint {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorMessage<?>> handle(Exception e) {
+    public ResponseEntity<ErrorMessage<? extends Serializable>> handle(Exception e) {
         return translator.translate(e);
     }
 }

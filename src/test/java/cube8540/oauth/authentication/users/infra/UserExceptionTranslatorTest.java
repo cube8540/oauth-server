@@ -1,12 +1,19 @@
-package cube8540.oauth.authentication.users.error;
+package cube8540.oauth.authentication.users.infra;
 
 import cube8540.oauth.authentication.error.message.ErrorMessage;
+import cube8540.oauth.authentication.users.domain.exception.UserAuthorizationException;
+import cube8540.oauth.authentication.users.domain.exception.UserInvalidException;
+import cube8540.oauth.authentication.users.domain.exception.UserNotFoundException;
+import cube8540.oauth.authentication.users.domain.exception.UserRegisterException;
+import cube8540.oauth.authentication.users.infra.UserExceptionTranslator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
+import java.io.Serializable;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -35,7 +42,7 @@ class UserExceptionTranslatorTest {
         @Test
         @DisplayName("HTTP 상태 코드는 404 이어야 한다.")
         void shouldHttpStatsCodeIs404() {
-            ResponseEntity<ErrorMessage<?>> response = translator.translate(e);
+            ResponseEntity<ErrorMessage<? extends Serializable>> response = translator.translate(e);
             assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         }
     }
@@ -54,7 +61,7 @@ class UserExceptionTranslatorTest {
         @Test
         @DisplayName("HTTP 상태 코드는 400 이어야 한다.")
         void shouldHttpStatsCodeIs400() {
-            ResponseEntity<ErrorMessage<?>> response = translator.translate(e);
+            ResponseEntity<ErrorMessage<? extends Serializable>> response = translator.translate(e);
             assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         }
     }
@@ -73,7 +80,7 @@ class UserExceptionTranslatorTest {
         @Test
         @DisplayName("HTTP 상태 코드는 400 이어야 한다.")
         void shouldHttpStatsCodeIs400() {
-            ResponseEntity<ErrorMessage<?>> response = translator.translate(e);
+            ResponseEntity<ErrorMessage<? extends Serializable>> response = translator.translate(e);
             assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         }
     }
@@ -92,7 +99,7 @@ class UserExceptionTranslatorTest {
         @Test
         @DisplayName("HTTP 상태 코드는 401 이어야 한다.")
         void shouldHttpStatsCodeIs401() {
-            ResponseEntity<ErrorMessage<?>> response = translator.translate(e);
+            ResponseEntity<ErrorMessage<? extends Serializable>> response = translator.translate(e);
             assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
         }
     }
