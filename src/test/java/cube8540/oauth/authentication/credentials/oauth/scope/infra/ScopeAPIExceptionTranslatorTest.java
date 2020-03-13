@@ -1,4 +1,4 @@
-package cube8540.oauth.authentication.credentials.oauth.error;
+package cube8540.oauth.authentication.credentials.oauth.scope.infra;
 
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.exception.ScopeInvalidException;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.exception.ScopeNotFoundException;

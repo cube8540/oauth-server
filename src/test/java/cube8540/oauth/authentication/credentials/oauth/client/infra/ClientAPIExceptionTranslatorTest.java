@@ -1,10 +1,9 @@
-package cube8540.oauth.authentication.credentials.oauth.error;
+package cube8540.oauth.authentication.credentials.oauth.client.infra;
 
 import cube8540.oauth.authentication.credentials.oauth.client.domain.exception.ClientAuthorizationException;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.exception.ClientInvalidException;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.exception.ClientNotFoundException;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.exception.ClientRegisterException;
-import cube8540.oauth.authentication.credentials.oauth.client.infra.ClientAPIExceptionTranslator;
 import cube8540.oauth.authentication.error.message.ErrorMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
