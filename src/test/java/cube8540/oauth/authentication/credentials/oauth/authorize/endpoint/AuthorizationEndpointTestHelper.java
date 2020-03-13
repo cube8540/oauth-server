@@ -5,7 +5,7 @@ import cube8540.oauth.authentication.credentials.oauth.OAuth2RequestValidator;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2Utils;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2ClientDetailsService;
-import cube8540.oauth.authentication.credentials.oauth.error.ClientNotFoundException;
+import cube8540.oauth.authentication.credentials.oauth.client.domain.exception.ClientNotFoundException;
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTranslator;
 import cube8540.oauth.authentication.credentials.oauth.error.RedirectMismatchException;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2ScopeDetails;

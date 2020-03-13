@@ -7,7 +7,7 @@ import cube8540.oauth.authentication.credentials.oauth.OAuth2RequestValidator;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2Utils;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2ClientDetailsService;
-import cube8540.oauth.authentication.credentials.oauth.error.ClientNotFoundException;
+import cube8540.oauth.authentication.credentials.oauth.client.domain.exception.ClientNotFoundException;
 import cube8540.oauth.authentication.credentials.oauth.error.AbstractOAuth2AuthenticationException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidGrantException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidRequestException;
