@@ -1,7 +1,6 @@
 package cube8540.oauth.authentication.credentials.oauth.security;
 
 import cube8540.oauth.authentication.credentials.oauth.OAuth2Utils;
-import cube8540.oauth.authentication.credentials.oauth.security.AuthorizationRequest;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;

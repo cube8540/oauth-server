@@ -1,22 +1,22 @@
 package cube8540.oauth.authentication.credentials.oauth.security.endpoint;
 
-import cube8540.oauth.authentication.credentials.oauth.security.AuthorizationRequest;
-import cube8540.oauth.authentication.credentials.oauth.security.DefaultAuthorizationRequest;
-import cube8540.oauth.authentication.credentials.oauth.security.DefaultOAuth2RequestValidator;
-import cube8540.oauth.authentication.credentials.oauth.security.OAuth2RequestValidator;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2Utils;
-import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetails;
-import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetailsService;
-import cube8540.oauth.authentication.credentials.oauth.client.domain.exception.ClientNotFoundException;
 import cube8540.oauth.authentication.credentials.oauth.error.AbstractOAuth2AuthenticationException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidGrantException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidRequestException;
+import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ClientRegistrationException;
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTranslator;
 import cube8540.oauth.authentication.credentials.oauth.error.RedirectMismatchException;
+import cube8540.oauth.authentication.credentials.oauth.security.AuthorizationCode;
+import cube8540.oauth.authentication.credentials.oauth.security.AuthorizationRequest;
+import cube8540.oauth.authentication.credentials.oauth.security.DefaultAuthorizationRequest;
+import cube8540.oauth.authentication.credentials.oauth.security.DefaultOAuth2RequestValidator;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AuthorizationCodeGenerator;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetails;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetailsService;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2RequestValidator;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ScopeDetails;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ScopeDetailsService;
-import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AuthorizationCodeGenerator;
-import cube8540.oauth.authentication.credentials.oauth.security.AuthorizationCode;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -162,8 +162,8 @@ public class AuthorizationEndpoint {
         }
     }
 
-    @ExceptionHandler(ClientNotFoundException.class)
-    public ModelAndView handleClientRegistrationException(ClientNotFoundException e, ServletWebRequest webRequest) {
+    @ExceptionHandler(OAuth2ClientRegistrationException.class)
+    public ModelAndView handleClientRegistrationException(OAuth2ClientRegistrationException e, ServletWebRequest webRequest) {
         log.warn("Handling error client registration exception : {}, {}", e.getClass().getName(), e.getMessage());
         return handleException(e, webRequest);
     }
@@ -194,7 +194,7 @@ public class AuthorizationEndpoint {
         ResponseEntity<OAuth2Error> responseEntity = exceptionTranslator.translate(e);
         webRequest.getResponse().setStatus(responseEntity.getStatusCode().value());
 
-        if (e instanceof ClientNotFoundException || e instanceof RedirectMismatchException) {
+        if (e instanceof OAuth2ClientRegistrationException || e instanceof RedirectMismatchException) {
             return new ModelAndView(errorPage, Collections.singletonMap("error", responseEntity.getBody()));
         }
 

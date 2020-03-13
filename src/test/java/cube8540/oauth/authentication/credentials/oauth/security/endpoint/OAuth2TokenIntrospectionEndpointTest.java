@@ -1,9 +1,8 @@
-package cube8540.oauth.authentication.credentials.oauth.token.endpoint;
+package cube8540.oauth.authentication.credentials.oauth.security.endpoint;
 
-import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidRequestException;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AccessTokenDetails;
-import cube8540.oauth.authentication.credentials.oauth.security.endpoint.OAuth2TokenIntrospectionEndpoint;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetails;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -16,14 +15,14 @@ import java.security.Principal;
 import java.util.HashMap;
 import java.util.Map;
 
-import static cube8540.oauth.authentication.credentials.oauth.token.endpoint.TokenEndpointTestHelper.RAW_TOKEN_ID;
-import static cube8540.oauth.authentication.credentials.oauth.token.endpoint.TokenEndpointTestHelper.mockAccessToken;
-import static cube8540.oauth.authentication.credentials.oauth.token.endpoint.TokenEndpointTestHelper.mockAccessTokenReadService;
-import static cube8540.oauth.authentication.credentials.oauth.token.endpoint.TokenEndpointTestHelper.mockClientDetails;
-import static cube8540.oauth.authentication.credentials.oauth.token.endpoint.TokenEndpointTestHelper.mockDetailsNotOAuth2ClientDetailsPrincipal;
-import static cube8540.oauth.authentication.credentials.oauth.token.endpoint.TokenEndpointTestHelper.mockIntrospectionConverter;
-import static cube8540.oauth.authentication.credentials.oauth.token.endpoint.TokenEndpointTestHelper.mockNotClientCredentialsTokenPrincipal;
-import static cube8540.oauth.authentication.credentials.oauth.token.endpoint.TokenEndpointTestHelper.mockPrincipal;
+import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.TokenEndpointTestHelper.RAW_TOKEN_ID;
+import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.TokenEndpointTestHelper.mockAccessToken;
+import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.TokenEndpointTestHelper.mockAccessTokenReadService;
+import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.TokenEndpointTestHelper.mockClientDetails;
+import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.TokenEndpointTestHelper.mockDetailsNotOAuth2ClientDetailsPrincipal;
+import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.TokenEndpointTestHelper.mockIntrospectionConverter;
+import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.TokenEndpointTestHelper.mockNotClientCredentialsTokenPrincipal;
+import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.TokenEndpointTestHelper.mockPrincipal;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 

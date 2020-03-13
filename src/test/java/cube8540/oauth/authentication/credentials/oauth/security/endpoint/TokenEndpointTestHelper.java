@@ -1,15 +1,12 @@
-package cube8540.oauth.authentication.credentials.oauth.token.endpoint;
+package cube8540.oauth.authentication.credentials.oauth.security.endpoint;
 
 import cube8540.oauth.authentication.credentials.oauth.OAuth2Utils;
-import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetails;
-import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
-import cube8540.oauth.authentication.credentials.oauth.security.endpoint.OAuth2AccessTokenIntrospectionConverter;
-import cube8540.oauth.authentication.credentials.oauth.security.provider.ClientCredentialsToken;
-import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AccessTokenDetails;
-import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AccessTokenGranter;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AccessTokenDetailsService;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AccessTokenGranter;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2TokenRevoker;
+import cube8540.oauth.authentication.credentials.oauth.security.provider.ClientCredentialsToken;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 
 import java.net.URI;
@@ -20,7 +17,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -31,9 +27,7 @@ class TokenEndpointTestHelper {
     static final String RAW_TOKEN_ID = "TOKEN-ID";
 
     static final String RAW_CLIENT_ID = "CLIENT-ID";
-    static final OAuth2ClientId CLIENT_ID = new OAuth2ClientId(RAW_CLIENT_ID);
     static final String RAW_DIFFERENT_CLIENT_ID = "DIFFERENT-CLIENT-ID";
-    static final OAuth2ClientId DIFFERENT_CLIENT_ID = new OAuth2ClientId(RAW_DIFFERENT_CLIENT_ID);
 
     static final String RAW_USERNAME = "email@email.com";
     static final String RAW_PASSWORD = "Password1234!@#$";
@@ -41,7 +35,6 @@ class TokenEndpointTestHelper {
     static final LocalDateTime EXPIRATION = LocalDateTime.of(2020, 2, 1, 22, 52);
 
     static final Set<String> RAW_SCOPES = new HashSet<>(Arrays.asList("SCOPE-1", "SCOPE-2", "SCOPE-3"));
-    static final Set<OAuth2ScopeId> SCOPES = RAW_SCOPES.stream().map(OAuth2ScopeId::new).collect(Collectors.toSet());
 
     static final String GRANT_TYPE = AuthorizationGrantType.AUTHORIZATION_CODE.getValue();
 
@@ -110,10 +103,10 @@ class TokenEndpointTestHelper {
 
         MockAccessToken configDefault() {
             when(token.getTokenValue()).thenReturn(RAW_TOKEN_ID);
-            when(token.getClientId()).thenReturn(CLIENT_ID);
+            when(token.getClientId()).thenReturn(RAW_CLIENT_ID);
             when(token.getUsername()).thenReturn(RAW_USERNAME);
             when(token.getExpiration()).thenReturn(EXPIRATION);
-            when(token.getScopes()).thenReturn(SCOPES);
+            when(token.getScopes()).thenReturn(RAW_SCOPES);
             return this;
         }
 
@@ -123,7 +116,7 @@ class TokenEndpointTestHelper {
         }
 
         MockAccessToken configDifferentClientId() {
-            when(token.getClientId()).thenReturn(DIFFERENT_CLIENT_ID);
+            when(token.getClientId()).thenReturn(RAW_DIFFERENT_CLIENT_ID);
             return this;
         }
 

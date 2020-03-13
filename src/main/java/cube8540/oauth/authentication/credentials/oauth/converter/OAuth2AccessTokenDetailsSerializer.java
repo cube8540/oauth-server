@@ -3,13 +3,11 @@ package cube8540.oauth.authentication.credentials.oauth.converter;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AccessTokenDetails;
-import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2Utils;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AccessTokenDetails;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class OAuth2AccessTokenDetailsSerializer extends StdSerializer<OAuth2AccessTokenDetails> {
 
@@ -45,7 +43,7 @@ public class OAuth2AccessTokenDetailsSerializer extends StdSerializer<OAuth2Acce
     }
 
     private void writeScopeField(OAuth2AccessTokenDetails value, JsonGenerator gen) throws IOException {
-        String scope = value.getScopes().stream().map(OAuth2ScopeId::getValue).collect(Collectors.joining(" "));
+        String scope = String.join(" ", value.getScopes());
         gen.writeStringField(OAuth2Utils.AccessTokenSerializeKey.SCOPE, scope);
     }
 }
