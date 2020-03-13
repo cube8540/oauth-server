@@ -2,8 +2,8 @@ package cube8540.oauth.authentication.credentials.authority.application;
 
 import cube8540.oauth.authentication.credentials.authority.domain.Authority;
 import cube8540.oauth.authentication.credentials.authority.domain.AuthorityRepository;
-import cube8540.oauth.authentication.credentials.authority.error.AuthorityNotFoundException;
-import cube8540.oauth.authentication.credentials.authority.error.AuthorityRegisterException;
+import cube8540.oauth.authentication.credentials.authority.domain.exception.AuthorityNotFoundException;
+import cube8540.oauth.authentication.credentials.authority.domain.exception.AuthorityRegisterException;
 import cube8540.oauth.authentication.error.message.ErrorCodes;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;

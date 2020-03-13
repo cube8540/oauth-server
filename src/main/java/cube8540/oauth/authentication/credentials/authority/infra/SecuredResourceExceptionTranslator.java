@@ -1,15 +1,20 @@
-package cube8540.oauth.authentication.credentials.authority.error;
+package cube8540.oauth.authentication.credentials.authority.infra;
 
+import cube8540.oauth.authentication.credentials.authority.domain.exception.ResourceInvalidException;
+import cube8540.oauth.authentication.credentials.authority.domain.exception.ResourceNotFoundException;
+import cube8540.oauth.authentication.credentials.authority.domain.exception.ResourceRegisterException;
 import cube8540.oauth.authentication.error.message.ErrorMessage;
 import cube8540.oauth.authentication.error.message.ExceptionTranslator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.io.Serializable;
+
 @Slf4j
-public class SecuredResourceExceptionTranslator implements ExceptionTranslator<ErrorMessage<?>> {
+public class SecuredResourceExceptionTranslator implements ExceptionTranslator<ErrorMessage<? extends Serializable>> {
     @Override
-    public ResponseEntity<ErrorMessage<?>> translate(Exception exception) {
+    public ResponseEntity<ErrorMessage<? extends Serializable>> translate(Exception exception) {
         if (exception instanceof ResourceNotFoundException) {
             ResourceNotFoundException e = ((ResourceNotFoundException) exception);
             return new ResponseEntity<>(ErrorMessage.instance(e.getCode(), e.getDescription()), HttpStatus.NOT_FOUND);
@@ -18,7 +23,7 @@ public class SecuredResourceExceptionTranslator implements ExceptionTranslator<E
             return new ResponseEntity<>(ErrorMessage.instance(e.getCode(), e.getDescription()), HttpStatus.BAD_REQUEST);
         } else if (exception instanceof ResourceInvalidException) {
             ResourceInvalidException e = ((ResourceInvalidException) exception);
-            return new ResponseEntity<>(ErrorMessage.instance(e.getCode(), e.getErrors()), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(ErrorMessage.instance(e.getCode(), e.getErrors().toArray()), HttpStatus.BAD_REQUEST);
         } else {
             log.error("Handle exception {}, {}", exception.getClass(), exception.getMessage());
             return response(HttpStatus.INTERNAL_SERVER_ERROR, UNKNOWN_SERVER_ERROR);

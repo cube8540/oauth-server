@@ -1,7 +1,7 @@
 package cube8540.oauth.authentication.credentials.authority.domain;
 
 import cube8540.oauth.authentication.credentials.authority.domain.converter.ResourceConverter;
-import cube8540.oauth.authentication.credentials.authority.error.ResourceInvalidException;
+import cube8540.oauth.authentication.credentials.authority.domain.exception.ResourceInvalidException;
 import cube8540.validator.core.Validator;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
