@@ -1,5 +1,9 @@
 package cube8540.oauth.authentication.credentials.oauth.error;
 
+import cube8540.oauth.authentication.credentials.oauth.scope.domain.exception.ScopeInvalidException;
+import cube8540.oauth.authentication.credentials.oauth.scope.domain.exception.ScopeNotFoundException;
+import cube8540.oauth.authentication.credentials.oauth.scope.domain.exception.ScopeRegisterException;
+import cube8540.oauth.authentication.credentials.oauth.scope.infra.ScopeAPIExceptionTranslator;
 import cube8540.oauth.authentication.error.message.ErrorMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -7,6 +11,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
+import java.io.Serializable;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -34,7 +40,7 @@ class ScopeAPIExceptionTranslatorTest {
         @Test
         @DisplayName("HTTP 상태 코드는 400 이어야 한다.")
         void shouldHttpStatusCodeIs400() {
-            ResponseEntity<ErrorMessage<?>> response = translator.translate(e);
+            ResponseEntity<ErrorMessage<? extends Serializable>> response = translator.translate(e);
             assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         }
     }
@@ -52,7 +58,7 @@ class ScopeAPIExceptionTranslatorTest {
         @Test
         @DisplayName("HTTP 상태 코드는 404 이어야 한다.")
         void shouldHttpStatusCodeIs404() {
-            ResponseEntity<ErrorMessage<?>> response = translator.translate(e);
+            ResponseEntity<ErrorMessage<? extends Serializable>> response = translator.translate(e);
             assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         }
 
@@ -71,7 +77,7 @@ class ScopeAPIExceptionTranslatorTest {
         @Test
         @DisplayName("HTTP 상태 코드는 400 이어야 한다.")
         void shouldHttpStatusCodeIs400() {
-            ResponseEntity<ErrorMessage<?>> response = translator.translate(e);
+            ResponseEntity<ErrorMessage<? extends Serializable>> response = translator.translate(e);
             assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         }
 
