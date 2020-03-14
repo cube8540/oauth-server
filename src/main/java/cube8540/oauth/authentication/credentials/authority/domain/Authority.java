@@ -65,15 +65,26 @@ public class Authority extends AbstractAggregateRoot<Authority> {
             this.accessibleResources = new HashSet<>();
         }
         this.accessibleResources.add(securedResource);
+
+        registerAccessibleResourceChangedEvent();
     }
 
     public void removeAccessibleResource(SecuredResourceId securedResource) {
         Optional.ofNullable(this.accessibleResources).ifPresent(resources -> resources.remove(securedResource));
+
+        registerAccessibleResourceChangedEvent();
     }
 
     public void validation(AuthorityValidationPolicy policy) {
         Validator.of(this).registerRule(policy.codeRule())
                 .registerRule(policy.accessibleResourceRule())
                 .getResult().hasErrorThrows(AuthorityInvalidException::instance);
+    }
+
+    private void registerAccessibleResourceChangedEvent() {
+        AuthorityAccessibleResourceChangedEvent event = new AuthorityAccessibleResourceChangedEvent(code);
+        if (!domainEvents().contains(event)) {
+            registerEvent(event);
+        }
     }
 }

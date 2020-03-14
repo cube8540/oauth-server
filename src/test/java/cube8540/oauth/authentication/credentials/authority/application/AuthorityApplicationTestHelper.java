@@ -3,6 +3,7 @@ package cube8540.oauth.authentication.credentials.authority.application;
 import cube8540.oauth.authentication.credentials.authority.domain.Authority;
 import cube8540.oauth.authentication.credentials.authority.domain.AuthorityCode;
 import cube8540.oauth.authentication.credentials.authority.domain.AuthorityRepository;
+import cube8540.oauth.authentication.credentials.authority.domain.AuthorityValidationPolicy;
 import cube8540.oauth.authentication.credentials.authority.domain.ResourceMethod;
 import cube8540.oauth.authentication.credentials.authority.domain.SecuredResource;
 import cube8540.oauth.authentication.credentials.authority.domain.SecuredResourceId;
@@ -12,7 +13,11 @@ import cube8540.validator.core.ValidationError;
 import cube8540.validator.core.ValidationRule;
 
 import java.net.URI;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
@@ -36,6 +41,13 @@ class AuthorityApplicationTestHelper {
     static final URI RESOURCE_URI = URI.create(RAW_RESOURCE_URI);
     static final String RAW_MODIFY_RESOURCE_URI = "/modify-resource/**";
     static final URI MODIFY_RESOURCE_URI = URI.create(RAW_MODIFY_RESOURCE_URI);
+
+    static final List<String> RAW_ACCESSIBLE_RESOURCES = Arrays.asList("RESOURCE-1", "RESOURCE-2", "RESOURCE-3");
+    static final Set<SecuredResourceId> ACCESSIBLE_RESOURCES = RAW_ACCESSIBLE_RESOURCES.stream().map(SecuredResourceId::new).collect(Collectors.toSet());
+    static final List<String> RAW_REMOVE_ACCESSIBLE_RESOURCES = Arrays.asList("REMOVE-RESOURCE-1", "REMOVE-RESOURCE-2", "REMOVE-RESOURCE-3");
+    static final List<String> RAW_ADDED_ACCESSIBLE_RESOURCES = Arrays.asList("ADD-RESOURCE-1", "ADD-RESOURCE-2", "ADD-RESOURCE-3");
+    static final List<SecuredResourceId> ADDED_ACCESSIBLE_RESOURCES = RAW_ADDED_ACCESSIBLE_RESOURCES.stream().map(SecuredResourceId::new).collect(Collectors.toList());
+    static final List<SecuredResourceId> REMOVE_ACCESSIBLE_RESOURCES = RAW_REMOVE_ACCESSIBLE_RESOURCES.stream().map(SecuredResourceId::new).collect(Collectors.toList());
 
     static MockAuthorityRepository mockAuthorityRepository() {
         return new MockAuthorityRepository();
@@ -61,8 +73,16 @@ class AuthorityApplicationTestHelper {
         return new MockValidationRule<>();
     }
 
+    static MockValidationRule<Authority> mockAuthorityValidationRule() {
+        return new MockValidationRule<>();
+    }
+
     static MockResourceValidationPolicy mockResourceValidationPolicy() {
         return new MockResourceValidationPolicy();
+    }
+
+    static MockAuthorityValidationPolicy mockAuthorityValidationPolicy() {
+        return new MockAuthorityValidationPolicy();
     }
 
     final static class MockAuthority {
@@ -220,6 +240,28 @@ class AuthorityApplicationTestHelper {
         }
 
         SecuredResourceValidationPolicy build() {
+            return policy;
+        }
+    }
+
+    static final class MockAuthorityValidationPolicy {
+        private AuthorityValidationPolicy policy;
+
+        private MockAuthorityValidationPolicy() {
+            this.policy = mock(AuthorityValidationPolicy.class);
+        }
+
+        MockAuthorityValidationPolicy codeRule(ValidationRule<Authority> rule) {
+            when(policy.codeRule()).thenReturn(rule);
+            return this;
+        }
+
+        MockAuthorityValidationPolicy accessibleResourceRule(ValidationRule<Authority> rule) {
+            when(policy.accessibleResourceRule()).thenReturn(rule);
+            return this;
+        }
+
+        AuthorityValidationPolicy build() {
             return policy;
         }
     }

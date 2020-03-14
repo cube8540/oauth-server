@@ -4,20 +4,24 @@ import cube8540.oauth.authentication.credentials.authority.AuthorityDetails;
 import cube8540.oauth.authentication.credentials.authority.domain.Authority;
 import cube8540.oauth.authentication.credentials.authority.domain.AuthorityCode;
 import cube8540.oauth.authentication.credentials.authority.domain.AuthorityRepository;
+import cube8540.oauth.authentication.credentials.authority.domain.AuthorityValidationPolicy;
+import cube8540.oauth.authentication.credentials.authority.domain.SecuredResourceId;
 import cube8540.oauth.authentication.credentials.authority.domain.exception.AuthorityNotFoundException;
 import cube8540.oauth.authentication.credentials.authority.domain.exception.AuthorityRegisterException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import lombok.Setter;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Service
 public class DefaultAuthorityManagementService implements AuthorityManagementService {
 
     private final AuthorityRepository repository;
 
-    @Autowired
+    @Setter
+    private AuthorityValidationPolicy validationPolicy;
+
     public DefaultAuthorityManagementService(AuthorityRepository repository) {
         this.repository = repository;
     }
@@ -42,23 +46,33 @@ public class DefaultAuthorityManagementService implements AuthorityManagementSer
         if (countAuthority(registerRequest.getCode()) > 0){
             throw AuthorityRegisterException.existsIdentifier(registerRequest.getCode() + " is already exists");
         }
-
         Authority authority = new Authority(registerRequest.getCode(), registerRequest.getDescription());
+        Optional.ofNullable(registerRequest.getAccessibleResources()).orElse(Collections.emptyList())
+                .stream().map(SecuredResourceId::new).forEach(authority::addAccessibleResource);
         if (registerRequest.isBasic()) {
             authority.settingBasicAuthority();
         }
+        authority.validation(validationPolicy);
         return DefaultAuthorityDetails.of(repository.save(authority));
     }
 
     @Override
     public AuthorityDetails modifyAuthority(String code, AuthorityModifyRequest modifyRequest) {
         Authority authority = getRegisteredAuthority(code);
+
         authority.setDescription(modifyRequest.getDescription());
+        Optional.ofNullable(modifyRequest.getNewAccessibleResources()).orElse(Collections.emptyList())
+                .stream().map(SecuredResourceId::new).forEach(authority::addAccessibleResource);
+        Optional.ofNullable(modifyRequest.getRemoveAccessibleResources()).orElse(Collections.emptyList())
+                .stream().map(SecuredResourceId::new).forEach(authority::removeAccessibleResource);
+        authority.validation(validationPolicy);
+
         if (modifyRequest.isBasic()) {
             authority.settingBasicAuthority();
         } else {
             authority.settingNotBasicAuthority();
         }
+
         return DefaultAuthorityDetails.of(repository.save(authority));
     }
 

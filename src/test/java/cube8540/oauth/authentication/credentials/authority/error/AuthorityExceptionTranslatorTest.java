@@ -1,9 +1,11 @@
 package cube8540.oauth.authentication.credentials.authority.error;
 
+import cube8540.oauth.authentication.credentials.authority.domain.exception.AuthorityInvalidException;
 import cube8540.oauth.authentication.credentials.authority.domain.exception.AuthorityNotFoundException;
 import cube8540.oauth.authentication.credentials.authority.domain.exception.AuthorityRegisterException;
 import cube8540.oauth.authentication.credentials.authority.infra.AuthorityExceptionTranslator;
 import cube8540.oauth.authentication.error.message.ErrorMessage;
+import cube8540.validator.core.ValidationError;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -11,7 +13,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.util.Arrays;
+
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -65,6 +71,34 @@ class AuthorityExceptionTranslatorTest {
         void shouldHttpStatusCodeIs400() {
             ResponseEntity<ErrorMessage<Object>> response = translator.translate(e);
             assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        }
+    }
+
+    @Nested
+    @DisplayName("AuthorityInvalidException 변환")
+    class TranslateAuthorityInvalidException {
+        private AuthorityInvalidException e;
+
+        @BeforeEach
+        void setup() {
+            this.e = AuthorityInvalidException.instance(Arrays.asList(new ValidationError("P", "V"),
+                    new ValidationError("P", "V1") ,new ValidationError("P", "V2")));
+        }
+
+        @Test
+        @DisplayName("상태 코드는 400 이어야 한다.")
+        void shouldHttpStatusCodeIs400() {
+            ResponseEntity<ErrorMessage<Object>> response = translator.translate(e);
+            assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        }
+
+        @Test
+        @DisplayName("관련 에러가 포함 되어야 한다.")
+        void shouldContainsErrorMessage() {
+            ResponseEntity<ErrorMessage<Object>> response = translator.translate(e);
+
+            assertNotNull(response.getBody());
+            assertArrayEquals(e.getErrors().toArray(), (Object[]) response.getBody().getDescription());
         }
     }
 

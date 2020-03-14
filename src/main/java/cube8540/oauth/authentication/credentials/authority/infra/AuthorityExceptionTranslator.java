@@ -1,5 +1,6 @@
 package cube8540.oauth.authentication.credentials.authority.infra;
 
+import cube8540.oauth.authentication.credentials.authority.domain.exception.AuthorityInvalidException;
 import cube8540.oauth.authentication.credentials.authority.domain.exception.AuthorityNotFoundException;
 import cube8540.oauth.authentication.credentials.authority.domain.exception.AuthorityRegisterException;
 import cube8540.oauth.authentication.error.message.ErrorMessage;
@@ -16,6 +17,9 @@ public class AuthorityExceptionTranslator implements ExceptionTranslator<ErrorMe
         if (exception instanceof AuthorityNotFoundException) {
             AuthorityNotFoundException e = ((AuthorityNotFoundException) exception);
             return response(HttpStatus.NOT_FOUND, ErrorMessage.instance(e.getCode(), e.getDescription()));
+        } else if (exception instanceof AuthorityInvalidException) {
+            AuthorityInvalidException e = ((AuthorityInvalidException) exception);
+            return response(HttpStatus.BAD_REQUEST, ErrorMessage.instance(e.getCode(), e.getErrors().toArray()));
         } else if (exception instanceof AuthorityRegisterException) {
             AuthorityRegisterException e = ((AuthorityRegisterException) exception);
             return response(HttpStatus.BAD_REQUEST, ErrorMessage.instance(e.getCode(), e.getDescription()));
