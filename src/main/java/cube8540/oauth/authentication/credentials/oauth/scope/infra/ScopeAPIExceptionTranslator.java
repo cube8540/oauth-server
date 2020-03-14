@@ -9,13 +9,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import java.io.Serializable;
-
 @Slf4j
-public class ScopeAPIExceptionTranslator implements ExceptionTranslator<ErrorMessage<? extends Serializable>> {
+public class ScopeAPIExceptionTranslator implements ExceptionTranslator<ErrorMessage<Object>> {
 
     @Override
-    public ResponseEntity<ErrorMessage<? extends  Serializable>> translate(Exception exception) {
+    public ResponseEntity<ErrorMessage<Object>> translate(Exception exception) {
         if (exception instanceof ScopeInvalidException) {
             ScopeInvalidException e = ((ScopeInvalidException) exception);
             return response(HttpStatus.BAD_REQUEST, ErrorMessage.instance(e.getCode(), e.getErrors().toArray()));

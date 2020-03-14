@@ -9,12 +9,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import java.io.Serializable;
-
 @Slf4j
-public class SecuredResourceExceptionTranslator implements ExceptionTranslator<ErrorMessage<? extends Serializable>> {
+public class SecuredResourceExceptionTranslator implements ExceptionTranslator<ErrorMessage<Object>> {
     @Override
-    public ResponseEntity<ErrorMessage<? extends Serializable>> translate(Exception exception) {
+    public ResponseEntity<ErrorMessage<Object>> translate(Exception exception) {
         if (exception instanceof ResourceNotFoundException) {
             ResourceNotFoundException e = ((ResourceNotFoundException) exception);
             return new ResponseEntity<>(ErrorMessage.instance(e.getCode(), e.getDescription()), HttpStatus.NOT_FOUND);

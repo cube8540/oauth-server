@@ -12,8 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import java.io.Serializable;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 
@@ -41,7 +39,7 @@ class UserExceptionTranslatorTest {
         @Test
         @DisplayName("HTTP 상태 코드는 404 이어야 한다.")
         void shouldHttpStatsCodeIs404() {
-            ResponseEntity<ErrorMessage<? extends Serializable>> response = translator.translate(e);
+            ResponseEntity<ErrorMessage<Object>> response = translator.translate(e);
             assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         }
     }
@@ -60,7 +58,7 @@ class UserExceptionTranslatorTest {
         @Test
         @DisplayName("HTTP 상태 코드는 400 이어야 한다.")
         void shouldHttpStatsCodeIs400() {
-            ResponseEntity<ErrorMessage<? extends Serializable>> response = translator.translate(e);
+            ResponseEntity<ErrorMessage<Object>> response = translator.translate(e);
             assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         }
     }
@@ -79,7 +77,7 @@ class UserExceptionTranslatorTest {
         @Test
         @DisplayName("HTTP 상태 코드는 400 이어야 한다.")
         void shouldHttpStatsCodeIs400() {
-            ResponseEntity<ErrorMessage<? extends Serializable>> response = translator.translate(e);
+            ResponseEntity<ErrorMessage<Object>> response = translator.translate(e);
             assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         }
     }
@@ -98,7 +96,7 @@ class UserExceptionTranslatorTest {
         @Test
         @DisplayName("HTTP 상태 코드는 401 이어야 한다.")
         void shouldHttpStatsCodeIs401() {
-            ResponseEntity<ErrorMessage<? extends Serializable>> response = translator.translate(e);
+            ResponseEntity<ErrorMessage<Object>> response = translator.translate(e);
             assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
         }
     }

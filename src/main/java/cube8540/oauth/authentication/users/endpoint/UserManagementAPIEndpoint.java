@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.SessionAttributes;
 
-import java.io.Serializable;
 import java.util.Collections;
 import java.util.Map;
 
@@ -30,7 +29,7 @@ public class UserManagementAPIEndpoint {
     private final UserManagementService service;
 
     @Setter(onMethod_ = {@Autowired, @Qualifier("userExceptionTranslator")})
-    private ExceptionTranslator<ErrorMessage<? extends Serializable>> translator;
+    private ExceptionTranslator<ErrorMessage<Object>> translator;
 
     @Autowired
     public UserManagementAPIEndpoint(UserManagementService service) {
@@ -52,7 +51,7 @@ public class UserManagementAPIEndpoint {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorMessage<? extends Serializable>> handle(Exception e) {
+    public ResponseEntity<ErrorMessage<Object>> handle(Exception e) {
         return translator.translate(e);
     }
 }

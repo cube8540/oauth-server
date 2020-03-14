@@ -12,8 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.io.Serializable;
-
 @Configuration
 public class AuthorityConfiguration {
 
@@ -27,12 +25,12 @@ public class AuthorityConfiguration {
     }
 
     @Bean
-    public ExceptionTranslator<ErrorMessage<? extends Serializable>> authorityExceptionTranslator() {
+    public ExceptionTranslator<ErrorMessage<Object>> authorityExceptionTranslator() {
         return new AuthorityExceptionTranslator();
     }
 
     @Bean
-    public ExceptionTranslator<ErrorMessage<? extends Serializable>> securedResourceExceptionTranslator() {
+    public ExceptionTranslator<ErrorMessage<Object>> securedResourceExceptionTranslator() {
         return new SecuredResourceExceptionTranslator();
     }
 

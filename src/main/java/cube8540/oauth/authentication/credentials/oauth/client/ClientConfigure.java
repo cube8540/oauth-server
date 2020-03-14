@@ -14,8 +14,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.io.Serializable;
-
 @Configuration
 public class ClientConfigure {
 
@@ -40,7 +38,7 @@ public class ClientConfigure {
     }
 
     @Bean
-    public ExceptionTranslator<ErrorMessage<? extends Serializable>> clientExceptionTranslator() {
+    public ExceptionTranslator<ErrorMessage<Object>> clientExceptionTranslator() {
         return new ClientAPIExceptionTranslator();
     }
 

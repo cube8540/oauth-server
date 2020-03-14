@@ -1,10 +1,10 @@
 package cube8540.oauth.authentication.credentials.oauth.scope.endpoint;
 
 import cube8540.oauth.authentication.credentials.oauth.scope.application.OAuth2AccessibleScopeDetailsService;
-import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ScopeDetails;
 import cube8540.oauth.authentication.credentials.oauth.scope.application.OAuth2ScopeManagementService;
 import cube8540.oauth.authentication.credentials.oauth.scope.application.OAuth2ScopeModifyRequest;
 import cube8540.oauth.authentication.credentials.oauth.scope.application.OAuth2ScopeRegisterRequest;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ScopeDetails;
 import cube8540.oauth.authentication.error.message.ErrorMessage;
 import cube8540.oauth.authentication.error.message.ExceptionTranslator;
 import lombok.Setter;
@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -35,7 +34,7 @@ public class ScopeManagementAPIEndpoint {
     private final OAuth2AccessibleScopeDetailsService accessibleScopeDetailsService;
 
     @Setter(onMethod_ = {@Autowired, @Qualifier("scopeExceptionTranslator")})
-    private ExceptionTranslator<ErrorMessage<? extends Serializable>> translator;
+    private ExceptionTranslator<ErrorMessage<Object>> translator;
 
     @Autowired
     public ScopeManagementAPIEndpoint(OAuth2ScopeManagementService managementService, OAuth2AccessibleScopeDetailsService accessibleScopeDetailsService) {
@@ -73,7 +72,7 @@ public class ScopeManagementAPIEndpoint {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorMessage<? extends Serializable>> handle(Exception e) {
+    public ResponseEntity<ErrorMessage<Object>> handle(Exception e) {
         return translator.translate(e);
     }
 }

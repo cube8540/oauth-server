@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -31,7 +30,7 @@ public class AuthorityManagementAPIEndpoint {
     private final AuthorityManagementService service;
 
     @Setter(onMethod_ = {@Autowired, @Qualifier("authorityExceptionTranslator")})
-    private ExceptionTranslator<ErrorMessage<? extends Serializable>> translator;
+    private ExceptionTranslator<ErrorMessage<Object>> translator;
 
     @Autowired
     public AuthorityManagementAPIEndpoint(AuthorityManagementService service) {
@@ -73,7 +72,7 @@ public class AuthorityManagementAPIEndpoint {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorMessage<? extends Serializable>> handle(Exception e) {
+    public ResponseEntity<ErrorMessage<Object>> handle(Exception e) {
         return translator.translate(e);
     }
 }

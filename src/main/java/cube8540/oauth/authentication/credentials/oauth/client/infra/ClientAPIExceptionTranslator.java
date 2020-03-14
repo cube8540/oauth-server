@@ -10,12 +10,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import java.io.Serializable;
-
 @Slf4j
-public class ClientAPIExceptionTranslator implements ExceptionTranslator<ErrorMessage<? extends Serializable>> {
+public class ClientAPIExceptionTranslator implements ExceptionTranslator<ErrorMessage<Object>> {
     @Override
-    public ResponseEntity<ErrorMessage<? extends Serializable>> translate(Exception exception) {
+    public ResponseEntity<ErrorMessage<Object>> translate(Exception exception) {
         if (exception instanceof ClientNotFoundException) {
             ClientNotFoundException e = ((ClientNotFoundException) exception);
             return response(HttpStatus.NOT_FOUND, ErrorMessage.instance(e.getCode(), e.getDescription()));
