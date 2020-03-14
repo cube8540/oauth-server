@@ -3,12 +3,15 @@ package cube8540.oauth.authentication.credentials.authority.domain;
 import cube8540.validator.core.ValidationError;
 import cube8540.validator.core.ValidationRule;
 
+import java.net.URI;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 class AuthorityTestHelper {
 
     static final String RAW_AUTHORITY_CODE = "AUTHORITY_CODE";
+    static final AuthorityCode AUTHORITY_CODE = new AuthorityCode(RAW_AUTHORITY_CODE);
     static final String DESCRIPTION = "DESCRIPTION";
 
     static final String RAW_RESOURCE_ID = "RESOURCE-ID";
@@ -16,6 +19,14 @@ class AuthorityTestHelper {
 
     static final String ERROR_PROPERTY = "property";
     static final String ERROR_MESSAGE = "message";
+
+    static final String RAW_RESOURCE = "/uri/**";
+    static final URI RESOURCE = URI.create(RAW_RESOURCE);
+    static final String RAW_CHANGE_RESOURCE = "/change/**";
+    static final URI CHANGE_RESOURCE = URI.create(RAW_CHANGE_RESOURCE);
+
+    static final ResourceMethod RESOURCE_METHOD = ResourceMethod.ALL;
+    static final ResourceMethod CHANGE_RESOURCE_METHOD = ResourceMethod.POST;
 
     static MockValidationRule<SecuredResource> mockResourceValidationRule() {
         return new MockValidationRule<>();
@@ -102,6 +113,11 @@ class AuthorityTestHelper {
 
         MockResourceValidationPolicy methodRule(ValidationRule<SecuredResource> validationRule) {
             when(this.policy.methodRule()).thenReturn(validationRule);
+            return this;
+        }
+
+        MockResourceValidationPolicy authoritiesRule(ValidationRule<SecuredResource> validationRule) {
+            when(this.policy.authoritiesRule()).thenReturn(validationRule);
             return this;
         }
 
