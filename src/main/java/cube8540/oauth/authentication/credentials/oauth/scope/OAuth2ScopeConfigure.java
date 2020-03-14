@@ -12,8 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.io.Serializable;
-
 @Configuration
 public class OAuth2ScopeConfigure {
 
@@ -35,7 +33,7 @@ public class OAuth2ScopeConfigure {
     }
 
     @Bean
-    public ExceptionTranslator<ErrorMessage<? extends Serializable>> scopeExceptionTranslator() {
+    public ExceptionTranslator<ErrorMessage<Object>> scopeExceptionTranslator() {
         return new ScopeAPIExceptionTranslator();
     }
 

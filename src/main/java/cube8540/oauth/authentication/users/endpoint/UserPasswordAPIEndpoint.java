@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.Serializable;
 import java.security.Principal;
 
 @RestController
@@ -27,7 +26,7 @@ public class UserPasswordAPIEndpoint {
     private final UserPasswordService service;
 
     @Setter(onMethod_ = {@Autowired, @Qualifier("userExceptionTranslator")})
-    private ExceptionTranslator<ErrorMessage<? extends Serializable>> translator;
+    private ExceptionTranslator<ErrorMessage<Object>> translator;
 
     @Autowired
     public UserPasswordAPIEndpoint(UserPasswordService service) {
@@ -50,7 +49,7 @@ public class UserPasswordAPIEndpoint {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorMessage<? extends Serializable>> handle(Exception e) {
+    public ResponseEntity<ErrorMessage<Object>> handle(Exception e) {
         return translator.translate(e);
     }
 }

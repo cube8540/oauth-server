@@ -31,7 +31,7 @@ public class DefaultSecuredResourceManagementService implements SecuredResourceM
 
     @Override
     public List<SecuredResourceDetails> getResources() {
-        return repository.findAll().stream().map(SecuredResourceDetails::of).collect(Collectors.toList());
+        return repository.findAll().stream().map(DefaultSecuredResourceDetails::of).collect(Collectors.toList());
     }
 
     @Override
@@ -42,7 +42,7 @@ public class DefaultSecuredResourceManagementService implements SecuredResourceM
         SecuredResource resource = new SecuredResource(new SecuredResourceId(registerRequest.getResourceId()),
                 URI.create(registerRequest.getResource()), ResourceMethod.of(registerRequest.getMethod()));
         resource.validation(policy);
-        return SecuredResourceDetails.of(repository.save(resource));
+        return DefaultSecuredResourceDetails.of(repository.save(resource));
     }
 
     @Override
@@ -50,7 +50,7 @@ public class DefaultSecuredResourceManagementService implements SecuredResourceM
         SecuredResource resource = getResource(resourceId);
         resource.changeResourceInfo(URI.create(modifyRequest.getResource()), ResourceMethod.of(modifyRequest.getMethod()));
         resource.validation(policy);
-        return SecuredResourceDetails.of(repository.save(resource));
+        return DefaultSecuredResourceDetails.of(repository.save(resource));
     }
 
     @Override
@@ -58,7 +58,7 @@ public class DefaultSecuredResourceManagementService implements SecuredResourceM
         SecuredResource resource = getResource(resourceId);
 
         repository.delete(resource);
-        return SecuredResourceDetails.of(resource);
+        return DefaultSecuredResourceDetails.of(resource);
     }
 
     private SecuredResource getResource(String resourceId) {

@@ -9,8 +9,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
-import java.io.Serializable;
-
 @Configuration
 public class UserConfiguration {
 
@@ -21,7 +19,7 @@ public class UserConfiguration {
     }
 
     @Bean
-    public ExceptionTranslator<ErrorMessage<? extends Serializable>> userExceptionTranslator() {
+    public ExceptionTranslator<ErrorMessage<Object>> userExceptionTranslator() {
         return new UserExceptionTranslator();
     }
 

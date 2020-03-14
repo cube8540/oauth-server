@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 
@@ -46,7 +45,7 @@ class SecuredResourceExceptionTranslatorTest {
         @Test
         @DisplayName("상태 코드는 404 이어야 한다.")
         void shouldHttpStatusCodeIs404() {
-            ResponseEntity<ErrorMessage<? extends Serializable>> response = translator.translate(exception);
+            ResponseEntity<ErrorMessage<Object>> response = translator.translate(exception);
 
             assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         }
@@ -54,7 +53,7 @@ class SecuredResourceExceptionTranslatorTest {
         @Test
         @DisplayName("에러 코드는 NOT_FOUND 이어야 한다.")
         void shouldErrorCodeIsNotFound() {
-            ResponseEntity<ErrorMessage<? extends Serializable>> response = translator.translate(exception);
+            ResponseEntity<ErrorMessage<Object>> response = translator.translate(exception);
 
             assertNotNull(response.getBody());
             assertEquals(ErrorCodes.NOT_FOUND, response.getBody().getErrorCode());
@@ -63,7 +62,7 @@ class SecuredResourceExceptionTranslatorTest {
         @Test
         @DisplayName("에러에 대한 정보가 포함되어야 한다.")
         void shouldIncludeErrorDescription() {
-            ResponseEntity<ErrorMessage<? extends Serializable>> response = translator.translate(exception);
+            ResponseEntity<ErrorMessage<Object>> response = translator.translate(exception);
 
             assertNotNull(response.getBody());
             assertEquals(DESCRIPTION, response.getBody().getDescription());
@@ -83,7 +82,7 @@ class SecuredResourceExceptionTranslatorTest {
         @Test
         @DisplayName("상태 코드는 400 이어야 한다.")
         void shouldHttpStatusCodeIs400() {
-            ResponseEntity<ErrorMessage<? extends Serializable>> response = translator.translate(exception);
+            ResponseEntity<ErrorMessage<Object>> response = translator.translate(exception);
 
             assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         }
@@ -91,7 +90,7 @@ class SecuredResourceExceptionTranslatorTest {
         @Test
         @DisplayName("에러 코드는 예외에 저장되어 있는 에러 코드 이어야 한다.")
         void shouldErrorCodeIsNotFound() {
-            ResponseEntity<ErrorMessage<? extends Serializable>> response = translator.translate(exception);
+            ResponseEntity<ErrorMessage<Object>> response = translator.translate(exception);
 
             assertNotNull(response.getBody());
             assertEquals(exception.getCode(), response.getBody().getErrorCode());
@@ -100,7 +99,7 @@ class SecuredResourceExceptionTranslatorTest {
         @Test
         @DisplayName("에러에 대한 정보가 포함되어야 한다.")
         void shouldIncludeErrorDescription() {
-            ResponseEntity<ErrorMessage<? extends Serializable>> response = translator.translate(exception);
+            ResponseEntity<ErrorMessage<Object>> response = translator.translate(exception);
 
             assertNotNull(response.getBody());
             assertEquals(exception.getDescription(), response.getBody().getDescription());
@@ -122,7 +121,7 @@ class SecuredResourceExceptionTranslatorTest {
         @Test
         @DisplayName("상태 코드는 400 이어야 한다.")
         void shouldHttpStatusCodeIs400() {
-            ResponseEntity<ErrorMessage<? extends Serializable>> response = translator.translate(exception);
+            ResponseEntity<ErrorMessage<Object>> response = translator.translate(exception);
 
             assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         }
@@ -130,7 +129,7 @@ class SecuredResourceExceptionTranslatorTest {
         @Test
         @DisplayName("에러 코드는 예외에 저장되어 있는 에러 코드 이어야 한다.")
         void shouldErrorCodeIsNotFound() {
-            ResponseEntity<ErrorMessage<? extends Serializable>> response = translator.translate(exception);
+            ResponseEntity<ErrorMessage<Object>> response = translator.translate(exception);
 
             assertNotNull(response.getBody());
             assertEquals(exception.getCode(), response.getBody().getErrorCode());
@@ -139,7 +138,7 @@ class SecuredResourceExceptionTranslatorTest {
         @Test
         @DisplayName("잘못된 속성에 대한 정보가 포함되어야 한다.")
         void shouldIncludeInvalidPropertyInfo() {
-            ResponseEntity<ErrorMessage<? extends Serializable>> response = translator.translate(exception);
+            ResponseEntity<ErrorMessage<Object>> response = translator.translate(exception);
 
             assertNotNull(response.getBody());
             Assertions.assertArrayEquals(errors.toArray(), (Object[]) response.getBody().getDescription());
@@ -159,7 +158,7 @@ class SecuredResourceExceptionTranslatorTest {
         @Test
         @DisplayName("HTTP 상태 코드는 500 이어야 한다.")
         void shouldHttpStatusCodeIs500() {
-            ResponseEntity<ErrorMessage<? extends Serializable>> response = translator.translate(exception);
+            ResponseEntity<ErrorMessage<Object>> response = translator.translate(exception);
 
             assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         }
@@ -167,7 +166,7 @@ class SecuredResourceExceptionTranslatorTest {
         @Test
         @DisplayName("에러 코드는 SERVER_ERROR 이어야 한다.")
         void shouldErrorCodeIsServerError() {
-            ResponseEntity<ErrorMessage<? extends Serializable>> response = translator.translate(exception);
+            ResponseEntity<ErrorMessage<Object>> response = translator.translate(exception);
 
             assertNotNull(response.getBody());
             assertEquals(ErrorCodes.SERVER_ERROR, response.getBody().getErrorCode());
