@@ -19,16 +19,18 @@ http://localhost:8080/api/authorities
 X-CSRF-TOKEN: 02d40025-cb71-4fef-b49b-93849a668a99
 
 {
-    "code": "TEST-ROLE"
-    "description": "테스트 권한"
-    "basic": true
+    "code": "TEST-ROLE",
+    "description": "테스트 권한",
+    "basic": true,
+    "accessibleResources": ["RESOURCE-1", "RESOURCE-2", "RESOURCE-3"]
 }
 ```
-|  파라미터명    | 필수 여부 |  타입   |  설명  |
-| :-----------: | :-------: | :----: | -------------------------------------------------- |
-| code         | Required  | String | 추가할 권한 코드                                     |
-| description  | Required  | String | 권한의 설명 텍스트                                   |
-| basic        | Required  | Boolean | 기본 권한 여부로 true 일시 기본 권한으로 설정 됩니다. |
+|  파라미터명        | 필수 여부 |  타입   |  설명  |
+| :----------------: | :-------: | :----: | -------------------------------------------------- |
+| code                | Required  | String | 추가할 권한 코드                                     |
+| description         | Required  | String | 권한의 설명 텍스트                                   |
+| basic               | Required  | Boolean | 기본 권한 여부로 true 일시 기본 권한으로 설정 됩니다. |
+| accessibleResources | Optional  | Array | 권한이 접근 가능한 자원의 아이디 |
 
 #### 응답
 ```
@@ -38,7 +40,8 @@ Content-Type: application/json
 {
     "code": "TEST-ROLE",
     "description": "테스트 권한",
-    "basic": true
+    "basic": true,
+    "accessibleResources": ["RESOURCE-1", "RESOURCE-2", "RESOURCE-3"]
 }
 ```
 |  파라미터명    |  타입   |  설명  |
@@ -46,6 +49,7 @@ Content-Type: application/json
 | code         | String | 추가된 권한 코드        |
 | description  | String |추가된 권한의 설명 텍스트 |
 | basic  | Boolean |추가된 권한의 기본 권한 여부 |
+| accessibleResources | Array | 권한이 접근 가능한 자원의 아이디 |
 
 #### 에러
 ```
@@ -82,7 +86,8 @@ Content-Type: application/json
         {
             "code": "ROLE_USER",
             "description": "테스트용 기본 권한",
-            "basic": true
+            "basic": true,
+            "accessibleResources": ["RESOURCE-1", "RESOURCE-2", "RESOURCE-3"]
         }
     ]
 }
@@ -93,6 +98,7 @@ Content-Type: application/json
 | code         | String | 권한 코드               |
 | description  | String | 권한의 설명 텍스트      |
 | basic  | Boolean | 권한의 기본 권한 여부      |
+| accessibleResources | Array | 권한이 접근 가능한 자원의 아이디 |
 
 ### 권한 정보 변경
 권한의 정보를 변경 합니다.
@@ -106,14 +112,18 @@ X-CSRF-TOKEN: 02d40025-cb71-4fef-b49b-93849a668a99
 
 {
     "description": "변경된 설명 텍스트",
-    "basic": true
+    "basic": true,
+    "newAccessibleResources": ["RESOURCE-4", "RESOURCE-5"],
+    "removeAccessibleResources": ["RESOURCE-1", "RESOURCE-2"]
 }
 ```
-|  파라미터명    | 필수 여부 |  타입   |  설명  |
-| :-----------: | :-------: | :----: | -------------------------------------------------- |
-| code         | Required  | String | 변경할 권한 코드                                     |
-| description  | Required  | String | 권한의 설명 텍스트                                   |
-| basic        | Required  | Boolean | 기본 권한 여부로 true 일시 기본 권한으로 설정 됩니다. |
+|  파라미터명                | 필수 여부 |  타입   |  설명  |
+| :-----------------------: | :-------: | :----: | -------------------------------------------------- |
+| code                      | Required  | String | 변경할 권한 코드                                     |
+| description               | Required  | String | 권한의 설명 텍스트                                   |
+| basic                     | Required  | Boolean | 기본 권한 여부로 true 일시 기본 권한으로 설정 됩니다. |
+| newAccessibleResources    | Optional  | Array | 권한에 추가할 접근 가능 자원 아이디 |
+| removeAccessibleResources | Optional  | Array | 권한에서 제거할 접근 가능 자원 아이디 |
 
 #### 응답
 ```
@@ -123,7 +133,8 @@ Content-Type: application/json
 {
     "code": "TEST-ROLE",
     "description": "변경된 설명 텍스트",
-    "basic": true
+    "basic": true,
+    "accessibleResources": ["RESOURCE-2", "RESOURCE-3", "RESOURCE-4", "RESOURCE-5"]
 }
 ```
 |  파라미터명    |  타입   |  설명  |
@@ -131,6 +142,7 @@ Content-Type: application/json
 | code         | String | 변경된 권한 코드        |
 | description  | String | 변경된 권한의 설명 텍스트 |
 | basic  | Boolean | 변경된 권한의 기본 권한 여부 |
+| accessibleResources | Array | 권한이 접근 가능한 자원의 아이디 |
 
 #### 에러
 ```
@@ -169,7 +181,8 @@ Content-Type: application/json
 {
     "code": "TEST-ROLE",
     "description": "권한 설명 텍스트",
-    "basic": true
+    "basic": true,
+    "accessibleResources": ["RESOURCE-2", "RESOURCE-3", "RESOURCE-4", "RESOURCE-5"]
 }
 ```
 |  파라미터명    |  타입   |  설명  |
@@ -177,6 +190,7 @@ Content-Type: application/json
 | code         | String | 삭제된 권한 코드        |
 | description  | String | 삭제된 권한의 설명 텍스트 |
 | basic  | Boolean | 삭제된 권한의 기본 권한 여부 |
+| accessibleResources | Array | 권한이 접근 가능한 자원의 아이디 |
 
 #### 에러
 ```
