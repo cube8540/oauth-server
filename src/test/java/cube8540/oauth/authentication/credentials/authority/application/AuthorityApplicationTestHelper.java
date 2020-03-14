@@ -49,6 +49,13 @@ class AuthorityApplicationTestHelper {
     static final List<SecuredResourceId> ADDED_ACCESSIBLE_RESOURCES = RAW_ADDED_ACCESSIBLE_RESOURCES.stream().map(SecuredResourceId::new).collect(Collectors.toList());
     static final List<SecuredResourceId> REMOVE_ACCESSIBLE_RESOURCES = RAW_REMOVE_ACCESSIBLE_RESOURCES.stream().map(SecuredResourceId::new).collect(Collectors.toList());
 
+    static final List<String> RAW_AUTHORITIES = Arrays.asList("AUTHORITY-1", "AUTHORITY-2", "AUTHORITY-3");
+    static final Set<AuthorityCode> AUTHORITIES = RAW_AUTHORITIES.stream().map(AuthorityCode::new).collect(Collectors.toSet());
+    static final List<String> RAW_REMOVE_AUTHORITIES = Arrays.asList("REMOVE-AUTHORITY-1", "REMOVE-AUTHORITY-2", "REMOVE-AUTHORITY-3");
+    static final List<String> RAW_ADD_AUTHORITIES = Arrays.asList("ADD-AUTHORITY-1", "ADD-AUTHORITY-2", "ADD-AUTHORITY-3");
+    static final List<AuthorityCode> REMOVE_AUTHORITIES = RAW_REMOVE_AUTHORITIES.stream().map(AuthorityCode::new).collect(Collectors.toList());
+    static final List<AuthorityCode> ADD_AUTHORITIES = RAW_ADD_AUTHORITIES.stream().map(AuthorityCode::new).collect(Collectors.toList());
+
     static MockAuthorityRepository mockAuthorityRepository() {
         return new MockAuthorityRepository();
     }
@@ -236,6 +243,11 @@ class AuthorityApplicationTestHelper {
 
         MockResourceValidationPolicy methodRule(ValidationRule<SecuredResource> validationRule) {
             when(this.policy.methodRule()).thenReturn(validationRule);
+            return this;
+        }
+
+        MockResourceValidationPolicy authoritiesRule(ValidationRule<SecuredResource> validationRule) {
+            when(this.policy.authoritiesRule()).thenReturn(validationRule);
             return this;
         }
 

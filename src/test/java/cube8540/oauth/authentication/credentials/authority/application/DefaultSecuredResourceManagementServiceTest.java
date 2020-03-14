@@ -15,10 +15,16 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 
+import static cube8540.oauth.authentication.credentials.authority.application.AuthorityApplicationTestHelper.ADD_AUTHORITIES;
+import static cube8540.oauth.authentication.credentials.authority.application.AuthorityApplicationTestHelper.AUTHORITIES;
 import static cube8540.oauth.authentication.credentials.authority.application.AuthorityApplicationTestHelper.MODIFY_RESOURCE_URI;
+import static cube8540.oauth.authentication.credentials.authority.application.AuthorityApplicationTestHelper.RAW_ADD_AUTHORITIES;
+import static cube8540.oauth.authentication.credentials.authority.application.AuthorityApplicationTestHelper.RAW_AUTHORITIES;
 import static cube8540.oauth.authentication.credentials.authority.application.AuthorityApplicationTestHelper.RAW_MODIFY_RESOURCE_URI;
+import static cube8540.oauth.authentication.credentials.authority.application.AuthorityApplicationTestHelper.RAW_REMOVE_AUTHORITIES;
 import static cube8540.oauth.authentication.credentials.authority.application.AuthorityApplicationTestHelper.RAW_RESOURCE_ID;
 import static cube8540.oauth.authentication.credentials.authority.application.AuthorityApplicationTestHelper.RAW_RESOURCE_URI;
+import static cube8540.oauth.authentication.credentials.authority.application.AuthorityApplicationTestHelper.REMOVE_AUTHORITIES;
 import static cube8540.oauth.authentication.credentials.authority.application.AuthorityApplicationTestHelper.RESOURCE_ID;
 import static cube8540.oauth.authentication.credentials.authority.application.AuthorityApplicationTestHelper.RESOURCE_URI;
 import static cube8540.oauth.authentication.credentials.authority.application.AuthorityApplicationTestHelper.mockResourceRepository;
@@ -26,8 +32,11 @@ import static cube8540.oauth.authentication.credentials.authority.application.Au
 import static cube8540.oauth.authentication.credentials.authority.application.AuthorityApplicationTestHelper.mockResourceValidationRule;
 import static cube8540.oauth.authentication.credentials.authority.application.AuthorityApplicationTestHelper.mockSecuredResource;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -45,7 +54,7 @@ class DefaultSecuredResourceManagementServiceTest {
 
             @BeforeEach
             void setupRequest() {
-                this.registerRequest = new SecuredResourceRegisterRequest(RAW_RESOURCE_ID, RAW_RESOURCE_URI, "POST");
+                this.registerRequest = new SecuredResourceRegisterRequest(RAW_RESOURCE_ID, RAW_RESOURCE_URI, "POST", null);
             }
 
             @Test
@@ -59,57 +68,45 @@ class DefaultSecuredResourceManagementServiceTest {
         @Nested
         @DisplayName("저장소에 저장되지 않은 권한일시")
         class WhenNotRegisterInRepository extends SecuredResourceNotFoundSetup {
-            private SecuredResourceRegisterRequest registerRequest;
-            private ValidationRule<SecuredResource> resourceIdRule;
-            private ValidationRule<SecuredResource> resourceRule;
-            private ValidationRule<SecuredResource> methodRule;
 
-            @BeforeEach
-            void setupRequest() {
-                this.registerRequest = new SecuredResourceRegisterRequest(RAW_RESOURCE_ID, RAW_RESOURCE_URI, "POST");
-                this.resourceIdRule = mockResourceValidationRule().configReturnTrue().build();
-                this.resourceRule = mockResourceValidationRule().configReturnTrue().build();
-                this.methodRule = mockResourceValidationRule().configReturnTrue().build();
+            @Nested
+            @DisplayName("요청한 접근 권한이 null 일시")
+            class WhenRequestingAuthoritiesIsNull extends SecuredResourceRegisterSetup {
 
-                SecuredResourceValidationPolicy policy = mockResourceValidationPolicy().resourceIdRule(resourceIdRule).resourceRule(resourceRule).methodRule(methodRule).build();
-                this.service.setPolicy(policy);
+                @Override
+                protected SecuredResourceRegisterRequest request() {
+                    return new SecuredResourceRegisterRequest(RAW_RESOURCE_ID, RAW_RESOURCE_URI, "POST", null);
+                }
+
+                @Test
+                @DisplayName("보호 자원에 접근 권한을 추가 하지 않아야 한다.")
+                void shouldNotAddAuthoritiesToSecuredResource() {
+                    ArgumentCaptor<SecuredResource> resourceCaptor = ArgumentCaptor.forClass(SecuredResource.class);
+
+                    service.registerNewResource(registerRequest);
+                    verify(repository, times(1)).save(resourceCaptor.capture());
+                    assertNull(resourceCaptor.getValue().getAuthorities());
+                }
             }
 
-            @Test
-            @DisplayName("요청 받은 자원의 아이디의 유효성을 검사한 후 저장소에 저장해야 한다.")
-            void shouldSaveRequestingResourceIdAfterValidation() {
-                ArgumentCaptor<SecuredResource> resourceCaptor = ArgumentCaptor.forClass(SecuredResource.class);
+            @Nested
+            @DisplayName("요청한 접근 권한이 null 이 아닐시")
+            class WhenRequestingAuthoritiesIsNotNull extends SecuredResourceRegisterSetup {
 
-                service.registerNewResource(registerRequest);
-                verifySaveAfterValidation(resourceIdRule, resourceCaptor);
-                assertEquals(RESOURCE_ID, resourceCaptor.getValue().getResourceId());
-            }
+                @Override
+                protected SecuredResourceRegisterRequest request() {
+                    return new SecuredResourceRegisterRequest(RAW_RESOURCE_ID, RAW_RESOURCE_URI, "POST", RAW_AUTHORITIES);
+                }
 
-            @Test
-            @DisplayName("요청 받은 자원 정보의 유효성을 검사한 후 저장소에 저장해야 한다.")
-            void shouldSaveRequestingResourceInfoAfterValidation() {
-                ArgumentCaptor<SecuredResource> resourceCaptor = ArgumentCaptor.forClass(SecuredResource.class);
+                @Test
+                @DisplayName("요청 받은 접근 권한을 유효성 검사 후 저장소에 저장해야 한다.")
+                void shouldSaveRequestingAuthoritiesToRepositoryAfterValidation() {
+                    ArgumentCaptor<SecuredResource> resourceCaptor = ArgumentCaptor.forClass(SecuredResource.class);
 
-                service.registerNewResource(registerRequest);
-                verifySaveAfterValidation(resourceRule, resourceCaptor);
-                assertEquals(RESOURCE_URI, resourceCaptor.getValue().getResource());
-            }
-
-            @Test
-            @DisplayName("요청 받은 자원 메소드의 유효성을 검사한 후 저장소에 저장해야 한다.")
-            void shouldSaveRequestingResourceMethodAfterValidation() {
-                ArgumentCaptor<SecuredResource> resourceCaptor = ArgumentCaptor.forClass(SecuredResource.class);
-
-                service.registerNewResource(registerRequest);
-                verifySaveAfterValidation(methodRule, resourceCaptor);
-                assertEquals(ResourceMethod.POST, resourceCaptor.getValue().getMethod());
-            }
-
-            private void verifySaveAfterValidation(ValidationRule<SecuredResource> rule, ArgumentCaptor<SecuredResource> argumentCaptor) {
-                InOrder inOrder = inOrder(rule, repository);
-                inOrder.verify(rule, times(1)).isValid(argumentCaptor.capture());
-                inOrder.verify(repository, times(1)).save(argumentCaptor.capture());
-                assertEquals(argumentCaptor.getAllValues().get(0), argumentCaptor.getAllValues().get(1));
+                    service.registerNewResource(registerRequest);
+                    verifySaveAfterValidation(authoritiesRule, resourceCaptor);
+                    assertEquals(AUTHORITIES, resourceCaptor.getValue().getAuthorities());
+                }
             }
         }
     }
@@ -125,7 +122,7 @@ class DefaultSecuredResourceManagementServiceTest {
 
             @BeforeEach
             void setupRequest() {
-                this.modifyRequest = new SecuredResourceModifyRequest(RAW_MODIFY_RESOURCE_URI, "PUT");
+                this.modifyRequest = new SecuredResourceModifyRequest(RAW_MODIFY_RESOURCE_URI, "PUT", null, null);
             }
 
             @Test
@@ -140,26 +137,83 @@ class DefaultSecuredResourceManagementServiceTest {
         @Nested
         @DisplayName("수정할 리소스가 저장소에 등록되어 있을시")
         class WhenModifyResourceIsRegisteredInRepository extends SecuredResourceFoundSetup {
-            private SecuredResourceValidationPolicy policy;
-            private SecuredResourceModifyRequest modifyRequest;
 
-            @BeforeEach
-            void setupRequest() {
-                this.policy = mockResourceValidationPolicy().build();
-                this.modifyRequest = new SecuredResourceModifyRequest(RAW_MODIFY_RESOURCE_URI, "PUT");
+            @Nested
+            @DisplayName("삭제할 접근 권한이 null 일시")
+            class WhenRemoveAuthoritiesIsNull extends SecuredResourceModifySetup {
 
-                this.service.setPolicy(policy);
+                @Override
+                protected SecuredResourceModifyRequest request() {
+                    return new SecuredResourceModifyRequest(RAW_MODIFY_RESOURCE_URI, "PUT", null, null);
+                }
+
+                @Test
+                @DisplayName("보호 자원의 접근 권한을 삭제하지 않아야 한다.")
+                void shouldNotRemoveAuthorityToResource() {
+                    service.modifyResource(RAW_RESOURCE_ID, modifyRequest);
+
+                    verify(securedResource, never()).removeAuthority(any());
+                }
             }
 
-            @Test
-            @DisplayName("리소스의 정보를 변경한 후 유효성을 검사하여 저장소에 등록해야 한다.")
-            void shouldChangeResourceInfoAndSavedRepositoryAfterValidation() {
-                InOrder inOrder = inOrder(securedResource, repository);
+            @Nested
+            @DisplayName("추가할 권한이 null 일시")
+            class WhenAddAuthoritiesIsNull extends SecuredResourceModifySetup {
 
-                service.modifyResource(RAW_RESOURCE_ID, modifyRequest);
-                inOrder.verify(securedResource, times(1)).changeResourceInfo(MODIFY_RESOURCE_URI, ResourceMethod.PUT);
-                inOrder.verify(securedResource, times(1)).validation(policy);
-                inOrder.verify(repository, times(1)).save(securedResource);
+                @Override
+                protected SecuredResourceModifyRequest request() {
+                    return new SecuredResourceModifyRequest(RAW_MODIFY_RESOURCE_URI, "PUT", null, null);
+                }
+
+                @Test
+                @DisplayName("보호 자원의 접근 권한을 추가하지 않아야 한다.")
+                void shouldNotAddAuthorityToResource() {
+                    service.modifyResource(RAW_RESOURCE_ID, modifyRequest);
+
+                    verify(securedResource, never()).addAuthority(any());
+                }
+            }
+
+            @Nested
+            @DisplayName("삭제할 접근 권한이 null 이 아닐시")
+            class WhenRemoveAuthoritiesIsNotNull extends SecuredResourceModifySetup {
+
+                @Override
+                protected SecuredResourceModifyRequest request() {
+                    return new SecuredResourceModifyRequest(RAW_MODIFY_RESOURCE_URI, "PUT", null, RAW_REMOVE_AUTHORITIES);
+                }
+
+                @Test
+                @DisplayName("보호 자원에 요청한 접근 권한을 삭제 후 유효성 검사를 하고 저장소에 저장해야 한다.")
+                void shouldSaveRepositoryAfterRequestingRemoveAuthoritiesToResourceAndValidation() {
+                    InOrder inOrder = inOrder(securedResource, repository);
+
+                    service.modifyResource(RAW_RESOURCE_ID, modifyRequest);
+                    REMOVE_AUTHORITIES.forEach(authority -> inOrder.verify(securedResource, times(1)).removeAuthority(authority));
+                    inOrder.verify(securedResource, times(1)).validation(policy);
+                    inOrder.verify(repository, times(1)).save(securedResource);
+                }
+            }
+
+            @Nested
+            @DisplayName("추가할 접근 권한이 null 이 아닐시")
+            class WhenAddAuthoritiesIsNotNull extends SecuredResourceModifySetup {
+
+                @Override
+                protected SecuredResourceModifyRequest request() {
+                    return new SecuredResourceModifyRequest(RAW_MODIFY_RESOURCE_URI, "PUT", RAW_ADD_AUTHORITIES, RAW_REMOVE_AUTHORITIES);
+                }
+
+                @Test
+                @DisplayName("보호 자원에 요청한 접근 권한을 추가 후 유효성 검사를 하고 저장소에 저장해야 한다.")
+                void shouldSaveRepositoryAfterRequestingAddAuthoritiesToResourceAndValidation() {
+                    InOrder inOrder = inOrder(securedResource, repository);
+
+                    service.modifyResource(RAW_RESOURCE_ID, modifyRequest);
+                    ADD_AUTHORITIES.forEach(authority -> inOrder.verify(securedResource, times(1)).addAuthority(authority));
+                    inOrder.verify(securedResource, times(1)).validation(policy);
+                    inOrder.verify(repository, times(1)).save(securedResource);
+                }
             }
         }
     }
@@ -216,5 +270,92 @@ class DefaultSecuredResourceManagementServiceTest {
             this.repository = mockResourceRepository().registerResource(securedResource).build();
             this.service = new DefaultSecuredResourceManagementService(repository);
         }
+    }
+
+    private static abstract class SecuredResourceRegisterSetup extends SecuredResourceNotFoundSetup {
+
+        protected SecuredResourceRegisterRequest registerRequest;
+        protected ValidationRule<SecuredResource> resourceIdRule;
+        protected ValidationRule<SecuredResource> resourceRule;
+        protected ValidationRule<SecuredResource> methodRule;
+        protected ValidationRule<SecuredResource> authoritiesRule;
+
+        @BeforeEach
+        void setupRequest() {
+            this.registerRequest =  request();
+            this.resourceIdRule = mockResourceValidationRule().configReturnTrue().build();
+            this.resourceRule = mockResourceValidationRule().configReturnTrue().build();
+            this.methodRule = mockResourceValidationRule().configReturnTrue().build();
+            this.authoritiesRule = mockResourceValidationRule().configReturnTrue().build();
+
+            SecuredResourceValidationPolicy policy = mockResourceValidationPolicy().resourceIdRule(resourceIdRule)
+                    .resourceRule(resourceRule).methodRule(methodRule).authoritiesRule(authoritiesRule).build();
+            this.service.setPolicy(policy);
+        }
+
+        @Test
+        @DisplayName("요청 받은 자원의 아이디의 유효성을 검사한 후 저장소에 저장해야 한다.")
+        void shouldSaveRequestingResourceIdAfterValidation() {
+            ArgumentCaptor<SecuredResource> resourceCaptor = ArgumentCaptor.forClass(SecuredResource.class);
+
+            service.registerNewResource(registerRequest);
+            verifySaveAfterValidation(resourceIdRule, resourceCaptor);
+            assertEquals(RESOURCE_ID, resourceCaptor.getValue().getResourceId());
+        }
+
+        @Test
+        @DisplayName("요청 받은 자원 정보의 유효성을 검사한 후 저장소에 저장해야 한다.")
+        void shouldSaveRequestingResourceInfoAfterValidation() {
+            ArgumentCaptor<SecuredResource> resourceCaptor = ArgumentCaptor.forClass(SecuredResource.class);
+
+            service.registerNewResource(registerRequest);
+            verifySaveAfterValidation(resourceRule, resourceCaptor);
+            assertEquals(RESOURCE_URI, resourceCaptor.getValue().getResource());
+        }
+
+        @Test
+        @DisplayName("요청 받은 자원 메소드의 유효성을 검사한 후 저장소에 저장해야 한다.")
+        void shouldSaveRequestingResourceMethodAfterValidation() {
+            ArgumentCaptor<SecuredResource> resourceCaptor = ArgumentCaptor.forClass(SecuredResource.class);
+
+            service.registerNewResource(registerRequest);
+            verifySaveAfterValidation(methodRule, resourceCaptor);
+            assertEquals(ResourceMethod.POST, resourceCaptor.getValue().getMethod());
+        }
+
+        protected void verifySaveAfterValidation(ValidationRule<SecuredResource> rule, ArgumentCaptor<SecuredResource> argumentCaptor) {
+            InOrder inOrder = inOrder(rule, repository);
+            inOrder.verify(rule, times(1)).isValid(argumentCaptor.capture());
+            inOrder.verify(repository, times(1)).save(argumentCaptor.capture());
+            assertEquals(argumentCaptor.getAllValues().get(0), argumentCaptor.getAllValues().get(1));
+        }
+
+        protected abstract SecuredResourceRegisterRequest request();
+    }
+
+    private static abstract class SecuredResourceModifySetup extends SecuredResourceFoundSetup {
+        protected SecuredResourceValidationPolicy policy;
+        protected SecuredResourceModifyRequest modifyRequest;
+
+        @BeforeEach
+        void setupRequest() {
+            this.policy = mockResourceValidationPolicy().build();
+            this.modifyRequest = request();
+
+            this.service.setPolicy(policy);
+        }
+
+        @Test
+        @DisplayName("리소스의 정보를 변경한 후 유효성을 검사하여 저장소에 등록해야 한다.")
+        void shouldChangeResourceInfoAndSavedRepositoryAfterValidation() {
+            InOrder inOrder = inOrder(securedResource, repository);
+
+            service.modifyResource(RAW_RESOURCE_ID, modifyRequest);
+            inOrder.verify(securedResource, times(1)).changeResourceInfo(MODIFY_RESOURCE_URI, ResourceMethod.PUT);
+            inOrder.verify(securedResource, times(1)).validation(policy);
+            inOrder.verify(repository, times(1)).save(securedResource);
+        }
+
+        protected abstract SecuredResourceModifyRequest request();
     }
 }
