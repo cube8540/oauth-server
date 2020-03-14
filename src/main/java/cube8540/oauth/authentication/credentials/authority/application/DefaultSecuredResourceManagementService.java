@@ -1,5 +1,6 @@
 package cube8540.oauth.authentication.credentials.authority.application;
 
+import cube8540.oauth.authentication.credentials.authority.domain.AuthorityCode;
 import cube8540.oauth.authentication.credentials.authority.domain.ResourceMethod;
 import cube8540.oauth.authentication.credentials.authority.domain.SecuredResource;
 import cube8540.oauth.authentication.credentials.authority.domain.SecuredResourceId;
@@ -10,7 +11,9 @@ import cube8540.oauth.authentication.credentials.authority.domain.exception.Reso
 import lombok.Setter;
 
 import java.net.URI;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class DefaultSecuredResourceManagementService implements SecuredResourceManagementService {
@@ -41,6 +44,8 @@ public class DefaultSecuredResourceManagementService implements SecuredResourceM
         }
         SecuredResource resource = new SecuredResource(new SecuredResourceId(registerRequest.getResourceId()),
                 URI.create(registerRequest.getResource()), ResourceMethod.of(registerRequest.getMethod()));
+        Optional.ofNullable(registerRequest.getAuthorities()).orElse(Collections.emptyList())
+                .stream().map(AuthorityCode::new).forEach(resource::addAuthority);
         resource.validation(policy);
         return DefaultSecuredResourceDetails.of(repository.save(resource));
     }
@@ -49,6 +54,10 @@ public class DefaultSecuredResourceManagementService implements SecuredResourceM
     public SecuredResourceDetails modifyResource(String resourceId, SecuredResourceModifyRequest modifyRequest) {
         SecuredResource resource = getResource(resourceId);
         resource.changeResourceInfo(URI.create(modifyRequest.getResource()), ResourceMethod.of(modifyRequest.getMethod()));
+        Optional.ofNullable(modifyRequest.getRemoveAuthorities()).orElse(Collections.emptyList())
+                .stream().map(AuthorityCode::new).forEach(resource::removeAuthority);
+        Optional.ofNullable(modifyRequest.getNewAuthorities()).orElse(Collections.emptyList())
+                .stream().map(AuthorityCode::new).forEach(resource::addAuthority);
         resource.validation(policy);
         return DefaultSecuredResourceDetails.of(repository.save(resource));
     }

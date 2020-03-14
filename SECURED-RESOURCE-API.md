@@ -22,7 +22,8 @@ X-CSRF-TOKEN: 02d40025-cb71-4fef-b49b-93849a668a99
 {
     "resourceId": "RESOURCE-1",
     "resource": "/user/**",
-    "method": "post"
+    "method": "post",
+    "authorities": ["AUTHORITY-1", "AUTHORITY-2", "AUTHORITY-3"]
 }
 ```
 |  파라미터명    | 필수 여부 |  타입   |  설명  |
@@ -30,6 +31,7 @@ X-CSRF-TOKEN: 02d40025-cb71-4fef-b49b-93849a668a99
 | resourceId    | Required  | String | 추가할 보호 자원 아이디                                                    |
 | resource      | Required  | String | 보호 자원 형식으로 URI 패턴으로 입력합니다.                                 |
 | method        | Required  | String | 보호 자원의 HTTP 메소드로 모든 메소드를 보호 하고 싶을땐 'ALL' 을 입력합니다. |
+| authorities   | Optional  | Array | 보호 자원에 접근 가능한 권한 코드                                            |
 
 #### 응답
 ```
@@ -39,7 +41,8 @@ Content-Type: application/json
 {
 	"resourceId": "RESOURCE-1",
 	"resource": "/user/**",
-	"method": "POST"
+	"method": "POST",
+    "authorities": ["AUTHORITY-1", "AUTHORITY-2", "AUTHORITY-3"]
 }
 ```
 |  파라미터명    |  타입   |  설명  |
@@ -47,6 +50,7 @@ Content-Type: application/json
 | resourceId    | String | 추가된 보호 자원 아이디  |
 | resource      | String | 추가된 보호 자원 형식    |
 | method        | String | 추가된 보호 자원의 메소드 |
+| authorities   | Array | 보호 자원에 접근 가능한 권한 코드 |
 
 #### 에러
 |              에러 코드                | 상태 코드 |                                   설명                                      |
@@ -75,17 +79,20 @@ Content-Type: application/json
         {
             "resourceId": "RESOURCE-1",
             "resource": "/user/**/1",
-            "method": "ALL"
+            "method": "ALL",
+            "authorities": ["AUTHORITY-1", "AUTHORITY-2", "AUTHORITY-3"]
         },
         {
             "resourceId": "RESOURCE-2",
             "resource": "/user/**/2",
-            "method": "ALL"
+            "method": "ALL",
+            "authorities": ["AUTHORITY-1", "AUTHORITY-2", "AUTHORITY-3"]
         },
         {
             "resourceId": "RESOURCE-3",
             "resource": "/user/**/3",
-            "method": "ALL"
+            "method": "ALL",
+            "authorities": ["AUTHORITY-1", "AUTHORITY-2", "AUTHORITY-3"]
         }
     ]
 }
@@ -96,27 +103,32 @@ Content-Type: application/json
 | resourceId    | String | 보호 자원 아이디  |
 | resource      | String | 보호 자원 형식    |
 | method        | String | 보호 자원의 메소드 |
+| authorities   | Array | 보호 자원에 접근 가능한 권한 코드 |
 
 ### 보호 자원 수정
 보호 자원의 정보를 변경 합니다.
 
 #### 요청
 ```
-POST HTTP/1.1
+PUT HTTP/1.1
 http://localhost:8080/api/secured-resources/{resourceId=RESOURCE-1}
 
 X-CSRF-TOKEN: 02d40025-cb71-4fef-b49b-93849a668a99
 
 {
     "resource": "/user/**",
-    "method": "post"
+    "method": "post",
+    "newAuthorities": ["AUTHORITY-4", "AUTHORITY-5"],
+    "removeAuthorities": ["AUTHORITY-1", "AUTHORITY-2"]
 }
 ```
-|  파라미터명    | 필수 여부 |  타입   |  설명  |
-| :-----------: | :-------: | :----: | ------------------------------------------------------------------------ |
-| resourceId    | Required  | String | 수정할 보호 자원 아이디                                                    |
-| resource      | Required  | String | 수정할 보호 자원 형식으로 URI 패턴으로 입력합니다.                                 |
-| method        | Required  | String | 수정할 보호 자원의 HTTP 메소드로 모든 메소드를 보호 하고 싶을땐 'ALL' 을 입력합니다. |
+|  파라미터명     | 필수 여부 |  타입   |  설명  |
+| :-------------:  | :-------: | :----: | ------------------------------------------------------------------------ |
+| resourceId      | Required  | String | 수정할 보호 자원 아이디                                                    |
+| resource        | Required  | String | 수정할 보호 자원 형식으로 URI 패턴으로 입력합니다.                                 |
+| method          | Required  | String | 수정할 보호 자원의 HTTP 메소드로 모든 메소드를 보호 하고 싶을땐 'ALL' 을 입력합니다. |
+| newAuthorities  | Optional  | Array | 추가할 보호 자원에 접근 가능한 권한 코드                                            |
+| removeAuthorities | Optional  | Array | 제거할 보호 자원에 접근 가능한 권한 코드                                            |
 
 #### 응답
 ```
@@ -126,7 +138,8 @@ Content-Type: application/json
 {
 	"resourceId": "RESOURCE-1",
 	"resource": "/user/**",
-	"method": "POST"
+	"method": "POST",
+    "authorities": ["AUTHORITY-3", "AUTHORITY-4", "AUTHORITY-5"]
 }
 ```
 |  파라미터명    |  타입   |  설명  |
@@ -134,6 +147,7 @@ Content-Type: application/json
 | resourceId    | String | 수정된 보호 자원 아이디  |
 | resource      | String | 수정된 보호 자원 형식    |
 | method        | String | 수정된 보호 자원의 메소드 |
+| authorities   | Array | 보호 자원에 접근 가능한 권한 코드 |
 
 #### 에러
 |              에러 코드                | 상태 코드 |                                   설명                                      |
@@ -164,7 +178,8 @@ Content-Type: application/json
 {
 	"resourceId": "RESOURCE-1",
 	"resource": "/user/**",
-	"method": "POST"
+	"method": "POST",
+    "authorities": ["AUTHORITY-1", "AUTHORITY-2", "AUTHORITY-3"]
 }
 ```
 |  파라미터명    |  타입   |  설명  |
@@ -172,6 +187,7 @@ Content-Type: application/json
 | resourceId    | String | 삭제된 보호 자원 아이디  |
 | resource      | String | 삭제된 보호 자원 형식    |
 | method        | String | 삭제된 보호 자원의 메소드 |
+| authorities   | Array | 보호 자원에 접근 가능한 권한 코드 |
 
 #### 에러
 |              에러 코드                | 상태 코드 |                                   설명                                      |

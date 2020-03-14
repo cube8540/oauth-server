@@ -10,4 +10,6 @@ public interface SecuredResourceValidationPolicy {
 
     ValidationRule<SecuredResource> methodRule();
 
+    ValidationRule<SecuredResource> authoritiesRule();
+
 }

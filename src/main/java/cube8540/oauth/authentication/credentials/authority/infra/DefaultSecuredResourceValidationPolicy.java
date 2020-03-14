@@ -22,4 +22,9 @@ public class DefaultSecuredResourceValidationPolicy implements SecuredResourceVa
     public ValidationRule<SecuredResource> methodRule() {
         return new SecuredResourceMethodRule();
     }
+
+    @Override
+    public ValidationRule<SecuredResource> authoritiesRule() {
+        return null;
+    }
 }

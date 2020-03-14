@@ -4,9 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.Value;
 
 import java.beans.ConstructorProperties;
+import java.util.List;
 
 @Value
-@RequiredArgsConstructor(onConstructor_ = @ConstructorProperties({"resourceId", "resource", "method"}))
+@RequiredArgsConstructor(onConstructor_ = @ConstructorProperties({"resourceId", "resource", "method", "authorities"}))
 public class SecuredResourceRegisterRequest {
 
     private String resourceId;
@@ -14,5 +15,7 @@ public class SecuredResourceRegisterRequest {
     private String resource;
 
     private String method;
+
+    private List<String> authorities;
 
 }
