@@ -9,12 +9,15 @@ import cube8540.oauth.authentication.credentials.authority.domain.SecuredResourc
 import cube8540.oauth.authentication.credentials.authority.domain.exception.AuthorityNotFoundException;
 import cube8540.oauth.authentication.credentials.authority.domain.exception.AuthorityRegisterException;
 import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Service
 public class DefaultAuthorityManagementService implements AuthorityManagementService {
 
     private final AuthorityRepository repository;
@@ -22,6 +25,7 @@ public class DefaultAuthorityManagementService implements AuthorityManagementSer
     @Setter
     private AuthorityValidationPolicy validationPolicy;
 
+    @Autowired
     public DefaultAuthorityManagementService(AuthorityRepository repository) {
         this.repository = repository;
     }

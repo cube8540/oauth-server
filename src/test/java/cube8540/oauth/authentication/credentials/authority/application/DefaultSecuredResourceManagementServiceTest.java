@@ -290,7 +290,7 @@ class DefaultSecuredResourceManagementServiceTest {
 
             SecuredResourceValidationPolicy policy = mockResourceValidationPolicy().resourceIdRule(resourceIdRule)
                     .resourceRule(resourceRule).methodRule(methodRule).authoritiesRule(authoritiesRule).build();
-            this.service.setPolicy(policy);
+            this.service.setValidationPolicy(policy);
         }
 
         @Test
@@ -342,7 +342,7 @@ class DefaultSecuredResourceManagementServiceTest {
             this.policy = mockResourceValidationPolicy().build();
             this.modifyRequest = request();
 
-            this.service.setPolicy(policy);
+            this.service.setValidationPolicy(policy);
         }
 
         @Test
