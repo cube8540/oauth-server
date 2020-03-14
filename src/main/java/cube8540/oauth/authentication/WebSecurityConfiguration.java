@@ -5,7 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.Order;
-import org.springframework.http.HttpMethod;
+import org.springframework.security.access.AccessDecisionManager;
+import org.springframework.security.access.AccessDecisionVoter;
+import org.springframework.security.access.vote.RoleVoter;
+import org.springframework.security.access.vote.UnanimousBased;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -14,7 +17,12 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.access.intercept.FilterInvocationSecurityMetadataSource;
+import org.springframework.security.web.access.intercept.FilterSecurityInterceptor;
 import org.springframework.web.cors.CorsConfiguration;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Order(2)
 @EnableWebSecurity
@@ -28,6 +36,9 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Setter(onMethod_ = @Autowired)
     private PasswordEncoder passwordEncoder;
+
+    @Setter(onMethod_ = @Autowired)
+    private FilterInvocationSecurityMetadataSource securityMetadataLoadService;
 
     @Setter
     private String loginPage = DEFAULT_LOGIN_PAGE;
@@ -49,14 +60,6 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
-                .antMatchers(HttpMethod.POST,"/api/accounts").permitAll()
-                .antMatchers(HttpMethod.GET, "/api/accounts/attributes/email").permitAll()
-                .antMatchers(HttpMethod.PUT, "/api/accounts/attributes/active").permitAll()
-                .antMatchers(HttpMethod.DELETE, "/api/accounts/attributes/password").permitAll()
-                .antMatchers(HttpMethod.POST, "/api/accounts/attributes/password").permitAll()
-                .antMatchers(HttpMethod.PUT, "/api/accounts/credentials/**").permitAll()
-                .and()
-            .authorizeRequests()
                 .anyRequest().authenticated()
                 .and()
             .formLogin()
@@ -64,11 +67,35 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .loginProcessingUrl(loginProcessUrl)
                 .permitAll()
                 .and()
-            .cors().configurationSource(request -> new CorsConfiguration().applyPermitDefaultValues());
+            .cors().configurationSource(request -> new CorsConfiguration().applyPermitDefaultValues())
+                .and()
+            .addFilterAfter(filterSecurityInterceptor(), FilterSecurityInterceptor.class);
     }
 
     @Override
     public void configure(WebSecurity web) throws Exception {
         web.ignoring().antMatchers("/css/**", "/img/**", "/js/**");
+    }
+
+    @Bean
+    public FilterSecurityInterceptor filterSecurityInterceptor() throws Exception {
+        FilterSecurityInterceptor filterSecurityInterceptor = new FilterSecurityInterceptor();
+
+        filterSecurityInterceptor.setAuthenticationManager(authenticationManagerBean());
+        filterSecurityInterceptor.setSecurityMetadataSource(securityMetadataLoadService);
+        filterSecurityInterceptor.setAccessDecisionManager(accessDecisionManager());
+
+        return filterSecurityInterceptor;
+    }
+
+    private AccessDecisionManager accessDecisionManager() {
+        List<AccessDecisionVoter<?>> accessDecisionVoters = new ArrayList<>();
+
+        RoleVoter roleVoter = new RoleVoter();
+        roleVoter.setRolePrefix("");
+
+        accessDecisionVoters.add(roleVoter);
+
+        return new UnanimousBased(accessDecisionVoters);
     }
 }

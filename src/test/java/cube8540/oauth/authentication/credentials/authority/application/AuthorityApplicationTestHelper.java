@@ -126,13 +126,33 @@ class AuthorityApplicationTestHelper {
             return this;
         }
 
+        MockSecuredResource resourceId(String resourceId) {
+            when(resource.getResourceId()).thenReturn(new SecuredResourceId(resourceId));
+            return this;
+        }
+
         MockSecuredResource resource() {
             when(resource.getResource()).thenReturn(RESOURCE_URI);
             return this;
         }
 
+        MockSecuredResource resource(URI resource) {
+            when(this.resource.getResource()).thenReturn(resource);
+            return this;
+        }
+
         MockSecuredResource method() {
             when(resource.getMethod()).thenReturn(ResourceMethod.ALL);
+            return this;
+        }
+
+        MockSecuredResource method(ResourceMethod method) {
+            when(resource.getMethod()).thenReturn(method);
+            return this;
+        }
+
+        MockSecuredResource authorities(Set<AuthorityCode> authorities) {
+            when(resource.getAuthorities()).thenReturn(authorities);
             return this;
         }
 
