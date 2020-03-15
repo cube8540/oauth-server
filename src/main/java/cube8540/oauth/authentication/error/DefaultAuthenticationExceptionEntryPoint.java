@@ -1,10 +1,7 @@
-package cube8540.oauth.authentication.credentials.oauth.error;
+package cube8540.oauth.authentication.error;
 
-import cube8540.oauth.authentication.error.ExceptionResponseRenderer;
-import cube8540.oauth.authentication.error.ExceptionTranslator;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.web.context.request.ServletWebRequest;
 
@@ -13,12 +10,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-public class OAuth2AuthenticationExceptionEntryPoint implements AuthenticationEntryPoint {
+public class DefaultAuthenticationExceptionEntryPoint<T> implements AuthenticationEntryPoint {
 
-    private final ExceptionTranslator<OAuth2Error> translator;
-    private final ExceptionResponseRenderer<OAuth2Error> responseRenderer;
+    private final ExceptionTranslator<T> translator;
+    private final ExceptionResponseRenderer<T> responseRenderer;
 
-    public OAuth2AuthenticationExceptionEntryPoint(ExceptionTranslator<OAuth2Error> translator, ExceptionResponseRenderer<OAuth2Error> responseRenderer) {
+    public DefaultAuthenticationExceptionEntryPoint(ExceptionTranslator<T> translator, ExceptionResponseRenderer<T> responseRenderer) {
         this.translator = translator;
         this.responseRenderer = responseRenderer;
     }
@@ -27,7 +24,7 @@ public class OAuth2AuthenticationExceptionEntryPoint implements AuthenticationEn
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException)
             throws IOException, ServletException {
         try {
-            ResponseEntity<OAuth2Error> responseEntity = translator.translate(authException);
+            ResponseEntity<T> responseEntity = translator.translate(authException);
             responseRenderer.rendering(responseEntity, new ServletWebRequest(request, response));
             response.flushBuffer();
         } catch(ServletException | IOException e) {

@@ -2,10 +2,10 @@ package cube8540.oauth.authentication.credentials.oauth.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionResponseRenderer;
-import cube8540.oauth.authentication.credentials.oauth.error.OAuth2AuthenticationExceptionEntryPoint;
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTranslator;
 import cube8540.oauth.authentication.credentials.oauth.security.provider.ClientCredentialsAuthenticationProvider;
 import cube8540.oauth.authentication.credentials.oauth.security.provider.ClientCredentialsEndpointFilter;
+import cube8540.oauth.authentication.error.DefaultAuthenticationExceptionEntryPoint;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -20,6 +20,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.context.NullSecurityContextRepository;
 import org.springframework.web.cors.CorsConfiguration;
@@ -43,13 +44,12 @@ public class OAuth2EndpointSecurityConfiguration extends WebSecurityConfigurerAd
     private ObjectMapper objectMapper;
 
     @Setter
-    private OAuth2AuthenticationExceptionEntryPoint oAuth2AuthenticationExceptionEntryPoint;
+    private AuthenticationEntryPoint entryPoint;
 
     @PostConstruct
     public void initialize() throws Exception {
-        this.oAuth2AuthenticationExceptionEntryPoint =
-                new OAuth2AuthenticationExceptionEntryPoint(new OAuth2ExceptionTranslator(),
-                        new OAuth2ExceptionResponseRenderer(new MappingJackson2HttpMessageConverter(objectMapper)));
+        this.entryPoint = new DefaultAuthenticationExceptionEntryPoint<>(new OAuth2ExceptionTranslator(),
+                new OAuth2ExceptionResponseRenderer(new MappingJackson2HttpMessageConverter(objectMapper)));
     }
 
     @Override
@@ -86,7 +86,7 @@ public class OAuth2EndpointSecurityConfiguration extends WebSecurityConfigurerAd
     @Bean
     public ClientCredentialsEndpointFilter tokenEndpointClientCredentialsFilter() throws Exception {
         ClientCredentialsEndpointFilter filter = new ClientCredentialsEndpointFilter("/oauth/**");
-        filter.setEntryPoint(oAuth2AuthenticationExceptionEntryPoint);
+        filter.setEntryPoint(entryPoint);
         filter.setAuthenticationManager(authenticationManagerBean());
         return filter;
     }
