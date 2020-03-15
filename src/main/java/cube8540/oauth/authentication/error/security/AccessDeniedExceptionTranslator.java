@@ -8,6 +8,6 @@ import org.springframework.http.ResponseEntity;
 public class AccessDeniedExceptionTranslator implements ExceptionTranslator<ErrorMessage<Object>> {
     @Override
     public ResponseEntity<ErrorMessage<Object>> translate(Exception exception) {
-        return new ResponseEntity<>(ACCESS_DENIED_ERROR, HttpStatus.FORBIDDEN);
+        return new ResponseEntity<>(ErrorMessage.ACCESS_DENIED_ERROR, HttpStatus.FORBIDDEN);
     }
 }

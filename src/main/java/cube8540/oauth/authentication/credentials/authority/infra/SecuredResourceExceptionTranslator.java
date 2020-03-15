@@ -3,8 +3,8 @@ package cube8540.oauth.authentication.credentials.authority.infra;
 import cube8540.oauth.authentication.credentials.authority.domain.exception.ResourceInvalidException;
 import cube8540.oauth.authentication.credentials.authority.domain.exception.ResourceNotFoundException;
 import cube8540.oauth.authentication.credentials.authority.domain.exception.ResourceRegisterException;
-import cube8540.oauth.authentication.error.message.ErrorMessage;
 import cube8540.oauth.authentication.error.ExceptionTranslator;
+import cube8540.oauth.authentication.error.message.ErrorMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +24,7 @@ public class SecuredResourceExceptionTranslator implements ExceptionTranslator<E
             return new ResponseEntity<>(ErrorMessage.instance(e.getCode(), e.getErrors().toArray()), HttpStatus.BAD_REQUEST);
         } else {
             log.error("Handle exception {}, {}", exception.getClass(), exception.getMessage());
-            return response(HttpStatus.INTERNAL_SERVER_ERROR, UNKNOWN_SERVER_ERROR);
+            return response(HttpStatus.INTERNAL_SERVER_ERROR, ErrorMessage.UNKNOWN_SERVER_ERROR);
         }
     }
 }

@@ -3,8 +3,8 @@ package cube8540.oauth.authentication.credentials.authority.infra;
 import cube8540.oauth.authentication.credentials.authority.domain.exception.AuthorityInvalidException;
 import cube8540.oauth.authentication.credentials.authority.domain.exception.AuthorityNotFoundException;
 import cube8540.oauth.authentication.credentials.authority.domain.exception.AuthorityRegisterException;
-import cube8540.oauth.authentication.error.message.ErrorMessage;
 import cube8540.oauth.authentication.error.ExceptionTranslator;
+import cube8540.oauth.authentication.error.message.ErrorMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +25,7 @@ public class AuthorityExceptionTranslator implements ExceptionTranslator<ErrorMe
             return response(HttpStatus.BAD_REQUEST, ErrorMessage.instance(e.getCode(), e.getDescription()));
         } else {
             log.error("Handle exception {}, {}", exception.getClass(), exception.getMessage());
-            return response(HttpStatus.INTERNAL_SERVER_ERROR, UNKNOWN_SERVER_ERROR);
+            return response(HttpStatus.INTERNAL_SERVER_ERROR, ErrorMessage.UNKNOWN_SERVER_ERROR);
         }
     }
 }

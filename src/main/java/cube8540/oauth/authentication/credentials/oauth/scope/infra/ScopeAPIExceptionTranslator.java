@@ -3,8 +3,8 @@ package cube8540.oauth.authentication.credentials.oauth.scope.infra;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.exception.ScopeInvalidException;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.exception.ScopeNotFoundException;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.exception.ScopeRegisterException;
-import cube8540.oauth.authentication.error.message.ErrorMessage;
 import cube8540.oauth.authentication.error.ExceptionTranslator;
+import cube8540.oauth.authentication.error.message.ErrorMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +25,7 @@ public class ScopeAPIExceptionTranslator implements ExceptionTranslator<ErrorMes
             return response(HttpStatus.NOT_FOUND, ErrorMessage.instance(e.getCode(), e.getDescription()));
         } else {
             log.error("Handle exception {}, {}", exception.getClass(), exception.getMessage());
-            return response(HttpStatus.INTERNAL_SERVER_ERROR, UNKNOWN_SERVER_ERROR);
+            return response(HttpStatus.INTERNAL_SERVER_ERROR, ErrorMessage.UNKNOWN_SERVER_ERROR);
         }
     }
 }
