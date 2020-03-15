@@ -1,4 +1,4 @@
-package cube8540.oauth.authentication.credentials.oauth.error;
+package cube8540.oauth.authentication.error;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.web.context.request.ServletWebRequest;
 
 import javax.servlet.http.HttpServletRequest;
@@ -21,25 +20,26 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @DisplayName("OAuth2 보안 예외 처리 엔트리 클래스 테스트")
-class OAuth2AuthenticationExceptionEntryPointTest {
+class DefaultAuthenticationExceptionEntryPointTest {
 
-    private OAuth2ExceptionTranslator translator;
-    private OAuth2ExceptionResponseRenderer renderer;
+    private ExceptionTranslator<Object> translator;
+    private ExceptionResponseRenderer<Object> renderer;
 
-    private OAuth2AuthenticationExceptionEntryPoint entryPoint;
+    private DefaultAuthenticationExceptionEntryPoint<Object> entryPoint;
 
     @BeforeEach
+    @SuppressWarnings("unchecked")
     void setup() {
-        this.translator = mock(OAuth2ExceptionTranslator.class);
-        this.renderer = mock(OAuth2ExceptionResponseRenderer.class);
+        this.translator = mock(ExceptionTranslator.class);
+        this.renderer = mock(ExceptionResponseRenderer.class);
 
-        this.entryPoint = new OAuth2AuthenticationExceptionEntryPoint(translator, renderer);
+        this.entryPoint = new DefaultAuthenticationExceptionEntryPoint<>(translator, renderer);
     }
 
     @Nested
     @DisplayName("예외 처리")
     class Commences {
-        private ResponseEntity<OAuth2Error> responseEntity;
+        private ResponseEntity<Object> responseEntity;
         private AuthenticationException exception;
         private HttpServletRequest request;
         private HttpServletResponse response;
@@ -56,7 +56,7 @@ class OAuth2AuthenticationExceptionEntryPointTest {
         }
 
         @Test
-        @DisplayName("Renderer을 이용하여 응답 메시지를 작성해야 한다.")
+        @DisplayName("Renderer 을 이용하여 응답 메시지를 작성해야 한다.")
         void shouldUsingRenderer() throws Exception {
             ArgumentCaptor<ServletWebRequest> requestCaptor = ArgumentCaptor.forClass(ServletWebRequest.class);
 

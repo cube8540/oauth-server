@@ -30,8 +30,8 @@ public class OAuth2AccessTokenDetailsSerializer extends StdSerializer<OAuth2Acce
     private void writeAdditionalInformationField(OAuth2AccessTokenDetails value, JsonGenerator gen) throws IOException {
         Map<String, String> additionalInformation = value.getAdditionalInformation();
         if (additionalInformation != null) {
-            for (String key : additionalInformation.keySet()) {
-                gen.writeStringField(key, additionalInformation.get(key));
+            for (Map.Entry<String, String> entry : additionalInformation.entrySet()) {
+                gen.writeStringField(entry.getKey(), entry.getValue());
             }
         }
     }

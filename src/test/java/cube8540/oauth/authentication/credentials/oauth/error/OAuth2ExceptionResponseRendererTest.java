@@ -31,7 +31,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @DisplayName("OAuth2 기본 예외 응답 메시지 클래스 테스트")
-class DefaultOauth2ExceptionResponseRendererTest {
+class OAuth2ExceptionResponseRendererTest {
 
     private HttpServletRequest request0;
     private HttpServletResponse response0;
@@ -63,7 +63,7 @@ class DefaultOauth2ExceptionResponseRendererTest {
             @Test
             @DisplayName("HttpMediaTypeNotSupportedException이 발생해야 한다.")
             void shouldThrowsHttpMediaTypeNotSupportedException() {
-                assertThrows(HttpMediaTypeNotSupportedException.class, () -> new DefaultOauth2ExceptionResponseRenderer(messageConverter));
+                assertThrows(HttpMediaTypeNotSupportedException.class, () -> new OAuth2ExceptionResponseRenderer(messageConverter));
             }
         }
     }
@@ -71,12 +71,12 @@ class DefaultOauth2ExceptionResponseRendererTest {
     @Nested
     @DisplayName("Response 객체에 응답 메시지를 작성")
     class WriteResponseMessage {
-        private DefaultOauth2ExceptionResponseRenderer renderer;
+        private OAuth2ExceptionResponseRenderer renderer;
 
         @BeforeEach
         void setup() throws Exception {
             when(messageConverter.canWrite(any(), any())).thenReturn(true);
-            this.renderer = new DefaultOauth2ExceptionResponseRenderer(messageConverter);
+            this.renderer = new OAuth2ExceptionResponseRenderer(messageConverter);
         }
 
         @Nested

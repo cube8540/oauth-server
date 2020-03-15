@@ -1,13 +1,9 @@
-package cube8540.oauth.authentication.error.message;
+package cube8540.oauth.authentication.error;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import java.io.Serializable;
-
-public interface ExceptionTranslator<T extends Serializable> {
-
-    ErrorMessage<Object> UNKNOWN_SERVER_ERROR = ErrorMessage.instance(ErrorCodes.SERVER_ERROR, "unknown server error");
+public interface ExceptionTranslator<T> {
 
     default <B> ResponseEntity<B> response(HttpStatus status, B body) {
         return new ResponseEntity<>(body, status);

@@ -5,7 +5,7 @@ import cube8540.oauth.authentication.credentials.authority.application.Authority
 import cube8540.oauth.authentication.credentials.authority.application.AuthorityModifyRequest;
 import cube8540.oauth.authentication.credentials.authority.application.AuthorityRegisterRequest;
 import cube8540.oauth.authentication.error.message.ErrorMessage;
-import cube8540.oauth.authentication.error.message.ExceptionTranslator;
+import cube8540.oauth.authentication.error.ExceptionTranslator;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;

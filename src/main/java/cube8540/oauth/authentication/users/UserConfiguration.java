@@ -1,7 +1,7 @@
 package cube8540.oauth.authentication.users;
 
 import cube8540.oauth.authentication.error.message.ErrorMessage;
-import cube8540.oauth.authentication.error.message.ExceptionTranslator;
+import cube8540.oauth.authentication.error.ExceptionTranslator;
 import cube8540.oauth.authentication.users.domain.UserCredentialsKeyGenerator;
 import cube8540.oauth.authentication.users.infra.DefaultUserCredentialsKeyGenerator;
 import cube8540.oauth.authentication.users.infra.UserExceptionTranslator;

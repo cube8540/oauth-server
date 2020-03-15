@@ -1,39 +1,30 @@
-package cube8540.oauth.authentication.credentials.oauth.error;
+package cube8540.oauth.authentication.error.security;
 
 import cube8540.oauth.authentication.error.ExceptionResponseRenderer;
+import cube8540.oauth.authentication.error.message.ErrorMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServletServerHttpResponse;
-import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.context.request.ServletWebRequest;
 
 import java.util.Objects;
 
-public class OAuth2ExceptionResponseRenderer implements ExceptionResponseRenderer<OAuth2Error> {
+public class AccessDeniedExceptionResponseRenderer implements ExceptionResponseRenderer<ErrorMessage<Object>> {
 
     private final HttpMessageConverter<Object> messageConverter;
 
-    private final MediaType supportMediaType;
-
-    public OAuth2ExceptionResponseRenderer(HttpMessageConverter<Object> messageConverter)
-            throws HttpMediaTypeNotSupportedException {
-        this(messageConverter, MediaType.ALL);
-    }
-
-    public OAuth2ExceptionResponseRenderer(HttpMessageConverter<Object> messageConverter, MediaType supportMediaType)
-            throws HttpMediaTypeNotSupportedException {
+    public AccessDeniedExceptionResponseRenderer(HttpMessageConverter<Object> messageConverter) throws HttpMediaTypeNotSupportedException {
         this.messageConverter = messageConverter;
-        this.supportMediaType = supportMediaType;
 
-        if (!messageConverter.canWrite(OAuth2Error.class, supportMediaType)) {
-            throw new HttpMediaTypeNotSupportedException(supportMediaType + " is not supported");
+        if (!messageConverter.canWrite(ErrorMessage.class, MediaType.APPLICATION_JSON)) {
+            throw new HttpMediaTypeNotSupportedException("application/json media type not supported");
         }
     }
 
     @Override
-    public void rendering(ResponseEntity<OAuth2Error> responseEntity, ServletWebRequest webRequest) throws Exception {
+    public void rendering(ResponseEntity<ErrorMessage<Object>> responseEntity, ServletWebRequest webRequest) throws Exception {
         if (responseEntity == null) {
             return;
         }
@@ -42,9 +33,9 @@ public class OAuth2ExceptionResponseRenderer implements ExceptionResponseRendere
             if (!responseEntity.getHeaders().isEmpty()) {
                 outputMessage.getHeaders().putAll(responseEntity.getHeaders());
             }
-            OAuth2Error body = responseEntity.getBody();
+            ErrorMessage<Object> body = responseEntity.getBody();
             if (body != null) {
-                messageConverter.write(body, supportMediaType, outputMessage);
+                messageConverter.write(body, MediaType.APPLICATION_JSON, outputMessage);
             } else {
                 outputMessage.getBody();
             }

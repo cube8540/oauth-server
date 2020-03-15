@@ -74,7 +74,7 @@ public class SecuredResource extends AbstractAggregateRoot<SecuredResource> {
     }
 
     public void removeAuthority(AuthorityCode authority) {
-        Optional.ofNullable(this.authorities).ifPresent(authorities -> authorities.remove(authority));
+        Optional.ofNullable(authorities).ifPresent(auth -> auth.remove(authority));
 
         registerSecuredResourceChangedEvent();
     }
@@ -90,7 +90,6 @@ public class SecuredResource extends AbstractAggregateRoot<SecuredResource> {
     private void registerSecuredResourceChangedEvent() {
         SecuredResourceChangedEvent event = new SecuredResourceChangedEvent(resourceId);
         if (!domainEvents().contains(event)) {
-            // TODO 이벤트를 리스닝하여 스프링 시큐리티의 권한 정보를 리로딩 하기
             registerEvent(event);
         }
     }

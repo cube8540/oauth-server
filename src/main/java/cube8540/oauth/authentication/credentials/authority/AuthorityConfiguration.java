@@ -10,7 +10,7 @@ import cube8540.oauth.authentication.credentials.authority.infra.DefaultAuthorit
 import cube8540.oauth.authentication.credentials.authority.infra.DefaultSecuredResourceValidationPolicy;
 import cube8540.oauth.authentication.credentials.authority.infra.SecuredResourceExceptionTranslator;
 import cube8540.oauth.authentication.error.message.ErrorMessage;
-import cube8540.oauth.authentication.error.message.ExceptionTranslator;
+import cube8540.oauth.authentication.error.ExceptionTranslator;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
