@@ -1,9 +1,8 @@
 package cube8540.oauth.authentication.credentials.oauth.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import cube8540.oauth.authentication.credentials.oauth.error.DefaultOauth2ExceptionResponseRenderer;
-import cube8540.oauth.authentication.credentials.oauth.error.OAuth2AuthenticationExceptionEntryPoint;
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionResponseRenderer;
+import cube8540.oauth.authentication.credentials.oauth.error.OAuth2AuthenticationExceptionEntryPoint;
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTranslator;
 import cube8540.oauth.authentication.credentials.oauth.security.provider.ClientCredentialsAuthenticationProvider;
 import cube8540.oauth.authentication.credentials.oauth.security.provider.ClientCredentialsEndpointFilter;
@@ -48,11 +47,9 @@ public class OAuth2EndpointSecurityConfiguration extends WebSecurityConfigurerAd
 
     @PostConstruct
     public void initialize() throws Exception {
-        MappingJackson2HttpMessageConverter messageConverter = new MappingJackson2HttpMessageConverter(objectMapper);
-        OAuth2ExceptionTranslator translator = new OAuth2ExceptionTranslator();
-        OAuth2ExceptionResponseRenderer renderer = new DefaultOauth2ExceptionResponseRenderer(messageConverter);
-
-        this.oAuth2AuthenticationExceptionEntryPoint = new OAuth2AuthenticationExceptionEntryPoint(translator, renderer);
+        this.oAuth2AuthenticationExceptionEntryPoint =
+                new OAuth2AuthenticationExceptionEntryPoint(new OAuth2ExceptionTranslator(),
+                        new OAuth2ExceptionResponseRenderer(new MappingJackson2HttpMessageConverter(objectMapper)));
     }
 
     @Override

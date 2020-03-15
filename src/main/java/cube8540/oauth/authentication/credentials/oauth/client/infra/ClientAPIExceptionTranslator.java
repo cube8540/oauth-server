@@ -5,7 +5,7 @@ import cube8540.oauth.authentication.credentials.oauth.client.domain.exception.C
 import cube8540.oauth.authentication.credentials.oauth.client.domain.exception.ClientNotFoundException;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.exception.ClientRegisterException;
 import cube8540.oauth.authentication.error.message.ErrorMessage;
-import cube8540.oauth.authentication.error.message.ExceptionTranslator;
+import cube8540.oauth.authentication.error.ExceptionTranslator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

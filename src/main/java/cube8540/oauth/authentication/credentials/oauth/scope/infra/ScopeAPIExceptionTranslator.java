@@ -4,7 +4,7 @@ import cube8540.oauth.authentication.credentials.oauth.scope.domain.exception.Sc
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.exception.ScopeNotFoundException;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.exception.ScopeRegisterException;
 import cube8540.oauth.authentication.error.message.ErrorMessage;
-import cube8540.oauth.authentication.error.message.ExceptionTranslator;
+import cube8540.oauth.authentication.error.ExceptionTranslator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -1,5 +1,7 @@
 package cube8540.oauth.authentication.credentials.oauth.error;
 
+import cube8540.oauth.authentication.error.ExceptionResponseRenderer;
+import cube8540.oauth.authentication.error.ExceptionTranslator;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
@@ -13,10 +15,10 @@ import java.io.IOException;
 
 public class OAuth2AuthenticationExceptionEntryPoint implements AuthenticationEntryPoint {
 
-    private final OAuth2ExceptionTranslator translator;
-    private final OAuth2ExceptionResponseRenderer responseRenderer;
+    private final ExceptionTranslator<OAuth2Error> translator;
+    private final ExceptionResponseRenderer<OAuth2Error> responseRenderer;
 
-    public OAuth2AuthenticationExceptionEntryPoint(OAuth2ExceptionTranslator translator, OAuth2ExceptionResponseRenderer responseRenderer) {
+    public OAuth2AuthenticationExceptionEntryPoint(ExceptionTranslator<OAuth2Error> translator, ExceptionResponseRenderer<OAuth2Error> responseRenderer) {
         this.translator = translator;
         this.responseRenderer = responseRenderer;
     }

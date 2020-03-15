@@ -1,7 +1,7 @@
 package cube8540.oauth.authentication.users.endpoint;
 
 import cube8540.oauth.authentication.error.message.ErrorMessage;
-import cube8540.oauth.authentication.error.message.ExceptionTranslator;
+import cube8540.oauth.authentication.error.ExceptionTranslator;
 import cube8540.oauth.authentication.users.application.UserCredentialsService;
 import cube8540.oauth.authentication.users.application.UserProfile;
 import cube8540.oauth.authentication.users.domain.exception.UserNotFoundException;
