@@ -9,7 +9,7 @@ import java.util.List;
 @Getter
 public class UserInvalidException extends ValidateException {
 
-    private String code;
+    private final String code;
 
     private UserInvalidException(String code, List<ValidationError> errors) {
         super(errors);

@@ -5,8 +5,8 @@ import org.springframework.security.oauth2.core.OAuth2Error;
 
 public abstract class AbstractOAuth2AuthenticationException extends AuthenticationException {
 
-    private OAuth2Error error;
-    private int statusCode;
+    private final OAuth2Error error;
+    private final int statusCode;
 
     public AbstractOAuth2AuthenticationException(int statusCode, OAuth2Error error) {
         super(error.getDescription());

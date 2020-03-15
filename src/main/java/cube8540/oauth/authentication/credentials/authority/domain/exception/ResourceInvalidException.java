@@ -10,7 +10,7 @@ import java.util.List;
 @Getter
 public class ResourceInvalidException extends ValidateException {
 
-    private String code;
+    private final String code;
 
     private ResourceInvalidException(String code, List<ValidationError> errors) {
         super(errors);
