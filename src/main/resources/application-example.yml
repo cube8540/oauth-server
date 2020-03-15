@@ -12,6 +12,8 @@ spring:
     driver-class-name: #your driver class name
     url: #your database url
     sql-script-encoding: UTF-8
+    platform: #your database platform ex) mariadb, mysql, oracle, mssql .....
+    initialization-mode: always
   jpa:
     hibernate:
       ddl-auto: validate

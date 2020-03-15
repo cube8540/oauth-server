@@ -1,0 +1,1 @@
+create table if not exists initialize (initialize_datetime timestamp not null default current_timestamp);
