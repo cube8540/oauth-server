@@ -5,7 +5,7 @@ Spring Boot 2.2.2
 Spring Security 5.2.1  
 
 ## Getting Started
-git 을 이용하여 프로젝트를 Pulling 한다. 그레들 배치 스크립트를 생성한다.
+git 을 이용하여 프로젝트를 Pulling 하고 그레들 배치 스크립트를 생성합니다.
 ```
 $ git clone https://github.com/cube8540/oauth-authentication-server.git
 $ cd oauth-authentication-server
@@ -19,6 +19,23 @@ src/main/resources/application-example.yml의 파일명을 application.yml으로
 src/main/resources/application.yml
 
 spring:
+  mail:
+    default-encoding: UTF-8
+    host: smtp.server.com
+    username: username
+    password: password
+    port: 1111
+    properties:
+      mail:
+        smtp:
+          auth: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+          starttls:
+            enable: true
+    protocol: smtp
+    test-connection: true
   datasource:
     hikari:
       username: testdb
@@ -29,18 +46,37 @@ spring:
       minimum-idle: 1
       maximum-pool-size: 10
       connection-timeout: 5000
-    driver-class-name: org.mariadb.jdbc.Driver
-    url: jdbc:mariadb://localhost:3306/testdb
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:oauth_authorization_server
     sql-script-encoding: UTF-8
+    platform: h2
+    initialization-mode: always
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: validate
     show-sql: true
 ```
+spring.datasource.platform 은 현재 mariadb, mysql, h2 database를 지원하며 서버 실행시 기본 설정을 위한
+[스키마 SQL](./src/main/resources/schema-h2.sql)과 [데이터 SQL](./src/main/resources/data-h2.sql)이 실행됩니다.
+
+spring.mail 은 새 계정을 등록했을시 해당 계정에 인증키가 포함된 이메일을 발송하게 됩니다. 만약 이메일을 발송하고 싶지 않을시
+spring.mail 옵션은 지워주시면 됩니다. 이메일의 템플릿은 아래 HTML 파일을 수정하여 변경 하실 수 있습니다.
+
+[계정 인증키 발송 이메일 템플릿](src/main/resources/templates/email/user-generated-key-mail-template.html)
 
 ## Build and start
-그레들의 bootJar 테스킹을 이용하여 빌드하고 서버를 시작합니다.
+아래의 명령어로 서버를 시작할 수 있습니다.
+```
+$ gradlew bootRun --args='--spring.profiles.active=local'
+```
+혹은 그레들의 bootJar 테스킹을 이용하여 빌드하고 서버를 시작합니다.
 ```
 $ gradle bootJar
-$ java -jar -Dspring.profiles.active=local build/libs/authentication-1.3.2.jar
-``` 
+$ java -jar -Dspring.profiles.active=local build/libs/authentication-<version>.jar
+```
+
+## Default Username/Password
+```
+Username: admin
+Password: admin
+```

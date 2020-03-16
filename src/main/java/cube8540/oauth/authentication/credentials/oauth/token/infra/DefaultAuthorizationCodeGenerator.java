@@ -1,6 +1,5 @@
 package cube8540.oauth.authentication.credentials.oauth.token.infra;
 
-import cube8540.oauth.authentication.credentials.oauth.token.domain.AuthorizationCode;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.AuthorizationCodeGenerator;
 
 import java.security.SecureRandom;
@@ -25,11 +24,11 @@ public class DefaultAuthorizationCodeGenerator implements AuthorizationCodeGener
 
 
     @Override
-    public AuthorizationCode generate() {
+    public String generate() {
         byte[] bytes = new byte[length];
         random.nextBytes(bytes);
 
-        return new AuthorizationCode(getRandomCode(bytes));
+        return getRandomCode(bytes);
     }
 
     private String getRandomCode(byte[] bytes) {

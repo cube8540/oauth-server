@@ -1,6 +1,6 @@
 package cube8540.oauth.authentication.users.application;
 
-import cube8540.oauth.authentication.credentials.authority.application.BasicAuthorityService;
+import cube8540.oauth.authentication.credentials.authority.BasicAuthorityService;
 import cube8540.oauth.authentication.credentials.authority.domain.AuthorityCode;
 import cube8540.oauth.authentication.users.domain.User;
 import cube8540.oauth.authentication.users.domain.UserCredentialsKey;

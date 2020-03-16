@@ -1,8 +1,8 @@
 package cube8540.oauth.authentication.credentials.oauth.client.domain;
 
-import cube8540.oauth.authentication.credentials.oauth.client.error.ClientAuthorizationException;
-import cube8540.oauth.authentication.credentials.oauth.client.error.ClientErrorCodes;
-import cube8540.oauth.authentication.credentials.oauth.client.error.ClientInvalidException;
+import cube8540.oauth.authentication.credentials.oauth.client.domain.exception.ClientAuthorizationException;
+import cube8540.oauth.authentication.credentials.oauth.client.domain.exception.ClientErrorCodes;
+import cube8540.oauth.authentication.credentials.oauth.client.domain.exception.ClientInvalidException;
 import cube8540.validator.core.ValidationError;
 import cube8540.validator.core.ValidationRule;
 import org.junit.jupiter.api.Assertions;

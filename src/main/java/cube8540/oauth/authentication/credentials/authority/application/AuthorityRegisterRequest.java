@@ -4,9 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.Value;
 
 import java.beans.ConstructorProperties;
+import java.util.List;
 
 @Value
-@RequiredArgsConstructor(onConstructor_ = @ConstructorProperties({"code", "description", "basic"}))
+@RequiredArgsConstructor(onConstructor_ = @ConstructorProperties({"code", "description", "basic", "accessibleResources"}))
 public class AuthorityRegisterRequest {
 
     private String code;
@@ -14,5 +15,7 @@ public class AuthorityRegisterRequest {
     private String description;
 
     private boolean basic;
+
+    private List<String> accessibleResources;
 
 }

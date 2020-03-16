@@ -1,6 +1,6 @@
 package cube8540.oauth.authentication.credentials.oauth.token.application;
 
-import cube8540.oauth.authentication.credentials.oauth.token.OAuth2RefreshTokenDetails;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2RefreshTokenDetails;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedRefreshToken;
 import lombok.Builder;
 import lombok.Value;

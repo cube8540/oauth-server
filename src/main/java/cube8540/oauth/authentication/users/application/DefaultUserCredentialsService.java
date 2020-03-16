@@ -1,12 +1,12 @@
 package cube8540.oauth.authentication.users.application;
 
-import cube8540.oauth.authentication.credentials.authority.application.BasicAuthorityService;
+import cube8540.oauth.authentication.credentials.authority.BasicAuthorityService;
 import cube8540.oauth.authentication.credentials.authority.domain.AuthorityCode;
 import cube8540.oauth.authentication.users.domain.User;
 import cube8540.oauth.authentication.users.domain.UserCredentialsKeyGenerator;
 import cube8540.oauth.authentication.users.domain.UserEmail;
 import cube8540.oauth.authentication.users.domain.UserRepository;
-import cube8540.oauth.authentication.users.error.UserNotFoundException;
+import cube8540.oauth.authentication.users.domain.exception.UserNotFoundException;
 import cube8540.oauth.authentication.users.infra.DefaultUserCredentialsKeyGenerator;
 import lombok.Setter;
 import org.springframework.stereotype.Service;

@@ -1,13 +1,14 @@
 package cube8540.oauth.authentication.credentials.authority.endpoint;
 
+import cube8540.oauth.authentication.credentials.authority.AuthorityDetails;
 import cube8540.oauth.authentication.credentials.authority.application.AuthorityManagementService;
 import cube8540.oauth.authentication.credentials.authority.application.AuthorityModifyRequest;
 import cube8540.oauth.authentication.credentials.authority.application.AuthorityRegisterRequest;
-import cube8540.oauth.authentication.credentials.authority.AuthorityDetails;
-import cube8540.oauth.authentication.credentials.authority.error.AuthorityExceptionTranslator;
 import cube8540.oauth.authentication.error.message.ErrorMessage;
+import cube8540.oauth.authentication.error.ExceptionTranslator;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -28,8 +29,8 @@ public class AuthorityManagementAPIEndpoint {
 
     private final AuthorityManagementService service;
 
-    @Setter
-    private AuthorityExceptionTranslator translator = new AuthorityExceptionTranslator();
+    @Setter(onMethod_ = {@Autowired, @Qualifier("authorityExceptionTranslator")})
+    private ExceptionTranslator<ErrorMessage<Object>> translator;
 
     @Autowired
     public AuthorityManagementAPIEndpoint(AuthorityManagementService service) {
@@ -71,7 +72,7 @@ public class AuthorityManagementAPIEndpoint {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorMessage<?>> handle(Exception e) {
+    public ResponseEntity<ErrorMessage<Object>> handle(Exception e) {
         return translator.translate(e);
     }
 }

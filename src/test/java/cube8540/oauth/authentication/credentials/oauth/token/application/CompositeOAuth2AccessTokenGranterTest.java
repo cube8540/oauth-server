@@ -1,9 +1,10 @@
 package cube8540.oauth.authentication.credentials.oauth.token.application;
 
-import cube8540.oauth.authentication.credentials.oauth.OAuth2TokenRequest;
-import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AccessTokenGranter;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2TokenRequest;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidGrantException;
-import cube8540.oauth.authentication.credentials.oauth.token.OAuth2AccessTokenDetails;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AccessTokenDetails;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -66,23 +67,23 @@ class CompositeOAuth2AccessTokenGranterTest {
         class WhenSupportedGrantType {
             private OAuth2ClientDetails clientDetails;
             private OAuth2TokenRequest tokenRequest;
-            private OAuth2AccessTokenGrantService codeTokenGranter;
+            private OAuth2AccessTokenGranter codeTokenGranter;
             private OAuth2AccessTokenDetails token;
 
             @BeforeEach
             void setup() {
                 this.clientDetails = mock(OAuth2ClientDetails.class);
                 this.tokenRequest = mock(OAuth2TokenRequest.class);
-                this.codeTokenGranter = mock(OAuth2AccessTokenGrantService.class);
+                this.codeTokenGranter = mock(OAuth2AccessTokenGranter.class);
                 this.token = mock(OAuth2AccessTokenDetails.class);
 
                 when(this.tokenRequest.getGrantType()).thenReturn(AuthorizationGrantType.AUTHORIZATION_CODE);
                 when(this.codeTokenGranter.grant(clientDetails, tokenRequest)).thenReturn(token);
 
                 accessTokenGranter.putTokenGranterMap(AuthorizationGrantType.AUTHORIZATION_CODE, codeTokenGranter);
-                accessTokenGranter.putTokenGranterMap(AuthorizationGrantType.CLIENT_CREDENTIALS, mock(OAuth2AccessTokenGrantService.class));
-                accessTokenGranter.putTokenGranterMap(AuthorizationGrantType.REFRESH_TOKEN, mock(OAuth2AccessTokenGrantService.class));
-                accessTokenGranter.putTokenGranterMap(AuthorizationGrantType.PASSWORD, mock(OAuth2AccessTokenGrantService.class));
+                accessTokenGranter.putTokenGranterMap(AuthorizationGrantType.CLIENT_CREDENTIALS, mock(OAuth2AccessTokenGranter.class));
+                accessTokenGranter.putTokenGranterMap(AuthorizationGrantType.REFRESH_TOKEN, mock(OAuth2AccessTokenGranter.class));
+                accessTokenGranter.putTokenGranterMap(AuthorizationGrantType.PASSWORD, mock(OAuth2AccessTokenGranter.class));
             }
 
             @Test

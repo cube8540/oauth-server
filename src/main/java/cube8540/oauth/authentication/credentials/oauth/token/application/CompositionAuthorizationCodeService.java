@@ -1,7 +1,8 @@
 package cube8540.oauth.authentication.credentials.oauth.token.application;
 
-import cube8540.oauth.authentication.credentials.oauth.AuthorizationRequest;
-import cube8540.oauth.authentication.credentials.oauth.token.domain.AuthorizationCode;
+import cube8540.oauth.authentication.credentials.oauth.security.AuthorizationRequest;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AuthorizationCodeGenerator;
+import cube8540.oauth.authentication.credentials.oauth.security.AuthorizationCode;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.AuthorizationCodeGenerator;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.AuthorizationCodeRepository;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizationCode;
@@ -27,7 +28,7 @@ public class CompositionAuthorizationCodeService implements OAuth2AuthorizationC
     }
 
     @Override
-    public Optional<OAuth2AuthorizationCode> consume(AuthorizationCode code) {
+    public Optional<OAuth2AuthorizationCode> consume(String code) {
         Optional<OAuth2AuthorizationCode> authorizationCode = codeRepository.findById(code);
         authorizationCode.ifPresent(codeRepository::delete);
 
@@ -42,6 +43,6 @@ public class CompositionAuthorizationCodeService implements OAuth2AuthorizationC
         authorizationCode.setAuthorizationRequest(request);
         codeRepository.save(authorizationCode);
 
-        return authorizationCode.getCode();
+        return new AuthorizationCode(authorizationCode.getCode());
     }
 }

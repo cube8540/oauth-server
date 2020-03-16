@@ -1,13 +1,13 @@
 package cube8540.oauth.authentication.credentials.oauth.token.domain;
 
-import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
 import cube8540.oauth.authentication.AuthenticationApplication;
-import cube8540.oauth.authentication.credentials.oauth.AuthorizationRequest;
+import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
 import cube8540.oauth.authentication.credentials.oauth.converter.RedirectUriConverter;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidClientException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidGrantException;
 import cube8540.oauth.authentication.credentials.oauth.error.RedirectMismatchException;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
+import cube8540.oauth.authentication.credentials.oauth.security.AuthorizationRequest;
 import cube8540.oauth.authentication.users.domain.UserEmail;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -24,8 +24,8 @@ import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.ElementCollection;
 import javax.persistence.Embedded;
-import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
+import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -48,9 +48,9 @@ public class OAuth2AuthorizationCode extends AbstractAggregateRoot<OAuth2Authori
     @Setter(AccessLevel.PROTECTED)
     private static Clock clock = AuthenticationApplication.DEFAULT_CLOCK;
 
-    @EmbeddedId
-    @AttributeOverride(name = "value", column = @Column(name = "authorization_code", length = 6))
-    private AuthorizationCode code;
+    @Id
+    @Column(name = "authorization_code", length = 6)
+    private String code;
 
     @Column(name = "expiration_at", nullable = false)
     private LocalDateTime expirationDateTime;

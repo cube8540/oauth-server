@@ -4,9 +4,9 @@ import cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2
 import cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientManagementService;
 import cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientModifyRequest;
 import cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientRegisterRequest;
-import cube8540.oauth.authentication.credentials.oauth.client.OAuth2ClientDetails;
-import cube8540.oauth.authentication.credentials.oauth.client.error.ClientExceptionTranslator;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetails;
 import cube8540.oauth.authentication.error.message.ErrorMessage;
+import cube8540.oauth.authentication.error.ExceptionTranslator;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -34,8 +34,8 @@ public class ClientManagementAPIEndpoint {
 
     private final OAuth2ClientManagementService service;
 
-    @Setter
-    private ClientExceptionTranslator translator = new ClientExceptionTranslator();
+    @Setter(onMethod_ = {@Autowired, @Qualifier("clientExceptionTranslator")})
+    private ExceptionTranslator<ErrorMessage<Object>> translator;
 
     @Setter
     private int clientPageSize;
@@ -80,7 +80,7 @@ public class ClientManagementAPIEndpoint {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorMessage<?>> handle(Exception e) {
+    public ResponseEntity<ErrorMessage<Object>> handle(Exception e) {
         return translator.translate(e);
     }
 }

@@ -1,9 +1,12 @@
 package cube8540.oauth.authentication.credentials.oauth.scope;
 
+import cube8540.oauth.authentication.credentials.authority.AuthorityDetailsService;
 import cube8540.oauth.authentication.credentials.oauth.scope.application.DefaultScopeDetailsService;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeRepository;
 import cube8540.oauth.authentication.credentials.oauth.scope.infra.DefaultOAuth2ScopeValidationPolicy;
-import cube8540.oauth.authentication.credentials.authority.AuthorityDetailsService;
+import cube8540.oauth.authentication.credentials.oauth.scope.infra.ScopeAPIExceptionTranslator;
+import cube8540.oauth.authentication.error.message.ErrorMessage;
+import cube8540.oauth.authentication.error.ExceptionTranslator;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -27,6 +30,11 @@ public class OAuth2ScopeConfigure {
 
         service.setValidationPolicy(policy);
         return service;
+    }
+
+    @Bean
+    public ExceptionTranslator<ErrorMessage<Object>> scopeExceptionTranslator() {
+        return new ScopeAPIExceptionTranslator();
     }
 
 }

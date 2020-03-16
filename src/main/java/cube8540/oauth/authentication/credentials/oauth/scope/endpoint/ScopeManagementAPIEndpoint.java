@@ -1,14 +1,15 @@
 package cube8540.oauth.authentication.credentials.oauth.scope.endpoint;
 
+import cube8540.oauth.authentication.credentials.oauth.scope.application.OAuth2AccessibleScopeDetailsService;
 import cube8540.oauth.authentication.credentials.oauth.scope.application.OAuth2ScopeManagementService;
 import cube8540.oauth.authentication.credentials.oauth.scope.application.OAuth2ScopeModifyRequest;
 import cube8540.oauth.authentication.credentials.oauth.scope.application.OAuth2ScopeRegisterRequest;
-import cube8540.oauth.authentication.credentials.oauth.scope.OAuth2AccessibleScopeDetailsService;
-import cube8540.oauth.authentication.credentials.oauth.scope.OAuth2ScopeDetails;
-import cube8540.oauth.authentication.credentials.oauth.scope.error.ScopeExceptionTranslator;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ScopeDetails;
 import cube8540.oauth.authentication.error.message.ErrorMessage;
+import cube8540.oauth.authentication.error.ExceptionTranslator;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -32,8 +33,8 @@ public class ScopeManagementAPIEndpoint {
     private final OAuth2ScopeManagementService managementService;
     private final OAuth2AccessibleScopeDetailsService accessibleScopeDetailsService;
 
-    @Setter
-    private ScopeExceptionTranslator translator = new ScopeExceptionTranslator();
+    @Setter(onMethod_ = {@Autowired, @Qualifier("scopeExceptionTranslator")})
+    private ExceptionTranslator<ErrorMessage<Object>> translator;
 
     @Autowired
     public ScopeManagementAPIEndpoint(OAuth2ScopeManagementService managementService, OAuth2AccessibleScopeDetailsService accessibleScopeDetailsService) {
@@ -71,7 +72,7 @@ public class ScopeManagementAPIEndpoint {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorMessage<?>> handle(Exception e) {
+    public ResponseEntity<ErrorMessage<Object>> handle(Exception e) {
         return translator.translate(e);
     }
 }

@@ -2,10 +2,11 @@ package cube8540.oauth.authentication.credentials.authority.application;
 
 import cube8540.oauth.authentication.credentials.authority.domain.Authority;
 import cube8540.oauth.authentication.credentials.authority.domain.AuthorityRepository;
-import cube8540.oauth.authentication.credentials.authority.error.AuthorityNotFoundException;
-import cube8540.oauth.authentication.credentials.authority.error.AuthorityRegisterException;
+import cube8540.oauth.authentication.credentials.authority.domain.AuthorityValidationPolicy;
+import cube8540.oauth.authentication.credentials.authority.domain.exception.AuthorityNotFoundException;
+import cube8540.oauth.authentication.credentials.authority.domain.exception.AuthorityRegisterException;
 import cube8540.oauth.authentication.error.message.ErrorCodes;
-import org.junit.jupiter.api.Assertions;
+import cube8540.validator.core.ValidationRule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -13,10 +14,24 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 
+import static cube8540.oauth.authentication.credentials.authority.application.AuthorityApplicationTestHelper.ACCESSIBLE_RESOURCES;
+import static cube8540.oauth.authentication.credentials.authority.application.AuthorityApplicationTestHelper.ADDED_ACCESSIBLE_RESOURCES;
+import static cube8540.oauth.authentication.credentials.authority.application.AuthorityApplicationTestHelper.CODE;
+import static cube8540.oauth.authentication.credentials.authority.application.AuthorityApplicationTestHelper.DESCRIPTION;
+import static cube8540.oauth.authentication.credentials.authority.application.AuthorityApplicationTestHelper.MODIFY_DESCRIPTION;
+import static cube8540.oauth.authentication.credentials.authority.application.AuthorityApplicationTestHelper.RAW_ACCESSIBLE_RESOURCES;
+import static cube8540.oauth.authentication.credentials.authority.application.AuthorityApplicationTestHelper.RAW_ADDED_ACCESSIBLE_RESOURCES;
+import static cube8540.oauth.authentication.credentials.authority.application.AuthorityApplicationTestHelper.RAW_CODE;
+import static cube8540.oauth.authentication.credentials.authority.application.AuthorityApplicationTestHelper.RAW_REMOVE_ACCESSIBLE_RESOURCES;
+import static cube8540.oauth.authentication.credentials.authority.application.AuthorityApplicationTestHelper.REMOVE_ACCESSIBLE_RESOURCES;
+import static cube8540.oauth.authentication.credentials.authority.application.AuthorityApplicationTestHelper.mockAuthorityValidationPolicy;
+import static cube8540.oauth.authentication.credentials.authority.application.AuthorityApplicationTestHelper.mockAuthorityValidationRule;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -43,7 +58,7 @@ class DefaultAuthorityManagementServiceTest {
         @Test
         @DisplayName("저장소에서 검색된 권한의 카운터를 반환해야 한다.")
         void shouldReturnsAuthorityCode() {
-            long count = service.countAuthority(AuthorityApplicationTestHelper.RAW_CODE);
+            long count = service.countAuthority(RAW_CODE);
 
             assertEquals(randomCount, count);
         }
@@ -60,7 +75,7 @@ class DefaultAuthorityManagementServiceTest {
             @Test
             @DisplayName("AuthorityNotFoundException 이 발생해야 한다.")
             void shouldThrowsAuthorityNotFoundException() {
-                assertThrows(AuthorityNotFoundException.class, () -> service.getAuthority(AuthorityApplicationTestHelper.RAW_CODE));
+                assertThrows(AuthorityNotFoundException.class, () -> service.getAuthority(RAW_CODE));
             }
         }
     }
@@ -76,7 +91,7 @@ class DefaultAuthorityManagementServiceTest {
 
             @BeforeEach
             void setupRequest() {
-                this.request = new AuthorityRegisterRequest(AuthorityApplicationTestHelper.RAW_CODE, AuthorityApplicationTestHelper.DESCRIPTION, true);
+                this.request = new AuthorityRegisterRequest(RAW_CODE, DESCRIPTION, true, RAW_ACCESSIBLE_RESOURCES);
             }
 
             @Test
@@ -89,7 +104,7 @@ class DefaultAuthorityManagementServiceTest {
             @DisplayName("에러 코드는 ALREADY_EXISTS_ID 이어야 한다.")
             void shouldErrorCodeIsAlreadyExistsId() {
                 AuthorityRegisterException error = assertThrows(AuthorityRegisterException.class, () -> service.registerAuthority(request));
-                Assertions.assertEquals(ErrorCodes.EXISTS_IDENTIFIER, error.getCode());
+                assertEquals(ErrorCodes.EXISTS_IDENTIFIER, error.getCode());
             }
         }
 
@@ -104,7 +119,7 @@ class DefaultAuthorityManagementServiceTest {
 
                 @BeforeEach
                 void setupRequest() {
-                    this.request = new AuthorityRegisterRequest(AuthorityApplicationTestHelper.RAW_CODE, AuthorityApplicationTestHelper.DESCRIPTION, true);
+                    this.request = new AuthorityRegisterRequest(RAW_CODE, DESCRIPTION, true, RAW_ACCESSIBLE_RESOURCES);
                 }
 
                 @Test
@@ -130,7 +145,7 @@ class DefaultAuthorityManagementServiceTest {
 
                 @BeforeEach
                 void setupRequest() {
-                    this.request = new AuthorityRegisterRequest(AuthorityApplicationTestHelper.RAW_CODE, AuthorityApplicationTestHelper.DESCRIPTION, false);
+                    this.request = new AuthorityRegisterRequest(RAW_CODE, DESCRIPTION, false, RAW_ACCESSIBLE_RESOURCES);
                 }
 
                 @Test
@@ -148,6 +163,58 @@ class DefaultAuthorityManagementServiceTest {
                     return request;
                 }
             }
+
+            @Nested
+            @DisplayName("등록할 접근 자원이 null 일시")
+            class WhenAccessibleResourceIsNull extends AuthorityRegisterSetup {
+                private AuthorityRegisterRequest request;
+
+                @BeforeEach
+                void setupRequest() {
+                    this.request = new AuthorityRegisterRequest(RAW_CODE, DESCRIPTION, false, null);
+                }
+
+                @Test
+                @DisplayName("자원에 접근 권한은 추가하지 않아야 한다.")
+                void shouldNotSaveAccessibleResourceToAuthority() {
+                    ArgumentCaptor<Authority> authorityCaptor = ArgumentCaptor.forClass(Authority.class);
+
+                    service.registerAuthority(request);
+                    verify(repository, times(1)).save(authorityCaptor.capture());
+                    assertNull(authorityCaptor.getValue().getAccessibleResources());
+                }
+
+                @Override
+                protected AuthorityRegisterRequest request() {
+                    return request;
+                }
+            }
+
+            @Nested
+            @DisplayName("등록할 접근 자원이 null 이 아닐시")
+            class WhenAccessibleResourceIsNotNull extends AuthorityRegisterSetup {
+                private AuthorityRegisterRequest request;
+
+                @BeforeEach
+                void setupRequest() {
+                    this.request = new AuthorityRegisterRequest(RAW_CODE, DESCRIPTION, false, RAW_ACCESSIBLE_RESOURCES);
+                }
+
+                @Test
+                @DisplayName("요청 받은 접근 자원을 유효성 검사 후 저장소에 저장해야 한다.")
+                void shouldSaveRequestingAccessibleResourcesToRepositoryAfterValidation() {
+                    ArgumentCaptor<Authority> authorityCaptor = ArgumentCaptor.forClass(Authority.class);
+
+                    service.registerAuthority(request());
+                    verifySaveAfterValidation(accessibleResourcesRule, authorityCaptor);
+                    assertEquals(ACCESSIBLE_RESOURCES, authorityCaptor.getValue().getAccessibleResources());
+                }
+
+                @Override
+                protected AuthorityRegisterRequest request() {
+                    return request;
+                }
+            }
         }
     }
 
@@ -162,9 +229,10 @@ class DefaultAuthorityManagementServiceTest {
             @Test
             @DisplayName("AuthorityNotFoundException 이 발생해야 한다.")
             void shouldThrowsAuthorityNotFoundException() {
-                AuthorityModifyRequest request = new AuthorityModifyRequest(AuthorityApplicationTestHelper.MODIFY_DESCRIPTION, false);
+                AuthorityModifyRequest request = new AuthorityModifyRequest(MODIFY_DESCRIPTION, false,
+                        RAW_ADDED_ACCESSIBLE_RESOURCES, RAW_REMOVE_ACCESSIBLE_RESOURCES);
 
-                assertThrows(AuthorityNotFoundException.class, () -> service.modifyAuthority(AuthorityApplicationTestHelper.RAW_CODE, request));
+                assertThrows(AuthorityNotFoundException.class, () -> service.modifyAuthority(RAW_CODE, request));
             }
         }
 
@@ -179,13 +247,13 @@ class DefaultAuthorityManagementServiceTest {
 
                 @BeforeEach
                 void setupRequest() {
-                    this.request = new AuthorityModifyRequest(AuthorityApplicationTestHelper.MODIFY_DESCRIPTION, true);
+                    this.request = new AuthorityModifyRequest(MODIFY_DESCRIPTION, true, null, null);
                 }
 
                 @Test
                 @DisplayName("검색된 권한의 기본 권한 여부를 true 로 변경해야 한다.")
                 void shouldSearchedAuthorityChangedBasicOptionTrue() {
-                    service.modifyAuthority(AuthorityApplicationTestHelper.RAW_CODE, request);
+                    service.modifyAuthority(RAW_CODE, request);
 
                     verify(authority, times(1)).settingBasicAuthority();
                 }
@@ -193,7 +261,7 @@ class DefaultAuthorityManagementServiceTest {
                 @Test
                 @DisplayName("settingNotBasicAuthority API 는 호출하지 않아야 한다.")
                 void shouldNotCallSettingNotBasicAuthority() {
-                    service.modifyAuthority(AuthorityApplicationTestHelper.RAW_CODE, request);
+                    service.modifyAuthority(RAW_CODE, request);
 
                     verify(authority, never()).settingNotBasicAuthority();
                 }
@@ -203,27 +271,27 @@ class DefaultAuthorityManagementServiceTest {
                 void shouldSaveAuthorityAfterModifyAuthorityInformation() {
                     InOrder inOrder = inOrder(repository, authority);
 
-                    service.modifyAuthority(AuthorityApplicationTestHelper.RAW_CODE, request);
-                    inOrder.verify(authority, times(1)).setDescription(AuthorityApplicationTestHelper.MODIFY_DESCRIPTION);
+                    service.modifyAuthority(RAW_CODE, request);
+                    inOrder.verify(authority, times(1)).setDescription(MODIFY_DESCRIPTION);
                     inOrder.verify(authority, times(1)).settingBasicAuthority();
                     inOrder.verify(repository, times(1)).save(authority);
                 }
             }
 
             @Nested
-            @DisplayName("권한 타입을 기본 권한으로 변경하는 요청일시")
+            @DisplayName("권한 타입을 기본 권한으로 변경하는 요청이 아닐시")
             class WhenRequestChangeAuthorityToNotBasicAuthority extends AuthorityFoundSetup {
                 private AuthorityModifyRequest request;
 
                 @BeforeEach
                 void setupRequest() {
-                    this.request = new AuthorityModifyRequest(AuthorityApplicationTestHelper.MODIFY_DESCRIPTION, false);
+                    this.request = new AuthorityModifyRequest(MODIFY_DESCRIPTION, false, null, null);
                 }
 
                 @Test
                 @DisplayName("검색된 권한의 기본 권한 여부를 false 로 변경해야 한다.")
                 void shouldSearchedAuthorityChangedBasicOptionFalse() {
-                    service.modifyAuthority(AuthorityApplicationTestHelper.RAW_CODE, request);
+                    service.modifyAuthority(RAW_CODE, request);
 
                     verify(authority, times(1)).settingNotBasicAuthority();
                 }
@@ -231,7 +299,7 @@ class DefaultAuthorityManagementServiceTest {
                 @Test
                 @DisplayName("settingBasicAuthority API 는 호출하지 않아야 한다.")
                 void shouldNotCallSettingBasicAuthority() {
-                    service.modifyAuthority(AuthorityApplicationTestHelper.RAW_CODE, request);
+                    service.modifyAuthority(RAW_CODE, request);
 
                     verify(authority, never()).settingBasicAuthority();
                 }
@@ -241,11 +309,99 @@ class DefaultAuthorityManagementServiceTest {
                 void shouldSaveAuthorityAfterModifyAuthorityInformation() {
                     InOrder inOrder = inOrder(repository, authority);
 
-                    service.modifyAuthority(AuthorityApplicationTestHelper.RAW_CODE, request);
-                    inOrder.verify(authority, times(1)).setDescription(AuthorityApplicationTestHelper.MODIFY_DESCRIPTION);
+                    service.modifyAuthority(RAW_CODE, request);
+                    inOrder.verify(authority, times(1)).setDescription(MODIFY_DESCRIPTION);
                     inOrder.verify(authority, times(1)).settingNotBasicAuthority();
                     inOrder.verify(repository, times(1)).save(authority);
                 }
+            }
+
+            @Nested
+            @DisplayName("추가할 접근 자원이 null 일시")
+            class WhenAddAccessibleResourceIsNull extends AuthorityFoundSetup {
+                private AuthorityModifyRequest request;
+
+                @BeforeEach
+                void setupRequest() {
+                    this.request = new AuthorityModifyRequest(DESCRIPTION, false, null, RAW_REMOVE_ACCESSIBLE_RESOURCES);
+                }
+
+                @Test
+                @DisplayName("권한의 접근 자원을 추가하지 않아야 한다.")
+                void shouldNotAddAccessibleResourceToAuthority() {
+                    service.modifyAuthority(RAW_CODE, request);
+
+                    verify(authority, never()).addAccessibleResource(any());
+                }
+            }
+
+            @Nested
+            @DisplayName("추가할 접근 자원이 null 이 아닐시")
+            class WhenAddedAccessibleResourceIsNotNull extends AuthorityFoundSetup {
+                private AuthorityModifyRequest request;
+                private AuthorityValidationPolicy policy;
+
+                @BeforeEach
+                void setupRequest() {
+                    this.request = new AuthorityModifyRequest(DESCRIPTION, false, RAW_ADDED_ACCESSIBLE_RESOURCES, RAW_REMOVE_ACCESSIBLE_RESOURCES);
+                    this.policy = mockAuthorityValidationPolicy().build();
+                    this.service.setValidationPolicy(policy);
+                }
+
+                @Test
+                @DisplayName("권한에 요청한 접근 자원을 추가 후 유효성 검사를 하고 저장소에 저장해야 한다.")
+                void shouldSaveRepositoryAfterRequestingAddAccessibleResourceToAuthorityAndValidation() {
+                    InOrder inOrder = inOrder(authority, repository);
+
+                    service.modifyAuthority(RAW_CODE, request);
+                    ADDED_ACCESSIBLE_RESOURCES.forEach(resource -> inOrder.verify(authority, times(1)).addAccessibleResource(resource));
+                    inOrder.verify(authority, times(1)).validation(policy);
+                    inOrder.verify(repository, times(1)).save(authority);
+                }
+            }
+
+            @Nested
+            @DisplayName("삭제할 접근 자원이 null 일시")
+            class WhenRemoveAccessibleResourceIsNull extends AuthorityFoundSetup {
+                private AuthorityModifyRequest request;
+
+                @BeforeEach
+                void setupRequest() {
+                    this.request = new AuthorityModifyRequest(DESCRIPTION, false, RAW_ADDED_ACCESSIBLE_RESOURCES, null);
+                }
+
+                @Test
+                @DisplayName("권한의 접근 자원을 삭제하지 않아야 한다.")
+                void shouldNotRemoveAccessibleResourceToAuthority() {
+                    service.modifyAuthority(RAW_CODE, request);
+
+                    verify(authority, never()).removeAccessibleResource(any());
+                }
+            }
+        }
+
+        @Nested
+        @DisplayName("삭제할 접근 자원이 null 이 아닐시")
+        class WhenRemoveAccessibleResourceIsNotNull extends AuthorityFoundSetup {
+            private AuthorityModifyRequest request;
+            private AuthorityValidationPolicy policy;
+
+            @BeforeEach
+            void setupRequest() {
+                this.request = new AuthorityModifyRequest(DESCRIPTION, false, RAW_ADDED_ACCESSIBLE_RESOURCES, RAW_REMOVE_ACCESSIBLE_RESOURCES);
+                this.policy = mockAuthorityValidationPolicy().build();
+                this.service.setValidationPolicy(policy);
+            }
+
+            @Test
+            @DisplayName("권한에 요청한 접근 자원을 삭제 후 유효성 검사를 하고 저장소에 저장해야 한다.")
+            void shouldSaveRepositoryAfterRequestingRemoveAccessibleResourceToAuthorityAndValidation() {
+                InOrder inOrder = inOrder(authority, repository);
+
+                service.modifyAuthority(RAW_CODE, request);
+                REMOVE_ACCESSIBLE_RESOURCES.forEach(resource -> inOrder.verify(authority, times(1)).removeAccessibleResource(resource));
+                inOrder.verify(authority, times(1)).validation(policy);
+                inOrder.verify(repository, times(1)).save(authority);
             }
         }
     }
@@ -261,7 +417,7 @@ class DefaultAuthorityManagementServiceTest {
             @Test
             @DisplayName("AuthorityNotFoundException 이 발생해야 한다.")
             void shouldAuthorityNotFoundException() {
-                assertThrows(AuthorityNotFoundException.class, () -> service.removeAuthority(AuthorityApplicationTestHelper.RAW_CODE));
+                assertThrows(AuthorityNotFoundException.class, () -> service.removeAuthority(RAW_CODE));
             }
         }
 
@@ -272,7 +428,7 @@ class DefaultAuthorityManagementServiceTest {
             @Test
             @DisplayName("저장소에서 찾은 권한을 삭제해야 한다.")
             void shouldRemoveSearchedAuthority() {
-                service.removeAuthority(AuthorityApplicationTestHelper.RAW_CODE);
+                service.removeAuthority(RAW_CODE);
                 verify(repository, times(1)).delete(authority);
             }
         }
@@ -303,15 +459,25 @@ class DefaultAuthorityManagementServiceTest {
     }
 
     private static abstract class AuthorityRegisterSetup extends AuthorityNotFoundSetup {
+        protected ValidationRule<Authority> codeRule;
+        protected ValidationRule<Authority> accessibleResourcesRule;
+
+        @BeforeEach
+        void setupValidation() {
+            this.codeRule = mockAuthorityValidationRule().configReturnTrue().build();
+            this.accessibleResourcesRule = mockAuthorityValidationRule().configReturnTrue().build();
+
+            this.service.setValidationPolicy(mockAuthorityValidationPolicy().codeRule(codeRule).accessibleResourceRule(accessibleResourcesRule).build());
+        }
 
         @Test
-        @DisplayName("요청 받은 코드를 저장소에 저장해야 한다.")
-        void shouldSaveRequestingCodeToRepository() {
+        @DisplayName("요청 받은 코드를 유효성 검사 후 저장소에 저장해야 한다.")
+        void shouldSaveRequestingCodeToRepositoryAfterValidation() {
             ArgumentCaptor<Authority> authorityCaptor = ArgumentCaptor.forClass(Authority.class);
 
             service.registerAuthority(request());
-            verify(repository, times(1)).save(authorityCaptor.capture());
-            Assertions.assertEquals(AuthorityApplicationTestHelper.CODE, authorityCaptor.getValue().getCode());
+            verifySaveAfterValidation(codeRule, authorityCaptor);
+            assertEquals(CODE, authorityCaptor.getValue().getCode());
         }
 
         @Test
@@ -321,7 +487,14 @@ class DefaultAuthorityManagementServiceTest {
 
             service.registerAuthority(request());
             verify(repository, times(1)).save(authorityCaptor.capture());
-            Assertions.assertEquals(AuthorityApplicationTestHelper.DESCRIPTION, authorityCaptor.getValue().getDescription());
+            assertEquals(DESCRIPTION, authorityCaptor.getValue().getDescription());
+        }
+
+        protected void verifySaveAfterValidation(ValidationRule<Authority> rule, ArgumentCaptor<Authority> argumentCaptor) {
+            InOrder inOrder = inOrder(rule, repository);
+            inOrder.verify(rule, times(1)).isValid(argumentCaptor.capture());
+            inOrder.verify(repository, times(1)).save(argumentCaptor.capture());
+            assertEquals(argumentCaptor.getAllValues().get(0), argumentCaptor.getAllValues().get(1));
         }
 
         protected abstract AuthorityRegisterRequest request();

@@ -1,14 +1,13 @@
 package cube8540.oauth.authentication.credentials.oauth.scope.application;
 
 import cube8540.oauth.authentication.credentials.authority.domain.AuthorityCode;
-import cube8540.oauth.authentication.credentials.oauth.scope.OAuth2AccessibleScopeDetailsService;
-import cube8540.oauth.authentication.credentials.oauth.scope.OAuth2ScopeDetails;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ScopeDetails;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2Scope;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeRepository;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeValidationPolicy;
-import cube8540.oauth.authentication.credentials.oauth.scope.error.ScopeNotFoundException;
-import cube8540.oauth.authentication.credentials.oauth.scope.error.ScopeRegisterException;
+import cube8540.oauth.authentication.credentials.oauth.scope.domain.exception.ScopeNotFoundException;
+import cube8540.oauth.authentication.credentials.oauth.scope.domain.exception.ScopeRegisterException;
 import lombok.Setter;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;

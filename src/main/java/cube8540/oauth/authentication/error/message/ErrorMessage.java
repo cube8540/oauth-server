@@ -7,6 +7,10 @@ import java.io.Serializable;
 @Value
 public class ErrorMessage<T> implements Serializable {
 
+    public static final ErrorMessage<Object> ACCESS_DENIED_ERROR = ErrorMessage.instance(ErrorCodes.ACCESS_DENIED, "access denied");
+
+    public static final ErrorMessage<Object> UNKNOWN_SERVER_ERROR = ErrorMessage.instance(ErrorCodes.SERVER_ERROR, "unknown server error");
+
     private String errorCode;
 
     private T description;

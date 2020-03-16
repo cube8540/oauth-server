@@ -1,13 +1,14 @@
 package cube8540.oauth.authentication.users.endpoint;
 
+import cube8540.oauth.authentication.error.message.ErrorMessage;
+import cube8540.oauth.authentication.error.ExceptionTranslator;
+import cube8540.oauth.authentication.users.application.ChangePasswordRequest;
 import cube8540.oauth.authentication.users.application.ResetPasswordRequest;
 import cube8540.oauth.authentication.users.application.UserPasswordService;
 import cube8540.oauth.authentication.users.application.UserProfile;
-import cube8540.oauth.authentication.error.message.ErrorMessage;
-import cube8540.oauth.authentication.users.application.ChangePasswordRequest;
-import cube8540.oauth.authentication.users.error.UserExceptionTranslator;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -24,8 +25,8 @@ public class UserPasswordAPIEndpoint {
 
     private final UserPasswordService service;
 
-    @Setter
-    private UserExceptionTranslator translator = new UserExceptionTranslator();
+    @Setter(onMethod_ = {@Autowired, @Qualifier("userExceptionTranslator")})
+    private ExceptionTranslator<ErrorMessage<Object>> translator;
 
     @Autowired
     public UserPasswordAPIEndpoint(UserPasswordService service) {
@@ -48,7 +49,7 @@ public class UserPasswordAPIEndpoint {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorMessage<?>> handle(Exception e) {
+    public ResponseEntity<ErrorMessage<Object>> handle(Exception e) {
         return translator.translate(e);
     }
 }
