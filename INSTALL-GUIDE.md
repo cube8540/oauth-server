@@ -46,10 +46,10 @@ spring:
       minimum-idle: 1
       maximum-pool-size: 10
       connection-timeout: 5000
-    driver-class-name: org.mariadb.jdbc.Driver
-    url: jdbc:mariadb://localhost:3306/testdb
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:oauth_authorization_server
     sql-script-encoding: UTF-8
-    platform: mariadb
+    platform: h2
     initialization-mode: always
   jpa:
     hibernate:

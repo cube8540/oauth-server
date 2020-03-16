@@ -141,3 +141,5 @@ create table if not exists user_authority (
 	constraint fk_user_authority_email foreign key (email) references user (email),
 	constraint fk_user_authority_authority foreign key(authority_code) references authority (code)
 );
+
+commit;
