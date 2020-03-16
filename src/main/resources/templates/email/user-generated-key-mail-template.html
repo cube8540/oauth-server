@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="kr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+<div>
+    <p><span th:text="${registeredUser}"></span> 님 가입을 환영합니다. 아래의 인증키를 입력하여 계정을 활성화 해주세요.</p>
+    <br>
+    <br>
+    <p>인증키: <span th:text="${generatedKey}"></span></p>
+</div>
+</body>
+</html>
