@@ -7,8 +7,8 @@ Spring Security 5.2.1
 ## Getting Started
 git 을 이용하여 프로젝트를 Pulling 하고 그레들 배치 스크립트를 생성합니다.
 ```
-$ git clone https://github.com/cube8540/oauth-authentication-server.git
-$ cd oauth-authentication-server
+$ git clone https://github.com/cube8540/oauth-server.git
+$ cd oauth-server
 $ gradle wrapper --gradle-version=<gradle-version>
 ```
 
