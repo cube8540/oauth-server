@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.env.Environment;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.security.access.AccessDecisionManager;
 import org.springframework.security.access.AccessDecisionVoter;
@@ -40,6 +41,9 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     private static final String DEFAULT_LOGIN_PAGE = "/accounts/signin";
     private static final String DEFAULT_LOGIN_PROCESS_URL = "/accounts/signin";
+
+    @Setter(onMethod_ = @Autowired)
+    private Environment environment;
 
     @Setter(onMethod_ = {@Autowired, @Qualifier("defaultUserService")})
     private UserDetailsService userDetailsService;
@@ -80,6 +84,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
             .formLogin()
                 .loginPage(DEFAULT_LOGIN_PAGE)
                 .loginProcessingUrl(DEFAULT_LOGIN_PROCESS_URL)
+                .defaultSuccessUrl(environment.getProperty("front.endpoint.login-success-page"))
                 .permitAll()
                 .and()
             .cors().configurationSource(request -> new CorsConfiguration().applyPermitDefaultValues())
