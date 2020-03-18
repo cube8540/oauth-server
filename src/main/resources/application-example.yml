@@ -35,3 +35,7 @@ spring:
     hibernate:
       ddl-auto: validate
     show-sql: true
+front:
+  endpoint:
+    register-page: #your register page endpoint
+    forgot-password-page: #your forgot password page endpoint
