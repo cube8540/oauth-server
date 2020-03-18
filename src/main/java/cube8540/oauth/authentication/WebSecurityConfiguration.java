@@ -29,6 +29,8 @@ import org.springframework.security.web.access.expression.DefaultWebSecurityExpr
 import org.springframework.security.web.access.expression.WebExpressionVoter;
 import org.springframework.security.web.access.intercept.FilterInvocationSecurityMetadataSource;
 import org.springframework.security.web.access.intercept.FilterSecurityInterceptor;
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 
 import javax.annotation.PostConstruct;
@@ -93,7 +95,9 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
                 .and()
             .addFilterAfter(filterSecurityInterceptor(), FilterSecurityInterceptor.class)
-            .exceptionHandling().authenticationEntryPoint(entryPoint);
+            .exceptionHandling()
+                .defaultAuthenticationEntryPointFor(new LoginUrlAuthenticationEntryPoint(DEFAULT_LOGIN_PAGE), new AntPathRequestMatcher("/oauth/authorize"))
+                .defaultAuthenticationEntryPointFor(entryPoint, new AntPathRequestMatcher("/**"));
     }
 
     @Override
