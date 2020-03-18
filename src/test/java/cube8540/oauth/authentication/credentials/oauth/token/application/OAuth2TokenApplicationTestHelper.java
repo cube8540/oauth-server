@@ -62,6 +62,7 @@ class OAuth2TokenApplicationTestHelper {
 
     static final String RAW_USERNAME = "email@email.com";
     static final UserEmail USERNAME = new UserEmail(RAW_USERNAME);
+    static final String RAW_DIFFERENT_USERNAME = "different@email.com";
     static final String RAW_AUTHENTICATION_USERNAME = "auth@email.com";
     static final UserEmail AUTHENTICATION_USERNAME = new UserEmail(RAW_AUTHENTICATION_USERNAME);
     static final String PASSWORD = "Password1234!@#$";
