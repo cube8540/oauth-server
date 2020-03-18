@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.TOKEN_CREATED_DATETIME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -253,6 +254,14 @@ class ClientCredentialsTokenGranterTest {
             OAuth2AuthorizedAccessToken accessToken = granter.createAccessToken(clientDetails, tokenRequest);
 
             assertEquals(AuthorizationGrantType.CLIENT_CREDENTIALS, accessToken.getTokenGrantType());
+        }
+
+        @Test
+        @DisplayName("토큰 발급 시간이 저장되어 있어야 한다.")
+        void shouldSetTokenIssuedAt() {
+            OAuth2AuthorizedAccessToken accessToken = granter.createAccessToken(clientDetails, tokenRequest);
+
+            assertEquals(TOKEN_CREATED_DATETIME, accessToken.getIssuedAt());
         }
 
         @Test

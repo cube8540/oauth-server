@@ -1,12 +1,12 @@
 package cube8540.oauth.authentication.credentials.oauth.token.application;
 
-import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetails;
-import cube8540.oauth.authentication.credentials.oauth.security.OAuth2TokenRequest;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
-import cube8540.oauth.authentication.credentials.oauth.security.AuthorizationRequest;
-import cube8540.oauth.authentication.credentials.oauth.security.OAuth2RequestValidator;
 import cube8540.oauth.authentication.credentials.oauth.security.AuthorizationCode;
+import cube8540.oauth.authentication.credentials.oauth.security.AuthorizationRequest;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetails;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2RequestValidator;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2TokenRequest;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.AuthorizationCodeGenerator;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.AuthorizationCodeRepository;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenRepository;
@@ -17,6 +17,8 @@ import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2Refres
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2TokenEnhancer;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2TokenId;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2TokenIdGenerator;
+import cube8540.oauth.authentication.credentials.oauth.token.domain.read.Oauth2AccessTokenReadRepository;
+import cube8540.oauth.authentication.credentials.oauth.token.domain.read.model.AccessTokenDetailsWithClient;
 import cube8540.oauth.authentication.users.domain.UserEmail;
 import org.springframework.security.authentication.AccountStatusException;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -33,6 +35,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -59,6 +62,7 @@ class OAuth2TokenApplicationTestHelper {
 
     static final String RAW_USERNAME = "email@email.com";
     static final UserEmail USERNAME = new UserEmail(RAW_USERNAME);
+    static final String RAW_DIFFERENT_USERNAME = "different@email.com";
     static final String RAW_AUTHENTICATION_USERNAME = "auth@email.com";
     static final UserEmail AUTHENTICATION_USERNAME = new UserEmail(RAW_AUTHENTICATION_USERNAME);
     static final String PASSWORD = "Password1234!@#$";
@@ -163,6 +167,10 @@ class OAuth2TokenApplicationTestHelper {
 
     static MockAuthorizationRequest mockAuthorizationRequest() {
         return new MockAuthorizationRequest();
+    }
+
+    static MockOAuth2AccessTokenReadRepository mockOAuth2AccessTokenReadRepository() {
+        return new MockOAuth2AccessTokenReadRepository();
     }
 
     static MockAuthorizationCodeRepository mockAuthorizationCodeRepository() {
@@ -596,6 +604,23 @@ class OAuth2TokenApplicationTestHelper {
 
         UserDetailsService build() {
             return service;
+        }
+    }
+
+    static final class MockOAuth2AccessTokenReadRepository {
+        private Oauth2AccessTokenReadRepository repository;
+
+        private MockOAuth2AccessTokenReadRepository() {
+            this.repository = mock(Oauth2AccessTokenReadRepository.class);
+        }
+
+        MockOAuth2AccessTokenReadRepository readAccessTokenWithClientByUsername(String username, List<AccessTokenDetailsWithClient> tokens) {
+            when(repository.readAccessTokenWithClientByUsername(username)).thenReturn(tokens);
+            return this;
+        }
+
+        Oauth2AccessTokenReadRepository build() {
+            return repository;
         }
     }
 

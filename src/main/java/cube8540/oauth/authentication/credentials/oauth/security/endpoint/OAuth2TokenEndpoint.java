@@ -15,6 +15,7 @@ import cube8540.oauth.authentication.credentials.oauth.security.provider.ClientC
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -43,7 +44,7 @@ public class OAuth2TokenEndpoint {
     private OAuth2ExceptionTranslator exceptionTranslator = new OAuth2ExceptionTranslator();
 
     @Autowired
-    public OAuth2TokenEndpoint(OAuth2AccessTokenGranter tokenGrantService, OAuth2TokenRevoker tokenRevokeService) {
+    public OAuth2TokenEndpoint(OAuth2AccessTokenGranter tokenGrantService, @Qualifier("clientAuthenticationBaseTokenRevoker") OAuth2TokenRevoker tokenRevokeService) {
         this.tokenGrantService = tokenGrantService;
         this.tokenRevokeService = tokenRevokeService;
     }
