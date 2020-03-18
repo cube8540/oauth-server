@@ -41,6 +41,7 @@ create table if not exists oauth2_access_token (
 	expiration datetime(6) not null,
 	grant_type varchar(32) not null,
 	email varchar(128) null,
+	issued_at datetime(6) not null,
 	constraint client_authentication_username unique (client_id, email),
 	constraint fk_access_token_client_id foreign key (client_id) references oauth2_clients (client_id),
 	constraint fk_access_token_username foreign key (email) references user (email)

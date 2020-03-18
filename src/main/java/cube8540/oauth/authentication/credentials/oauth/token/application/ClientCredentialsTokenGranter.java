@@ -10,6 +10,8 @@ import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2TokenI
 import lombok.Setter;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 
+import java.time.LocalDateTime;
+
 public class ClientCredentialsTokenGranter extends AbstractOAuth2TokenGranter {
 
     @Setter
@@ -30,6 +32,7 @@ public class ClientCredentialsTokenGranter extends AbstractOAuth2TokenGranter {
                 .expiration(extractTokenExpiration(clientDetails))
                 .tokenGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
                 .scopes(extractGrantScope(clientDetails, tokenRequest))
+                .issuedAt(LocalDateTime.now(clock))
                 .build();
         if (allowedRefreshToken) {
             accessToken.generateRefreshToken(refreshTokenGenerator(), extractRefreshTokenExpiration(clientDetails));

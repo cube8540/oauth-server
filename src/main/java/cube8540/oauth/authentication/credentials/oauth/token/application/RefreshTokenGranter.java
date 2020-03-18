@@ -13,6 +13,7 @@ import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2Refres
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2TokenId;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2TokenIdGenerator;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -50,6 +51,7 @@ public class RefreshTokenGranter extends AbstractOAuth2TokenGranter {
                 .username(storedAccessToken.getUsername())
                 .scopes(extractGrantScope(storedAccessToken, tokenRequest))
                 .tokenGrantType(storedAccessToken.getTokenGrantType())
+                .issuedAt(LocalDateTime.now(clock))
                 .build();
         accessToken.generateRefreshToken(refreshTokenGenerator(), extractRefreshTokenExpiration(clientDetails));
 

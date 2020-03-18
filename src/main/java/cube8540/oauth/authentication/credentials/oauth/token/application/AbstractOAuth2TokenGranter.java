@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 public abstract class AbstractOAuth2TokenGranter implements OAuth2AccessTokenGranter {
 
     @Setter(AccessLevel.PROTECTED)
-    private static Clock clock = AuthenticationApplication.DEFAULT_CLOCK;
+    protected static Clock clock = AuthenticationApplication.DEFAULT_CLOCK;
 
     @Getter(AccessLevel.PROTECTED)
     private final OAuth2TokenIdGenerator tokenIdGenerator;
