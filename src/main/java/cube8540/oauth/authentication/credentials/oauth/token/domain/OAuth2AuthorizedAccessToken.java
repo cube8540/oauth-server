@@ -1,7 +1,7 @@
 package cube8540.oauth.authentication.credentials.oauth.token.domain;
 
-import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
 import cube8540.oauth.authentication.AuthenticationApplication;
+import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
 import cube8540.oauth.authentication.credentials.oauth.converter.AuthorizationGrantTypeConverter;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import cube8540.oauth.authentication.users.domain.UserEmail;
@@ -100,6 +100,9 @@ public class OAuth2AuthorizedAccessToken extends AbstractAggregateRoot<OAuth2Aut
     @MapKeyColumn(name = "info_key")
     @Column(name = "info_value", length = 128)
     private Map<String, String> additionalInformation;
+
+    @Column(name = "issued_at", nullable = false)
+    private LocalDateTime issuedAt;
 
     public static OAuth2AuthorizedAccessTokenBuilder builder(OAuth2TokenIdGenerator tokenIdGenerator) {
         return new OAuth2AuthorizedAccessTokenBuilder()

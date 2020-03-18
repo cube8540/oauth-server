@@ -356,6 +356,14 @@ class ResourceOwnerPasswordTokenGranterTest {
         }
 
         @Test
+        @DisplayName("토큰 발급 시간이 저장되어 있어야 한다.")
+        void shouldSetTokenIssuedAt() {
+            OAuth2AuthorizedAccessToken accessToken = granter.createAccessToken(clientDetails, tokenRequest);
+
+            assertEquals(TOKEN_CREATED_DATETIME, accessToken.getIssuedAt());
+        }
+
+        @Test
         @DisplayName("토큰의 유효시간이 설정되어 있어야 한다.")
         void shouldSetTokenValidity() {
             OAuth2AuthorizedAccessToken accessToken = granter.createAccessToken(clientDetails, tokenRequest);

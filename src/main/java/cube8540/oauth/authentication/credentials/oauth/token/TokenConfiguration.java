@@ -11,6 +11,9 @@ import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2Access
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2RefreshTokenRepository;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2TokenIdGenerator;
 import cube8540.oauth.authentication.credentials.oauth.token.infra.DefaultTokenIdGenerator;
+import cube8540.oauth.authentication.credentials.oauth.token.infra.TokenExceptionTranslator;
+import cube8540.oauth.authentication.error.ExceptionTranslator;
+import cube8540.oauth.authentication.error.message.ErrorMessage;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -52,6 +55,11 @@ public class TokenConfiguration {
     @Bean
     public OAuth2TokenIdGenerator tokenIdGenerator() {
         return new DefaultTokenIdGenerator();
+    }
+
+    @Bean
+    public ExceptionTranslator<ErrorMessage<Object>> tokenExceptionTranslator() {
+        return new TokenExceptionTranslator();
     }
 
 }

@@ -17,6 +17,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 
+import java.time.LocalDateTime;
+
 public class ResourceOwnerPasswordTokenGranter extends AbstractOAuth2TokenGranter {
 
     private final AuthenticationManager authenticationManager;
@@ -42,6 +44,7 @@ public class ResourceOwnerPasswordTokenGranter extends AbstractOAuth2TokenGrante
                 .username(new UserEmail(authentication.getName()))
                 .scopes(extractGrantScope(clientDetails, tokenRequest))
                 .tokenGrantType(AuthorizationGrantType.PASSWORD)
+                .issuedAt(LocalDateTime.now(clock))
                 .build();
         accessToken.generateRefreshToken(refreshTokenGenerator(), extractRefreshTokenExpiration(clientDetails));
         return accessToken;
