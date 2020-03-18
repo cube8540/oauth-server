@@ -35,3 +35,10 @@ spring:
     hibernate:
       ddl-auto: validate
     show-sql: true
+front:
+  endpoint:
+    login-page: #your login page
+    login-process-url: #your login process page
+    login-success-page: #your login success endpoint
+    register-page: #your register page endpoint
+    forgot-password-page: #your forgot password page endpoint
