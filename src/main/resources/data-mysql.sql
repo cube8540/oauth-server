@@ -10,6 +10,7 @@ insert into secured_resource(resource_id, method, resource) select 'SECURED-RESO
 insert into secured_resource(resource_id, method, resource) select 'OAUTH2-CLIENT-API', 'ALL', '/api/clients/**' where not exists (select initialize_datetime from initialize);
 insert into secured_resource(resource_id, method, resource) select 'OAUTH2-SCOPE-API', 'ALL', '/api/scopes/**' where not exists (select initialize_datetime from initialize);
 insert into secured_resource(resource_id, method, resource) select 'USER-PASSWORD-CHANGE-API', 'PUT', '/api/accounts/attributes/password' where not exists (select initialize_datetime from initialize);
+insert into secured_resource(resource_id, method, resource) select 'USER-ME-API', 'GET', '/api/accounts/me' where not exists (select initialize_datetime from initialize);
 insert into secured_resource(resource_id, method, resource) select 'TOKEN-API', 'ALL', '/api/tokens/**' where not exists (select initialize_datetime from initialize);
 
 insert into authority_accessible_resources(authority, resource_id) select 'ROLE_USER', 'OAUTH-AUTHORIZATION-ENDPOINT' where not exists (select initialize_datetime from initialize);
@@ -18,6 +19,7 @@ insert into authority_accessible_resources(authority, resource_id) select 'ROLE_
 insert into authority_accessible_resources(authority, resource_id) select 'ROLE_ADMIN', 'OAUTH2-CLIENT-API' where not exists (select initialize_datetime from initialize);
 insert into authority_accessible_resources(authority, resource_id) select 'ROLE_ADMIN', 'OAUTH2-SCOPE-API' where not exists (select initialize_datetime from initialize);
 insert into authority_accessible_resources(authority, resource_id) select 'ROLE_USER', 'USER-PASSWORD-CHANGE-API' where not exists (select initialize_datetime from initialize);
+insert into authority_accessible_resources(authority, resource_id) select 'ROLE_USER', 'USER-ME-API' where not exists (select initialize_datetime from initialize);
 insert into authority_accessible_resources(authority, resource_id) select 'ROLE_USER', 'TOKEN-API' where not exists (select initialize_datetime from initialize);
 
 
