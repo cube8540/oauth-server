@@ -43,6 +43,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     private static final String DEFAULT_LOGIN_PAGE = "/accounts/signin";
     private static final String DEFAULT_LOGIN_PROCESS_URL = "/accounts/signin";
+    private static final String DEFAULT_LOGOUT_URL = "/accounts/signout";
 
     @Setter(onMethod_ = @Autowired)
     private Environment environment;
@@ -90,6 +91,10 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .permitAll()
                 .and()
             .cors().configurationSource(request -> new CorsConfiguration().applyPermitDefaultValues())
+                .and()
+            .logout()
+                .logoutUrl(DEFAULT_LOGOUT_URL)
+                .logoutSuccessUrl(environment.getProperty("front.endpoint.logout-success-page"))
                 .and()
             .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
