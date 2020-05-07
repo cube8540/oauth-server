@@ -7,11 +7,9 @@ import cube8540.oauth.authentication.credentials.oauth.error.InvalidRequestExcep
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ClientRegistrationException;
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTranslator;
 import cube8540.oauth.authentication.credentials.oauth.error.RedirectMismatchException;
-import cube8540.oauth.authentication.credentials.oauth.security.AuthorizationCode;
 import cube8540.oauth.authentication.credentials.oauth.security.AuthorizationRequest;
 import cube8540.oauth.authentication.credentials.oauth.security.DefaultAuthorizationRequest;
 import cube8540.oauth.authentication.credentials.oauth.security.DefaultOAuth2RequestValidator;
-import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AuthorizationCodeGenerator;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetailsService;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2RequestValidator;
@@ -26,7 +24,6 @@ import org.springframework.security.authentication.InsufficientAuthenticationExc
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.OAuth2Error;
-import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationResponseType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -69,7 +66,7 @@ public class AuthorizationEndpoint {
 
     private final OAuth2ScopeDetailsService scopeDetailsService;
 
-    private final OAuth2AuthorizationCodeGenerator codeGenerator;
+    private final AuthorizationResponseEnhancer responseEnhancer;
 
     @Setter
     private SessionAttributeStore sessionAttributeStore = new DefaultSessionAttributeStore();
@@ -93,10 +90,10 @@ public class AuthorizationEndpoint {
     @Autowired
     public AuthorizationEndpoint(@Qualifier("defaultOAuth2ClientDetailsService") OAuth2ClientDetailsService clientDetailsService,
                                  OAuth2ScopeDetailsService scopeDetailsService,
-                                 OAuth2AuthorizationCodeGenerator codeGenerator) {
+                                 AuthorizationResponseEnhancer responseEnhancer) {
         this.clientDetailsService = clientDetailsService;
         this.scopeDetailsService = scopeDetailsService;
-        this.codeGenerator = codeGenerator;
+        this.responseEnhancer = responseEnhancer;
     }
 
     @GetMapping(value = "/oauth/authorize")
@@ -108,9 +105,6 @@ public class AuthorizationEndpoint {
         AuthorizationRequest authorizationRequest = new DefaultAuthorizationRequest(parameters, principal);
         if (authorizationRequest.getResponseType() == null) {
             throw InvalidRequestException.invalidRequest("response_type is required");
-        }
-        if (!authorizationRequest.getResponseType().equals(OAuth2AuthorizationResponseType.CODE)) {
-            throw InvalidRequestException.unsupportedResponseType("unsupported response type");
         }
 
         OAuth2ClientDetails clientDetails = clientDetailsService.loadClientDetailsByClientId(parameters.get(OAuth2Utils.AuthorizationRequestKey.CLIENT_ID));
@@ -150,13 +144,7 @@ public class AuthorizationEndpoint {
             if (originalAuthorizationRequestMap.get(OAuth2Utils.AuthorizationRequestKey.REDIRECT_URI) == null) {
                 authorizationRequest.setRedirectUri(null);
             }
-            AuthorizationCode code = codeGenerator.generateNewAuthorizationCode(authorizationRequest);
-            ModelAndView modelAndView = new ModelAndView(new RedirectView(redirectURI.toString()))
-                    .addObject(OAuth2Utils.AuthorizationResponseKey.CODE, code.getValue());
-            if (authorizationRequest.getState() != null) {
-                modelAndView.addObject(OAuth2Utils.AuthorizationResponseKey.STATE, authorizationRequest.getState());
-            }
-            return modelAndView;
+            return responseEnhancer.enhance(new ModelAndView(new RedirectView(redirectURI.toString())), authorizationRequest);
         } finally {
             sessionStatus.setComplete();
         }

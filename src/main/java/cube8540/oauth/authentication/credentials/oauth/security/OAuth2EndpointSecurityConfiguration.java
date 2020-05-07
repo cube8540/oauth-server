@@ -3,6 +3,9 @@ package cube8540.oauth.authentication.credentials.oauth.security;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionResponseRenderer;
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTranslator;
+import cube8540.oauth.authentication.credentials.oauth.security.endpoint.AuthorizationCodeResponseEnhancer;
+import cube8540.oauth.authentication.credentials.oauth.security.endpoint.AuthorizationImplicitResponseEnhancer;
+import cube8540.oauth.authentication.credentials.oauth.security.endpoint.AuthorizationResponseEnhancer;
 import cube8540.oauth.authentication.credentials.oauth.security.provider.ClientCredentialsAuthenticationProvider;
 import cube8540.oauth.authentication.credentials.oauth.security.provider.ClientCredentialsEndpointFilter;
 import cube8540.oauth.authentication.error.DefaultAuthenticationExceptionEntryPoint;
@@ -89,5 +92,13 @@ public class OAuth2EndpointSecurityConfiguration extends WebSecurityConfigurerAd
         filter.setEntryPoint(entryPoint);
         filter.setAuthenticationManager(authenticationManagerBean());
         return filter;
+    }
+
+    @Bean
+    public AuthorizationResponseEnhancer authorizationResponseEnhancer(OAuth2AccessTokenGranter accessTokenGranter, OAuth2AuthorizationCodeGenerator codeGenerator) {
+        AuthorizationResponseEnhancer enhancer = new AuthorizationCodeResponseEnhancer(codeGenerator);
+        enhancer.setNext(new AuthorizationImplicitResponseEnhancer(accessTokenGranter, clientDetailsService));
+
+        return enhancer;
     }
 }
