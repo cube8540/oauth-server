@@ -6,6 +6,8 @@ import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTran
 import cube8540.oauth.authentication.credentials.oauth.error.RedirectMismatchException;
 import cube8540.oauth.authentication.credentials.oauth.security.AuthorizationCode;
 import cube8540.oauth.authentication.credentials.oauth.security.AuthorizationRequest;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AccessTokenDetails;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AccessTokenGranter;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AuthorizationCodeGenerator;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetailsService;
@@ -23,6 +25,7 @@ import org.springframework.web.context.request.ServletWebRequest;
 
 import javax.servlet.http.HttpServletRequest;
 import java.net.URI;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -30,11 +33,17 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class AuthorizationEndpointTestHelper {
+
+    static final String TOKEN_TYPE = "Bearer";
+
+    static final String RAW_ACCESS_TOKEN_ID = "ACCESS-TOKEN-ID";
 
     static final String RAW_AUTHORIZATION_CODE = "AUTHORIZATION_CODE";
     static final AuthorizationCode AUTHORIZATION_CODE = new AuthorizationCode(RAW_AUTHORIZATION_CODE);
@@ -74,6 +83,11 @@ public class AuthorizationEndpointTestHelper {
     static final OAuth2Error UNAUTHORIZED_CLIENT_ERROR = new OAuth2Error(OAuth2ErrorCodes.UNAUTHORIZED_CLIENT);
     static final ResponseEntity<OAuth2Error> UNAUTHORIZED_CLIENT_RESPONSE = new ResponseEntity<>(UNAUTHORIZED_CLIENT_ERROR, HttpStatus.UNAUTHORIZED);
 
+    static final LocalDateTime EXPIRATION_DATETIME = LocalDateTime.of(2020, 1, 24, 21, 24, 0);
+    static final long EXPIRATION_IN = 600000;
+
+    static final Map<String, String> ADDITIONAL_INFO = new HashMap<>();
+
     static Authentication mockAuthorizedAuthentication() {
         Authentication authentication = mock(Authentication.class);
         when(authentication.getName()).thenReturn(RAW_USERNAME);
@@ -86,6 +100,13 @@ public class AuthorizationEndpointTestHelper {
         when(authentication.getName()).thenReturn(RAW_USERNAME);
         when(authentication.isAuthenticated()).thenReturn(false);
         return authentication;
+    }
+
+    static AuthorizationResponseEnhancer mockResponseEnhancer() {
+        AuthorizationResponseEnhancer enhancer = mock(AuthorizationResponseEnhancer.class);
+
+        doAnswer(returnsFirstArg()).when(enhancer).enhance(any(), any());
+        return enhancer;
     }
 
     static MockAuthorizationRequestMap mockAuthorizationRequestMap() {
@@ -134,6 +155,14 @@ public class AuthorizationEndpointTestHelper {
 
     static MockSessionAttributeStore mockSessionAttributeStore() {
         return new MockSessionAttributeStore();
+    }
+
+    static MockOAuth2AccessTokenGranter mockAccessTokenGranter() {
+        return new MockOAuth2AccessTokenGranter();
+    }
+
+    static MockAccessToken mockAccessToken() {
+        return new MockAccessToken();
     }
 
     static class MockAuthorizationRequestMap {
@@ -311,6 +340,11 @@ public class AuthorizationEndpointTestHelper {
             return this;
         }
 
+        MockAuthorizationRequest configResponseType(OAuth2AuthorizationResponseType responseType) {
+            when(authorizationRequest.getResponseType()).thenReturn(responseType);
+            return this;
+        }
+
         AuthorizationRequest build() {
             return authorizationRequest;
         }
@@ -392,6 +426,47 @@ public class AuthorizationEndpointTestHelper {
 
         SessionAttributeStore build() {
             return store;
+        }
+    }
+
+    static class MockOAuth2AccessTokenGranter {
+        private OAuth2AccessTokenGranter granter;
+
+        private MockOAuth2AccessTokenGranter() {
+            this.granter = mock(OAuth2AccessTokenGranter.class);
+        }
+
+        MockOAuth2AccessTokenGranter configToken(OAuth2AccessTokenDetails accessToken) {
+            when(granter.grant(any(), any())).thenReturn(accessToken);
+            return this;
+        }
+
+        OAuth2AccessTokenGranter build() {
+            return granter;
+        }
+    }
+
+    static class MockAccessToken {
+        private OAuth2AccessTokenDetails accessToken;
+
+        private MockAccessToken() {
+            this.accessToken = mock(OAuth2AccessTokenDetails.class);
+        }
+
+        MockAccessToken configDefault() {
+            when(accessToken.getTokenValue()).thenReturn(RAW_ACCESS_TOKEN_ID);
+            when(accessToken.getTokenType()).thenReturn(TOKEN_TYPE);
+            when(accessToken.getClientId()).thenReturn(RAW_CLIENT_ID);
+            when(accessToken.getUsername()).thenReturn(RAW_USERNAME);
+            when(accessToken.getScopes()).thenReturn(RAW_RESOLVED_SCOPES);
+            when(accessToken.getExpiration()).thenReturn(EXPIRATION_DATETIME);
+            when(accessToken.getExpiresIn()).thenReturn(EXPIRATION_IN);
+            when(accessToken.getAdditionalInformation()).thenReturn(ADDITIONAL_INFO);
+            return this;
+        }
+
+        OAuth2AccessTokenDetails build() {
+            return accessToken;
         }
     }
 }

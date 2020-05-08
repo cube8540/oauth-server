@@ -3,6 +3,7 @@
 
 ## 구현되어 있는 인증 타입
 [Authorization Code](#authorization-code-flow)  
+[Implicit](#implicit-flow)  
 [Resource Owner Password Credentials (Password)](#resource-owner-password-credentials-flow)  
 [Client Credentials](#client-credentials-flow)  
 [Refresh Token](#refresh-token-flow)  
@@ -67,6 +68,32 @@ http://localhost:8080/oauth/token?grant_type=authorization_code
     "scope": "TEST-2 TEST-3 TEST-1 TEST-4",
     "refresh_token": "fe36c27cbc104eaeb100c17b000d3613"
 }
+```
+### Implicit Flow
+이 방식은 Authorization Code Flow 에서 인증 코드와 Access Token 의 교환 과정을 생략하고 바로 Access Token 을 가져오는 방식 입니다.
+주로 자바스크립트 어플리케이션 ex) SPA.. 및 특정한 저장 장소가 없는 어플리케이션 에서 주로 사용하며, 보안이 좋지 않아 권장하지 않는 방식 입니다.
+#### 자원 소유자 인증
+Authorization Code Flow 와 마찬 가지로 자원 소유자의 인증을 위해 브라우저를 키고 아래의 주소로 이동합니다.
+```
+http://localhost:8080/oauth/authorize?response_type=code
+&redirect_uri=http://example-your-app.com/callback
+&client_id=<your-client-id>
+```
+|  파라미터명    |  필수 여부     |  타입   |  설명  |
+| :-----------:   | :--------------: | :-----:  | -------------------------------------------------------------------------------------------------------------- |
+| response_type | Required       | String | 응답 타입 받드시 **code** 이어야 합니다.                                                                         |
+| redirect_uri  | Optional       | URI    | 인가 코드를 받을 URI. 클라이언트에 등록된 URI가 여러개면 필수로 포함되어야 합니다.                                  |
+| client_id     | Required       | String | 클라이언트 아이디                                                                                               |
+| state         | Optional(권장) | String | CSRF 토큰 역할을 합니다. 만약 state 값에 대한 검증이 누락 되었거나 미흡하면 사용자 계정을 탈취 당할 수 있습니다.     |
+| scope         | Optional       | String | 인증 후 얻을 스코프 입니다. 스코프는 여러개를 요청할 수 있으며 공백으로 구별 합니다. 생략될시 모든 스코프를 얻습니다. |
+
+위 요청을 하면 권한 서버는 자원 소유자의 인증을 위해 인증 페이지로 리다이렉트 하게 됩니다. 이후 자원 소유자가 인증을 완료하고
+인가를 허락할시 /oauth/authorize 를 요청 할 때 이용한 **redirect_uri**로 **Access Token** 를 전달 합니다.
+```
+http://example-your-app.com/callback#access_token=5f169a5a1c6d49d5a0eb7884b4428121
+&token_type=Bearer
+&expires_in=599
+&scope=TEST-2 TEST-3 TEST-1 TEST-4
 ```
 ### Resource Owner Password Credentials Flow
 자원 소유자가 직접 아이디와 패스워드를 입력하여 권한 서버에 인증을 받습니다. 클라이언트는 입력 받은 자원 소유자의 아이디와

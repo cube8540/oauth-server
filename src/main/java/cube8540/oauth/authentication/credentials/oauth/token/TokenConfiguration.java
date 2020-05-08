@@ -4,6 +4,7 @@ import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AccessToke
 import cube8540.oauth.authentication.credentials.oauth.token.application.AuthorizationCodeTokenGranter;
 import cube8540.oauth.authentication.credentials.oauth.token.application.ClientCredentialsTokenGranter;
 import cube8540.oauth.authentication.credentials.oauth.token.application.CompositeOAuth2AccessTokenGranter;
+import cube8540.oauth.authentication.credentials.oauth.token.application.ImplicitTokenGranter;
 import cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2AuthorizationCodeConsumer;
 import cube8540.oauth.authentication.credentials.oauth.token.application.RefreshTokenGranter;
 import cube8540.oauth.authentication.credentials.oauth.token.application.ResourceOwnerPasswordTokenGranter;
@@ -47,6 +48,8 @@ public class TokenConfiguration {
                 new RefreshTokenGranter(accessTokenRepository, refreshTokenRepository, tokenIdGenerator()));
         tokenGranter.putTokenGranterMap(AuthorizationGrantType.CLIENT_CREDENTIALS,
                 new ClientCredentialsTokenGranter(tokenIdGenerator(), accessTokenRepository));
+        tokenGranter.putTokenGranterMap(AuthorizationGrantType.IMPLICIT,
+                new ImplicitTokenGranter(tokenIdGenerator(), accessTokenRepository));
         tokenGranter.putTokenGranterMap(AuthorizationGrantType.PASSWORD,
                 new ResourceOwnerPasswordTokenGranter(tokenIdGenerator(), accessTokenRepository, authenticationManager));
         return tokenGranter;
