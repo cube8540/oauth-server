@@ -1,6 +1,5 @@
 package cube8540.oauth.authentication.users.domain;
 
-import cube8540.oauth.authentication.credentials.authority.domain.AuthorityCode;
 import cube8540.oauth.authentication.users.domain.exception.UserAuthorizationException;
 import cube8540.oauth.authentication.users.domain.exception.UserInvalidException;
 import cube8540.validator.core.Validator;
@@ -18,19 +17,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.persistence.AttributeOverride;
 import javax.persistence.AttributeOverrides;
-import javax.persistence.CollectionTable;
 import javax.persistence.Column;
-import javax.persistence.ElementCollection;
 import javax.persistence.Embedded;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
 import javax.persistence.Table;
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.Optional;
-import java.util.Set;
 
 @Getter
 @ToString
@@ -56,18 +49,15 @@ public class User extends AbstractAggregateRoot<User> {
     })
     private UserCredentialsKey credentialsKey;
 
-    @ElementCollection
-    @CollectionTable(name = "user_authority", joinColumns = @JoinColumn(name = "email", nullable = false))
-    @AttributeOverride(name = "value", column = @Column(name = "authority_code", length = 32, nullable = false))
-    private Set<AuthorityCode> authorities;
-
-
     @Embedded
     @AttributeOverrides(value = {
             @AttributeOverride(name = "keyValue", column = @Column(name = "password_credentials_key", length = 32)),
             @AttributeOverride(name = "expiryDateTime", column = @Column(name = "password_credentials_key_expiry_datetime"))
     })
     private UserCredentialsKey passwordCredentialsKey;
+
+    @Column(name = "is_credentials", nullable = false)
+    private boolean isCredentials;
 
     @CreationTimestamp
     @Column(name = "registered_at", nullable = false)
@@ -80,6 +70,7 @@ public class User extends AbstractAggregateRoot<User> {
     public User(String email, String password) {
         this.email = new UserEmail(email);
         this.password = password;
+        this.isCredentials = false;
         registerEvent(new UserRegisterEvent(this.email));
     }
 
@@ -90,20 +81,20 @@ public class User extends AbstractAggregateRoot<User> {
     }
 
     public void generateCredentialsKey(UserCredentialsKeyGenerator keyGenerator) {
-        if (this.authorities != null && !this.authorities.isEmpty()) {
+        if (isCredentials) {
             throw UserAuthorizationException.alreadyCredentials("This account is already certification");
         }
         this.credentialsKey = keyGenerator.generateKey();
         registerEvent(new UserGeneratedCredentialsKeyEvent(email, credentialsKey));
     }
 
-    public void credentials(String credentialsKey, Collection<AuthorityCode> authorities) {
+    public void credentials(String credentialsKey) {
         UserKeyMatchedResult matchedResult = Optional.ofNullable(this.credentialsKey)
                 .map(key -> key.matches(credentialsKey))
                 .orElseThrow(() -> UserAuthorizationException.invalidKey("Key is not matched"));
         assertMatchedResult(matchedResult);
-        this.authorities = new HashSet<>(authorities);
         this.credentialsKey = null;
+        this.isCredentials = true;
     }
 
     public void changePassword(String existsPassword, String changePassword, PasswordEncoder encoder) {

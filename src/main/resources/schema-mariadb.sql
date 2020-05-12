@@ -10,6 +10,7 @@ create table if not exists user (
 	password varchar(64) not null,
 	password_credentials_key_expiry_datetime datetime(6) null,
 	password_credentials_key varchar(32) null,
+	is_credntials tinyint(1) not null,
 	registered_at datetime(6) not null
 );
 
@@ -133,14 +134,6 @@ create table if not exists authority_accessible_resources (
 	primary key (authority, resource_id),
 	constraint fk_accessible_resource_authority foreign key (resource_id) references secured_resource (resource_id) on delete cascade,
 	constraint fk_accessible_resource_resource foreign key (authority) references authority (code) on delete cascade
-);
-
-create table if not exists user_authority (
-	email varchar(128) not null,
-	authority_code varchar(32) not null,
-	primary key (email, authority_code),
-	constraint fk_user_authority_email foreign key (email) references user (email) on delete cascade,
-	constraint fk_user_authority_authority foreign key(authority_code) references authority (code) on delete cascade
 );
 
 commit;

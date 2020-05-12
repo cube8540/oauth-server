@@ -1,8 +1,6 @@
-insert into user(email, password, registered_at, last_updated_at) select 'admin', '$2a$10$uTSfWKXF20lwumttjUbxteWVJBedSEQkYxC6qJJbEVUYjzvM6q7Q2', current_timestamp, current_timestamp where not exists (select initialize_datetime from initialize);
+insert into user(email, password, registered_at, last_updated_at, is_credentials) select 'admin', '$2a$10$uTSfWKXF20lwumttjUbxteWVJBedSEQkYxC6qJJbEVUYjzvM6q7Q2', current_timestamp, current_timestamp, true where not exists (select initialize_datetime from initialize);
 insert into authority(code, is_basic, description) select 'ROLE_USER', true, 'Default Role' where not exists (select initialize_datetime from initialize);
 insert into authority(code, is_basic, description) select 'ROLE_ADMIN', false, 'Admin Role' where not exists (select initialize_datetime from initialize);
-insert into user_authority(email, authority_code) select 'admin', 'ROLE_ADMIN' where not exists (select initialize_datetime from initialize);
-insert into user_authority(email, authority_code) select 'admin', 'ROLE_USER' where not exists (select initialize_datetime from initialize);
 
 insert into secured_resource(resource_id, method, resource) select 'OAUTH-AUTHORIZATION-ENDPOINT', 'ALL', '/oauth/authorize' where not exists (select initialize_datetime from initialize);
 insert into secured_resource(resource_id, method, resource) select 'AUTHORITIES-API', 'ALL', '/api/authorities/**' where not exists (select initialize_datetime from initialize);

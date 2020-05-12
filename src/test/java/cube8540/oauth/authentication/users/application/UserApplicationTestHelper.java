@@ -110,7 +110,7 @@ class UserApplicationTestHelper {
         }
 
         MockUser certified() {
-            when(user.getAuthorities()).thenReturn(UserApplicationTestHelper.AUTHORITIES);
+            when(user.isCredentials()).thenReturn(true);
             return this;
         }
 

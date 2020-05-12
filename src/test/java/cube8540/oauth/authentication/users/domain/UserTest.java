@@ -12,8 +12,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.Collections;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -317,7 +315,7 @@ class UserTest {
         }
 
         @Nested
-        @DisplayName("이미 인증 받은 계정일시")
+        @DisplayName("이미 인증 받은 계정 일시")
         class WhenAlreadyCertificationAccount {
             private UserCredentialsKeyGenerator keyGenerator;
 
@@ -330,7 +328,7 @@ class UserTest {
                 this.keyGenerator = UserTestHelper.mockKeyGenerator(key);
                 this.user = new User(UserTestHelper.RAW_EMAIL, UserTestHelper.PASSWORD);
                 this.user.generateCredentialsKey(keyGenerator);
-                this.user.credentials(UserTestHelper.RAW_CREDENTIALS_KEY, UserTestHelper.AUTHORITIES_CODE);
+                this.user.credentials(UserTestHelper.RAW_CREDENTIALS_KEY);
             }
 
             @Test
@@ -346,32 +344,6 @@ class UserTest {
                         () -> user.generateCredentialsKey(keyGenerator));
 
                 assertEquals(UserErrorCodes.ALREADY_CREDENTIALS, e.getCode());
-            }
-        }
-
-        @Nested
-        @DisplayName("이미 인증 받았지만 할당된 권한이 없을시")
-        class WhenAlreadyCertificationNotHaveAuthoritiesAccount {
-            private UserCredentialsKey key;
-            private UserCredentialsKeyGenerator keyGenerator;
-
-            private User user;
-
-            @BeforeEach
-            void setup() {
-                this.key = UserTestHelper.mockCredentialsKey().matches(UserTestHelper.RAW_CREDENTIALS_KEY).build();
-                this.keyGenerator = UserTestHelper.mockKeyGenerator(key);
-                this.user = new User(UserTestHelper.RAW_EMAIL, UserTestHelper.PASSWORD);
-                this.user.generateCredentialsKey(keyGenerator);
-                this.user.credentials(UserTestHelper.RAW_CREDENTIALS_KEY, Collections.emptySet());
-            }
-
-            @Test
-            @DisplayName("키 생성기에서 반환된 키를 저장해야 한다.")
-            void shouldSaveCreatedKeyByGivenGenerator() {
-                user.generateCredentialsKey(keyGenerator);
-
-                assertEquals(key, user.getCredentialsKey());
             }
         }
     }
@@ -393,14 +365,14 @@ class UserTest {
             @Test
             @DisplayName("UserAuthorizationException 이 발생해야 한다.")
             void shouldThrowsUserAuthorizationException() {
-                assertThrows(UserAuthorizationException.class, () -> user.credentials(UserTestHelper.RAW_CREDENTIALS_KEY, Collections.emptyList()));
+                assertThrows(UserAuthorizationException.class, () -> user.credentials(UserTestHelper.RAW_CREDENTIALS_KEY));
             }
 
             @Test
             @DisplayName("에러 코드는 INVALID_KEY 이어야 한다.")
             void shouldErrorCodeIsInvalidKey() {
                 UserAuthorizationException e = assertThrows(UserAuthorizationException.class,
-                        () -> user.credentials(UserTestHelper.RAW_CREDENTIALS_KEY, Collections.emptyList()));
+                        () -> user.credentials(UserTestHelper.RAW_CREDENTIALS_KEY));
 
                 assertEquals(UserErrorCodes.INVALID_KEY, e.getCode());
             }
@@ -423,14 +395,14 @@ class UserTest {
             @Test
             @DisplayName("UserAuthorizationException 이 발생해야 한다.")
             void shouldThrowsUserAuthorizationException() {
-                assertThrows(UserAuthorizationException.class, () -> user.credentials(UserTestHelper.RAW_CREDENTIALS_KEY, Collections.emptyList()));
+                assertThrows(UserAuthorizationException.class, () -> user.credentials(UserTestHelper.RAW_CREDENTIALS_KEY));
             }
 
             @Test
             @DisplayName("에러 코드는 INVALID_KEY 이어야 한다.")
             void shouldErrorCodeIsInvalidKey() {
                 UserAuthorizationException e = assertThrows(UserAuthorizationException.class,
-                        () -> user.credentials(UserTestHelper.RAW_CREDENTIALS_KEY, Collections.emptyList()));
+                        () -> user.credentials(UserTestHelper.RAW_CREDENTIALS_KEY));
 
                 assertEquals(UserErrorCodes.INVALID_KEY, e.getCode());
             }
@@ -453,14 +425,14 @@ class UserTest {
             @Test
             @DisplayName("UserAuthorizationException 이 발생해야 한다.")
             void shouldThrowsUserAuthorizationException() {
-                assertThrows(UserAuthorizationException.class, () -> user.credentials(UserTestHelper.RAW_CREDENTIALS_KEY, Collections.emptyList()));
+                assertThrows(UserAuthorizationException.class, () -> user.credentials(UserTestHelper.RAW_CREDENTIALS_KEY));
             }
 
             @Test
             @DisplayName("에러 코드는 KEY_EXPIRED 이어야 한다.")
             void shouldErrorCodeIsKeyExpired() {
                 UserAuthorizationException e = assertThrows(UserAuthorizationException.class,
-                        () -> user.credentials(UserTestHelper.RAW_CREDENTIALS_KEY, Collections.emptyList()));
+                        () -> user.credentials(UserTestHelper.RAW_CREDENTIALS_KEY));
 
                 assertEquals(UserErrorCodes.KEY_EXPIRED, e.getCode());
             }
@@ -481,19 +453,19 @@ class UserTest {
             }
 
             @Test
-            @DisplayName("인자로 받은 권한을 저장해야한다.")
-            void shouldSaveGivenAuthorities() {
-                user.credentials(UserTestHelper.RAW_CREDENTIALS_KEY, UserTestHelper.AUTHORITIES_CODE);
+            @DisplayName("인증키를 null로 설정해야 한다.")
+            void shouldCredentialsKeySetNull() {
+                user.credentials(UserTestHelper.RAW_CREDENTIALS_KEY);
 
-                Assertions.assertEquals(UserTestHelper.AUTHORITIES_CODE, user.getAuthorities());
+                assertNull(user.getCredentialsKey());
             }
 
             @Test
-            @DisplayName("인증키를 null로 설정해야 한다.")
-            void shouldCredentialsKeySetNull() {
-                user.credentials(UserTestHelper.RAW_CREDENTIALS_KEY, UserTestHelper.AUTHORITIES_CODE);
+            @DisplayName("isCredentials 속성을 true로 변경해야 한다.")
+            void shouldSetTrueToIsCredentialsProperty() {
+                user.credentials(UserTestHelper.RAW_CREDENTIALS_KEY);
 
-                assertNull(user.getCredentialsKey());
+                assertTrue(user.isCredentials());
             }
         }
     }

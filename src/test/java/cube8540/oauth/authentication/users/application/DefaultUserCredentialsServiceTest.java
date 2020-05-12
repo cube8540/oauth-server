@@ -1,6 +1,5 @@
 package cube8540.oauth.authentication.users.application;
 
-import cube8540.oauth.authentication.credentials.authority.BasicAuthorityService;
 import cube8540.oauth.authentication.users.domain.User;
 import cube8540.oauth.authentication.users.domain.UserCredentialsKeyGenerator;
 import cube8540.oauth.authentication.users.domain.UserRepository;
@@ -28,7 +27,7 @@ class DefaultUserCredentialsServiceTest {
         class WhenUserNotRegisteredInRepository extends UserNotFoundSetup {
 
             @Test
-            @DisplayName("UserNotFoundException 이 발생해야 한다.")
+            @DisplayName("UserNotFoundException이 발생 해야 한다.")
             void shouldThrowsUserNotFoundException() {
                 assertThrows(UserNotFoundException.class, () -> service.grantCredentialsKey(UserApplicationTestHelper.RAW_EMAIL));
             }
@@ -49,7 +48,7 @@ class DefaultUserCredentialsServiceTest {
                 this.repository = UserApplicationTestHelper.mockUserRepository().registerUser(user).build();
                 this.keyGenerator = UserApplicationTestHelper.mockKeyGenerator();
 
-                this.service = new DefaultUserCredentialsService(repository, UserApplicationTestHelper.mockBasicAuthorityService().build());
+                this.service = new DefaultUserCredentialsService(repository);
                 this.service.setKeyGenerator(keyGenerator);
             }
 
@@ -101,17 +100,15 @@ class DefaultUserCredentialsServiceTest {
                 this.user = UserApplicationTestHelper.configDefaultMockUser().build();
                 this.repository = UserApplicationTestHelper.mockUserRepository().registerUser(user).build();
 
-                BasicAuthorityService basicAuthorityService = UserApplicationTestHelper.mockBasicAuthorityService().basicAuthority().build();
-
-                this.service = new DefaultUserCredentialsService(repository, basicAuthorityService);
+                this.service = new DefaultUserCredentialsService(repository);
             }
 
             @Test
-            @DisplayName("요청 받은 인증키와 기본 권한으로 계정 인증을 해야 한다.")
-            void shouldAccountCredentialsByRequestingCredentialsKeyAndBasicAuthority() {
+            @DisplayName("요청 받은 인증키로 인증을 해야 한다.")
+            void shouldAccountCredentialsByRequestingCredentialsKey() {
                 service.accountCredentials(UserApplicationTestHelper.RAW_EMAIL, UserApplicationTestHelper.RAW_CREDENTIALS_KEY);
 
-                verify(user, times(1)).credentials(UserApplicationTestHelper.RAW_CREDENTIALS_KEY, UserApplicationTestHelper.BASIC_AUTHORITIES);
+                verify(user, times(1)).credentials(UserApplicationTestHelper.RAW_CREDENTIALS_KEY);
             }
 
             @Test
@@ -120,7 +117,7 @@ class DefaultUserCredentialsServiceTest {
                 service.accountCredentials(UserApplicationTestHelper.RAW_EMAIL, UserApplicationTestHelper.RAW_CREDENTIALS_KEY);
 
                 InOrder inOrder = inOrder(user, repository);
-                inOrder.verify(user, times(1)).credentials(UserApplicationTestHelper.RAW_CREDENTIALS_KEY, UserApplicationTestHelper.BASIC_AUTHORITIES);
+                inOrder.verify(user, times(1)).credentials(UserApplicationTestHelper.RAW_CREDENTIALS_KEY);
                 inOrder.verify(repository, times(1)).save(user);
             }
         }
@@ -133,7 +130,7 @@ class DefaultUserCredentialsServiceTest {
         void setup() {
             UserRepository repository = UserApplicationTestHelper.mockUserRepository().emptyUser().build();
 
-            this.service = new DefaultUserCredentialsService(repository, UserApplicationTestHelper.mockBasicAuthorityService().build());
+            this.service = new DefaultUserCredentialsService(repository);
         }
     }
 }

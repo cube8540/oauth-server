@@ -1,7 +1,5 @@
 package cube8540.oauth.authentication.users.application;
 
-import cube8540.oauth.authentication.credentials.authority.BasicAuthorityService;
-import cube8540.oauth.authentication.credentials.authority.domain.AuthorityCode;
 import cube8540.oauth.authentication.users.domain.User;
 import cube8540.oauth.authentication.users.domain.UserCredentialsKeyGenerator;
 import cube8540.oauth.authentication.users.domain.UserEmail;
@@ -12,21 +10,16 @@ import lombok.Setter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
 @Service
 public class DefaultUserCredentialsService implements UserCredentialsService {
 
     private final UserRepository repository;
 
-    private final BasicAuthorityService authorityService;
-
     @Setter
     private UserCredentialsKeyGenerator keyGenerator = new DefaultUserCredentialsKeyGenerator();
 
-    public DefaultUserCredentialsService(UserRepository repository, BasicAuthorityService authorityService) {
+    public DefaultUserCredentialsService(UserRepository repository) {
         this.repository = repository;
-        this.authorityService = authorityService;
     }
 
     @Override
@@ -42,9 +35,8 @@ public class DefaultUserCredentialsService implements UserCredentialsService {
     @Transactional
     public UserProfile accountCredentials(String email, String credentialsKey) {
         User user = getUser(email);
-        List<AuthorityCode> authorityCodes = authorityService.getBasicAuthority();
 
-        user.credentials(credentialsKey, authorityCodes);
+        user.credentials(credentialsKey);
         return UserProfile.of(repository.save(user));
     }
 
