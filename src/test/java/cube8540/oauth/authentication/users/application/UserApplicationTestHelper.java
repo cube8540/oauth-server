@@ -1,7 +1,5 @@
 package cube8540.oauth.authentication.users.application;
 
-import cube8540.oauth.authentication.credentials.authority.BasicAuthorityService;
-import cube8540.oauth.authentication.credentials.authority.domain.AuthorityCode;
 import cube8540.oauth.authentication.users.domain.User;
 import cube8540.oauth.authentication.users.domain.UserCredentialsKey;
 import cube8540.oauth.authentication.users.domain.UserCredentialsKeyGenerator;
@@ -10,18 +8,10 @@ import cube8540.oauth.authentication.users.domain.UserKeyMatchedResult;
 import cube8540.oauth.authentication.users.domain.UserRepository;
 import cube8540.oauth.authentication.users.domain.UserValidationPolicy;
 import cube8540.validator.core.ValidationRule;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.security.Principal;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
@@ -41,10 +31,6 @@ class UserApplicationTestHelper {
 
     static final String RAW_CREDENTIALS_KEY = "CREDENTIALS-KEY";
     static final String RAW_PASSWORD_CREDENTIALS_KEY = "PASSWORD-CREDENTIALS-KEY";
-
-    static final Set<String> RAW_AUTHORITIES = new HashSet<>(Arrays.asList("CODE-1", "CODE-2", "CODE-3"));
-    static final Set<AuthorityCode> AUTHORITIES = RAW_AUTHORITIES.stream().map(AuthorityCode::new).collect(Collectors.toSet());
-    static final List<AuthorityCode> BASIC_AUTHORITIES = RAW_AUTHORITIES.stream().map(AuthorityCode::new).collect(Collectors.toList());
 
     static MockUser mockUser() {
         return new MockUser();
@@ -73,10 +59,6 @@ class UserApplicationTestHelper {
 
     static MockCredentialsKey mockCredentialsKey() {
         return new MockCredentialsKey();
-    }
-
-    static MockBasicAuthorityService mockBasicAuthorityService() {
-        return new MockBasicAuthorityService();
     }
 
     static UserCredentialsKeyGenerator mockKeyGenerator() {
@@ -239,29 +221,5 @@ class UserApplicationTestHelper {
         UserValidationPolicy build() {
             return policy;
         }
-    }
-
-    static class MockBasicAuthorityService {
-        private BasicAuthorityService service;
-
-        private MockBasicAuthorityService() {
-            this.service = mock(BasicAuthorityService.class);
-        }
-
-        MockBasicAuthorityService basicAuthority() {
-            when(service.getBasicAuthority()).thenReturn(BASIC_AUTHORITIES);
-            return this;
-        }
-
-        BasicAuthorityService build() {
-            return service;
-        }
-    }
-
-    static Set<GrantedAuthority> convertGrantAuthority(Collection<AuthorityCode> authorities) {
-        return authorities.stream()
-                .map(AuthorityCode::getValue)
-                .map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toSet());
     }
 }

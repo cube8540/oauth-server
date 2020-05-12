@@ -13,7 +13,6 @@ class AuthorityTestHelper {
 
     static final String RAW_AUTHORITY_CODE = "AUTHORITY_CODE";
     static final OAuth2ScopeId AUTHORITY_CODE = new OAuth2ScopeId(RAW_AUTHORITY_CODE);
-    static final String DESCRIPTION = "DESCRIPTION";
 
     static final String RAW_RESOURCE_ID = "RESOURCE-ID";
     static final SecuredResourceId RESOURCE_ID = new SecuredResourceId(RAW_RESOURCE_ID);
@@ -29,20 +28,12 @@ class AuthorityTestHelper {
     static final ResourceMethod RESOURCE_METHOD = ResourceMethod.ALL;
     static final ResourceMethod CHANGE_RESOURCE_METHOD = ResourceMethod.POST;
 
-    static MockValidationRule<SecuredResource> mockResourceValidationRule() {
-        return new MockValidationRule<>();
-    }
-
-    static MockValidationRule<Authority> mockAuthorityValidationRule() {
-        return new MockValidationRule<>();
-    }
-
     static MockResourceValidationPolicy mockResourceValidationPolicy() {
         return new MockResourceValidationPolicy();
     }
 
-    static MockAuthorityValidationPolicy mockAuthorityValidationPolicy() {
-        return new MockAuthorityValidationPolicy();
+    static MockValidationRule<SecuredResource> mockResourceValidationRule() {
+        return new MockValidationRule<>();
     }
 
     static final class MockValidationRule<T> {
@@ -70,28 +61,6 @@ class AuthorityTestHelper {
 
         ValidationRule<T> build() {
             return rule;
-        }
-    }
-
-    static final class MockAuthorityValidationPolicy {
-        private AuthorityValidationPolicy policy;
-
-        private MockAuthorityValidationPolicy() {
-            this.policy = mock(AuthorityValidationPolicy.class);
-        }
-
-        MockAuthorityValidationPolicy codeRule(ValidationRule<Authority> rule) {
-            when(policy.codeRule()).thenReturn(rule);
-            return this;
-        }
-
-        MockAuthorityValidationPolicy accessibleResourceRule(ValidationRule<Authority> rule) {
-            when(policy.accessibleResourceRule()).thenReturn(rule);
-            return this;
-        }
-
-        AuthorityValidationPolicy build() {
-            return policy;
         }
     }
 

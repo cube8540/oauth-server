@@ -30,12 +30,6 @@ create table if not exists oauth2_scope (
 	description varchar(64) null
 );
 
-create table if not exists authority (
-	code varchar(32) not null primary key,
-	is_basic bit not null,
-	description varchar(64) null
-);
-
 create table if not exists oauth2_access_token (
 	token_id varchar(32) not null primary key,
 	client_id varchar(32) not null,
@@ -133,7 +127,7 @@ create table if not exists authority_accessible_resources (
 	resource_id varchar(128) not null,
 	primary key (authority, resource_id),
 	constraint fk_accessible_resource_authority foreign key (resource_id) references secured_resource (resource_id) on delete cascade,
-	constraint fk_accessible_resource_resource foreign key (authority) references authority (code) on delete cascade
+	constraint fk_accessible_resource_resource foreign key (authority) references oauth2_scope (scope_id) on delete cascade
 );
 
 commit;

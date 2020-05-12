@@ -11,14 +11,14 @@ insert into secured_resource(resource_id, method, resource) select 'USER-PASSWOR
 insert into secured_resource(resource_id, method, resource) select 'USER-ME-API', 'GET', '/api/accounts/me' where not exists (select initialize_datetime from initialize);
 insert into secured_resource(resource_id, method, resource) select 'TOKEN-API', 'ALL', '/api/tokens/**' where not exists (select initialize_datetime from initialize);
 
-insert into authority_accessible_resources(authority, resource_id) select 'ROLE_USER', 'OAUTH-AUTHORIZATION-ENDPOINT' where not exists (select initialize_datetime from initialize);
+/*insert into authority_accessible_resources(authority, resource_id) select 'ROLE_USER', 'OAUTH-AUTHORIZATION-ENDPOINT' where not exists (select initialize_datetime from initialize);
 insert into authority_accessible_resources(authority, resource_id) select 'ROLE_ADMIN', 'AUTHORITIES-API' where not exists (select initialize_datetime from initialize);
 insert into authority_accessible_resources(authority, resource_id) select 'ROLE_ADMIN', 'SECURED-RESOURCE-API' where not exists (select initialize_datetime from initialize);
 insert into authority_accessible_resources(authority, resource_id) select 'ROLE_ADMIN', 'OAUTH2-CLIENT-API' where not exists (select initialize_datetime from initialize);
 insert into authority_accessible_resources(authority, resource_id) select 'ROLE_ADMIN', 'OAUTH2-SCOPE-API' where not exists (select initialize_datetime from initialize);
 insert into authority_accessible_resources(authority, resource_id) select 'ROLE_USER', 'USER-PASSWORD-CHANGE-API' where not exists (select initialize_datetime from initialize);
 insert into authority_accessible_resources(authority, resource_id) select 'ROLE_USER', 'USER-ME-API' where not exists (select initialize_datetime from initialize);
-insert into authority_accessible_resources(authority, resource_id) select 'ROLE_USER', 'TOKEN-API' where not exists (select initialize_datetime from initialize);
+insert into authority_accessible_resources(authority, resource_id) select 'ROLE_USER', 'TOKEN-API' where not exists (select initialize_datetime from initialize);*/
 
 
 insert into initialize select current_timestamp where not exists (select * from initialize);

@@ -1,15 +1,10 @@
 package cube8540.oauth.authentication.users.domain;
 
-import cube8540.oauth.authentication.credentials.authority.domain.AuthorityCode;
 import cube8540.validator.core.ValidationError;
 import cube8540.validator.core.ValidationRule;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -30,9 +25,6 @@ class UserTestHelper {
 
     static final String PASSWORD_ERROR_PROPERTY = "password";
     static final String PASSWORD_ERROR_MESSAGE = "message";
-
-    static final Set<String> RAW_AUTHORITIES_CODE = new HashSet<>(Arrays.asList("AUTH-CODE-1", "AUTH-CODE-2", "AUTH-CODE-3"));
-    static final Set<AuthorityCode> AUTHORITIES_CODE = RAW_AUTHORITIES_CODE.stream().map(AuthorityCode::new).collect(Collectors.toSet());
 
     static final LocalDateTime NOW = LocalDateTime.of(2020, 2, 8, 23, 5);
     static final LocalDateTime EXPIRATION_DATETIME = NOW.plusMinutes(5);
