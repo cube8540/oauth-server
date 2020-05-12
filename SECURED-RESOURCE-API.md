@@ -31,7 +31,7 @@ X-CSRF-TOKEN: 02d40025-cb71-4fef-b49b-93849a668a99
 | resourceId    | Required  | String | 추가할 보호 자원 아이디                                                    |
 | resource      | Required  | String | 보호 자원 형식으로 URI 패턴으로 입력합니다.                                 |
 | method        | Required  | String | 보호 자원의 HTTP 메소드로 모든 메소드를 보호 하고 싶을땐 'ALL' 을 입력합니다. |
-| authorities   | Optional  | Array | 보호 자원에 접근 가능한 권한 코드                                            |
+| authorities   | Optional  | Array | 보호 자원에 접근 가능한 스코프 아이디                                            |
 
 #### 응답
 ```
@@ -50,7 +50,7 @@ Content-Type: application/json
 | resourceId    | String | 추가된 보호 자원 아이디  |
 | resource      | String | 추가된 보호 자원 형식    |
 | method        | String | 추가된 보호 자원의 메소드 |
-| authorities   | Array | 보호 자원에 접근 가능한 권한 코드 |
+| authorities   | Array | 보호 자원에 접근 가능한 스코프 아이디 |
 
 #### 에러
 |              에러 코드                | 상태 코드 |                                   설명                                      |
@@ -103,7 +103,7 @@ Content-Type: application/json
 | resourceId    | String | 보호 자원 아이디  |
 | resource      | String | 보호 자원 형식    |
 | method        | String | 보호 자원의 메소드 |
-| authorities   | Array | 보호 자원에 접근 가능한 권한 코드 |
+| authorities   | Array | 보호 자원에 접근 가능한 스코프 아이디 |
 
 ### 보호 자원 수정
 보호 자원의 정보를 변경 합니다.
@@ -127,8 +127,8 @@ X-CSRF-TOKEN: 02d40025-cb71-4fef-b49b-93849a668a99
 | resourceId      | Required  | String | 수정할 보호 자원 아이디                                                    |
 | resource        | Required  | String | 수정할 보호 자원 형식으로 URI 패턴으로 입력합니다.                                 |
 | method          | Required  | String | 수정할 보호 자원의 HTTP 메소드로 모든 메소드를 보호 하고 싶을땐 'ALL' 을 입력합니다. |
-| newAuthorities  | Optional  | Array | 추가할 보호 자원에 접근 가능한 권한 코드                                            |
-| removeAuthorities | Optional  | Array | 제거할 보호 자원에 접근 가능한 권한 코드                                            |
+| newAuthorities  | Optional  | Array | 추가할 보호 자원에 접근 가능한 스코프 아이디                                            |
+| removeAuthorities | Optional  | Array | 제거할 보호 자원에 접근 가능한 스코프 아이디                                            |
 
 #### 응답
 ```
@@ -147,7 +147,7 @@ Content-Type: application/json
 | resourceId    | String | 수정된 보호 자원 아이디  |
 | resource      | String | 수정된 보호 자원 형식    |
 | method        | String | 수정된 보호 자원의 메소드 |
-| authorities   | Array | 보호 자원에 접근 가능한 권한 코드 |
+| authorities   | Array | 보호 자원에 접근 가능한 스코프 아이디 |
 
 #### 에러
 |              에러 코드                | 상태 코드 |                                   설명                                      |
@@ -187,7 +187,7 @@ Content-Type: application/json
 | resourceId    | String | 삭제된 보호 자원 아이디  |
 | resource      | String | 삭제된 보호 자원 형식    |
 | method        | String | 삭제된 보호 자원의 메소드 |
-| authorities   | Array | 보호 자원에 접근 가능한 권한 코드 |
+| authorities   | Array | 보호 자원에 접근 가능한 스코프 아이디 |
 
 #### 에러
 |              에러 코드                | 상태 코드 |                                   설명                                      |

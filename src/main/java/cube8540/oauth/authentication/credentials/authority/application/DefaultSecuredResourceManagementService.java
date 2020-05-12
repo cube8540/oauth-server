@@ -1,6 +1,5 @@
 package cube8540.oauth.authentication.credentials.authority.application;
 
-import cube8540.oauth.authentication.credentials.authority.domain.AuthorityCode;
 import cube8540.oauth.authentication.credentials.authority.domain.ResourceMethod;
 import cube8540.oauth.authentication.credentials.authority.domain.SecuredResource;
 import cube8540.oauth.authentication.credentials.authority.domain.SecuredResourceId;
@@ -8,6 +7,7 @@ import cube8540.oauth.authentication.credentials.authority.domain.SecuredResourc
 import cube8540.oauth.authentication.credentials.authority.domain.SecuredResourceValidationPolicy;
 import cube8540.oauth.authentication.credentials.authority.domain.exception.ResourceNotFoundException;
 import cube8540.oauth.authentication.credentials.authority.domain.exception.ResourceRegisterException;
+import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -49,7 +49,7 @@ public class DefaultSecuredResourceManagementService implements SecuredResourceM
         SecuredResource resource = new SecuredResource(new SecuredResourceId(registerRequest.getResourceId()),
                 URI.create(registerRequest.getResource()), ResourceMethod.of(registerRequest.getMethod()));
         Optional.ofNullable(registerRequest.getAuthorities()).orElse(Collections.emptyList())
-                .stream().map(AuthorityCode::new).forEach(resource::addAuthority);
+                .stream().map(OAuth2ScopeId::new).forEach(resource::addAuthority);
         resource.validation(validationPolicy);
         return DefaultSecuredResourceDetails.of(repository.save(resource));
     }
@@ -59,9 +59,9 @@ public class DefaultSecuredResourceManagementService implements SecuredResourceM
         SecuredResource resource = getResource(resourceId);
         resource.changeResourceInfo(URI.create(modifyRequest.getResource()), ResourceMethod.of(modifyRequest.getMethod()));
         Optional.ofNullable(modifyRequest.getRemoveAuthorities()).orElse(Collections.emptyList())
-                .stream().map(AuthorityCode::new).forEach(resource::removeAuthority);
+                .stream().map(OAuth2ScopeId::new).forEach(resource::removeAuthority);
         Optional.ofNullable(modifyRequest.getNewAuthorities()).orElse(Collections.emptyList())
-                .stream().map(AuthorityCode::new).forEach(resource::addAuthority);
+                .stream().map(OAuth2ScopeId::new).forEach(resource::addAuthority);
         resource.validation(validationPolicy);
         return DefaultSecuredResourceDetails.of(repository.save(resource));
     }

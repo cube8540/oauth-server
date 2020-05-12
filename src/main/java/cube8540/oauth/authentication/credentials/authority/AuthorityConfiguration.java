@@ -9,6 +9,7 @@ import cube8540.oauth.authentication.credentials.authority.infra.AuthorityExcept
 import cube8540.oauth.authentication.credentials.authority.infra.DefaultAuthorityValidationPolicy;
 import cube8540.oauth.authentication.credentials.authority.infra.DefaultSecuredResourceValidationPolicy;
 import cube8540.oauth.authentication.credentials.authority.infra.SecuredResourceExceptionTranslator;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ScopeDetailsService;
 import cube8540.oauth.authentication.error.message.ErrorMessage;
 import cube8540.oauth.authentication.error.ExceptionTranslator;
 import lombok.Setter;
@@ -27,10 +28,13 @@ public class AuthorityConfiguration {
     @Setter(onMethod_ = @Autowired)
     private DefaultSecuredResourceManagementService securedResourceManagementService;
 
+    @Setter(onMethod_ = @Autowired)
+    private OAuth2ScopeDetailsService scopeDetailsService;
+
     @PostConstruct
     public void setManagementServicePolicy() {
         authorityManagementService.setValidationPolicy(createAuthorityValidationPolicy(securedResourceManagementService));
-        securedResourceManagementService.setValidationPolicy(createSecuredResourceValidationPolicy(authorityManagementService));
+        securedResourceManagementService.setValidationPolicy(createSecuredResourceValidationPolicy(scopeDetailsService));
     }
 
     private AuthorityValidationPolicy createAuthorityValidationPolicy(SecuredResourceReadService securedResourceReadService) {
@@ -39,9 +43,9 @@ public class AuthorityConfiguration {
         return policy;
     }
 
-    private SecuredResourceValidationPolicy createSecuredResourceValidationPolicy(AuthorityDetailsService authorityDetailsService) {
+    private SecuredResourceValidationPolicy createSecuredResourceValidationPolicy(OAuth2ScopeDetailsService scopeDetailsService) {
         DefaultSecuredResourceValidationPolicy policy = new DefaultSecuredResourceValidationPolicy();
-        policy.setAuthorityDetailsService(authorityDetailsService);
+        policy.setAuthorityDetailsService(scopeDetailsService);
         return policy;
     }
 

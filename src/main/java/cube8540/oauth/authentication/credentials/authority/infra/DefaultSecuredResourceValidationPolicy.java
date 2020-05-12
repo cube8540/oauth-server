@@ -1,19 +1,19 @@
 package cube8540.oauth.authentication.credentials.authority.infra;
 
-import cube8540.oauth.authentication.credentials.authority.AuthorityDetailsService;
 import cube8540.oauth.authentication.credentials.authority.domain.SecuredResource;
 import cube8540.oauth.authentication.credentials.authority.domain.SecuredResourceValidationPolicy;
 import cube8540.oauth.authentication.credentials.authority.infra.rule.SecuredResourceAuthoritiesRule;
 import cube8540.oauth.authentication.credentials.authority.infra.rule.SecuredResourceIdRule;
 import cube8540.oauth.authentication.credentials.authority.infra.rule.SecuredResourceMethodRule;
 import cube8540.oauth.authentication.credentials.authority.infra.rule.SecuredResourceRule;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ScopeDetailsService;
 import cube8540.validator.core.ValidationRule;
 import lombok.Setter;
 
 public class DefaultSecuredResourceValidationPolicy implements SecuredResourceValidationPolicy {
 
     @Setter
-    private AuthorityDetailsService authorityDetailsService;
+    private OAuth2ScopeDetailsService authorityDetailsService;
 
     @Override
     public ValidationRule<SecuredResource> resourceIdRule() {
@@ -33,7 +33,7 @@ public class DefaultSecuredResourceValidationPolicy implements SecuredResourceVa
     @Override
     public ValidationRule<SecuredResource> authoritiesRule() {
         SecuredResourceAuthoritiesRule validationRule = new SecuredResourceAuthoritiesRule();
-        validationRule.setAuthorityDetailsService(authorityDetailsService);
+        validationRule.setScopeDetailsService(authorityDetailsService);
         return validationRule;
     }
 }

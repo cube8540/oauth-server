@@ -1,10 +1,10 @@
 package cube8540.oauth.authentication.credentials.authority.application;
 
-import cube8540.oauth.authentication.credentials.authority.domain.AuthorityCode;
 import cube8540.oauth.authentication.credentials.authority.domain.ResourceMethod;
 import cube8540.oauth.authentication.credentials.authority.domain.SecuredResource;
 import cube8540.oauth.authentication.credentials.authority.domain.SecuredResourceRepository;
 import cube8540.oauth.authentication.credentials.authority.security.SecurityMetadataLoadService;
+import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.ConfigAttribute;
 import org.springframework.security.access.SecurityConfig;
@@ -42,8 +42,8 @@ public class DefaultSecurityMetadataLoadService implements SecurityMetadataLoadS
         }
     }
 
-    private Collection<ConfigAttribute> authorityToConfigAttribute(Set<AuthorityCode> authorities) {
+    private Collection<ConfigAttribute> authorityToConfigAttribute(Set<OAuth2ScopeId> authorities) {
         return Optional.ofNullable(authorities).orElse(Collections.emptySet())
-                .stream().map(AuthorityCode::getValue).map(SecurityConfig::new).collect(Collectors.toList());
+                .stream().map(OAuth2ScopeId::getValue).map(SecurityConfig::new).collect(Collectors.toList());
     }
 }
