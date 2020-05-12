@@ -1,18 +1,18 @@
 package cube8540.oauth.authentication.credentials.oauth.scope.infra.rule;
 
-import cube8540.oauth.authentication.credentials.authority.AuthorityDetails;
-import cube8540.oauth.authentication.credentials.authority.AuthorityDetailsService;
-import cube8540.oauth.authentication.credentials.authority.domain.AuthorityCode;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2Scope;
+import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ScopeDetails;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ScopeDetailsService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -22,15 +22,18 @@ import static org.mockito.Mockito.when;
 @DisplayName("기본 스코프 접근 권한 유효성 검사 클래스 테스트")
 class DefaultScopeAccessibleAuthorityValidationRuleTest {
 
-    private AuthorityDetailsService detailsService;
+    private static final List<String> RAW_GIVEN_SCOPES = Arrays.asList("AUTH-1", "AUTH-2", "AUTH-3");
+    private static final Set<OAuth2ScopeId> GIVEN_SCOPES = RAW_GIVEN_SCOPES.stream().map(OAuth2ScopeId::new).collect(Collectors.toSet());
+
+    private OAuth2ScopeDetailsService detailsService;
     private DefaultScopeAccessibleAuthorityValidationRule rule;
 
     @BeforeEach
     void setup() {
-        this.detailsService = mock(AuthorityDetailsService.class);
+        this.detailsService = mock(OAuth2ScopeDetailsService.class);
 
         this.rule = new DefaultScopeAccessibleAuthorityValidationRule();
-        this.rule.setAuthorityService(detailsService);
+        this.rule.setScopeDetailsServices(detailsService);
     }
 
     @Nested
@@ -41,7 +44,7 @@ class DefaultScopeAccessibleAuthorityValidationRuleTest {
         @BeforeEach
         void setup() {
             this.scope = mock(OAuth2Scope.class);
-            rule.setAuthorityService(null);
+            rule.setScopeDetailsServices(null);
         }
 
         @Test
@@ -61,11 +64,10 @@ class DefaultScopeAccessibleAuthorityValidationRuleTest {
         void setup() {
             this.scope = mock(OAuth2Scope.class);
 
-            List<AuthorityDetails> details = Arrays.asList(mocking("AUTH-1"), mocking("AUTH-2"), mocking("AUTH-3"));
-            Set<AuthorityCode> scopesCode = new HashSet<>(Arrays.asList(new AuthorityCode("AUTH-1"), new AuthorityCode("AUTH-2"), new AuthorityCode("AUTH-4")));
+            List<OAuth2ScopeDetails> details = Arrays.asList(mocking("AUTH-1"), mocking("AUTH-2"));
 
-            when(scope.getAccessibleAuthority()).thenReturn(scopesCode);
-            when(detailsService.getAuthorities()).thenReturn(details);
+            when(scope.getAccessibleAuthority()).thenReturn(GIVEN_SCOPES);
+            when(detailsService.loadScopeDetailsByScopeIds(RAW_GIVEN_SCOPES)).thenReturn(details);
         }
 
         @Test
@@ -74,16 +76,16 @@ class DefaultScopeAccessibleAuthorityValidationRuleTest {
             assertFalse(rule.isValid(scope));
         }
 
-        private AuthorityDetails mocking(String code) {
-            AuthorityDetails details = mock(AuthorityDetails.class);
+        private OAuth2ScopeDetails mocking(String code) {
+            OAuth2ScopeDetails details = mock(OAuth2ScopeDetails.class);
 
-            when(details.getCode()).thenReturn(code);
+            when(details.getScopeId()).thenReturn(code);
             return details;
         }
     }
 
     @Nested
-    @DisplayName("스코프의 접근 권한으 모두 존재하는 접근 권한일시")
+    @DisplayName("스코프의 접근 권한이 모두 존재하는 접근 권한일시")
     class WhenScopesAuthorityAllExisting {
 
         private OAuth2Scope scope;
@@ -92,11 +94,10 @@ class DefaultScopeAccessibleAuthorityValidationRuleTest {
         void setup() {
             this.scope = mock(OAuth2Scope.class);
 
-            List<AuthorityDetails> details = Arrays.asList(mocking("AUTH-1"), mocking("AUTH-2"), mocking("AUTH-3"));
-            Set<AuthorityCode> scopesCode = new HashSet<>(Arrays.asList(new AuthorityCode("AUTH-1"), new AuthorityCode("AUTH-2"), new AuthorityCode("AUTH-3")));
+            List<OAuth2ScopeDetails> details = Arrays.asList(mocking("AUTH-1"), mocking("AUTH-2"), mocking("AUTH-3"));
 
-            when(scope.getAccessibleAuthority()).thenReturn(scopesCode);
-            when(detailsService.getAuthorities()).thenReturn(details);
+            when(scope.getAccessibleAuthority()).thenReturn(GIVEN_SCOPES);
+            when(detailsService.loadScopeDetailsByScopeIds(RAW_GIVEN_SCOPES)).thenReturn(details);
         }
 
         @Test
@@ -105,10 +106,10 @@ class DefaultScopeAccessibleAuthorityValidationRuleTest {
             assertTrue(rule.isValid(scope));
         }
 
-        private AuthorityDetails mocking(String code) {
-            AuthorityDetails details = mock(AuthorityDetails.class);
+        private OAuth2ScopeDetails mocking(String code) {
+            OAuth2ScopeDetails details = mock(OAuth2ScopeDetails.class);
 
-            when(details.getCode()).thenReturn(code);
+            when(details.getScopeId()).thenReturn(code);
             return details;
         }
     }

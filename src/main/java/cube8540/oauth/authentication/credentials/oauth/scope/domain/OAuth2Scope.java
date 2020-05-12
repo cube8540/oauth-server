@@ -1,6 +1,5 @@
 package cube8540.oauth.authentication.credentials.oauth.scope.domain;
 
-import cube8540.oauth.authentication.credentials.authority.domain.AuthorityCode;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.exception.ScopeInvalidException;
 import cube8540.validator.core.Validator;
 import lombok.AccessLevel;
@@ -43,23 +42,23 @@ public class OAuth2Scope extends AbstractAggregateRoot<OAuth2Scope> {
     @ElementCollection
     @CollectionTable(name = "oauth2_scope_accessible_authority", joinColumns = @JoinColumn(name = "scope_id", nullable = false))
     @AttributeOverride(name = "value", column = @Column(name = "authority", length = 32, nullable = false))
-    private Set<AuthorityCode> accessibleAuthority;
+    private Set<OAuth2ScopeId> accessibleAuthority;
 
     public OAuth2Scope(String scopeId, String description) {
         this.id = new OAuth2ScopeId(scopeId);
         this.description = description;
     }
 
-    public void addAccessibleAuthority(AuthorityCode authority) {
+    public void addAccessibleAuthority(OAuth2ScopeId scope) {
         if (this.accessibleAuthority == null) {
             this.accessibleAuthority = new HashSet<>();
         }
-        this.accessibleAuthority.add(authority);
+        this.accessibleAuthority.add(scope);
     }
 
-    public void removeAccessibleAuthority(AuthorityCode code) {
+    public void removeAccessibleAuthority(OAuth2ScopeId scope) {
         if (this.accessibleAuthority != null) {
-            this.accessibleAuthority.remove(code);
+            this.accessibleAuthority.remove(scope);
         }
     }
 
@@ -68,7 +67,7 @@ public class OAuth2Scope extends AbstractAggregateRoot<OAuth2Scope> {
             return false;
         }
         return authentication.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority).map(AuthorityCode::new)
+                .map(GrantedAuthority::getAuthority).map(OAuth2ScopeId::new)
                 .anyMatch(authority -> accessibleAuthority.contains(authority));
     }
 

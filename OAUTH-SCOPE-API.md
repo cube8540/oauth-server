@@ -28,7 +28,7 @@ X-CSRF-TOKEN: 02d40025-cb71-4fef-b49b-93849a668a99
 | :----------------: | :-------: | :----: | ------------------------------------- |
 | scopeId              | Required  | String | 추가할 스코프의 아이디               |
 | description          | Required  | String | 추가할 스코프의 설명 텍스트          |
-| accessibleAuthority  | Required  | String | 해당 스코프에 접근 가능한 유저 권한  |
+| accessibleAuthority  | Required  | String | 해당 스코프에 접근 가능한 스코프  |
 
 #### 응답
 ```
@@ -134,8 +134,8 @@ X-CSRF-TOKEN: 02d40025-cb71-4fef-b49b-93849a668a99
 | :-----------------------: | :-------: | :----: | ------------------------------------- |
 | scopeId                   | Required  | String | 수정할 스코프의 아이디               |
 | description               | Required  | String | 변경할 스코프의 설명 텍스트          |
-| removeAccessibleAuthority | Required  | Array  | 삭제할 스코프에 접근 가능한 유저 권한 |
-| newAccessibleAuthority    | Required  | Array  | 추가할 스코프에 접근 가능한 유저 권한 |
+| removeAccessibleAuthority | Required  | Array  | 삭제할 스코프에 접근 가능한 스코프 |
+| newAccessibleAuthority    | Required  | Array  | 추가할 스코프에 접근 가능한 스코프 |
 
 #### 응답
 ```
