@@ -4,7 +4,6 @@ import cube8540.oauth.authentication.AuthenticationApplication;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
 import cube8540.oauth.authentication.credentials.oauth.converter.AuthorizationGrantTypeConverter;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
-import cube8540.oauth.authentication.users.domain.UserEmail;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -69,7 +68,7 @@ public class OAuth2AuthorizedAccessToken extends AbstractAggregateRoot<OAuth2Aut
 
     @Embedded
     @AttributeOverride(name = "value", column = @Column(name = "email", length = 128))
-    private UserEmail username;
+    private PrincipalUsername username;
 
     @Embedded
     @AttributeOverride(name = "value", column = @Column(name = "client_id", length = 32, nullable = false))

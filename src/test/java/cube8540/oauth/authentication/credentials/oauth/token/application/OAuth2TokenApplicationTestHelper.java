@@ -17,9 +17,9 @@ import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2Refres
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2TokenEnhancer;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2TokenId;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2TokenIdGenerator;
+import cube8540.oauth.authentication.credentials.oauth.token.domain.PrincipalUsername;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.read.Oauth2AccessTokenReadRepository;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.read.model.AccessTokenDetailsWithClient;
-import cube8540.oauth.authentication.users.domain.UserEmail;
 import org.springframework.security.authentication.AccountStatusException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -61,10 +61,10 @@ class OAuth2TokenApplicationTestHelper {
     static final OAuth2TokenId NEW_REFRESH_TOKEN_ID = new OAuth2TokenId(RAW_NEW_REFRESH_TOKEN_ID);
 
     static final String RAW_USERNAME = "email@email.com";
-    static final UserEmail USERNAME = new UserEmail(RAW_USERNAME);
+    static final PrincipalUsername USERNAME = new PrincipalUsername(RAW_USERNAME);
     static final String RAW_DIFFERENT_USERNAME = "different@email.com";
     static final String RAW_AUTHENTICATION_USERNAME = "auth@email.com";
-    static final UserEmail AUTHENTICATION_USERNAME = new UserEmail(RAW_AUTHENTICATION_USERNAME);
+    static final PrincipalUsername AUTHENTICATION_USERNAME = new PrincipalUsername(RAW_AUTHENTICATION_USERNAME);
     static final String PASSWORD = "Password1234!@#$";
 
     static final String RAW_CLIENT_ID = "CLIENT-ID";

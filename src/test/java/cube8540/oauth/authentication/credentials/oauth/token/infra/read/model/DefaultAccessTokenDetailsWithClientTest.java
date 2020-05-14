@@ -4,7 +4,7 @@ import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2Clien
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedAccessToken;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2TokenId;
-import cube8540.oauth.authentication.users.domain.UserEmail;
+import cube8540.oauth.authentication.credentials.oauth.token.domain.PrincipalUsername;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -28,7 +28,7 @@ class DefaultAccessTokenDetailsWithClientTest {
     private static final String CLIENT_NAME = "CLIENT-NAME";
 
     private static final String RAW_USERNAME = "email@email.com";
-    private static final UserEmail USERNAME = new UserEmail(RAW_USERNAME);
+    private static final PrincipalUsername USERNAME = new PrincipalUsername(RAW_USERNAME);
 
     private static final LocalDateTime ISSUED_AT = LocalDateTime.of(2020, 3, 18, 18, 2);
 
@@ -57,7 +57,7 @@ class DefaultAccessTokenDetailsWithClientTest {
         DefaultAccessTokenDetailsWithClient token = new DefaultAccessTokenDetailsWithClient(accessToken, client);
 
         assertEquals(token.getTokenValue(), RAW_TOKEN_VALUE);
-        assertEquals(token.getUsername(), RAW_USERNAME);;
+        assertEquals(token.getUsername(), RAW_USERNAME);
         assertEquals(token.getIssuedAt(), ISSUED_AT);
         assertEquals(token.getAdditionalInformation(), ADDITIONAL_INFORMATION);
         assertEquals(token.getClient().getClientId(), RAW_CLIENT_ID);

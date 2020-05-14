@@ -8,7 +8,6 @@ import cube8540.oauth.authentication.credentials.oauth.error.InvalidGrantExcepti
 import cube8540.oauth.authentication.credentials.oauth.error.RedirectMismatchException;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import cube8540.oauth.authentication.credentials.oauth.security.AuthorizationRequest;
-import cube8540.oauth.authentication.users.domain.UserEmail;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -61,7 +60,7 @@ public class OAuth2AuthorizationCode extends AbstractAggregateRoot<OAuth2Authori
 
     @Embedded
     @AttributeOverride(name = "value", column = @Column(name = "email", length = 128, nullable = false))
-    private UserEmail username;
+    private PrincipalUsername username;
 
     @Column(name = "state", length = 12)
     private String state;
@@ -82,7 +81,7 @@ public class OAuth2AuthorizationCode extends AbstractAggregateRoot<OAuth2Authori
 
     public void setAuthorizationRequest(AuthorizationRequest request) {
         this.clientId = new OAuth2ClientId(request.getClientId());
-        this.username = new UserEmail(request.getUsername());
+        this.username = new PrincipalUsername(request.getUsername());
         this.redirectURI = request.getRedirectUri();
         this.approvedScopes = request.getRequestScopes().stream()
                 .map(OAuth2ScopeId::new).collect(Collectors.toSet());

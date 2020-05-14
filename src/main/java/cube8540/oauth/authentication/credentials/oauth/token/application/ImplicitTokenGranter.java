@@ -6,7 +6,7 @@ import cube8540.oauth.authentication.credentials.oauth.security.OAuth2TokenReque
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenRepository;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedAccessToken;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2TokenIdGenerator;
-import cube8540.oauth.authentication.users.domain.UserEmail;
+import cube8540.oauth.authentication.credentials.oauth.token.domain.PrincipalUsername;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 
 import java.time.LocalDateTime;
@@ -21,7 +21,7 @@ public class ImplicitTokenGranter extends AbstractOAuth2TokenGranter {
     protected OAuth2AuthorizedAccessToken createAccessToken(OAuth2ClientDetails clientDetails, OAuth2TokenRequest tokenRequest) {
         return OAuth2AuthorizedAccessToken.builder(getTokenIdGenerator())
                 .scopes(extractGrantScope(clientDetails, tokenRequest))
-                .username(new UserEmail(tokenRequest.getUsername()))
+                .username(new PrincipalUsername(tokenRequest.getUsername()))
                 .tokenGrantType(AuthorizationGrantType.IMPLICIT)
                 .expiration(extractTokenExpiration(clientDetails))
                 .client(new OAuth2ClientId(clientDetails.getClientId()))
