@@ -1,7 +1,7 @@
 package cube8540.oauth.authentication.users.endpoint;
 
-import cube8540.oauth.authentication.error.message.ErrorMessage;
 import cube8540.oauth.authentication.error.ExceptionTranslator;
+import cube8540.oauth.authentication.error.message.ErrorMessage;
 import cube8540.oauth.authentication.users.application.UserManagementService;
 import cube8540.oauth.authentication.users.application.UserProfile;
 import cube8540.oauth.authentication.users.application.UserRegisterRequest;
@@ -17,16 +17,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.SessionAttributes;
 
 import java.util.Collections;
 import java.util.Map;
 
 @RestController
-@SessionAttributes({UserManagementAPIEndpoint.NEW_REGISTERED_USER_ATTRIBUTE})
 public class UserManagementAPIEndpoint {
-
-    protected static final String NEW_REGISTERED_USER_ATTRIBUTE = "UserManagementAPIEndpoint.newRegisteredUser";
 
     private final UserManagementService service;
 
@@ -44,11 +40,8 @@ public class UserManagementAPIEndpoint {
     }
 
     @PostMapping(value = "/api/accounts")
-    public UserProfile registerUserAccounts(@RequestBody UserRegisterRequest registerRequest, Map<String, Object> model) {
-        UserProfile registerUser = service.registerUser(registerRequest);
-
-        model.put(NEW_REGISTERED_USER_ATTRIBUTE, registerUser);
-        return registerUser;
+    public UserProfile registerUserAccounts(@RequestBody UserRegisterRequest registerRequest) {
+        return service.registerUser(registerRequest);
     }
 
     @GetMapping(value = "/api/accounts/attributes/email")

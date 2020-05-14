@@ -1,10 +1,9 @@
 package cube8540.oauth.authentication.users.endpoint;
 
-import cube8540.oauth.authentication.error.message.ErrorMessage;
 import cube8540.oauth.authentication.error.ExceptionTranslator;
+import cube8540.oauth.authentication.error.message.ErrorMessage;
 import cube8540.oauth.authentication.users.application.UserCredentialsService;
 import cube8540.oauth.authentication.users.application.UserProfile;
-import cube8540.oauth.authentication.users.domain.exception.UserNotFoundException;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -13,13 +12,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.SessionAttributes;
-import org.springframework.web.bind.support.SessionStatus;
-
-import java.util.Map;
 
 @RestController
-@SessionAttributes({UserManagementAPIEndpoint.NEW_REGISTERED_USER_ATTRIBUTE})
 public class UserCredentialsAPIEndpoint {
 
     private final UserCredentialsService service;
@@ -33,16 +27,8 @@ public class UserCredentialsAPIEndpoint {
     }
 
     @PutMapping(value = "/api/accounts/attributes/active")
-    public UserProfile credentials(@RequestParam String credentialsKey, Map<String, Object> model, SessionStatus sessionStatus) {
-        try {
-            if (model.get(UserManagementAPIEndpoint.NEW_REGISTERED_USER_ATTRIBUTE) == null) {
-                throw UserNotFoundException.instance("Registered user is not found");
-            }
-            UserProfile registeredUser = (UserProfile) model.get(UserManagementAPIEndpoint.NEW_REGISTERED_USER_ATTRIBUTE);
-            return service.accountCredentials(registeredUser.getEmail(), credentialsKey);
-        } finally {
-            sessionStatus.setComplete();
-        }
+    public UserProfile credentials(@RequestParam String email, @RequestParam String credentialsKey) {
+        return service.accountCredentials(email, credentialsKey);
     }
 
     @ExceptionHandler(Exception.class)
