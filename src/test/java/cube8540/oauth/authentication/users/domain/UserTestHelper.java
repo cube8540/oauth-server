@@ -11,6 +11,8 @@ import static org.mockito.Mockito.when;
 
 class UserTestHelper {
 
+    static final String RAW_USERNAME = "username1234";
+
     static final String RAW_EMAIL = "email@email.com";
 
     static final String PASSWORD = "Password1234!@#$";
@@ -19,6 +21,9 @@ class UserTestHelper {
 
     static final String RAW_CREDENTIALS_KEY = "CREDENTIALS-KEY";
     static final String RAW_PASSWORD_CREDENTIALS_KEY = "PASSWORD-CREDENTIALS-KEY";
+
+    static final String USERNAME_ERROR_PROPERTY = "username";
+    static final String USERNAME_ERROR_MESSAGE = "message";
 
     static final String EMAIL_ERROR_PROPERTY = "email";
     static final String EMAIL_ERROR_MESSAGE = "message";
@@ -145,6 +150,11 @@ class UserTestHelper {
 
         private MockValidationPolicy() {
             this.policy = mock(UserValidationPolicy.class);
+        }
+
+        MockValidationPolicy usernameRule(ValidationRule<User> validationRule) {
+            when(this.policy.usernameRule()).thenReturn(validationRule);
+            return this;
         }
 
         MockValidationPolicy emailRule(ValidationRule<User> validationRule) {

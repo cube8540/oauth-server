@@ -3,7 +3,8 @@ create table if not exists initialize (
 );
 
 create table if not exists user (
-	email varchar(128) not null primary key,
+    username varchar(32) not null primary key,
+	email varchar(128) not null unique key,
 	credentials_key_expiry_datetime datetime(6) null,
 	credentials_key varchar(32) null,
 	last_updated_at datetime(6) not null,
@@ -22,7 +23,7 @@ create table if not exists oauth2_clients (
 	refresh_token_validity bigint not null,
 	client_secret varchar(64) not null,
 
-	constraint fk_client_username foreign key (oauth2_client_owner) references user (email) on delete cascade
+	constraint fk_client_username foreign key (oauth2_client_owner) references user (username) on delete cascade
 );
 
 create table if not exists oauth2_scope (
@@ -35,11 +36,11 @@ create table if not exists oauth2_access_token (
 	client_id varchar(32) not null,
 	expiration datetime(6) not null,
 	grant_type varchar(32) not null,
-	email varchar(128) null,
+	username varchar(32) null,
 	issued_at datetime(6) not null,
-	constraint client_authentication_username unique (client_id, email),
+	constraint client_authentication_username unique (client_id, username),
 	constraint fk_access_token_client_id foreign key (client_id) references oauth2_clients (client_id) on delete cascade,
-	constraint fk_access_token_username foreign key (email) references user (email) on delete cascade
+	constraint fk_access_token_username foreign key (username) references user (username) on delete cascade
 );
 
 create table if not exists oauth2_access_token_additional_information (
@@ -56,10 +57,10 @@ create table if not exists oauth2_authorization_code (
 	expiration_at datetime(6) not null,
 	redirect_uri varchar(128) null,
 	state varchar(12) null,
-	email varchar(128) not null,
+	username varchar(32) null,
 
     constraint fk_authorization_code_client_id foreign key (client_id) references oauth2_clients (client_id) on delete cascade,
-	constraint fk_authorization_code_username foreign key (email) references user (email) on delete cascade
+	constraint fk_authorization_code_username foreign key (username) references user (username) on delete cascade
 );
 
 create table if not exists oauth2_client_grant_type (

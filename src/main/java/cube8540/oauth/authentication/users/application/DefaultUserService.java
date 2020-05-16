@@ -1,8 +1,8 @@
 package cube8540.oauth.authentication.users.application;
 
 import cube8540.oauth.authentication.users.domain.User;
-import cube8540.oauth.authentication.users.domain.UserEmail;
 import cube8540.oauth.authentication.users.domain.UserRepository;
+import cube8540.oauth.authentication.users.domain.Username;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -23,7 +23,7 @@ public class DefaultUserService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = repository.findByEmail(new UserEmail(username))
+        User user = repository.findByUsername(new Username(username))
                 .orElseThrow(() -> new UsernameNotFoundException(username + " is not found"));
 
         return org.springframework.security.core.userdetails.User.builder()

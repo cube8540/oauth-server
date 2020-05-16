@@ -37,7 +37,7 @@ class DefaultUserServiceTest {
             @Test
             @DisplayName("UsernameNotFoundException 이 발생해야 한다.")
             void shouldThrowsUsernameNotFoundException() {
-                assertThrows(UsernameNotFoundException.class, () -> service.loadUserByUsername(UserApplicationTestHelper.RAW_EMAIL));
+                assertThrows(UsernameNotFoundException.class, () -> service.loadUserByUsername(UserApplicationTestHelper.RAW_USERNAME));
             }
         }
 
@@ -60,7 +60,7 @@ class DefaultUserServiceTest {
                 @Test
                 @DisplayName("계정의 잠금된 설정으로 반환되어야 한다.")
                 void shouldAccountIsNotLocked() {
-                    UserDetails result = service.loadUserByUsername(UserApplicationTestHelper.RAW_EMAIL);
+                    UserDetails result = service.loadUserByUsername(UserApplicationTestHelper.RAW_USERNAME);
 
                     assertFalse(result.isAccountNonLocked());
                 }
@@ -81,7 +81,7 @@ class DefaultUserServiceTest {
                 @Test
                 @DisplayName("권한은 항상 빈 배열로 반환 해야 한다.")
                 void shouldReturnEmptyArrayToAuthority() {
-                    UserDetails result = service.loadUserByUsername(UserApplicationTestHelper.RAW_EMAIL);
+                    UserDetails result = service.loadUserByUsername(UserApplicationTestHelper.RAW_USERNAME);
 
                     assertEquals(Collections.emptySet(), result.getAuthorities());
                 }
@@ -89,7 +89,7 @@ class DefaultUserServiceTest {
                 @Test
                 @DisplayName("계정의 잠금되지 않은 설정으로 반환되어야 한다.")
                 void shouldAccountIsNotLocked() {
-                    UserDetails result = service.loadUserByUsername(UserApplicationTestHelper.RAW_EMAIL);
+                    UserDetails result = service.loadUserByUsername(UserApplicationTestHelper.RAW_USERNAME);
 
                     assertTrue(result.isAccountNonLocked());
                 }

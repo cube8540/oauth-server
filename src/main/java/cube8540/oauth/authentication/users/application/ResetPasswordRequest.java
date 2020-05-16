@@ -6,10 +6,10 @@ import lombok.Value;
 import java.beans.ConstructorProperties;
 
 @Value
-@RequiredArgsConstructor(onConstructor_ = @ConstructorProperties({"email", "credentialsKey", "newPassword"}))
+@RequiredArgsConstructor(onConstructor_ = @ConstructorProperties({"username", "credentialsKey", "newPassword"}))
 public class ResetPasswordRequest {
 
-    private String email;
+    private String username;
 
     private String credentialsKey;
 

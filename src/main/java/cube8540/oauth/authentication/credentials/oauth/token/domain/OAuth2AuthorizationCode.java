@@ -59,7 +59,7 @@ public class OAuth2AuthorizationCode extends AbstractAggregateRoot<OAuth2Authori
     private OAuth2ClientId clientId;
 
     @Embedded
-    @AttributeOverride(name = "value", column = @Column(name = "email", length = 128, nullable = false))
+    @AttributeOverride(name = "value", column = @Column(name = "username", length = 32, nullable = false))
     private PrincipalUsername username;
 
     @Column(name = "state", length = 12)

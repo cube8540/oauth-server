@@ -36,7 +36,11 @@ import java.util.Optional;
 public class User extends AbstractAggregateRoot<User> {
 
     @EmbeddedId
-    @AttributeOverride(name = "value", column = @Column(name = "email", length = 128))
+    @AttributeOverride(name = "value", column = @Column(name = "username", length = 32))
+    private Username username;
+
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "email", length = 128, unique = true))
     private UserEmail email;
 
     @Column(name = "password", length = 64, nullable = false)
@@ -67,15 +71,17 @@ public class User extends AbstractAggregateRoot<User> {
     @Column(name = "last_updated_at", nullable = false)
     private LocalDateTime lastUpdatedAt;
 
-    public User(String email, String password) {
+    public User(String username, String email, String password) {
+        this.username = new Username(username);
         this.email = new UserEmail(email);
         this.password = password;
         this.isCredentials = false;
-        registerEvent(new UserRegisterEvent(this.email));
+        registerEvent(new UserRegisterEvent(this.username));
     }
 
     public void validation(UserValidationPolicy policy) {
-        Validator.of(this).registerRule(policy.emailRule())
+        Validator.of(this).registerRule(policy.usernameRule())
+                .registerRule(policy.emailRule())
                 .registerRule(policy.passwordRule())
                 .getResult().hasErrorThrows(UserInvalidException::instance);
     }
@@ -85,7 +91,7 @@ public class User extends AbstractAggregateRoot<User> {
             throw UserAuthorizationException.alreadyCredentials("This account is already certification");
         }
         this.credentialsKey = keyGenerator.generateKey();
-        registerEvent(new UserGeneratedCredentialsKeyEvent(email, credentialsKey));
+        registerEvent(new UserGeneratedCredentialsKeyEvent(username, email, credentialsKey));
     }
 
     public void credentials(String credentialsKey) {

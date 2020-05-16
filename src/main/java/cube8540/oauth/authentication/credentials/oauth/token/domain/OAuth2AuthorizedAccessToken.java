@@ -52,7 +52,7 @@ import java.util.Set;
 @Builder
 @Entity
 @Table(name = "oauth2_access_token", uniqueConstraints = {
-        @UniqueConstraint(name = "client_authentication_username", columnNames = {"client_id", "email"})
+        @UniqueConstraint(name = "client_authentication_username", columnNames = {"client_id", "username"})
 })
 @DynamicInsert
 @DynamicUpdate
@@ -67,7 +67,7 @@ public class OAuth2AuthorizedAccessToken extends AbstractAggregateRoot<OAuth2Aut
     private OAuth2TokenId tokenId;
 
     @Embedded
-    @AttributeOverride(name = "value", column = @Column(name = "email", length = 128))
+    @AttributeOverride(name = "value", column = @Column(name = "username", length = 32))
     private PrincipalUsername username;
 
     @Embedded

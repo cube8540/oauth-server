@@ -2,12 +2,12 @@ package cube8540.oauth.authentication.users.application;
 
 public interface UserManagementService {
 
-    Long countUser(String email);
+    Long countUser(String username);
 
-    UserProfile loadUserProfile(String email);
+    UserProfile loadUserProfile(String username);
 
     UserProfile registerUser(UserRegisterRequest registerRequest);
 
-    UserProfile removeUser(String email);
+    UserProfile removeUser(String username);
 
 }

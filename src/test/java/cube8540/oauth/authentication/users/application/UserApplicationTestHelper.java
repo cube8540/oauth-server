@@ -7,6 +7,7 @@ import cube8540.oauth.authentication.users.domain.UserEmail;
 import cube8540.oauth.authentication.users.domain.UserKeyMatchedResult;
 import cube8540.oauth.authentication.users.domain.UserRepository;
 import cube8540.oauth.authentication.users.domain.UserValidationPolicy;
+import cube8540.oauth.authentication.users.domain.Username;
 import cube8540.validator.core.ValidationRule;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -21,6 +22,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 class UserApplicationTestHelper {
+
+    static final String RAW_USERNAME = "username";
+    static final Username USERNAME = new Username(RAW_USERNAME);
 
     static final String RAW_EMAIL = "email@email.com";
     static final UserEmail EMAIL = new UserEmail(RAW_EMAIL);
@@ -37,7 +41,7 @@ class UserApplicationTestHelper {
     }
 
     static MockUser configDefaultMockUser() {
-        return mockUser().email()
+        return mockUser().username().email()
                 .password();
     }
 
@@ -81,6 +85,11 @@ class UserApplicationTestHelper {
             this.user = mock(User.class);
         }
 
+        MockUser username() {
+            when(user.getUsername()).thenReturn(UserApplicationTestHelper.USERNAME);
+            return this;
+        }
+
         MockUser email() {
             when(user.getEmail()).thenReturn(UserApplicationTestHelper.EMAIL);
             return this;
@@ -115,17 +124,17 @@ class UserApplicationTestHelper {
         }
 
         MockUserRepository emptyUser() {
-            when(repository.findByEmail(EMAIL)).thenReturn(Optional.empty());
+            when(repository.findByUsername(USERNAME)).thenReturn(Optional.empty());
             return this;
         }
 
         MockUserRepository registerUser(User user) {
-            when(repository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
+            when(repository.findByUsername(USERNAME)).thenReturn(Optional.of(user));
             return this;
         }
 
         MockUserRepository countUser(long count) {
-            when(repository.countByEmail(EMAIL)).thenReturn(count);
+            when(repository.countByUsername(USERNAME)).thenReturn(count);
             return this;
         }
 
@@ -206,6 +215,11 @@ class UserApplicationTestHelper {
 
         private MockUserValidationPolicy() {
             this.policy = mock(UserValidationPolicy.class);
+        }
+
+        MockUserValidationPolicy username(ValidationRule<User> validationRule) {
+            when(policy.usernameRule()).thenReturn(validationRule);
+            return this;
         }
 
         MockUserValidationPolicy email(ValidationRule<User> validationRule) {

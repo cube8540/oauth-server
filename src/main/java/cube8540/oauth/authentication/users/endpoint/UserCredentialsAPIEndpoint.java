@@ -27,8 +27,8 @@ public class UserCredentialsAPIEndpoint {
     }
 
     @PutMapping(value = "/api/accounts/attributes/active")
-    public UserProfile credentials(@RequestParam String email, @RequestParam String credentialsKey) {
-        return service.accountCredentials(email, credentialsKey);
+    public UserProfile credentials(@RequestParam String username, @RequestParam String credentialsKey) {
+        return service.accountCredentials(username, credentialsKey);
     }
 
     @ExceptionHandler(Exception.class)

@@ -44,9 +44,9 @@ public class UserManagementAPIEndpoint {
         return service.registerUser(registerRequest);
     }
 
-    @GetMapping(value = "/api/accounts/attributes/email")
-    public Map<String, Long> countAccountEmail(@RequestParam("email") String email) {
-        long count = service.countUser(email);
+    @GetMapping(value = "/api/accounts/attributes/username")
+    public Map<String, Long> countAccountUsername(@RequestParam("username") String username) {
+        long count = service.countUser(username);
         return Collections.singletonMap("count", count);
     }
 

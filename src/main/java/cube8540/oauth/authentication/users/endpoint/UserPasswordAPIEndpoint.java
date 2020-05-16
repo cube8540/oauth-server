@@ -39,8 +39,8 @@ public class UserPasswordAPIEndpoint {
     }
 
     @DeleteMapping(value = "/api/accounts/attributes/password")
-    public UserProfile forgotPassword(@RequestParam String email) {
-        return service.forgotPassword(email);
+    public UserProfile forgotPassword(@RequestParam String username) {
+        return service.forgotPassword(username);
     }
 
     @PostMapping(value = "/api/accounts/attributes/password")

@@ -2,8 +2,8 @@ package cube8540.oauth.authentication.users.application;
 
 import cube8540.oauth.authentication.users.domain.User;
 import cube8540.oauth.authentication.users.domain.UserCredentialsKeyGenerator;
-import cube8540.oauth.authentication.users.domain.UserEmail;
 import cube8540.oauth.authentication.users.domain.UserRepository;
+import cube8540.oauth.authentication.users.domain.Username;
 import cube8540.oauth.authentication.users.domain.exception.UserNotFoundException;
 import cube8540.oauth.authentication.users.infra.DefaultUserCredentialsKeyGenerator;
 import lombok.Setter;
@@ -24,8 +24,8 @@ public class DefaultUserCredentialsService implements UserCredentialsService {
 
     @Override
     @Transactional
-    public UserProfile grantCredentialsKey(String email) {
-        User user = getUser(email);
+    public UserProfile grantCredentialsKey(String username) {
+        User user = getUser(username);
 
         user.generateCredentialsKey(keyGenerator);
         return UserProfile.of(repository.save(user));
@@ -33,15 +33,15 @@ public class DefaultUserCredentialsService implements UserCredentialsService {
 
     @Override
     @Transactional
-    public UserProfile accountCredentials(String email, String credentialsKey) {
-        User user = getUser(email);
+    public UserProfile accountCredentials(String username, String credentialsKey) {
+        User user = getUser(username);
 
         user.credentials(credentialsKey);
         return UserProfile.of(repository.save(user));
     }
 
-    private User getUser(String email) {
-        return repository.findByEmail(new UserEmail(email))
-                .orElseThrow(() -> UserNotFoundException.instance(email + " is not found"));
+    private User getUser(String username) {
+        return repository.findByUsername(new Username(username))
+                .orElseThrow(() -> UserNotFoundException.instance(username + " is not found"));
     }
 }

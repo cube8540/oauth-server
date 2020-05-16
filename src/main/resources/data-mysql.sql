@@ -1,4 +1,4 @@
-insert into user(email, password, registered_at, last_updated_at, is_credentials) select 'admin', '$2a$10$uTSfWKXF20lwumttjUbxteWVJBedSEQkYxC6qJJbEVUYjzvM6q7Q2', current_timestamp, current_timestamp, true where not exists (select initialize_datetime from initialize);
+insert into user(username, email, password, registered_at, last_updated_at, is_credentials) select 'admin', 'admin', '$2a$10$uTSfWKXF20lwumttjUbxteWVJBedSEQkYxC6qJJbEVUYjzvM6q7Q2', current_timestamp, current_timestamp, true where not exists (select initialize_datetime from initialize);
 insert into authority(code, is_basic, description) select 'ROLE_USER', true, 'Default Role' where not exists (select initialize_datetime from initialize);
 insert into authority(code, is_basic, description) select 'ROLE_ADMIN', false, 'Admin Role' where not exists (select initialize_datetime from initialize);
 

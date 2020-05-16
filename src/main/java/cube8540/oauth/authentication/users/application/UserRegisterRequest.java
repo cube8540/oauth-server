@@ -6,8 +6,10 @@ import lombok.Value;
 import java.beans.ConstructorProperties;
 
 @Value
-@RequiredArgsConstructor(onConstructor_ = @ConstructorProperties({"email", "password"}))
+@RequiredArgsConstructor(onConstructor_ = @ConstructorProperties({"username", "email", "password"}))
 public class UserRegisterRequest {
+
+    private String username;
 
     private String email;
 
