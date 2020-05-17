@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -37,6 +38,11 @@ public class UserManagementAPIEndpoint {
     @GetMapping(value = "/api/accounts/me")
     public UserProfile getProfile(@AuthenticationPrincipal Authentication authentication) {
         return service.loadUserProfile(authentication.getName());
+    }
+
+    @DeleteMapping(value = "/api/accounts/me")
+    public UserProfile removeProfile(@AuthenticationPrincipal Authentication authentication) {
+        return service.removeUser(authentication.getName());
     }
 
     @PostMapping(value = "/api/accounts")
