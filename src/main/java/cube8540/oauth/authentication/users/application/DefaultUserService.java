@@ -27,7 +27,7 @@ public class DefaultUserService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException(username + " is not found"));
 
         return org.springframework.security.core.userdetails.User.builder()
-                .username(user.getEmail().getValue()).password(user.getPassword())
+                .username(user.getUsername().getValue()).password(user.getPassword())
                 .accountLocked(!user.isCredentials()).authorities(Collections.emptySet())
                 .build();
     }
