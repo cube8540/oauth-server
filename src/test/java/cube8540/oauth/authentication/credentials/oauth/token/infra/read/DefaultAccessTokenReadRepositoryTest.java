@@ -1,7 +1,7 @@
 package cube8540.oauth.authentication.credentials.oauth.token.infra.read;
 
+import cube8540.oauth.authentication.credentials.oauth.token.domain.PrincipalUsername;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.read.model.AccessTokenDetailsWithClient;
-import cube8540.oauth.authentication.users.domain.UserEmail;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -25,7 +25,7 @@ import static org.mockito.Mockito.when;
 class DefaultAccessTokenReadRepositoryTest {
 
     private static final String RAW_USERNAME = "email@email.com";
-    private static final UserEmail USERNAME = new UserEmail(RAW_USERNAME);
+    private static final PrincipalUsername USERNAME = new PrincipalUsername(RAW_USERNAME);
 
     @Nested
     @DisplayName("엑세스 토큰, 클라이언트 검색")
