@@ -22,6 +22,6 @@ public class UserRegisteredEventListener {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMPLETION, classes = UserRegisterEvent.class)
     public void handle(UserRegisterEvent event) {
-        credentialsService.grantCredentialsKey(event.getEmail().getValue());
+        credentialsService.grantCredentialsKey(event.getUsername().getValue());
     }
 }

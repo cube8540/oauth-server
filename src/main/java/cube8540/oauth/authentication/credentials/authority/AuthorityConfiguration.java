@@ -1,16 +1,12 @@
 package cube8540.oauth.authentication.credentials.authority;
 
-import cube8540.oauth.authentication.credentials.authority.application.DefaultAuthorityManagementService;
 import cube8540.oauth.authentication.credentials.authority.application.DefaultSecuredResourceManagementService;
-import cube8540.oauth.authentication.credentials.authority.application.SecuredResourceReadService;
-import cube8540.oauth.authentication.credentials.authority.domain.AuthorityValidationPolicy;
 import cube8540.oauth.authentication.credentials.authority.domain.SecuredResourceValidationPolicy;
-import cube8540.oauth.authentication.credentials.authority.infra.AuthorityExceptionTranslator;
-import cube8540.oauth.authentication.credentials.authority.infra.DefaultAuthorityValidationPolicy;
 import cube8540.oauth.authentication.credentials.authority.infra.DefaultSecuredResourceValidationPolicy;
 import cube8540.oauth.authentication.credentials.authority.infra.SecuredResourceExceptionTranslator;
-import cube8540.oauth.authentication.error.message.ErrorMessage;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ScopeDetailsService;
 import cube8540.oauth.authentication.error.ExceptionTranslator;
+import cube8540.oauth.authentication.error.message.ErrorMessage;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -22,32 +18,20 @@ import javax.annotation.PostConstruct;
 public class AuthorityConfiguration {
 
     @Setter(onMethod_ = @Autowired)
-    private DefaultAuthorityManagementService authorityManagementService;
+    private DefaultSecuredResourceManagementService securedResourceManagementService;
 
     @Setter(onMethod_ = @Autowired)
-    private DefaultSecuredResourceManagementService securedResourceManagementService;
+    private OAuth2ScopeDetailsService scopeDetailsService;
 
     @PostConstruct
     public void setManagementServicePolicy() {
-        authorityManagementService.setValidationPolicy(createAuthorityValidationPolicy(securedResourceManagementService));
-        securedResourceManagementService.setValidationPolicy(createSecuredResourceValidationPolicy(authorityManagementService));
+        securedResourceManagementService.setValidationPolicy(createSecuredResourceValidationPolicy(scopeDetailsService));
     }
 
-    private AuthorityValidationPolicy createAuthorityValidationPolicy(SecuredResourceReadService securedResourceReadService) {
-        DefaultAuthorityValidationPolicy policy = new DefaultAuthorityValidationPolicy();
-        policy.setSecuredResourceReadService(securedResourceReadService);
-        return policy;
-    }
-
-    private SecuredResourceValidationPolicy createSecuredResourceValidationPolicy(AuthorityDetailsService authorityDetailsService) {
+    private SecuredResourceValidationPolicy createSecuredResourceValidationPolicy(OAuth2ScopeDetailsService scopeDetailsService) {
         DefaultSecuredResourceValidationPolicy policy = new DefaultSecuredResourceValidationPolicy();
-        policy.setAuthorityDetailsService(authorityDetailsService);
+        policy.setAuthorityDetailsService(scopeDetailsService);
         return policy;
-    }
-
-    @Bean
-    public ExceptionTranslator<ErrorMessage<Object>> authorityExceptionTranslator() {
-        return new AuthorityExceptionTranslator();
     }
 
     @Bean

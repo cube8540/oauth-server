@@ -5,7 +5,6 @@ import cube8540.oauth.authentication.credentials.oauth.client.domain.exception.C
 import cube8540.oauth.authentication.credentials.oauth.converter.AuthorizationGrantTypeConverter;
 import cube8540.oauth.authentication.credentials.oauth.converter.RedirectUriConverter;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
-import cube8540.oauth.authentication.users.domain.UserEmail;
 import cube8540.validator.core.Validator;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -80,7 +79,7 @@ public class OAuth2Client extends AbstractAggregateRoot<OAuth2Client> {
     @Setter
     @Embedded
     @AttributeOverride(name = "value", column = @Column(name = "oauth2_client_owner", nullable = false, length = 128))
-    private UserEmail owner;
+    private ClientOwner owner;
 
     @Column(name = "access_token_validity", nullable = false)
     private Duration accessTokenValidity;

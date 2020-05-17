@@ -1,8 +1,8 @@
 package cube8540.oauth.authentication.credentials.authority.application;
 
-import cube8540.oauth.authentication.credentials.authority.domain.AuthorityCode;
 import cube8540.oauth.authentication.credentials.authority.domain.ResourceMethod;
 import cube8540.oauth.authentication.credentials.authority.domain.SecuredResource;
+import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import lombok.Value;
 
 import java.net.URI;
@@ -24,7 +24,7 @@ public class DefaultSecuredResourceDetails implements SecuredResourceDetails {
 
     public static DefaultSecuredResourceDetails of(SecuredResource securedResource) {
         List<String> authorities = Optional.ofNullable(securedResource.getAuthorities()).orElse(Collections.emptySet())
-                .stream().map(AuthorityCode::getValue).collect(Collectors.toList());
+                .stream().map(OAuth2ScopeId::getValue).collect(Collectors.toList());
         return new DefaultSecuredResourceDetails(securedResource.getResourceId().getValue(), securedResource.getResource(), securedResource.getMethod(), authorities);
     }
 

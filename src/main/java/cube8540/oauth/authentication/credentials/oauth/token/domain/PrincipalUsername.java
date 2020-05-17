@@ -1,4 +1,4 @@
-package cube8540.oauth.authentication.credentials.authority.domain;
+package cube8540.oauth.authentication.credentials.oauth.token.domain;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -16,7 +16,7 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Embeddable
-public class AuthorityCode implements Serializable {
+public class PrincipalUsername implements Serializable {
 
     private String value;
 

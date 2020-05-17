@@ -4,7 +4,6 @@ import cube8540.oauth.authentication.AuthenticationApplication;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
 import cube8540.oauth.authentication.credentials.oauth.converter.AuthorizationGrantTypeConverter;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
-import cube8540.oauth.authentication.users.domain.UserEmail;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -53,7 +52,7 @@ import java.util.Set;
 @Builder
 @Entity
 @Table(name = "oauth2_access_token", uniqueConstraints = {
-        @UniqueConstraint(name = "client_authentication_username", columnNames = {"client_id", "email"})
+        @UniqueConstraint(name = "client_authentication_username", columnNames = {"client_id", "username"})
 })
 @DynamicInsert
 @DynamicUpdate
@@ -68,8 +67,8 @@ public class OAuth2AuthorizedAccessToken extends AbstractAggregateRoot<OAuth2Aut
     private OAuth2TokenId tokenId;
 
     @Embedded
-    @AttributeOverride(name = "value", column = @Column(name = "email", length = 128))
-    private UserEmail username;
+    @AttributeOverride(name = "value", column = @Column(name = "username", length = 32))
+    private PrincipalUsername username;
 
     @Embedded
     @AttributeOverride(name = "value", column = @Column(name = "client_id", length = 32, nullable = false))

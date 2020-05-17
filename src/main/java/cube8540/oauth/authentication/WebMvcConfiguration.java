@@ -9,9 +9,9 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.navercorp.lucy.security.xss.servletfilter.XssEscapeServletFilter;
-import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AccessTokenDetails;
 import cube8540.oauth.authentication.credentials.oauth.converter.OAuth2AccessTokenDetailsSerializer;
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ErrorSerializer;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AccessTokenDetails;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,6 +21,7 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.OAuth2Error;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -37,6 +38,16 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
     public void addViewControllers(ViewControllerRegistry registry) {
         registry.addViewController("/accounts/signin").setViewName("accounts/signin");
         registry.addViewController("/oauth/approval").setViewName("oauth/approval");
+    }
+
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        // swagger ui
+        registry.addResourceHandler("swagger-ui.html")
+                .addResourceLocations("classpath:/META-INF/resources/");
+
+        registry.addResourceHandler("/webjars/**")
+                .addResourceLocations("classpath:/META-INF/resources/webjars/");
     }
 
     @Override

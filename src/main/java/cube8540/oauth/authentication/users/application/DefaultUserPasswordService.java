@@ -2,10 +2,10 @@ package cube8540.oauth.authentication.users.application;
 
 import cube8540.oauth.authentication.users.domain.User;
 import cube8540.oauth.authentication.users.domain.UserCredentialsKeyGenerator;
-import cube8540.oauth.authentication.users.domain.UserEmail;
 import cube8540.oauth.authentication.users.domain.UserKeyMatchedResult;
 import cube8540.oauth.authentication.users.domain.UserRepository;
 import cube8540.oauth.authentication.users.domain.UserValidationPolicy;
+import cube8540.oauth.authentication.users.domain.Username;
 import cube8540.oauth.authentication.users.domain.exception.UserNotFoundException;
 import cube8540.oauth.authentication.users.infra.DefaultUserCredentialsKeyGenerator;
 import cube8540.oauth.authentication.users.infra.DefaultUserValidationPolicy;
@@ -50,15 +50,15 @@ public class DefaultUserPasswordService implements UserPasswordService {
 
     @Override
     @Transactional
-    public UserProfile forgotPassword(String email) {
-        User user = getUser(email);
+    public UserProfile forgotPassword(String username) {
+        User user = getUser(username);
         user.forgotPassword(keyGenerator);
         return UserProfile.of(repository.save(user));
     }
 
     @Override
-    public boolean validateCredentialsKey(String email, String credentialsKey) {
-        User user = getUser(email);
+    public boolean validateCredentialsKey(String username, String credentialsKey) {
+        User user = getUser(username);
 
         return user.getPasswordCredentialsKey().matches(credentialsKey).equals(UserKeyMatchedResult.MATCHED);
     }
@@ -66,7 +66,7 @@ public class DefaultUserPasswordService implements UserPasswordService {
     @Override
     @Transactional
     public UserProfile resetPassword(ResetPasswordRequest resetRequest) {
-        User user = getUser(resetRequest.getEmail());
+        User user = getUser(resetRequest.getUsername());
 
         user.resetPassword(resetRequest.getCredentialsKey(), resetRequest.getNewPassword());
         user.validation(validationPolicy);
@@ -75,8 +75,8 @@ public class DefaultUserPasswordService implements UserPasswordService {
         return UserProfile.of(repository.save(user));
     }
 
-    private User getUser(String email) {
-        return repository.findByEmail(new UserEmail(email))
-                .orElseThrow(() -> UserNotFoundException.instance(email + " is not found"));
+    private User getUser(String username) {
+        return repository.findByUsername(new Username(username))
+                .orElseThrow(() -> UserNotFoundException.instance(username + " is not found"));
     }
 }

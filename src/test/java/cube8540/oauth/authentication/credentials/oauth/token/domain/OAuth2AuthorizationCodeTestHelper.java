@@ -4,7 +4,6 @@ import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2Clien
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import cube8540.oauth.authentication.credentials.oauth.security.AuthorizationCode;
 import cube8540.oauth.authentication.credentials.oauth.security.AuthorizationRequest;
-import cube8540.oauth.authentication.users.domain.UserEmail;
 
 import java.net.URI;
 import java.time.LocalDateTime;
@@ -24,7 +23,7 @@ class OAuth2AuthorizationCodeTestHelper {
     static final OAuth2ClientId CLIENT_ID = new OAuth2ClientId(RAW_CLIENT_ID);
 
     static final String RAW_USERNAME = "email@email.com";
-    static final UserEmail USERNAME = new UserEmail(RAW_USERNAME);
+    static final PrincipalUsername USERNAME = new PrincipalUsername(RAW_USERNAME);
 
     static final String STATE = "STATE";
 

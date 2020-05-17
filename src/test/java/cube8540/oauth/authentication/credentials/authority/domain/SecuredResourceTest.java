@@ -11,10 +11,8 @@ import org.junit.jupiter.api.Test;
 import static cube8540.oauth.authentication.credentials.authority.domain.AuthorityTestHelper.AUTHORITY_CODE;
 import static cube8540.oauth.authentication.credentials.authority.domain.AuthorityTestHelper.CHANGE_RESOURCE;
 import static cube8540.oauth.authentication.credentials.authority.domain.AuthorityTestHelper.CHANGE_RESOURCE_METHOD;
-import static cube8540.oauth.authentication.credentials.authority.domain.AuthorityTestHelper.DESCRIPTION;
 import static cube8540.oauth.authentication.credentials.authority.domain.AuthorityTestHelper.ERROR_MESSAGE;
 import static cube8540.oauth.authentication.credentials.authority.domain.AuthorityTestHelper.ERROR_PROPERTY;
-import static cube8540.oauth.authentication.credentials.authority.domain.AuthorityTestHelper.RAW_AUTHORITY_CODE;
 import static cube8540.oauth.authentication.credentials.authority.domain.AuthorityTestHelper.RESOURCE;
 import static cube8540.oauth.authentication.credentials.authority.domain.AuthorityTestHelper.RESOURCE_ID;
 import static cube8540.oauth.authentication.credentials.authority.domain.AuthorityTestHelper.RESOURCE_METHOD;
@@ -84,26 +82,6 @@ class SecuredResourceTest {
             this.securedResource.removeAuthority(AUTHORITY_CODE);
 
             assertFalse(securedResource.getAuthorities().contains(AUTHORITY_CODE));
-        }
-    }
-
-    @Nested
-    @DisplayName("접근 자원 삭제")
-    class RemoveAccessibleResource {
-        private Authority authority;
-
-        @BeforeEach
-        void setup() {
-            this.authority = new Authority(RAW_AUTHORITY_CODE, DESCRIPTION);
-            this.authority.addAccessibleResource(RESOURCE_ID);
-        }
-
-        @Test
-        @DisplayName("인자로 받은 접근 자원을 삭제 해야 한다.")
-        void shouldRemoveGivenAccessibleResource() {
-            this.authority.removeAccessibleResource(RESOURCE_ID);
-
-            assertFalse(authority.getAccessibleResources().contains(RESOURCE_ID));
         }
     }
 

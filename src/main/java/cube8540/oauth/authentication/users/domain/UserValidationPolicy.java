@@ -4,6 +4,8 @@ import cube8540.validator.core.ValidationRule;
 
 public interface UserValidationPolicy {
 
+    ValidationRule<User> usernameRule();
+
     ValidationRule<User> emailRule();
 
     ValidationRule<User> passwordRule();

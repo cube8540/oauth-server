@@ -1,15 +1,11 @@
 package cube8540.oauth.authentication.credentials.authority.application;
 
-import cube8540.oauth.authentication.credentials.authority.domain.Authority;
-import cube8540.oauth.authentication.credentials.authority.domain.AuthorityCode;
-import cube8540.oauth.authentication.credentials.authority.domain.AuthorityRepository;
-import cube8540.oauth.authentication.credentials.authority.domain.AuthorityValidationPolicy;
 import cube8540.oauth.authentication.credentials.authority.domain.ResourceMethod;
 import cube8540.oauth.authentication.credentials.authority.domain.SecuredResource;
 import cube8540.oauth.authentication.credentials.authority.domain.SecuredResourceId;
 import cube8540.oauth.authentication.credentials.authority.domain.SecuredResourceRepository;
 import cube8540.oauth.authentication.credentials.authority.domain.SecuredResourceValidationPolicy;
-import cube8540.validator.core.ValidationError;
+import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import cube8540.validator.core.ValidationRule;
 
 import java.net.URI;
@@ -28,12 +24,6 @@ import static org.mockito.Mockito.when;
 
 class AuthorityApplicationTestHelper {
 
-    static final String RAW_CODE = "AUTHORITY-CODE";
-    static final AuthorityCode CODE = new AuthorityCode(RAW_CODE);
-
-    static final String DESCRIPTION = "DESCRIPTION";
-    static final String MODIFY_DESCRIPTION = "MODIFY-DESCRIPTION";
-
     static final String RAW_RESOURCE_ID = "RESOURCE-ID";
     static final SecuredResourceId RESOURCE_ID = new SecuredResourceId(RAW_RESOURCE_ID);
 
@@ -42,31 +32,13 @@ class AuthorityApplicationTestHelper {
     static final String RAW_MODIFY_RESOURCE_URI = "/modify-resource/**";
     static final URI MODIFY_RESOURCE_URI = URI.create(RAW_MODIFY_RESOURCE_URI);
 
-    static final List<String> RAW_ACCESSIBLE_RESOURCES = Arrays.asList("RESOURCE-1", "RESOURCE-2", "RESOURCE-3");
-    static final Set<SecuredResourceId> ACCESSIBLE_RESOURCES = RAW_ACCESSIBLE_RESOURCES.stream().map(SecuredResourceId::new).collect(Collectors.toSet());
-    static final List<String> RAW_REMOVE_ACCESSIBLE_RESOURCES = Arrays.asList("REMOVE-RESOURCE-1", "REMOVE-RESOURCE-2", "REMOVE-RESOURCE-3");
-    static final List<String> RAW_ADDED_ACCESSIBLE_RESOURCES = Arrays.asList("ADD-RESOURCE-1", "ADD-RESOURCE-2", "ADD-RESOURCE-3");
-    static final List<SecuredResourceId> ADDED_ACCESSIBLE_RESOURCES = RAW_ADDED_ACCESSIBLE_RESOURCES.stream().map(SecuredResourceId::new).collect(Collectors.toList());
-    static final List<SecuredResourceId> REMOVE_ACCESSIBLE_RESOURCES = RAW_REMOVE_ACCESSIBLE_RESOURCES.stream().map(SecuredResourceId::new).collect(Collectors.toList());
-
     static final List<String> RAW_AUTHORITIES = Arrays.asList("AUTHORITY-1", "AUTHORITY-2", "AUTHORITY-3");
-    static final Set<AuthorityCode> AUTHORITIES = RAW_AUTHORITIES.stream().map(AuthorityCode::new).collect(Collectors.toSet());
+    static final Set<OAuth2ScopeId> AUTHORITIES = RAW_AUTHORITIES.stream().map(OAuth2ScopeId::new).collect(Collectors.toSet());
     static final List<String> RAW_REMOVE_AUTHORITIES = Arrays.asList("REMOVE-AUTHORITY-1", "REMOVE-AUTHORITY-2", "REMOVE-AUTHORITY-3");
     static final List<String> RAW_ADD_AUTHORITIES = Arrays.asList("ADD-AUTHORITY-1", "ADD-AUTHORITY-2", "ADD-AUTHORITY-3");
-    static final List<AuthorityCode> REMOVE_AUTHORITIES = RAW_REMOVE_AUTHORITIES.stream().map(AuthorityCode::new).collect(Collectors.toList());
-    static final List<AuthorityCode> ADD_AUTHORITIES = RAW_ADD_AUTHORITIES.stream().map(AuthorityCode::new).collect(Collectors.toList());
+    static final List<OAuth2ScopeId> REMOVE_AUTHORITIES = RAW_REMOVE_AUTHORITIES.stream().map(OAuth2ScopeId::new).collect(Collectors.toList());
+    static final List<OAuth2ScopeId> ADD_AUTHORITIES = RAW_ADD_AUTHORITIES.stream().map(OAuth2ScopeId::new).collect(Collectors.toList());
 
-    static MockAuthorityRepository mockAuthorityRepository() {
-        return new MockAuthorityRepository();
-    }
-
-    static MockAuthority configDefaultAuthority() {
-        return mockAuthority().code().description();
-    }
-
-    static MockAuthority mockAuthority() {
-        return new MockAuthority();
-    }
 
     static MockResourceRepository mockResourceRepository() {
         return new MockResourceRepository();
@@ -80,38 +52,8 @@ class AuthorityApplicationTestHelper {
         return new MockValidationRule<>();
     }
 
-    static MockValidationRule<Authority> mockAuthorityValidationRule() {
-        return new MockValidationRule<>();
-    }
-
     static MockResourceValidationPolicy mockResourceValidationPolicy() {
         return new MockResourceValidationPolicy();
-    }
-
-    static MockAuthorityValidationPolicy mockAuthorityValidationPolicy() {
-        return new MockAuthorityValidationPolicy();
-    }
-
-    final static class MockAuthority {
-        private Authority authority;
-
-        private MockAuthority() {
-            this.authority = mock(Authority.class);
-        }
-
-        MockAuthority code() {
-            when(authority.getCode()).thenReturn(CODE);
-            return this;
-        }
-
-        MockAuthority description() {
-            when(authority.getDescription()).thenReturn(DESCRIPTION);
-            return this;
-        }
-
-        Authority build() {
-            return authority;
-        }
     }
 
     final static class MockSecuredResource {
@@ -151,7 +93,7 @@ class AuthorityApplicationTestHelper {
             return this;
         }
 
-        MockSecuredResource authorities(Set<AuthorityCode> authorities) {
+        MockSecuredResource authorities(Set<OAuth2ScopeId> authorities) {
             when(resource.getAuthorities()).thenReturn(authorities);
             return this;
         }
@@ -161,34 +103,6 @@ class AuthorityApplicationTestHelper {
         }
     }
 
-    final static class MockAuthorityRepository {
-        private AuthorityRepository repository;
-
-        private MockAuthorityRepository() {
-            this.repository = mock(AuthorityRepository.class);
-
-            doAnswer(returnsFirstArg()).when(repository).save(isA(Authority.class));
-        }
-
-        MockAuthorityRepository count(long count) {
-            when(repository.countByCode(CODE)).thenReturn(count);
-            return this;
-        }
-
-        MockAuthorityRepository emptyAuthority() {
-            when(repository.findById(CODE)).thenReturn(Optional.empty());
-            return this;
-        }
-
-        MockAuthorityRepository registerAuthority(Authority authority) {
-            when(repository.findById(CODE)).thenReturn(Optional.of(authority));
-            return this;
-        }
-
-        AuthorityRepository build() {
-            return repository;
-        }
-    }
 
     final static class MockResourceRepository {
         private SecuredResourceRepository repository;
@@ -229,15 +143,6 @@ class AuthorityApplicationTestHelper {
             return this;
         }
 
-        MockValidationRule<T> configReturnFalse() {
-            when(this.rule.isValid(any())).thenReturn(false);
-            return this;
-        }
-
-        MockValidationRule<T> validationError(ValidationError error) {
-            when(this.rule.error()).thenReturn(error);
-            return this;
-        }
 
         ValidationRule<T> build() {
             return rule;
@@ -276,25 +181,4 @@ class AuthorityApplicationTestHelper {
         }
     }
 
-    static final class MockAuthorityValidationPolicy {
-        private AuthorityValidationPolicy policy;
-
-        private MockAuthorityValidationPolicy() {
-            this.policy = mock(AuthorityValidationPolicy.class);
-        }
-
-        MockAuthorityValidationPolicy codeRule(ValidationRule<Authority> rule) {
-            when(policy.codeRule()).thenReturn(rule);
-            return this;
-        }
-
-        MockAuthorityValidationPolicy accessibleResourceRule(ValidationRule<Authority> rule) {
-            when(policy.accessibleResourceRule()).thenReturn(rule);
-            return this;
-        }
-
-        AuthorityValidationPolicy build() {
-            return policy;
-        }
-    }
 }

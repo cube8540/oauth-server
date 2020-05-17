@@ -12,7 +12,6 @@ jacoco {
 
 group = 'cube8540.oauth'
 version = '1.5.0'
-sourceCompatibility = '13'
 
 configurations {
     compileOnly {
@@ -58,6 +57,7 @@ dependencies {
     implementation 'org.mariadb.jdbc:mariadb-java-client:2.5.2'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.security:spring-security-oauth2-resource-server:5.2.1.RELEASE'
+    implementation 'com.nimbusds:oauth2-oidc-sdk:8.3'
     implementation 'org.apache.commons:commons-text:1.8'
     implementation 'com.navercorp.lucy:lucy-xss:1.6.3'
     implementation 'com.h2database:h2:1.4.200'
@@ -71,6 +71,8 @@ dependencies {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     }
     testImplementation 'org.springframework.amqp:spring-rabbit-test'
+    implementation 'io.springfox:springfox-swagger2:2.9.2'
+    implementation 'io.springfox:springfox-swagger-ui:2.9.2'
 }
 
 test {

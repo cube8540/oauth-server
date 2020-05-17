@@ -1,13 +1,12 @@
 package cube8540.oauth.authentication.credentials.oauth.scope.application;
 
-import cube8540.oauth.authentication.credentials.authority.domain.AuthorityCode;
-import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ScopeDetails;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2Scope;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeRepository;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeValidationPolicy;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.exception.ScopeNotFoundException;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.exception.ScopeRegisterException;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ScopeDetails;
 import lombok.Setter;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
@@ -56,7 +55,7 @@ public class DefaultScopeDetailsService implements OAuth2ScopeManagementService,
 
         OAuth2Scope scope = new OAuth2Scope(registerRequest.getScopeId(), registerRequest.getDescription());
         Optional.ofNullable(registerRequest.getAccessibleAuthority())
-                .ifPresent(authorities -> authorities.forEach(authority -> scope.addAccessibleAuthority(new AuthorityCode(authority))));
+                .ifPresent(authorities -> authorities.forEach(authority -> scope.addAccessibleAuthority(new OAuth2ScopeId(authority))));
 
         scope.validate(validationPolicy);
         return DefaultOAuth2ScopeDetails.of(repository.save(scope));
@@ -69,9 +68,9 @@ public class DefaultScopeDetailsService implements OAuth2ScopeManagementService,
 
         scope.setDescription(modifyRequest.getDescription());
         Optional.ofNullable(modifyRequest.getRemoveAccessibleAuthority())
-                .ifPresent(authorities -> authorities.forEach(auth -> scope.removeAccessibleAuthority(new AuthorityCode(auth))));
+                .ifPresent(authorities -> authorities.forEach(auth -> scope.removeAccessibleAuthority(new OAuth2ScopeId(auth))));
         Optional.ofNullable(modifyRequest.getNewAccessibleAuthority())
-                .ifPresent(authorities -> authorities.forEach(auth -> scope.addAccessibleAuthority(new AuthorityCode(auth))));
+                .ifPresent(authorities -> authorities.forEach(auth -> scope.addAccessibleAuthority(new OAuth2ScopeId(auth))));
 
         scope.validate(validationPolicy);
         return DefaultOAuth2ScopeDetails.of(repository.save(scope));

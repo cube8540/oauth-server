@@ -3,13 +3,15 @@ create table if not exists initialize (
 );
 
 create table if not exists user (
-	email varchar(128) not null primary key,
+    username varchar(32) not null primary key,
+	email varchar(128) not null unique key,
 	credentials_key_expiry_datetime datetime(6) null,
 	credentials_key varchar(32) null,
 	last_updated_at datetime(6) not null,
 	password varchar(64) not null,
 	password_credentials_key_expiry_datetime datetime(6) null,
 	password_credentials_key varchar(32) null,
+	is_credentials tinyint(1) not null,
 	registered_at datetime(6) not null
 );
 
@@ -21,17 +23,11 @@ create table if not exists oauth2_clients (
 	refresh_token_validity bigint not null,
 	client_secret varchar(64) not null,
 
-	constraint fk_client_username foreign key (oauth2_client_owner) references user (email) on delete cascade
+	constraint fk_client_username foreign key (oauth2_client_owner) references user (username) on delete cascade
 );
 
 create table if not exists oauth2_scope (
 	scope_id varchar(32) not null primary key,
-	description varchar(64) null
-);
-
-create table if not exists authority (
-	code varchar(32) not null primary key,
-	is_basic bit not null,
 	description varchar(64) null
 );
 
@@ -40,11 +36,11 @@ create table if not exists oauth2_access_token (
 	client_id varchar(32) not null,
 	expiration datetime(6) not null,
 	grant_type varchar(32) not null,
-	email varchar(128) null,
+	username varchar(32) null,
 	issued_at datetime(6) not null,
-	constraint client_authentication_username unique (client_id, email),
+	constraint client_authentication_username unique (client_id, username),
 	constraint fk_access_token_client_id foreign key (client_id) references oauth2_clients (client_id) on delete cascade,
-	constraint fk_access_token_username foreign key (email) references user (email) on delete cascade
+	constraint fk_access_token_username foreign key (username) references user (username) on delete cascade
 );
 
 create table if not exists oauth2_access_token_additional_information (
@@ -61,10 +57,10 @@ create table if not exists oauth2_authorization_code (
 	expiration_at datetime(6) not null,
 	redirect_uri varchar(128) null,
 	state varchar(12) null,
-	email varchar(128) not null,
+	username varchar(32) null,
 
     constraint fk_authorization_code_client_id foreign key (client_id) references oauth2_clients (client_id) on delete cascade,
-	constraint fk_authorization_code_username foreign key (email) references user (email) on delete cascade
+	constraint fk_authorization_code_username foreign key (username) references user (username) on delete cascade
 );
 
 create table if not exists oauth2_client_grant_type (
@@ -110,7 +106,7 @@ create table if not exists oauth2_scope_accessible_authority (
 	authority varchar(32) not null,
 	primary key (scope_id, authority),
 	constraint fk_accessible_authority_scope_id foreign key (scope_id) references oauth2_scope (scope_id) on delete cascade,
-	constraint fk_accessible_authority_authority foreign key (authority) references authority (code) on delete cascade
+	constraint fk_accessible_authority_authority foreign key (authority) references oauth2_scope (scope_id) on delete cascade
 );
 
 create table if not exists oauth2_token_scope (
@@ -131,16 +127,8 @@ create table if not exists authority_accessible_resources (
 	authority varchar(32) not null,
 	resource_id varchar(128) not null,
 	primary key (authority, resource_id),
-	constraint fk_accessible_resource_authority foreign key (resource_id) references secured_resource (resource_id) on delete cascade,
-	constraint fk_accessible_resource_resource foreign key (authority) references authority (code) on delete cascade
-);
-
-create table if not exists user_authority (
-	email varchar(128) not null,
-	authority_code varchar(32) not null,
-	primary key (email, authority_code),
-	constraint fk_user_authority_email foreign key (email) references user (email) on delete cascade,
-	constraint fk_user_authority_authority foreign key(authority_code) references authority (code) on delete cascade
+	constraint fk_accessible_resource_resource foreign key (resource_id) references secured_resource (resource_id) on delete cascade,
+	constraint fk_accessible_resource_authority foreign key (authority) references oauth2_scope (scope_id) on delete cascade
 );
 
 commit;

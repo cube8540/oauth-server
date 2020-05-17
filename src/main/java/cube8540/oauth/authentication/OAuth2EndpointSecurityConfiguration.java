@@ -1,8 +1,11 @@
-package cube8540.oauth.authentication.credentials.oauth.security;
+package cube8540.oauth.authentication;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionResponseRenderer;
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTranslator;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AccessTokenGranter;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AuthorizationCodeGenerator;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetailsService;
 import cube8540.oauth.authentication.credentials.oauth.security.endpoint.AuthorizationCodeResponseEnhancer;
 import cube8540.oauth.authentication.credentials.oauth.security.endpoint.AuthorizationImplicitResponseEnhancer;
 import cube8540.oauth.authentication.credentials.oauth.security.endpoint.AuthorizationResponseEnhancer;

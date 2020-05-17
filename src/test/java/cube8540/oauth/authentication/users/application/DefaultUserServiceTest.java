@@ -6,11 +6,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
-import java.util.Set;
+import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -38,7 +37,7 @@ class DefaultUserServiceTest {
             @Test
             @DisplayName("UsernameNotFoundException 이 발생해야 한다.")
             void shouldThrowsUsernameNotFoundException() {
-                assertThrows(UsernameNotFoundException.class, () -> service.loadUserByUsername(UserApplicationTestHelper.RAW_EMAIL));
+                assertThrows(UsernameNotFoundException.class, () -> service.loadUserByUsername(UserApplicationTestHelper.RAW_USERNAME));
             }
         }
 
@@ -61,7 +60,7 @@ class DefaultUserServiceTest {
                 @Test
                 @DisplayName("계정의 잠금된 설정으로 반환되어야 한다.")
                 void shouldAccountIsNotLocked() {
-                    UserDetails result = service.loadUserByUsername(UserApplicationTestHelper.RAW_EMAIL);
+                    UserDetails result = service.loadUserByUsername(UserApplicationTestHelper.RAW_USERNAME);
 
                     assertFalse(result.isAccountNonLocked());
                 }
@@ -80,18 +79,17 @@ class DefaultUserServiceTest {
                 }
 
                 @Test
-                @DisplayName("저장소에서 찾은 유저의 권한을 반환해야 한다.")
-                void shouldReturnsGrantedAuthority() {
-                    UserDetails result = service.loadUserByUsername(UserApplicationTestHelper.RAW_EMAIL);
+                @DisplayName("권한은 항상 빈 배열로 반환 해야 한다.")
+                void shouldReturnEmptyArrayToAuthority() {
+                    UserDetails result = service.loadUserByUsername(UserApplicationTestHelper.RAW_USERNAME);
 
-                    Set<GrantedAuthority> expectedAuthorities = UserApplicationTestHelper.convertGrantAuthority(UserApplicationTestHelper.AUTHORITIES);
-                    assertEquals(expectedAuthorities, result.getAuthorities());
+                    assertEquals(Collections.emptySet(), result.getAuthorities());
                 }
 
                 @Test
                 @DisplayName("계정의 잠금되지 않은 설정으로 반환되어야 한다.")
                 void shouldAccountIsNotLocked() {
-                    UserDetails result = service.loadUserByUsername(UserApplicationTestHelper.RAW_EMAIL);
+                    UserDetails result = service.loadUserByUsername(UserApplicationTestHelper.RAW_USERNAME);
 
                     assertTrue(result.isAccountNonLocked());
                 }

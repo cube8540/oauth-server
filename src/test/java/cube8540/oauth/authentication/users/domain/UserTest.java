@@ -12,8 +12,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.Collections;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -27,6 +25,35 @@ class UserTest {
     class Validation {
 
         @Nested
+        @DisplayName("허용된 아이디가 아닐시")
+        class WhenUsernameNotAllowed {
+            private ValidationError usernameError;
+            private UserValidationPolicy policy;
+
+            private User user;
+
+            @BeforeEach
+            void setup() {
+                this.user = new User(UserTestHelper.RAW_USERNAME, UserTestHelper.RAW_EMAIL, UserTestHelper.PASSWORD);
+                this.usernameError = new ValidationError(UserTestHelper.USERNAME_ERROR_PROPERTY, UserTestHelper.USERNAME_ERROR_MESSAGE);
+
+                ValidationRule<User> userRule = UserTestHelper.mockValidationRule().configReturnFalse(user).validationError(usernameError).build();
+                ValidationRule<User> emailRule = UserTestHelper.mockValidationRule().configReturnTrue(user).build();
+                ValidationRule<User> passwordRule = UserTestHelper.mockValidationRule().configReturnTrue(user).build();
+
+                this.policy = UserTestHelper.mockValidationPolicy().usernameRule(userRule).emailRule(emailRule).passwordRule(passwordRule).build();
+            }
+
+            @Test
+            @DisplayName("UserInvalidException 이 발생해야 하며 예외 클래스에 아이디 에러 메시지가 포함 되어야 한다.")
+            void shouldThrowsUserInvalidExceptionAndContainsErrorMessage() {
+                UserInvalidException exception = assertThrows(UserInvalidException.class, () -> user.validation(policy));
+
+                assertTrue(exception.getErrors().contains(usernameError));
+            }
+        }
+
+        @Nested
         @DisplayName("허용된 이메일이 아닐시")
         class WhenUserEmailNotAllowed {
             private ValidationError emailError;
@@ -36,17 +63,18 @@ class UserTest {
 
             @BeforeEach
             void setup() {
-                this.user = new User(UserTestHelper.RAW_EMAIL, UserTestHelper.PASSWORD);
+                this.user = new User(UserTestHelper.RAW_USERNAME, UserTestHelper.RAW_EMAIL, UserTestHelper.PASSWORD);
                 this.emailError = new ValidationError(UserTestHelper.EMAIL_ERROR_PROPERTY, UserTestHelper.EMAIL_ERROR_MESSAGE);
 
+                ValidationRule<User> userRule = UserTestHelper.mockValidationRule().configReturnTrue(user).build();
                 ValidationRule<User> emailRule = UserTestHelper.mockValidationRule().configReturnFalse(user).validationError(emailError).build();
                 ValidationRule<User> passwordRule = UserTestHelper.mockValidationRule().configReturnTrue(user).build();
 
-                this.policy = UserTestHelper.mockValidationPolicy().emailRule(emailRule).passwordRule(passwordRule).build();
+                this.policy = UserTestHelper.mockValidationPolicy().usernameRule(userRule).emailRule(emailRule).passwordRule(passwordRule).build();
             }
 
             @Test
-            @DisplayName("UserInvalidException 이 발생해야 하며 예외 클래스에 이메일 에러 메시지가 포함되어야 한다.")
+            @DisplayName("UserInvalidException 이 발생해야 하며 예외 클래스에 이메일 에러 메시지가 포함 되어야 한다.")
             void shouldThrowsUserInvalidExceptionAndContainsErrorMessage() {
                 UserInvalidException exception = assertThrows(UserInvalidException.class, () -> user.validation(policy));
 
@@ -64,17 +92,18 @@ class UserTest {
 
             @BeforeEach
             void setup() {
-                this.user = new User(UserTestHelper.RAW_EMAIL, UserTestHelper.PASSWORD);
+                this.user = new User(UserTestHelper.RAW_USERNAME, UserTestHelper.RAW_EMAIL, UserTestHelper.PASSWORD);
                 this.passwordError = new ValidationError(UserTestHelper.PASSWORD_ERROR_PROPERTY, UserTestHelper.PASSWORD_ERROR_MESSAGE);
 
+                ValidationRule<User> userRule = UserTestHelper.mockValidationRule().configReturnTrue(user).build();
                 ValidationRule<User> emailRule = UserTestHelper.mockValidationRule().configReturnTrue(user).build();
                 ValidationRule<User> passwordRule = UserTestHelper.mockValidationRule().configReturnFalse(user).validationError(passwordError).build();
 
-                this.policy = UserTestHelper.mockValidationPolicy().emailRule(emailRule).passwordRule(passwordRule).build();
+                this.policy = UserTestHelper.mockValidationPolicy().usernameRule(userRule).emailRule(emailRule).passwordRule(passwordRule).build();
             }
 
             @Test
-            @DisplayName("UserInvalidException 이 발생해야 하며 예외 클래스에 패스워드 에러 메시지가 포함되어야 한다.")
+            @DisplayName("UserInvalidException 이 발생해야 하며 예외 클래스에 패스워드 에러 메시지가 포함 되어야 한다.")
             void shouldThrowsUserInvalidExceptionAndContainsErrorMessage() {
                 UserInvalidException exception = assertThrows(UserInvalidException.class, () -> user.validation(policy));
 
@@ -96,7 +125,7 @@ class UserTest {
 
             @BeforeEach
             void setup(){
-                this.user = new User(UserTestHelper.RAW_EMAIL, UserTestHelper.PASSWORD);
+                this.user = new User(UserTestHelper.RAW_USERNAME, UserTestHelper.RAW_EMAIL, UserTestHelper.PASSWORD);
                 this.encoder  = UserTestHelper.mockPasswordEncoder().mismatches().build();
             }
 
@@ -125,7 +154,7 @@ class UserTest {
 
             @BeforeEach
             void setup() {
-                this.user = new User(UserTestHelper.RAW_EMAIL, UserTestHelper.PASSWORD);
+                this.user = new User(UserTestHelper.RAW_USERNAME, UserTestHelper.RAW_EMAIL, UserTestHelper.PASSWORD);
                 this.encoder = UserTestHelper.mockPasswordEncoder().matches().build();
             }
 
@@ -151,7 +180,7 @@ class UserTest {
         void setup() {
             this.credentialsKey = UserTestHelper.mockCredentialsKey().build();
             this.keyGenerator = UserTestHelper.mockKeyGenerator(credentialsKey);
-            this.user = new User(UserTestHelper.RAW_EMAIL, UserTestHelper.PASSWORD);
+            this.user = new User(UserTestHelper.RAW_USERNAME, UserTestHelper.RAW_EMAIL, UserTestHelper.PASSWORD);
         }
 
         @Test
@@ -174,7 +203,7 @@ class UserTest {
 
             @BeforeEach
             void setup() {
-                this.user = new User(UserTestHelper.RAW_EMAIL, UserTestHelper.PASSWORD);
+                this.user = new User(UserTestHelper.RAW_USERNAME, UserTestHelper.RAW_EMAIL, UserTestHelper.PASSWORD);
             }
 
             @Test
@@ -200,7 +229,7 @@ class UserTest {
 
             @BeforeEach
             void setup() {
-                this.user = new User(UserTestHelper.RAW_EMAIL, UserTestHelper.PASSWORD);
+                this.user = new User(UserTestHelper.RAW_USERNAME, UserTestHelper.RAW_EMAIL, UserTestHelper.PASSWORD);
 
                 UserCredentialsKey key = UserTestHelper.mockCredentialsKey().mismatches(UserTestHelper.RAW_PASSWORD_CREDENTIALS_KEY).build();
                 UserCredentialsKeyGenerator keyGenerator = UserTestHelper.mockKeyGenerator(key);
@@ -231,7 +260,7 @@ class UserTest {
 
             @BeforeEach
             void setup() {
-                this.user = new User(UserTestHelper.RAW_EMAIL, UserTestHelper.PASSWORD);
+                this.user = new User(UserTestHelper.RAW_USERNAME, UserTestHelper.RAW_EMAIL, UserTestHelper.PASSWORD);
 
                 UserCredentialsKey key = UserTestHelper.mockCredentialsKey().expired(UserTestHelper.RAW_PASSWORD_CREDENTIALS_KEY).build();
                 UserCredentialsKeyGenerator keyGenerator = UserTestHelper.mockKeyGenerator(key);
@@ -262,7 +291,7 @@ class UserTest {
 
             @BeforeEach
             void setup() {
-                this.user = new User(UserTestHelper.RAW_EMAIL, UserTestHelper.PASSWORD);
+                this.user = new User(UserTestHelper.RAW_USERNAME, UserTestHelper.RAW_EMAIL, UserTestHelper.PASSWORD);
 
                 UserCredentialsKey key = UserTestHelper.mockCredentialsKey().matches(UserTestHelper.RAW_PASSWORD_CREDENTIALS_KEY).build();
                 UserCredentialsKeyGenerator keyGenerator = UserTestHelper.mockKeyGenerator(key);
@@ -304,7 +333,7 @@ class UserTest {
             void setup() {
                 this.key = UserTestHelper.mockCredentialsKey().build();
                 this.keyGenerator = UserTestHelper.mockKeyGenerator(key);
-                this.user = new User(UserTestHelper.RAW_EMAIL, UserTestHelper.PASSWORD);
+                this.user = new User(UserTestHelper.RAW_USERNAME, UserTestHelper.RAW_EMAIL, UserTestHelper.PASSWORD);
             }
 
             @Test
@@ -317,7 +346,7 @@ class UserTest {
         }
 
         @Nested
-        @DisplayName("이미 인증 받은 계정일시")
+        @DisplayName("이미 인증 받은 계정 일시")
         class WhenAlreadyCertificationAccount {
             private UserCredentialsKeyGenerator keyGenerator;
 
@@ -328,9 +357,9 @@ class UserTest {
                 UserCredentialsKey key = UserTestHelper.mockCredentialsKey().matches(UserTestHelper.RAW_CREDENTIALS_KEY).build();
 
                 this.keyGenerator = UserTestHelper.mockKeyGenerator(key);
-                this.user = new User(UserTestHelper.RAW_EMAIL, UserTestHelper.PASSWORD);
+                this.user = new User(UserTestHelper.RAW_USERNAME, UserTestHelper.RAW_EMAIL, UserTestHelper.PASSWORD);
                 this.user.generateCredentialsKey(keyGenerator);
-                this.user.credentials(UserTestHelper.RAW_CREDENTIALS_KEY, UserTestHelper.AUTHORITIES_CODE);
+                this.user.credentials(UserTestHelper.RAW_CREDENTIALS_KEY);
             }
 
             @Test
@@ -348,32 +377,6 @@ class UserTest {
                 assertEquals(UserErrorCodes.ALREADY_CREDENTIALS, e.getCode());
             }
         }
-
-        @Nested
-        @DisplayName("이미 인증 받았지만 할당된 권한이 없을시")
-        class WhenAlreadyCertificationNotHaveAuthoritiesAccount {
-            private UserCredentialsKey key;
-            private UserCredentialsKeyGenerator keyGenerator;
-
-            private User user;
-
-            @BeforeEach
-            void setup() {
-                this.key = UserTestHelper.mockCredentialsKey().matches(UserTestHelper.RAW_CREDENTIALS_KEY).build();
-                this.keyGenerator = UserTestHelper.mockKeyGenerator(key);
-                this.user = new User(UserTestHelper.RAW_EMAIL, UserTestHelper.PASSWORD);
-                this.user.generateCredentialsKey(keyGenerator);
-                this.user.credentials(UserTestHelper.RAW_CREDENTIALS_KEY, Collections.emptySet());
-            }
-
-            @Test
-            @DisplayName("키 생성기에서 반환된 키를 저장해야 한다.")
-            void shouldSaveCreatedKeyByGivenGenerator() {
-                user.generateCredentialsKey(keyGenerator);
-
-                assertEquals(key, user.getCredentialsKey());
-            }
-        }
     }
 
     @Nested
@@ -387,20 +390,20 @@ class UserTest {
 
             @BeforeEach
             void setup() {
-                this.user = new User(UserTestHelper.RAW_EMAIL, UserTestHelper.PASSWORD);
+                this.user = new User(UserTestHelper.RAW_USERNAME, UserTestHelper.RAW_EMAIL, UserTestHelper.PASSWORD);
             }
 
             @Test
             @DisplayName("UserAuthorizationException 이 발생해야 한다.")
             void shouldThrowsUserAuthorizationException() {
-                assertThrows(UserAuthorizationException.class, () -> user.credentials(UserTestHelper.RAW_CREDENTIALS_KEY, Collections.emptyList()));
+                assertThrows(UserAuthorizationException.class, () -> user.credentials(UserTestHelper.RAW_CREDENTIALS_KEY));
             }
 
             @Test
             @DisplayName("에러 코드는 INVALID_KEY 이어야 한다.")
             void shouldErrorCodeIsInvalidKey() {
                 UserAuthorizationException e = assertThrows(UserAuthorizationException.class,
-                        () -> user.credentials(UserTestHelper.RAW_CREDENTIALS_KEY, Collections.emptyList()));
+                        () -> user.credentials(UserTestHelper.RAW_CREDENTIALS_KEY));
 
                 assertEquals(UserErrorCodes.INVALID_KEY, e.getCode());
             }
@@ -416,21 +419,21 @@ class UserTest {
                 UserCredentialsKey key = UserTestHelper.mockCredentialsKey().mismatches(UserTestHelper.RAW_CREDENTIALS_KEY).build();
                 UserCredentialsKeyGenerator keyGenerator = UserTestHelper.mockKeyGenerator(key);
 
-                this.user = new User(UserTestHelper.RAW_EMAIL, UserTestHelper.PASSWORD);
+                this.user = new User(UserTestHelper.RAW_USERNAME, UserTestHelper.RAW_EMAIL, UserTestHelper.PASSWORD);
                 this.user.generateCredentialsKey(keyGenerator);
             }
 
             @Test
             @DisplayName("UserAuthorizationException 이 발생해야 한다.")
             void shouldThrowsUserAuthorizationException() {
-                assertThrows(UserAuthorizationException.class, () -> user.credentials(UserTestHelper.RAW_CREDENTIALS_KEY, Collections.emptyList()));
+                assertThrows(UserAuthorizationException.class, () -> user.credentials(UserTestHelper.RAW_CREDENTIALS_KEY));
             }
 
             @Test
             @DisplayName("에러 코드는 INVALID_KEY 이어야 한다.")
             void shouldErrorCodeIsInvalidKey() {
                 UserAuthorizationException e = assertThrows(UserAuthorizationException.class,
-                        () -> user.credentials(UserTestHelper.RAW_CREDENTIALS_KEY, Collections.emptyList()));
+                        () -> user.credentials(UserTestHelper.RAW_CREDENTIALS_KEY));
 
                 assertEquals(UserErrorCodes.INVALID_KEY, e.getCode());
             }
@@ -446,21 +449,21 @@ class UserTest {
                 UserCredentialsKey key = UserTestHelper.mockCredentialsKey().expired(UserTestHelper.RAW_CREDENTIALS_KEY).build();
                 UserCredentialsKeyGenerator keyGenerator = UserTestHelper.mockKeyGenerator(key);
 
-                this.user = new User(UserTestHelper.RAW_EMAIL, UserTestHelper.PASSWORD);
+                this.user = new User(UserTestHelper.RAW_USERNAME, UserTestHelper.RAW_EMAIL, UserTestHelper.PASSWORD);
                 this.user.generateCredentialsKey(keyGenerator);
             }
 
             @Test
             @DisplayName("UserAuthorizationException 이 발생해야 한다.")
             void shouldThrowsUserAuthorizationException() {
-                assertThrows(UserAuthorizationException.class, () -> user.credentials(UserTestHelper.RAW_CREDENTIALS_KEY, Collections.emptyList()));
+                assertThrows(UserAuthorizationException.class, () -> user.credentials(UserTestHelper.RAW_CREDENTIALS_KEY));
             }
 
             @Test
             @DisplayName("에러 코드는 KEY_EXPIRED 이어야 한다.")
             void shouldErrorCodeIsKeyExpired() {
                 UserAuthorizationException e = assertThrows(UserAuthorizationException.class,
-                        () -> user.credentials(UserTestHelper.RAW_CREDENTIALS_KEY, Collections.emptyList()));
+                        () -> user.credentials(UserTestHelper.RAW_CREDENTIALS_KEY));
 
                 assertEquals(UserErrorCodes.KEY_EXPIRED, e.getCode());
             }
@@ -476,24 +479,24 @@ class UserTest {
                 UserCredentialsKey key = UserTestHelper.mockCredentialsKey().matches(UserTestHelper.RAW_CREDENTIALS_KEY).build();
                 UserCredentialsKeyGenerator keyGenerator = UserTestHelper.mockKeyGenerator(key);
 
-                this.user = new User(UserTestHelper.RAW_EMAIL, UserTestHelper.PASSWORD);
+                this.user = new User(UserTestHelper.RAW_USERNAME, UserTestHelper.RAW_EMAIL, UserTestHelper.PASSWORD);
                 this.user.generateCredentialsKey(keyGenerator);
-            }
-
-            @Test
-            @DisplayName("인자로 받은 권한을 저장해야한다.")
-            void shouldSaveGivenAuthorities() {
-                user.credentials(UserTestHelper.RAW_CREDENTIALS_KEY, UserTestHelper.AUTHORITIES_CODE);
-
-                Assertions.assertEquals(UserTestHelper.AUTHORITIES_CODE, user.getAuthorities());
             }
 
             @Test
             @DisplayName("인증키를 null로 설정해야 한다.")
             void shouldCredentialsKeySetNull() {
-                user.credentials(UserTestHelper.RAW_CREDENTIALS_KEY, UserTestHelper.AUTHORITIES_CODE);
+                user.credentials(UserTestHelper.RAW_CREDENTIALS_KEY);
 
                 assertNull(user.getCredentialsKey());
+            }
+
+            @Test
+            @DisplayName("isCredentials 속성을 true로 변경해야 한다.")
+            void shouldSetTrueToIsCredentialsProperty() {
+                user.credentials(UserTestHelper.RAW_CREDENTIALS_KEY);
+
+                assertTrue(user.isCredentials());
             }
         }
     }
@@ -508,7 +511,7 @@ class UserTest {
         @BeforeEach
         void setup() {
             this.encoder = UserTestHelper.mockPasswordEncoder().encode().build();
-            this.user = new User(UserTestHelper.RAW_EMAIL, UserTestHelper.PASSWORD);
+            this.user = new User(UserTestHelper.RAW_USERNAME, UserTestHelper.RAW_EMAIL, UserTestHelper.PASSWORD);
         }
 
         @Test

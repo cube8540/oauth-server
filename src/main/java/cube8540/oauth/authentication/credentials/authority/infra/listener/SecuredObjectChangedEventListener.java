@@ -1,6 +1,5 @@
 package cube8540.oauth.authentication.credentials.authority.infra.listener;
 
-import cube8540.oauth.authentication.credentials.authority.domain.AuthorityAccessibleResourceChangedEvent;
 import cube8540.oauth.authentication.credentials.authority.domain.SecuredResourceChangedEvent;
 import cube8540.oauth.authentication.credentials.authority.security.ReloadableFilterInvocationSecurityMetadataSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +17,7 @@ public class SecuredObjectChangedEventListener {
         this.reloadableMetadataSource = reloadableMetadataSource;
     }
 
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT, classes = {AuthorityAccessibleResourceChangedEvent.class, SecuredResourceChangedEvent.class})
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT, classes = {SecuredResourceChangedEvent.class})
     public void reloadMetadataSource() {
         this.reloadableMetadataSource.reload();
     }

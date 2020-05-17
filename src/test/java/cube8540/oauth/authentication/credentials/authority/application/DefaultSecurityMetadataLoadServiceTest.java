@@ -1,9 +1,9 @@
 package cube8540.oauth.authentication.credentials.authority.application;
 
-import cube8540.oauth.authentication.credentials.authority.domain.AuthorityCode;
 import cube8540.oauth.authentication.credentials.authority.domain.ResourceMethod;
 import cube8540.oauth.authentication.credentials.authority.domain.SecuredResource;
 import cube8540.oauth.authentication.credentials.authority.domain.SecuredResourceRepository;
+import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -41,12 +41,12 @@ class DefaultSecurityMetadataLoadServiceTest {
     private static final ResourceMethod RESOURCE_2_METHOD = ResourceMethod.PUT;
     private static final ResourceMethod RESOURCE_3_METHOD = ResourceMethod.ALL;
 
-    private static final Set<AuthorityCode> AUTHORITIES_1 = new HashSet<>(Arrays.asList(
-            new AuthorityCode("AUTHORITY-1"), new AuthorityCode("AUTHORITY-2"), new AuthorityCode("AUTHORITY-3")));
-    private static final Set<AuthorityCode> AUTHORITIES_2 = new HashSet<>(Arrays.asList(
-            new AuthorityCode("AUTHORITY-1"), new AuthorityCode("AUTHORITY-4"), new AuthorityCode("AUTHORITY-5")));
-    private static final Set<AuthorityCode> AUTHORITIES_3 = new HashSet<>(Arrays.asList(
-            new AuthorityCode("AUTHORITY-5"), new AuthorityCode("AUTHORITY-6"), new AuthorityCode("AUTHORITY-7")));
+    private static final Set<OAuth2ScopeId> AUTHORITIES_1 = new HashSet<>(Arrays.asList(
+            new OAuth2ScopeId("AUTHORITY-1"), new OAuth2ScopeId("AUTHORITY-2"), new OAuth2ScopeId("AUTHORITY-3")));
+    private static final Set<OAuth2ScopeId> AUTHORITIES_2 = new HashSet<>(Arrays.asList(
+            new OAuth2ScopeId("AUTHORITY-1"), new OAuth2ScopeId("AUTHORITY-4"), new OAuth2ScopeId("AUTHORITY-5")));
+    private static final Set<OAuth2ScopeId> AUTHORITIES_3 = new HashSet<>(Arrays.asList(
+            new OAuth2ScopeId("AUTHORITY-5"), new OAuth2ScopeId("AUTHORITY-6"), new OAuth2ScopeId("AUTHORITY-7")));
 
     private SecuredResourceRepository repository;
 
@@ -81,8 +81,8 @@ class DefaultSecurityMetadataLoadServiceTest {
         }
     }
 
-    private Collection<ConfigAttribute> securityConfig(Set<AuthorityCode> authorityCodes) {
-        return authorityCodes.stream().map(AuthorityCode::getValue).map(SecurityConfig::new).collect(Collectors.toList());
+    private Collection<ConfigAttribute> securityConfig(Set<OAuth2ScopeId> authorityCodes) {
+        return authorityCodes.stream().map(OAuth2ScopeId::getValue).map(SecurityConfig::new).collect(Collectors.toList());
     }
 
 }

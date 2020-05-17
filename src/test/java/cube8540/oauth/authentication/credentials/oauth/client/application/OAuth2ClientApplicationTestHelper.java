@@ -1,11 +1,11 @@
 package cube8540.oauth.authentication.credentials.oauth.client.application;
 
+import cube8540.oauth.authentication.credentials.oauth.client.domain.ClientOwner;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2Client;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientRepository;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientValidatePolicy;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
-import cube8540.oauth.authentication.users.domain.UserEmail;
 import cube8540.validator.core.ValidationRule;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -62,7 +62,7 @@ public class OAuth2ClientApplicationTestHelper {
     static final List<String> RAW_REMOVE_SCOPES = REMOVE_SCOPES.stream().map(OAuth2ScopeId::getValue).collect(Collectors.toList());
 
     static final String RAW_OWNER = "owner@email.com";
-    static final UserEmail OWNER = new UserEmail(RAW_OWNER);
+    static final ClientOwner OWNER = new ClientOwner(RAW_OWNER);
 
     static final Duration ACCESS_TOKEN_VALIDITY = Duration.ofMinutes(10);
     static final Duration REFRESH_TOKEN_VALIDITY = Duration.ofHours(12);

@@ -4,7 +4,7 @@ import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeI
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AccessTokenDetails;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2RefreshTokenDetails;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedAccessToken;
-import cube8540.oauth.authentication.users.domain.UserEmail;
+import cube8540.oauth.authentication.credentials.oauth.token.domain.PrincipalUsername;
 import lombok.Builder;
 import lombok.Value;
 
@@ -40,7 +40,7 @@ public class DefaultAccessTokenDetails implements OAuth2AccessTokenDetails {
                 .isExpired(accessToken.isExpired())
                 .tokenType(TOKEN_TYPE);
         builder.scopes(Optional.ofNullable(accessToken.getScopes()).orElse(Collections.emptySet()).stream().map(OAuth2ScopeId::getValue).collect(Collectors.toSet()));
-        builder.username(Optional.ofNullable(accessToken.getUsername()).map(UserEmail::getValue).orElse(null));
+        builder.username(Optional.ofNullable(accessToken.getUsername()).map(PrincipalUsername::getValue).orElse(null));
         builder.refreshToken(Optional.ofNullable(accessToken.getRefreshToken()).map(DefaultRefreshTokenDetails::of).orElse(null));
         builder.additionalInformation(Optional.ofNullable(accessToken.getAdditionalInformation()).orElse(null));
         return builder.build();

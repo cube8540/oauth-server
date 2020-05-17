@@ -1,7 +1,6 @@
 package cube8540.oauth.authentication.credentials.oauth.token.domain;
 
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
-import cube8540.oauth.authentication.users.domain.UserEmail;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 
 import java.time.LocalDateTime;
@@ -18,7 +17,7 @@ class OAuth2AccessTokenTestHelper {
     static final OAuth2TokenId REFRESH_TOKEN_ID = new OAuth2TokenId(RAW_REFRESH_TOKEN_ID);
 
     static final String RAW_USERNAME = "email@email.com";
-    static final UserEmail USERNAME = new UserEmail(RAW_USERNAME);
+    static final PrincipalUsername USERNAME = new PrincipalUsername(RAW_USERNAME);
 
     static final String RAW_CLIENT_ID = "CLIENT-ID";
     static final OAuth2ClientId CLIENT_ID = new OAuth2ClientId(RAW_CLIENT_ID);

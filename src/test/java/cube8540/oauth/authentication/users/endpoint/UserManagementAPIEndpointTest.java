@@ -3,23 +3,22 @@ package cube8540.oauth.authentication.users.endpoint;
 import cube8540.oauth.authentication.users.application.UserManagementService;
 import cube8540.oauth.authentication.users.application.UserProfile;
 import cube8540.oauth.authentication.users.application.UserRegisterRequest;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @DisplayName("유저 관리 API 엔드 포인트 테스트")
 class UserManagementAPIEndpointTest {
 
+    private static final String USERNAME = "username";
     private static final String EMAIL = "email@email.com";
     private static final String PASSWORD = "Password1234!@#$";
 
@@ -39,28 +38,21 @@ class UserManagementAPIEndpointTest {
     class RegisterNewUser {
 
         private UserRegisterRequest registerRequest;
-        private Map<String, Object> model;
-        private UserProfile userProfile;
 
         @BeforeEach
         void setup() {
-            this.registerRequest = new UserRegisterRequest(EMAIL, PASSWORD);
-            this.model = new HashMap<>();
-            this.userProfile = new UserProfile(EMAIL, REGISTERED_DATE_TIME);
+            this.registerRequest = new UserRegisterRequest(USERNAME, EMAIL, PASSWORD);
 
+            UserProfile userProfile = new UserProfile(USERNAME, EMAIL, REGISTERED_DATE_TIME);
             when(service.registerUser(registerRequest)).thenReturn(userProfile);
         }
 
         @Test
-        @DisplayName("새로 등록된 유저를 세션에 저장해야 한다.")
-        void shouldSaveNewRegisteredUserToSession() {
-            endpoint.registerUserAccounts(registerRequest, model);
-            assertEquals(userProfile, model.get(UserManagementAPIEndpoint.NEW_REGISTERED_USER_ATTRIBUTE));
-        }
+        @DisplayName("요청 받은 새 유저 정보를 등록해야 한다.")
+        void shouldRegisterNewUserByInputData() {
+            endpoint.registerUserAccounts(registerRequest);
 
-        @AfterEach
-        void after() {
-            this.model.clear();
+            verify(service, times(1)).registerUser(registerRequest);
         }
     }
 

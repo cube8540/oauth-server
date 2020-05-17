@@ -16,7 +16,8 @@ import org.thymeleaf.context.Context;
 public class UserGeneratedCredentialsKeyEventListener {
 
     protected static final String TEMPLATE_LOCATION = "email/user-generated-key-mail-template";
-    protected static final String USER_EMAIL_VARIABLE = "registeredUser";
+    protected static final String USERNAME_VARIABLE = "registeredUsername";
+    protected static final String USER_EMAIL_VARIABLE = "registeredUserEmail";
     protected static final String GENERATED_KEY_VARIABLE = "generatedKey";
 
     protected static final String DEFAULT_SUBJECT = "가입 확인 이메일 입니다.";
@@ -56,6 +57,7 @@ public class UserGeneratedCredentialsKeyEventListener {
     private Context createContext(UserGeneratedCredentialsKeyEvent event) {
         Context context = new Context();
 
+        context.setVariable(USERNAME_VARIABLE, event.getUsername().getValue());
         context.setVariable(USER_EMAIL_VARIABLE, event.getEmail().getValue());
         context.setVariable(GENERATED_KEY_VARIABLE, event.getKey().getKeyValue());
 

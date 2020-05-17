@@ -3,6 +3,7 @@ package cube8540.oauth.authentication.users.infra.listener;
 import cube8540.oauth.authentication.users.domain.UserCredentialsKey;
 import cube8540.oauth.authentication.users.domain.UserEmail;
 import cube8540.oauth.authentication.users.domain.UserGeneratedCredentialsKeyEvent;
+import cube8540.oauth.authentication.users.domain.Username;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -30,15 +31,18 @@ import static org.mockito.Mockito.when;
 @DisplayName("유저 인증키 할당 이벤트 리스너 클래스 테스트")
 class UserGeneratedCredentialsKeyEventListenerTest {
 
+    private static final String RAW_USERNAME = "username1234";
+    private static final Username USERNAME = new Username(RAW_USERNAME);
+
     private static final String RAW_USER_EMAIL = "email@email.com";
-    private static final UserEmail USER_EMAIL = new UserEmail(RAW_USER_EMAIL);
+    private static final UserEmail EMAIL = new UserEmail(RAW_USER_EMAIL);
 
     private static final String RAW_KEY = "TEST";
     private static final UserCredentialsKey KEY = new UserCredentialsKey(RAW_KEY);
 
     private static final String EMAIL_TEMPLATE = "TEST";
 
-    private static final UserGeneratedCredentialsKeyEvent EVENT = new UserGeneratedCredentialsKeyEvent(USER_EMAIL, KEY);
+    private static final UserGeneratedCredentialsKeyEvent EVENT = new UserGeneratedCredentialsKeyEvent(USERNAME, EMAIL, KEY);
 
     @Nested
     @DisplayName("이메일 발송")
@@ -132,6 +136,7 @@ class UserGeneratedCredentialsKeyEventListenerTest {
 
             verify(engine, times(1)).process(eq(UserGeneratedCredentialsKeyEventListener.TEMPLATE_LOCATION), contextCaptor.capture());
             verify(mimeMessage, times(1)).setContent(EMAIL_TEMPLATE, "text/html");
+            assertEquals(RAW_USERNAME, contextCaptor.getValue().getVariable(UserGeneratedCredentialsKeyEventListener.USERNAME_VARIABLE));
             assertEquals(RAW_USER_EMAIL, contextCaptor.getValue().getVariable(UserGeneratedCredentialsKeyEventListener.USER_EMAIL_VARIABLE));
             assertEquals(RAW_KEY, contextCaptor.getValue().getVariable(UserGeneratedCredentialsKeyEventListener.GENERATED_KEY_VARIABLE));
         }
