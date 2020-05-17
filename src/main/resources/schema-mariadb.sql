@@ -11,7 +11,7 @@ create table if not exists user (
 	password varchar(64) not null,
 	password_credentials_key_expiry_datetime datetime(6) null,
 	password_credentials_key varchar(32) null,
-	is_credntials tinyint(1) not null,
+	is_credentials tinyint(1) not null,
 	registered_at datetime(6) not null
 );
 
@@ -127,8 +127,8 @@ create table if not exists authority_accessible_resources (
 	authority varchar(32) not null,
 	resource_id varchar(128) not null,
 	primary key (authority, resource_id),
-	constraint fk_accessible_resource_authority foreign key (resource_id) references secured_resource (resource_id) on delete cascade,
-	constraint fk_accessible_resource_resource foreign key (authority) references oauth2_scope (scope_id) on delete cascade
+	constraint fk_accessible_resource_resource foreign key (resource_id) references secured_resource (resource_id) on delete cascade,
+	constraint fk_accessible_resource_authority foreign key (authority) references oauth2_scope (scope_id) on delete cascade
 );
 
 commit;
