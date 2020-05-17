@@ -55,7 +55,7 @@ insert into secured_resource(resource_id, method, resource) select 'OAUTH2-SCOPE
 insert into secured_resource(resource_id, method, resource) select 'OAUTH2-SCOPE-REMOVE-API', 'DELETE', '/api/scopes/**' where not exists (select initialize_datetime from initialize);
 
 -- security resource api
-insert into secured_resource(resource_id, method, resource) select 'SECURED-RESOURCE-API', 'ALL', '/api/secured-resource/**' where not exists (select initialize_datetime from initialize);
+insert into secured_resource(resource_id, method, resource) select 'SECURED-RESOURCE-API', 'ALL', '/api/secured-resources/**' where not exists (select initialize_datetime from initialize);
 
 -- user security resource api
 insert into secured_resource(resource_id, method, resource) select 'USER-PASSWORD-CHANGE-API', 'PUT', '/api/accounts/attributes/password' where not exists (select initialize_datetime from initialize);
