@@ -44,6 +44,7 @@ class DefaultOpaqueTokenIntrospectorTest {
                 OpaqueTokenIntrospector delegate = mock(OpaqueTokenIntrospector.class);
                 OAuth2AuthenticatedPrincipal mockPrincipal = mockOAuthAuthenticatedPrincipal()
                         .configDefault()
+                        .configUsernameInAttribute(RAW_PRINCIPAL_NAME)
                         .configAuthoritiesInAttribute(null)
                         .configAttributes(this.attributes)
                         .build();
@@ -92,6 +93,7 @@ class DefaultOpaqueTokenIntrospectorTest {
                 OpaqueTokenIntrospector delegate = mock(OpaqueTokenIntrospector.class);
                 OAuth2AuthenticatedPrincipal mockPrincipal = mockOAuthAuthenticatedPrincipal()
                         .configDefault()
+                        .configUsernameInAttribute(RAW_PRINCIPAL_NAME)
                         .configAuthoritiesInAttribute(RAW_AUTHORITIES)
                         .configAttributes(this.attributes)
                         .build();

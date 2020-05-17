@@ -23,7 +23,8 @@ public class DefaultOpaqueTokenIntrospector implements OpaqueTokenIntrospector {
     @Override
     public OAuth2AuthenticatedPrincipal introspect(String token) {
         OAuth2AuthenticatedPrincipal principal = this.delegate.introspect(token);
-        return new DefaultOAuth2AuthenticatedPrincipal(principal.getName(), principal.getAttributes(), extractAuthorities(principal));
+        return new DefaultOAuth2AuthenticatedPrincipal(principal.getAttribute(OAuth2IntrospectionClaimNames.USERNAME),
+                principal.getAttributes(), extractAuthorities(principal));
     }
 
     private List<GrantedAuthority> extractAuthorities(OAuth2AuthenticatedPrincipal principal) {
