@@ -12,7 +12,4 @@ public interface AuthorityDetails {
     @ApiModelProperty(value = "권한 설명", required = true, example = "Default User Authority")
     String getDescription();
 
-    @ApiModelProperty(value = "권한 타입", required = true, example = "AUTHORITY")
-    AuthorityType getAuthorityType();
-
 }

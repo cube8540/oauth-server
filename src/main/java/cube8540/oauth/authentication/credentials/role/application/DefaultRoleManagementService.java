@@ -27,7 +27,7 @@ public class DefaultRoleManagementService implements RoleManagementService, Basi
 
     @Override
     public Collection<AuthorityDetails> loadBasicAuthorities() {
-        return repository.findByBasic(true).stream().map(DefaultAuthorityDetails::of).collect(Collectors.toList());
+        return repository.findByBasic(true).stream().map(DefaultRoleDetails::of).collect(Collectors.toList());
     }
 
     @Override
@@ -37,7 +37,7 @@ public class DefaultRoleManagementService implements RoleManagementService, Basi
 
     @Override
     public List<AuthorityDetails> loadAllAuthorities() {
-        return repository.findAll().stream().map(DefaultAuthorityDetails::of).collect(Collectors.toList());
+        return repository.findAll().stream().map(DefaultRoleDetails::of).collect(Collectors.toList());
     }
 
     @Override
@@ -50,7 +50,7 @@ public class DefaultRoleManagementService implements RoleManagementService, Basi
         role.setBasic(registerRequest.isBasic());
         role.validate(validationPolicy);
 
-        return DefaultAuthorityDetails.of(repository.save(role));
+        return DefaultRoleDetails.of(repository.save(role));
     }
 
     @Override
@@ -60,7 +60,7 @@ public class DefaultRoleManagementService implements RoleManagementService, Basi
 
         role.setDescription(modifyRequest.getDescription());
         role.setBasic(modifyRequest.isBasic());
-        return DefaultAuthorityDetails.of(repository.save(role));
+        return DefaultRoleDetails.of(repository.save(role));
     }
 
     @Override
@@ -69,7 +69,7 @@ public class DefaultRoleManagementService implements RoleManagementService, Basi
                 .orElseThrow(() -> RoleNotFoundException.instance(code + " is not found"));
 
         repository.delete(role);
-        return DefaultAuthorityDetails.of(role);
+        return DefaultRoleDetails.of(role);
     }
 
     @Override
@@ -77,6 +77,6 @@ public class DefaultRoleManagementService implements RoleManagementService, Basi
         List<AuthorityCode> codeIn = authorities.stream()
                 .map(AuthorityCode::new).collect(Collectors.toList());
         return repository.findAllById(codeIn).stream()
-                .map(DefaultAuthorityDetails::of).collect(Collectors.toList());
+                .map(DefaultRoleDetails::of).collect(Collectors.toList());
     }
 }
