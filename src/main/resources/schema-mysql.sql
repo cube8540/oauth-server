@@ -1,84 +1,142 @@
--- insert default user
-insert into user(username, email, password, registered_at, last_updated_at, is_credentials) select 'admin', 'admin', '$2a$10$uTSfWKXF20lwumttjUbxteWVJBedSEQkYxC6qJJbEVUYjzvM6q7Q2', current_timestamp, current_timestamp, true where not exists (select initialize_datetime from initialize);
+create table if not exists initialize (
+	initialize_datetime timestamp default current_timestamp() not null
+);
 
--- insert default client
-insert into oauth2_clients(client_id, client_secret, client_name, access_token_validity, refresh_token_validity, oauth2_client_owner) select 'oauth-client', '$2a$10$IKIfJYgEf7s5fAdpDFLmIu7.nEIFFgqDRRbfptstuHNav6kVdvFxK', 'client-name', 600000000000, 7200000000000, 'admin' where not exists (select initialize_datetime from initialize);
-insert into oauth2_client_grant_type(client_id, grant_type) select 'oauth-client', 'authorization_code' where not exists (select initialize_datetime from initialize);
-insert into oauth2_client_grant_type(client_id, grant_type) select 'oauth-client', 'refresh_token' where not exists (select initialize_datetime from initialize);
-insert into oauth2_client_grant_type(client_id, grant_type) select 'oauth-client', 'client_credentials' where not exists (select initialize_datetime from initialize);
+create table if not exists role (
+    code varchar(32) not null primary key,
+    description varchar(32),
+    basic boolean not null default false
+);
 
--- insert user scope
-insert into oauth2_scope(scope_id, description) select 'access.oauth.scope', 'access oauth scope api' where not exists (select initialize_datetime from initialize);
-insert into oauth2_scope(scope_id, description) select 'access.oauth.client', 'access oauth client api' where not exists (select initialize_datetime from initialize);
-insert into oauth2_scope(scope_id, description) select 'access.oauth.token', 'access oauth token api' where not exists (select initialize_datetime from initialize);
-insert into oauth2_scope(scope_id, description) select 'access.user.attribute', 'access user attribute api' where not exists (select initialize_datetime from initialize);
-insert into oauth2_scope(scope_id, description) select 'modify.user.attribute', 'modifiable user attribute' where not exists (select initialize_datetime from initialize);
+create table if not exists `user` (
+    username varchar(32) not null primary key,
+	email varchar(128) not null,
+	credentials_key_expiry_datetime timestamp,
+	credentials_key varchar(32),
+	last_updated_at timestamp not null,
+	password varchar(64) not null,
+	password_credentials_key_expiry_datetime timestamp,
+	password_credentials_key varchar(32),
+	is_credentials boolean not null default false,
+	registered_at timestamp not null,
 
--- insert admin scope
-insert into oauth2_scope(scope_id, description) select 'management.server', 'management server configuration' where not exists (select initialize_datetime from initialize);
-insert into oauth2_scope(scope_id, description) select 'management.oauth', 'management oauth configuration' where not exists (select initialize_datetime from initialize);
-insert into oauth2_scope(scope_id, description) select 'management.secured-resource', 'management resource security configuration' where not exists (select initialize_datetime from initialize);
+	unique key uk_user_email (email)
+);
 
--- insert client scope
-insert into oauth2_client_scope(client_id, scope_id) select 'oauth-client', 'access.oauth.scope' where not exists (select initialize_datetime from initialize);
-insert into oauth2_client_scope(client_id, scope_id) select 'oauth-client', 'access.oauth.client' where not exists (select initialize_datetime from initialize);
-insert into oauth2_client_scope(client_id, scope_id) select 'oauth-client', 'access.oauth.token' where not exists (select initialize_datetime from initialize);
-insert into oauth2_client_scope(client_id, scope_id) select 'oauth-client', 'access.user.attribute' where not exists (select initialize_datetime from initialize);
-insert into oauth2_client_scope(client_id, scope_id) select 'oauth-client', 'modify.user.attribute' where not exists (select initialize_datetime from initialize);
+create table if not exists oauth2_clients (
+	client_id varchar(32) not null primary key,
+	access_token_validity bigint not null,
+	client_name varchar(32) not null,
+	oauth2_client_owner varchar(128) not null,
+	refresh_token_validity bigint not null,
+	client_secret varchar(64) not null,
 
--- insert client redirect uri
-insert into oauth2_client_redirect_uri(client_id, redirect_uri) select 'oauth-client', 'http://localhost:8080/callback' where not exists (select initialize_datetime from initialize);
+	constraint fk_client_username foreign key (oauth2_client_owner) references user (username) on delete cascade
+);
 
--- insert accessible scope authority
-insert into oauth2_scope_accessible_authority(scope_id, authority) select 'access.oauth.scope', 'access.oauth.scope' where not exists (select initialize_datetime from initialize);
-insert into oauth2_scope_accessible_authority(scope_id, authority) select 'access.oauth.client', 'access.oauth.scope' where not exists (select initialize_datetime from initialize);
-insert into oauth2_scope_accessible_authority(scope_id, authority) select 'access.oauth.token', 'access.oauth.scope' where not exists (select initialize_datetime from initialize);
-insert into oauth2_scope_accessible_authority(scope_id, authority) select 'access.user.attribute', 'access.oauth.scope' where not exists (select initialize_datetime from initialize);
-insert into oauth2_scope_accessible_authority(scope_id, authority) select 'modify.user.attribute', 'access.oauth.scope' where not exists (select initialize_datetime from initialize);
+create table if not exists oauth2_scope (
+	scope_id varchar(32) not null primary key,
+	description varchar(64)
+);
 
--- insert management scope authority
-insert into oauth2_scope_accessible_authority(scope_id, authority) select 'management.server', 'management.server' where not exists (select initialize_datetime from initialize);
-insert into oauth2_scope_accessible_authority(scope_id, authority) select 'management.oauth', 'management.server' where not exists (select initialize_datetime from initialize);
-insert into oauth2_scope_accessible_authority(scope_id, authority) select 'management.secured-resource', 'management.server' where not exists (select initialize_datetime from initialize);
+create table if not exists oauth2_access_token (
+	token_id varchar(32) not null primary key,
+	client_id varchar(32) not null,
+	expiration timestamp not null,
+	grant_type varchar(32) not null,
+	username varchar(32),
+	issued_at timestamp not null,
+	constraint client_authentication_username unique (client_id, username),
+	constraint fk_access_token_client_id foreign key (client_id) references oauth2_clients (client_id) on delete cascade,
+	constraint fk_access_token_username foreign key (username) references user (username) on delete cascade
+);
 
--- oauth2 client security resource api
-insert into secured_resource(resource_id, method, resource) select 'TOKEN-READ-API', 'GET', '/api/tokens/**' where not exists (select initialize_datetime from initialize);
-insert into secured_resource(resource_id, method, resource) select 'OAUTH2-CLIENT-READ-API', 'GET', '/api/clients/**' where not exists (select initialize_datetime from initialize);
-insert into secured_resource(resource_id, method, resource) select 'OAUTH2-CLIENT-REGISTER-API', 'POST', '/api/clients/**' where not exists (select initialize_datetime from initialize);
-insert into secured_resource(resource_id, method, resource) select 'OAUTH2-CLIENT-MODIFY-API', 'PUT', '/api/clients/**' where not exists (select initialize_datetime from initialize);
-insert into secured_resource(resource_id, method, resource) select 'OAUTH2-CLIENT-REMOVE-API', 'DELETE', '/api/clients/**' where not exists (select initialize_datetime from initialize);
+create table if not exists oauth2_access_token_additional_information (
+	token_id varchar(32) not null,
+	info_value varchar(128),
+	info_key varchar(255) not null,
+	primary key (token_id, info_key),
+	constraint fk_account_token foreign key (token_id) references oauth2_access_token (token_id) on delete cascade
+);
 
--- oauth2 scope security resource api
-insert into secured_resource(resource_id, method, resource) select 'OAUTH2-SCOPE-READ-API', 'GET', '/api/scopes/**' where not exists (select initialize_datetime from initialize);
-insert into secured_resource(resource_id, method, resource) select 'OAUTH2-SCOPE-REGISTER-API', 'POST', '/api/scopes/**' where not exists (select initialize_datetime from initialize);
-insert into secured_resource(resource_id, method, resource) select 'OAUTH2-SCOPE-MODIFY-API', 'PUT', '/api/scopes/**' where not exists (select initialize_datetime from initialize);
-insert into secured_resource(resource_id, method, resource) select 'OAUTH2-SCOPE-REMOVE-API', 'DELETE', '/api/scopes/**' where not exists (select initialize_datetime from initialize);
+create table if not exists oauth2_authorization_code (
+	authorization_code varchar(6) not null primary key,
+	client_id varchar(32) not null,
+	expiration_at timestamp not null,
+	redirect_uri varchar(128) null,
+	state varchar(12),
+	username varchar(32),
 
--- security resource api
-insert into secured_resource(resource_id, method, resource) select 'SECURED-RESOURCE-API', 'ALL', '/api/secured-resource/**' where not exists (select initialize_datetime from initialize);
+    constraint fk_authorization_code_client_id foreign key (client_id) references oauth2_clients (client_id) on delete cascade,
+	constraint fk_authorization_code_username foreign key (username) references user (username) on delete cascade
+);
 
--- user security resource api
-insert into secured_resource(resource_id, method, resource) select 'USER-PASSWORD-CHANGE-API', 'PUT', '/api/accounts/attributes/password' where not exists (select initialize_datetime from initialize);
-insert into secured_resource(resource_id, method, resource) select 'USER-ME-API', 'GET', '/api/accounts/me' where not exists (select initialize_datetime from initialize);
+create table if not exists oauth2_client_grant_type (
+	client_id varchar(32) not null,
+	grant_type varchar(32) not null,
+	primary key (client_id, grant_type),
+	constraint fk_client_grant_type_client_id foreign key (client_id) references oauth2_clients (client_id)
+);
 
--- connect security resource and scope
-insert into authority_accessible_resources(authority, resource_id) select 'access.oauth.token', 'TOKEN-READ-API' where not exists (select initialize_datetime from initialize);
-insert into authority_accessible_resources(authority, resource_id) select 'access.oauth.client', 'OAUTH2-CLIENT-READ-API' where not exists (select initialize_datetime from initialize);
-insert into authority_accessible_resources(authority, resource_id) select 'access.oauth.client', 'OAUTH2-CLIENT-REGISTER-API' where not exists (select initialize_datetime from initialize);
-insert into authority_accessible_resources(authority, resource_id) select 'access.oauth.client', 'OAUTH2-CLIENT-MODIFY-API' where not exists (select initialize_datetime from initialize);
-insert into authority_accessible_resources(authority, resource_id) select 'access.oauth.client', 'OAUTH2-CLIENT-REMOVE-API' where not exists (select initialize_datetime from initialize);
+create table if not exists oauth2_client_redirect_uri (
+	client_id varchar(32) not null,
+	redirect_uri varchar(128) not null,
+	primary key (client_id, redirect_uri),
+	constraint fk_client_redirect_uri_client_id foreign key (client_id) references oauth2_clients (client_id) on delete cascade
+);
 
-insert into authority_accessible_resources(authority, resource_id) select 'access.oauth.scope', 'OAUTH2-SCOPE-READ-API' where not exists (select initialize_datetime from initialize);
-insert into authority_accessible_resources(authority, resource_id) select 'management.oauth', 'OAUTH2-SCOPE-REGISTER-API' where not exists (select initialize_datetime from initialize);
-insert into authority_accessible_resources(authority, resource_id) select 'management.oauth', 'OAUTH2-SCOPE-MODIFY-API' where not exists (select initialize_datetime from initialize);
-insert into authority_accessible_resources(authority, resource_id) select 'management.oauth', 'OAUTH2-SCOPE-REMOVE-API' where not exists (select initialize_datetime from initialize);
+create table if not exists oauth2_client_scope (
+	client_id varchar(32) not null,
+	scope_id varchar(32) not null,
+	primary key (client_id, scope_id),
+	constraint fk_client_scope_client_id foreign key (client_id) references oauth2_clients (client_id) on delete cascade,
+	constraint fk_client_scope_scope_id foreign key (scope_id) references oauth2_scope (scope_id) on delete cascade
+);
 
-insert into authority_accessible_resources(authority, resource_id) select 'management.server', 'SECURED-RESOURCE-API' where not exists (select initialize_datetime from initialize);
+create table if not exists oauth2_code_approved_scope
+(
+	authorization_code varchar(6) not null,
+	scope_id varchar(32) not null,
+	primary key (authorization_code, scope_id),
+	constraint fk_approved_scope_code foreign key (authorization_code) references oauth2_authorization_code (authorization_code) on delete cascade,
+	constraint fk_approved_scope_scope foreign key (scope_id) references oauth2_scope (scope_id) on delete cascade
+);
 
-insert into authority_accessible_resources(authority, resource_id) select 'modify.user.attribute', 'USER-PASSWORD-CHANGE-API' where not exists (select initialize_datetime from initialize);
-insert into authority_accessible_resources(authority, resource_id) select 'access.user.attribute', 'USER-ME-API' where not exists (select initialize_datetime from initialize);
+create table if not exists oauth2_refresh_token (
+	token_id varchar(32) not null primary key,
+	expiration timestamp not null,
+	access_token_token_id varchar(32) null,
+	constraint fk_refresh_token_access_token foreign key (access_token_token_id) references oauth2_access_token (token_id) on delete cascade
+);
 
+create table if not exists oauth2_scope_accessible_authority (
+	scope_id varchar(32) not null,
+	authority varchar(32) not null,
+	primary key (scope_id, authority),
+	constraint fk_accessible_authority_scope_id foreign key (scope_id) references oauth2_scope (scope_id) on delete cascade,
+	constraint fk_accessible_authority_authority foreign key (authority) references oauth2_scope (scope_id) on delete cascade
+);
 
-insert into initialize select current_timestamp where not exists (select * from initialize);
+create table if not exists oauth2_token_scope (
+	token_id varchar(32) not null,
+	scope_id varchar(32) not null,
+	primary key (token_id, scope_id),
+	constraint fk_token_scope_token_id foreign key (token_id) references oauth2_access_token (token_id) on delete cascade,
+	constraint fk_token_scope_scope_id foreign key (scope_id) references oauth2_scope (scope_id) on delete cascade
+);
+
+create table if not exists secured_resource (
+	resource_id varchar(32) not null primary key,
+	method varchar(32) not null,
+	resource varchar(128) not null
+);
+
+create table if not exists authority_accessible_resources (
+	authority varchar(32) not null,
+	resource_id varchar(128) not null,
+	primary key (authority, resource_id),
+	constraint fk_accessible_resource_resource foreign key (resource_id) references secured_resource (resource_id) on delete cascade,
+	constraint fk_accessible_resource_authority foreign key (authority) references oauth2_scope (scope_id) on delete cascade
+);
 
 commit;
