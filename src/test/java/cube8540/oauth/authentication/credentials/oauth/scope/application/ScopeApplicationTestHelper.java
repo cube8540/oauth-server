@@ -97,19 +97,19 @@ class ScopeApplicationTestHelper {
         }
 
         MockScopeRepository count(long count) {
-            when(repository.countById(SCOPE_ID)).thenReturn(count);
+            when(repository.countByCode(SCOPE_ID)).thenReturn(count);
             return this;
         }
 
         MockScopeRepository registerScope(OAuth2Scope scope) {
             when(repository.findById(SCOPE_ID)).thenReturn(Optional.of(scope));
-            when(repository.countById(SCOPE_ID)).thenReturn(1L);
+            when(repository.countByCode(SCOPE_ID)).thenReturn(1L);
             return this;
         }
 
         MockScopeRepository emptyScope() {
             when(repository.findById(SCOPE_ID)).thenReturn(Optional.empty());
-            when(repository.countById(SCOPE_ID)).thenReturn(0L);
+            when(repository.countByCode(SCOPE_ID)).thenReturn(0L);
             return this;
         }
 

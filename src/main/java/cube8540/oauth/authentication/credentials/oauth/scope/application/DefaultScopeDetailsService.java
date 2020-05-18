@@ -31,7 +31,7 @@ public class DefaultScopeDetailsService implements OAuth2ScopeManagementService,
     public Collection<AuthorityDetails> loadAuthorityByAuthorityCodes(Collection<String> authorities) {
         List<AuthorityCode> scopeIn = authorities.stream()
                 .map(AuthorityCode::new).collect(Collectors.toList());
-        return repository.findByIdIn(scopeIn).stream()
+        return repository.findAllById(scopeIn).stream()
                 .map(DefaultOAuth2ScopeDetails::of).collect(Collectors.toList());
     }
 
@@ -43,13 +43,13 @@ public class DefaultScopeDetailsService implements OAuth2ScopeManagementService,
 
     @Override
     public Long countByScopeId(String scopeId) {
-        return repository.countById(new AuthorityCode(scopeId));
+        return repository.countByCode(new AuthorityCode(scopeId));
     }
 
     @Override
     @Transactional
     public AuthorityDetails registerNewScope(OAuth2ScopeRegisterRequest registerRequest) {
-        if (repository.countById(new AuthorityCode(registerRequest.getScopeId())) > 0) {
+        if (repository.countByCode(new AuthorityCode(registerRequest.getScopeId())) > 0) {
             throw ScopeRegisterException.existsIdentifier(registerRequest.getScopeId() + " is exists");
         }
 
