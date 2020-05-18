@@ -1,7 +1,7 @@
 package cube8540.oauth.authentication.credentials.oauth.token.application;
 
 import cube8540.oauth.authentication.AuthenticationApplication;
-import cube8540.oauth.authentication.credentials.domain.AuthorityCode;
+import cube8540.oauth.authentication.credentials.AuthorityCode;
 import cube8540.oauth.authentication.credentials.oauth.security.DefaultOAuth2RequestValidator;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AccessTokenDetails;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AccessTokenGranter;

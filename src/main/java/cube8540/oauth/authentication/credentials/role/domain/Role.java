@@ -1,7 +1,7 @@
 package cube8540.oauth.authentication.credentials.role.domain;
 
-import cube8540.oauth.authentication.credentials.domain.AbstractAuthority;
-import cube8540.oauth.authentication.credentials.domain.AuthorityCode;
+import cube8540.oauth.authentication.credentials.AbstractAuthority;
+import cube8540.oauth.authentication.credentials.AuthorityCode;
 import cube8540.oauth.authentication.credentials.role.domain.exception.RoleInvalidException;
 import cube8540.oauth.authentication.credentials.role.infra.RoleValidationPolicy;
 import cube8540.validator.core.Validator;

@@ -1,4 +1,4 @@
-package cube8540.oauth.authentication.credentials.domain;
+package cube8540.oauth.authentication.credentials;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;

@@ -1,6 +1,6 @@
 package cube8540.oauth.authentication.credentials.role.application;
 
-import cube8540.oauth.authentication.credentials.domain.AuthorityCode;
+import cube8540.oauth.authentication.credentials.AuthorityCode;
 import cube8540.oauth.authentication.credentials.role.domain.Role;
 import cube8540.oauth.authentication.credentials.role.domain.RoleRepository;
 import cube8540.oauth.authentication.credentials.role.infra.RoleValidationPolicy;

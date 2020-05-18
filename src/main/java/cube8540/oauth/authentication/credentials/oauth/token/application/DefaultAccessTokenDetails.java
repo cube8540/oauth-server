@@ -1,6 +1,6 @@
 package cube8540.oauth.authentication.credentials.oauth.token.application;
 
-import cube8540.oauth.authentication.credentials.domain.AuthorityCode;
+import cube8540.oauth.authentication.credentials.AuthorityCode;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AccessTokenDetails;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2RefreshTokenDetails;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedAccessToken;
@@ -21,16 +21,25 @@ public class DefaultAccessTokenDetails implements OAuth2AccessTokenDetails {
 
     private static final String TOKEN_TYPE = "Bearer";
 
-    private String tokenValue;
-    private String clientId;
-    private Set<String> scopes;
-    private String tokenType;
-    private String username;
-    private Map<String, String> additionalInformation;
-    private LocalDateTime expiration;
-    private long expiresIn;
-    private OAuth2RefreshTokenDetails refreshToken;
-    private boolean isExpired;
+    String tokenValue;
+
+    String clientId;
+
+    Set<String> scopes;
+
+    String tokenType;
+
+    String username;
+
+    Map<String, String> additionalInformation;
+
+    LocalDateTime expiration;
+
+    long expiresIn;
+
+    OAuth2RefreshTokenDetails refreshToken;
+
+    boolean isExpired;
 
     public static DefaultAccessTokenDetails of(OAuth2AuthorizedAccessToken accessToken) {
         DefaultAccessTokenDetailsBuilder builder = builder().tokenValue(accessToken.getTokenId().getValue())

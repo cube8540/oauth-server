@@ -1,7 +1,7 @@
 package cube8540.oauth.authentication.credentials.oauth.scope.domain;
 
-import cube8540.oauth.authentication.credentials.domain.AbstractAuthority;
-import cube8540.oauth.authentication.credentials.domain.AuthorityCode;
+import cube8540.oauth.authentication.credentials.AbstractAuthority;
+import cube8540.oauth.authentication.credentials.AuthorityCode;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.exception.ScopeInvalidException;
 import cube8540.validator.core.Validator;
 import lombok.AccessLevel;

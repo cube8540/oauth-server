@@ -5,6 +5,6 @@ import lombok.Value;
 @Value
 public class SecuredResourceChangedEvent {
 
-    private SecuredResourceId resourceId;
+    SecuredResourceId resourceId;
 
 }

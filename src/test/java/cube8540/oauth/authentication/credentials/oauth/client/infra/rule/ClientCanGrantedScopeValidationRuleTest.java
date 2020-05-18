@@ -1,7 +1,7 @@
 package cube8540.oauth.authentication.credentials.oauth.client.infra.rule;
 
 import cube8540.oauth.authentication.credentials.AuthorityDetails;
-import cube8540.oauth.authentication.credentials.domain.AuthorityCode;
+import cube8540.oauth.authentication.credentials.AuthorityCode;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2Client;
 import cube8540.oauth.authentication.credentials.oauth.scope.application.OAuth2AccessibleScopeDetailsService;
 import org.junit.jupiter.api.BeforeEach;

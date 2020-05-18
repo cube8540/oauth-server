@@ -1,6 +1,6 @@
 package cube8540.oauth.authentication.credentials.role.domain;
 
-import cube8540.oauth.authentication.credentials.domain.AuthorityCode;
+import cube8540.oauth.authentication.credentials.AuthorityCode;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

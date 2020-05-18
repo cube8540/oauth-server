@@ -11,12 +11,17 @@ import java.util.Map;
 @Value
 public class DefaultAccessTokenDetailsWithClient implements AccessTokenDetailsWithClient {
 
-    private String tokenValue;
-    private AccessTokenClient client;
-    private String username;
-    private LocalDateTime issuedAt;
-    private long expiresIn;
-    private Map<String, String> additionalInformation;
+    String tokenValue;
+
+    AccessTokenClient client;
+
+    String username;
+
+    LocalDateTime issuedAt;
+
+    long expiresIn;
+
+    Map<String, String> additionalInformation;
 
     public DefaultAccessTokenDetailsWithClient(OAuth2AuthorizedAccessToken accessToken, OAuth2Client client) {
         this.tokenValue = accessToken.getTokenId().getValue();
@@ -29,10 +34,9 @@ public class DefaultAccessTokenDetailsWithClient implements AccessTokenDetailsWi
 
     @Value
     public static class DefaultClient implements AccessTokenDetailsWithClient.AccessTokenClient {
+        String clientId;
 
-        private String clientId;
-        private String clientName;
-
+        String clientName;
     }
 
 }
