@@ -2,8 +2,9 @@ package cube8540.oauth.authentication;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cube8540.oauth.authentication.credentials.oauth.security.introspector.DefaultOpaqueTokenIntrospector;
-import cube8540.oauth.authentication.credentials.security.RoleAuthorityVoter;
-import cube8540.oauth.authentication.credentials.security.ScopeAuthorityVoter;
+import cube8540.oauth.authentication.credentials.security.RoleSecurityConfig;
+import cube8540.oauth.authentication.credentials.security.ScopeSecurityConfig;
+import cube8540.oauth.authentication.credentials.security.TypeBasedAuthorityVoter;
 import cube8540.oauth.authentication.error.DefaultAuthenticationExceptionEntryPoint;
 import cube8540.oauth.authentication.error.security.AccessDeniedExceptionResponseRenderer;
 import cube8540.oauth.authentication.error.security.AccessDeniedExceptionTranslator;
@@ -107,13 +108,13 @@ public class OAuth2ResourceEndpointSecurityConfiguration extends WebSecurityConf
     }
 
     private RoleVoter createRoleAuthorityVoter() {
-        RoleAuthorityVoter roleVoter = new RoleAuthorityVoter();
+        TypeBasedAuthorityVoter roleVoter = new TypeBasedAuthorityVoter(RoleSecurityConfig.class);
         roleVoter.setRolePrefix("");
         return roleVoter;
     }
 
     private RoleVoter createScopeAuthorityVoter() {
-        ScopeAuthorityVoter roleVoter = new ScopeAuthorityVoter();
+        TypeBasedAuthorityVoter roleVoter = new TypeBasedAuthorityVoter(ScopeSecurityConfig.class);
         roleVoter.setRolePrefix("");
         return roleVoter;
     }
