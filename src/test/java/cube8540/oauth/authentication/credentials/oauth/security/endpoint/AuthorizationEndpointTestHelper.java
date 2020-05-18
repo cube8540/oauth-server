@@ -1,5 +1,7 @@
 package cube8540.oauth.authentication.credentials.oauth.security.endpoint;
 
+import cube8540.oauth.authentication.credentials.AuthorityDetails;
+import cube8540.oauth.authentication.credentials.AuthorityDetailsService;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2Utils;
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ClientRegistrationException;
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTranslator;
@@ -12,8 +14,6 @@ import cube8540.oauth.authentication.credentials.oauth.security.OAuth2Authorizat
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetailsService;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2RequestValidator;
-import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ScopeDetails;
-import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ScopeDetailsService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -62,10 +62,10 @@ public class AuthorizationEndpointTestHelper {
 
     static final String RAW_SCOPE = "SCOPE-1 SCOPE-2 SCOPE-3";
     static final Set<String> SCOPE = OAuth2Utils.extractScopes(RAW_SCOPE);
-    static final Collection<OAuth2ScopeDetails> SCOPE_DETAILS = Arrays.asList(
-            mock(OAuth2ScopeDetails.class), mock(OAuth2ScopeDetails.class), mock(OAuth2ScopeDetails.class));
-    static final Collection<OAuth2ScopeDetails> CLIENT_SCOPE_DETAILS = Arrays.asList(
-            mock(OAuth2ScopeDetails.class), mock(OAuth2ScopeDetails.class), mock(OAuth2ScopeDetails.class));
+    static final Collection<AuthorityDetails> SCOPE_DETAILS = Arrays.asList(
+            mock(AuthorityDetails.class), mock(AuthorityDetails.class), mock(AuthorityDetails.class));
+    static final Collection<AuthorityDetails> CLIENT_SCOPE_DETAILS = Arrays.asList(
+            mock(AuthorityDetails.class), mock(AuthorityDetails.class), mock(AuthorityDetails.class));
     static final Set<String> RAW_RESOLVED_SCOPES = new HashSet<>(Arrays.asList("RESOLVED-SCOPE-1", "RESOLVED-SCOPE-2", "RESOLVED-SCOPE-3"));
 
     static final Set<String> CLIENT_SCOPE = new HashSet<>(Arrays.asList("CLIENT-SCOPE-1", "CLIENT-SCOPE-2", "CLIENT-SCOPE-3"));
@@ -282,18 +282,18 @@ public class AuthorizationEndpointTestHelper {
     }
 
     static class MockScopeDetailsService {
-        private OAuth2ScopeDetailsService service;
+        private AuthorityDetailsService service;
 
         private MockScopeDetailsService() {
-            this.service = mock(OAuth2ScopeDetailsService.class);
+            this.service = mock(AuthorityDetailsService.class);
         }
 
-        MockScopeDetailsService registerScopes(Collection<String> where, Collection<OAuth2ScopeDetails> result) {
-            when(service.loadScopeDetailsByScopeIds(where)).thenReturn(result);
+        MockScopeDetailsService registerScopes(Collection<String> where, Collection<AuthorityDetails> result) {
+            when(service.loadAuthorityByAuthorityCodes(where)).thenReturn(result);
             return this;
         }
 
-        OAuth2ScopeDetailsService build() {
+        AuthorityDetailsService build() {
             return service;
         }
     }

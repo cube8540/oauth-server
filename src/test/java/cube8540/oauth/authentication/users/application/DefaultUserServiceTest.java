@@ -6,10 +6,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
-import java.util.Collections;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -79,11 +80,12 @@ class DefaultUserServiceTest {
                 }
 
                 @Test
-                @DisplayName("권한은 항상 빈 배열로 반환 해야 한다.")
-                void shouldReturnEmptyArrayToAuthority() {
+                @DisplayName("저장소에서 찾은 유저의 권한을 반환 해야 한다.")
+                void shouldReturnsGrantedAuthority() {
                     UserDetails result = service.loadUserByUsername(UserApplicationTestHelper.RAW_USERNAME);
 
-                    assertEquals(Collections.emptySet(), result.getAuthorities());
+                    Set<GrantedAuthority> expectedAuthorities = UserApplicationTestHelper.convertGrantAuthority(UserApplicationTestHelper.AUTHORITIES);
+                    assertEquals(expectedAuthorities, result.getAuthorities());
                 }
 
                 @Test

@@ -1,9 +1,9 @@
 package cube8540.oauth.authentication.credentials.oauth.scope.infra.rule;
 
+import cube8540.oauth.authentication.credentials.AuthorityDetails;
+import cube8540.oauth.authentication.credentials.AuthorityDetailsService;
+import cube8540.oauth.authentication.credentials.AuthorityCode;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2Scope;
-import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
-import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ScopeDetails;
-import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ScopeDetailsService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -23,14 +23,14 @@ import static org.mockito.Mockito.when;
 class DefaultScopeAccessibleAuthorityValidationRuleTest {
 
     private static final List<String> RAW_GIVEN_SCOPES = Arrays.asList("AUTH-1", "AUTH-2", "AUTH-3");
-    private static final Set<OAuth2ScopeId> GIVEN_SCOPES = RAW_GIVEN_SCOPES.stream().map(OAuth2ScopeId::new).collect(Collectors.toSet());
+    private static final Set<AuthorityCode> GIVEN_SCOPES = RAW_GIVEN_SCOPES.stream().map(AuthorityCode::new).collect(Collectors.toSet());
 
-    private OAuth2ScopeDetailsService detailsService;
+    private AuthorityDetailsService detailsService;
     private DefaultScopeAccessibleAuthorityValidationRule rule;
 
     @BeforeEach
     void setup() {
-        this.detailsService = mock(OAuth2ScopeDetailsService.class);
+        this.detailsService = mock(AuthorityDetailsService.class);
 
         this.rule = new DefaultScopeAccessibleAuthorityValidationRule();
         this.rule.setScopeDetailsServices(detailsService);
@@ -64,10 +64,10 @@ class DefaultScopeAccessibleAuthorityValidationRuleTest {
         void setup() {
             this.scope = mock(OAuth2Scope.class);
 
-            List<OAuth2ScopeDetails> details = Arrays.asList(mocking("AUTH-1"), mocking("AUTH-2"));
+            List<AuthorityDetails> details = Arrays.asList(mocking("AUTH-1"), mocking("AUTH-2"));
 
             when(scope.getAccessibleAuthority()).thenReturn(GIVEN_SCOPES);
-            when(detailsService.loadScopeDetailsByScopeIds(RAW_GIVEN_SCOPES)).thenReturn(details);
+            when(detailsService.loadAuthorityByAuthorityCodes(RAW_GIVEN_SCOPES)).thenReturn(details);
         }
 
         @Test
@@ -76,10 +76,10 @@ class DefaultScopeAccessibleAuthorityValidationRuleTest {
             assertFalse(rule.isValid(scope));
         }
 
-        private OAuth2ScopeDetails mocking(String code) {
-            OAuth2ScopeDetails details = mock(OAuth2ScopeDetails.class);
+        private AuthorityDetails mocking(String code) {
+            AuthorityDetails details = mock(AuthorityDetails.class);
 
-            when(details.getScopeId()).thenReturn(code);
+            when(details.getCode()).thenReturn(code);
             return details;
         }
     }
@@ -94,10 +94,10 @@ class DefaultScopeAccessibleAuthorityValidationRuleTest {
         void setup() {
             this.scope = mock(OAuth2Scope.class);
 
-            List<OAuth2ScopeDetails> details = Arrays.asList(mocking("AUTH-1"), mocking("AUTH-2"), mocking("AUTH-3"));
+            List<AuthorityDetails> details = Arrays.asList(mocking("AUTH-1"), mocking("AUTH-2"), mocking("AUTH-3"));
 
             when(scope.getAccessibleAuthority()).thenReturn(GIVEN_SCOPES);
-            when(detailsService.loadScopeDetailsByScopeIds(RAW_GIVEN_SCOPES)).thenReturn(details);
+            when(detailsService.loadAuthorityByAuthorityCodes(RAW_GIVEN_SCOPES)).thenReturn(details);
         }
 
         @Test
@@ -106,10 +106,10 @@ class DefaultScopeAccessibleAuthorityValidationRuleTest {
             assertTrue(rule.isValid(scope));
         }
 
-        private OAuth2ScopeDetails mocking(String code) {
-            OAuth2ScopeDetails details = mock(OAuth2ScopeDetails.class);
+        private AuthorityDetails mocking(String code) {
+            AuthorityDetails details = mock(AuthorityDetails.class);
 
-            when(details.getScopeId()).thenReturn(code);
+            when(details.getCode()).thenReturn(code);
             return details;
         }
     }

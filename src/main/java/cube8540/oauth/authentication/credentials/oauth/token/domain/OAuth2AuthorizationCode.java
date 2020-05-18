@@ -1,12 +1,12 @@
 package cube8540.oauth.authentication.credentials.oauth.token.domain;
 
 import cube8540.oauth.authentication.AuthenticationApplication;
+import cube8540.oauth.authentication.credentials.AuthorityCode;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
 import cube8540.oauth.authentication.credentials.oauth.converter.RedirectUriConverter;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidClientException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidGrantException;
 import cube8540.oauth.authentication.credentials.oauth.error.RedirectMismatchException;
-import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import cube8540.oauth.authentication.credentials.oauth.security.AuthorizationRequest;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -72,7 +72,7 @@ public class OAuth2AuthorizationCode extends AbstractAggregateRoot<OAuth2Authori
     @ElementCollection
     @CollectionTable(name = "oauth2_code_approved_scope", joinColumns = @JoinColumn(name = "authorization_code", nullable = false))
     @AttributeOverride(name = "value", column = @Column(name = "scope_id", length = 32, nullable = false))
-    private Set<OAuth2ScopeId> approvedScopes;
+    private Set<AuthorityCode> approvedScopes;
 
     public OAuth2AuthorizationCode(AuthorizationCodeGenerator generator) {
         this.code = generator.generate();
@@ -84,7 +84,7 @@ public class OAuth2AuthorizationCode extends AbstractAggregateRoot<OAuth2Authori
         this.username = new PrincipalUsername(request.getUsername());
         this.redirectURI = request.getRedirectUri();
         this.approvedScopes = request.getRequestScopes().stream()
-                .map(OAuth2ScopeId::new).collect(Collectors.toSet());
+                .map(AuthorityCode::new).collect(Collectors.toSet());
     }
 
     public void validateWithAuthorizationRequest(AuthorizationRequest request) {

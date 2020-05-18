@@ -5,10 +5,10 @@ import lombok.Value;
 @Value
 public class UserGeneratedCredentialsKeyEvent {
 
-    private Username username;
+    Username username;
 
-    private UserEmail email;
+    UserEmail email;
 
-    private UserCredentialsKey key;
+    UserCredentialsKey key;
 
 }

@@ -11,10 +11,13 @@ import java.time.LocalDateTime;
 @Builder
 public class DefaultRefreshTokenDetails implements OAuth2RefreshTokenDetails {
 
-    private String tokenValue;
-    private LocalDateTime expiration;
-    private boolean isExpired;
-    private long expiresIn;
+    String tokenValue;
+
+    LocalDateTime expiration;
+
+    boolean isExpired;
+
+    long expiresIn;
 
     public static DefaultRefreshTokenDetails of(OAuth2AuthorizedRefreshToken refreshToken) {
         return DefaultRefreshTokenDetails.builder()

@@ -1,6 +1,9 @@
 package cube8540.oauth.authentication.users.application;
 
+import cube8540.oauth.authentication.credentials.AuthorityDetails;
+import cube8540.oauth.authentication.credentials.BasicAuthorityDetailsService;
 import cube8540.oauth.authentication.users.domain.User;
+import cube8540.oauth.authentication.users.domain.UserAuthority;
 import cube8540.oauth.authentication.users.domain.UserCredentialsKey;
 import cube8540.oauth.authentication.users.domain.UserCredentialsKeyGenerator;
 import cube8540.oauth.authentication.users.domain.UserEmail;
@@ -9,10 +12,17 @@ import cube8540.oauth.authentication.users.domain.UserRepository;
 import cube8540.oauth.authentication.users.domain.UserValidationPolicy;
 import cube8540.oauth.authentication.users.domain.Username;
 import cube8540.validator.core.ValidationRule;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.security.Principal;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
@@ -35,6 +45,16 @@ class UserApplicationTestHelper {
 
     static final String RAW_CREDENTIALS_KEY = "CREDENTIALS-KEY";
     static final String RAW_PASSWORD_CREDENTIALS_KEY = "PASSWORD-CREDENTIALS-KEY";
+
+    static final Set<String> RAW_AUTHORITIES = new HashSet<>(Arrays.asList("CODE-1", "CODE-2", "CODE-3"));
+    static final Collection<AuthorityDetails> BASIC_AUTHORITIES = RAW_AUTHORITIES.stream().map(UserApplicationTestHelper::mockAuthority).collect(Collectors.toList());
+    static final Collection<UserAuthority> AUTHORITIES = RAW_AUTHORITIES.stream().map(UserAuthority::new).collect(Collectors.toList());
+
+    private static AuthorityDetails mockAuthority(String code) {
+        AuthorityDetails authorityDetails = mock(AuthorityDetails.class);
+        when(authorityDetails.getCode()).thenReturn(code);
+        return authorityDetails;
+    }
 
     static MockUser mockUser() {
         return new MockUser();
@@ -78,6 +98,10 @@ class UserApplicationTestHelper {
         return principal;
     }
 
+    static MockBasicAuthorityService mockBasicAuthorityService() {
+        return new MockBasicAuthorityService();
+    }
+
     static class MockUser {
         private User user;
 
@@ -102,6 +126,7 @@ class UserApplicationTestHelper {
 
         MockUser certified() {
             when(user.isCredentials()).thenReturn(true);
+            when(user.getAuthorities()).thenReturn(new HashSet<>(AUTHORITIES));
             return this;
         }
 
@@ -235,5 +260,29 @@ class UserApplicationTestHelper {
         UserValidationPolicy build() {
             return policy;
         }
+    }
+
+    static class MockBasicAuthorityService {
+        private BasicAuthorityDetailsService service;
+
+        private MockBasicAuthorityService() {
+            this.service = mock(BasicAuthorityDetailsService.class);
+        }
+
+        MockBasicAuthorityService basicAuthority() {
+            when(service.loadBasicAuthorities()).thenReturn(BASIC_AUTHORITIES);
+            return this;
+        }
+
+        BasicAuthorityDetailsService build() {
+            return service;
+        }
+    }
+
+    static Set<GrantedAuthority> convertGrantAuthority(Collection<UserAuthority> authorities) {
+        return authorities.stream()
+                .map(UserAuthority::getValue)
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toSet());
     }
 }

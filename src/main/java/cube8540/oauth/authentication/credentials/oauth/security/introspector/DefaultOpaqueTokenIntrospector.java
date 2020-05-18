@@ -2,22 +2,27 @@ package cube8540.oauth.authentication.credentials.oauth.security.introspector;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.core.DefaultOAuth2AuthenticatedPrincipal;
 import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal;
 import org.springframework.security.oauth2.server.resource.introspection.OAuth2IntrospectionClaimNames;
 import org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector;
 
+import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class DefaultOpaqueTokenIntrospector implements OpaqueTokenIntrospector {
 
-    private OpaqueTokenIntrospector delegate;
+    private final OpaqueTokenIntrospector delegate;
+    private final UserDetailsService userDetailsService;
 
-    public DefaultOpaqueTokenIntrospector(OpaqueTokenIntrospector delegate) {
+    public DefaultOpaqueTokenIntrospector(OpaqueTokenIntrospector delegate, UserDetailsService userDetailsService) {
         this.delegate = delegate;
+        this.userDetailsService = userDetailsService;
     }
 
     @Override
@@ -27,10 +32,23 @@ public class DefaultOpaqueTokenIntrospector implements OpaqueTokenIntrospector {
                 principal.getAttributes(), extractAuthorities(principal));
     }
 
-    private List<GrantedAuthority> extractAuthorities(OAuth2AuthenticatedPrincipal principal) {
-        List<String> scopes = principal.getAttribute(OAuth2IntrospectionClaimNames.SCOPE);
-        return Optional.ofNullable(scopes).orElse(Collections.emptyList()).stream()
-                .map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toList());
+    private Collection<GrantedAuthority> extractAuthorities(OAuth2AuthenticatedPrincipal principal) {
+        Collection<String> roles = getUserAuthorities(principal);
+        Collection<String> scopes = getUserScopes(principal);
+
+        return Stream.concat(roles.stream(), scopes.stream()).map(SimpleGrantedAuthority::new).collect(Collectors.toSet());
+    }
+
+    private Collection<String> getUserScopes(OAuth2AuthenticatedPrincipal principal) {
+        Collection<String> scopes = principal.getAttribute(OAuth2IntrospectionClaimNames.SCOPE);
+
+        return Optional.ofNullable(scopes).orElse(Collections.emptySet());
+    }
+
+    private Collection<String> getUserAuthorities(OAuth2AuthenticatedPrincipal principal) {
+        UserDetails userDetails = userDetailsService.loadUserByUsername(principal.getAttribute(OAuth2IntrospectionClaimNames.USERNAME));
+
+        return Optional.ofNullable(userDetails.getAuthorities()).orElse(Collections.emptySet()).stream()
+                .map(GrantedAuthority::getAuthority).collect(Collectors.toSet());
     }
 }

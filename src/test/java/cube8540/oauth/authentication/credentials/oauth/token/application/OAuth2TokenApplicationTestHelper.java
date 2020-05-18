@@ -1,7 +1,7 @@
 package cube8540.oauth.authentication.credentials.oauth.token.application;
 
+import cube8540.oauth.authentication.credentials.AuthorityCode;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
-import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import cube8540.oauth.authentication.credentials.oauth.security.AuthorizationCode;
 import cube8540.oauth.authentication.credentials.oauth.security.AuthorizationRequest;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetails;
@@ -73,11 +73,11 @@ class OAuth2TokenApplicationTestHelper {
     static final OAuth2ClientId DIFFERENT_CLIENT = new OAuth2ClientId(RAW_DIFFERENT_CLIENT);
 
     static final Set<String> RAW_SCOPES = new HashSet<>(Arrays.asList("SCOPE-1", "SCOPE-2", "SCOPE-3"));
-    static final Set<OAuth2ScopeId> SCOPES = RAW_SCOPES.stream().map(OAuth2ScopeId::new).collect(Collectors.toSet());
+    static final Set<AuthorityCode> SCOPES = RAW_SCOPES.stream().map(AuthorityCode::new).collect(Collectors.toSet());
     static final Set<String> RAW_CLIENT_SCOPES = new HashSet<>(Arrays.asList("CLIENT-SCOPE-1", "CLIENT-SCOPE-2", "CLIENT-SCOPE-3"));
-    static final Set<OAuth2ScopeId> CLIENT_SCOPES = RAW_CLIENT_SCOPES.stream().map(OAuth2ScopeId::new).collect(Collectors.toSet());
+    static final Set<AuthorityCode> CLIENT_SCOPES = RAW_CLIENT_SCOPES.stream().map(AuthorityCode::new).collect(Collectors.toSet());
     static final Set<String> RAW_APPROVED_SCOPES = new HashSet<>(Arrays.asList("APPROVED-SCOPE-1", "APPROVED-SCOPE-1", "APPROVED-SCOPE-1"));
-    static final Set<OAuth2ScopeId> APPROVED_SCOPES = RAW_APPROVED_SCOPES.stream().map(OAuth2ScopeId::new).collect(Collectors.toSet());
+    static final Set<AuthorityCode> APPROVED_SCOPES = RAW_APPROVED_SCOPES.stream().map(AuthorityCode::new).collect(Collectors.toSet());
 
     static final LocalDateTime EXPIRATION_DATETIME = LocalDateTime.of(2020, 1, 24, 21, 24, 0);
     static final LocalDateTime TOKEN_CREATED_DATETIME = LocalDateTime.of(2020, 1, 29, 22, 57);
@@ -205,7 +205,7 @@ class OAuth2TokenApplicationTestHelper {
             return this;
         }
 
-        MockAccessToken configScopes(Set<OAuth2ScopeId> scopeIds) {
+        MockAccessToken configScopes(Set<AuthorityCode> scopeIds) {
             when(accessToken.getScopes()).thenReturn(scopeIds);
             return this;
         }

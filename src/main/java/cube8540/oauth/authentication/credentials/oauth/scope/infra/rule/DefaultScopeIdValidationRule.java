@@ -28,6 +28,6 @@ public class DefaultScopeIdValidationRule implements ValidationRule<OAuth2Scope>
 
     @Override
     public boolean isValid(OAuth2Scope target) {
-        return target.getId() != null && target.getId().getValue() != null;
+        return target.getCode() != null && target.getCode().getValue() != null;
     }
 }

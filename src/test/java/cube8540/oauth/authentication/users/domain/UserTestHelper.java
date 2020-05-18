@@ -35,6 +35,9 @@ class UserTestHelper {
     static final LocalDateTime EXPIRATION_DATETIME = NOW.plusMinutes(5);
     static final LocalDateTime NOT_EXPIRATION_DATETIME = EXPIRATION_DATETIME.plusMinutes(1);
 
+    static final String RAW_AUTHORITY = "AUTHORITY";
+    static final UserAuthority AUTHORITY = new UserAuthority(RAW_AUTHORITY);
+
     static MockPasswordEncoder mockPasswordEncoder() {
         return new MockPasswordEncoder();
     }

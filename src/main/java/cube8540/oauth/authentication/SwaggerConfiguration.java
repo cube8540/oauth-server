@@ -82,11 +82,25 @@ public class SwaggerConfiguration {
                 .ignoredParameterTypes(Authentication.class)
                 .ignoredParameterTypes(Principal.class)
                 .select()
-                .apis(RequestHandlerSelectors.basePackage("cube8540.oauth.authentication.credentials.authority.endpoint"))
+                .apis(RequestHandlerSelectors.basePackage("cube8540.oauth.authentication.credentials.resource.endpoint"))
                 .paths(PathSelectors.ant("/api/secured-resources/**"))
                 .build()
                 .groupName("Secured Resource API")
                 .apiInfo(createApiInfo("보호 자원 API"));
+    }
+
+    @Bean
+    public Docket roleAPI() {
+        return new Docket(DocumentationType.SWAGGER_2)
+                .useDefaultResponseMessages(false)
+                .ignoredParameterTypes(Authentication.class)
+                .ignoredParameterTypes(Principal.class)
+                .select()
+                .apis(RequestHandlerSelectors.basePackage("cube8540.oauth.authentication.credentials.role.endpoint"))
+                .paths(PathSelectors.ant("/api/authorities/**"))
+                .build()
+                .groupName("Role API")
+                .apiInfo(createApiInfo("권한 API"));
     }
 
     private ApiInfo createApiInfo(String title) {
