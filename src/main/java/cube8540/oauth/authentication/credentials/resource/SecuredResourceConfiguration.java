@@ -24,14 +24,18 @@ public class SecuredResourceConfiguration {
     @Setter(onMethod_ = {@Autowired, @Qualifier("defaultScopeDetailsService")})
     private AuthorityDetailsService scopeDetailsService;
 
+    @Setter(onMethod_ = {@Autowired, @Qualifier("defaultRoleManagementService")})
+    private AuthorityDetailsService roleDetailsService;
+
     @PostConstruct
     public void setManagementServicePolicy() {
-        securedResourceManagementService.setValidationPolicy(createSecuredResourceValidationPolicy(scopeDetailsService));
+        securedResourceManagementService.setValidationPolicy(createSecuredResourceValidationPolicy());
     }
 
-    private SecuredResourceValidationPolicy createSecuredResourceValidationPolicy(AuthorityDetailsService scopeDetailsService) {
+    private SecuredResourceValidationPolicy createSecuredResourceValidationPolicy() {
         DefaultSecuredResourceValidationPolicy policy = new DefaultSecuredResourceValidationPolicy();
-        policy.setAuthorityDetailsService(scopeDetailsService);
+        policy.setScopeAuthorityDetailsService(scopeDetailsService);
+        policy.setRoleAuthorityDetailsService(roleDetailsService);
         return policy;
     }
 

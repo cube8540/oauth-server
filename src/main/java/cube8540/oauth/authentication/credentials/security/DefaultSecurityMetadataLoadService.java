@@ -1,19 +1,18 @@
-package cube8540.oauth.authentication.credentials.resource.application;
+package cube8540.oauth.authentication.credentials.security;
 
-import cube8540.oauth.authentication.credentials.domain.AuthorityCode;
+import cube8540.oauth.authentication.credentials.resource.domain.AccessibleAuthority;
 import cube8540.oauth.authentication.credentials.resource.domain.ResourceMethod;
 import cube8540.oauth.authentication.credentials.resource.domain.SecuredResource;
 import cube8540.oauth.authentication.credentials.resource.domain.SecuredResourceRepository;
-import cube8540.oauth.authentication.credentials.security.SecurityMetadataLoadService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.ConfigAttribute;
-import org.springframework.security.access.SecurityConfig;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -42,8 +41,16 @@ public class DefaultSecurityMetadataLoadService implements SecurityMetadataLoadS
         }
     }
 
-    private Collection<ConfigAttribute> authorityToConfigAttribute(Set<AuthorityCode> authorities) {
-        return Optional.ofNullable(authorities).orElse(Collections.emptySet())
-                .stream().map(AuthorityCode::getValue).map(SecurityConfig::new).collect(Collectors.toList());
+    private Collection<ConfigAttribute> authorityToConfigAttribute(Set<AccessibleAuthority> authorities) {
+        Collection<ConfigAttribute> configAttributes = new HashSet<>();
+
+        Optional.ofNullable(authorities).orElse(Collections.emptySet()).stream()
+                .filter(auth -> auth.getAuthorityType().equals(AccessibleAuthority.AuthorityType.OAUTH2_SCOPE))
+                .forEach(auth -> configAttributes.add(new ScopeSecurityConfig(auth.getAuthority())));
+        Optional.ofNullable(authorities).orElse(Collections.emptySet()).stream()
+                .filter(auth -> auth.getAuthorityType().equals(AccessibleAuthority.AuthorityType.AUTHORITY))
+                .forEach(auth -> configAttributes.add(new RoleSecurityConfig(auth.getAuthority())));
+
+        return configAttributes;
     }
 }

@@ -2,6 +2,8 @@ package cube8540.oauth.authentication;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cube8540.oauth.authentication.credentials.oauth.security.introspector.DefaultOpaqueTokenIntrospector;
+import cube8540.oauth.authentication.credentials.security.RoleAuthorityVoter;
+import cube8540.oauth.authentication.credentials.security.ScopeAuthorityVoter;
 import cube8540.oauth.authentication.error.DefaultAuthenticationExceptionEntryPoint;
 import cube8540.oauth.authentication.error.security.AccessDeniedExceptionResponseRenderer;
 import cube8540.oauth.authentication.error.security.AccessDeniedExceptionTranslator;
@@ -14,8 +16,8 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.security.access.AccessDecisionManager;
 import org.springframework.security.access.AccessDecisionVoter;
-import org.springframework.security.access.vote.AffirmativeBased;
 import org.springframework.security.access.vote.RoleVoter;
+import org.springframework.security.access.vote.UnanimousBased;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -23,8 +25,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.server.resource.introspection.NimbusOpaqueTokenIntrospector;
 import org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector;
 import org.springframework.security.web.AuthenticationEntryPoint;
-import org.springframework.security.web.access.expression.DefaultWebSecurityExpressionHandler;
-import org.springframework.security.web.access.expression.WebExpressionVoter;
 import org.springframework.security.web.access.intercept.FilterInvocationSecurityMetadataSource;
 import org.springframework.security.web.access.intercept.FilterSecurityInterceptor;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -96,24 +96,20 @@ public class OAuth2ResourceEndpointSecurityConfiguration extends WebSecurityConf
     private AccessDecisionManager accessDecisionManager() {
         List<AccessDecisionVoter<?>> accessDecisionVoters = new ArrayList<>();
 
-        accessDecisionVoters.add(createWebExpressionVoter());
-        accessDecisionVoters.add(createRoleVoter());
+        accessDecisionVoters.add(createRoleAuthorityVoter());
+        accessDecisionVoters.add(createScopeAuthorityVoter());
 
-        return new AffirmativeBased(accessDecisionVoters);
+        return new UnanimousBased(accessDecisionVoters);
     }
 
-    private WebExpressionVoter createWebExpressionVoter() {
-        WebExpressionVoter webExpressionVoter = new WebExpressionVoter();
-        DefaultWebSecurityExpressionHandler webSecurityExpressionHandler = new DefaultWebSecurityExpressionHandler();
-
-        webSecurityExpressionHandler.setDefaultRolePrefix("");
-        webExpressionVoter.setExpressionHandler(webSecurityExpressionHandler);
-
-        return webExpressionVoter;
+    private RoleVoter createRoleAuthorityVoter() {
+        RoleAuthorityVoter roleVoter = new RoleAuthorityVoter();
+        roleVoter.setRolePrefix("");
+        return roleVoter;
     }
 
-    private RoleVoter createRoleVoter() {
-        RoleVoter roleVoter = new RoleVoter();
+    private RoleVoter createScopeAuthorityVoter() {
+        ScopeAuthorityVoter roleVoter = new ScopeAuthorityVoter();
         roleVoter.setRolePrefix("");
         return roleVoter;
     }

@@ -1,5 +1,6 @@
-package cube8540.oauth.authentication.credentials.resource.application;
+package cube8540.oauth.authentication.credentials.security;
 
+import cube8540.oauth.authentication.credentials.resource.application.AccessibleAuthorityValue;
 import cube8540.oauth.authentication.credentials.resource.domain.AccessibleAuthority;
 import cube8540.oauth.authentication.credentials.resource.domain.ResourceMethod;
 import cube8540.oauth.authentication.credentials.resource.domain.SecuredResource;
@@ -22,7 +23,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class SecuredResourceApplicationTestHelper {
+class SecurityApplicationTestHelper {
 
     static final String RAW_RESOURCE_ID = "RESOURCE-ID";
     static final SecuredResourceId RESOURCE_ID = new SecuredResourceId(RAW_RESOURCE_ID);
@@ -173,13 +174,8 @@ class SecuredResourceApplicationTestHelper {
             return this;
         }
 
-        MockResourceValidationPolicy scopeRule(ValidationRule<SecuredResource> validationRule) {
+        MockResourceValidationPolicy authoritiesRule(ValidationRule<SecuredResource> validationRule) {
             when(this.policy.scopeAuthoritiesRule()).thenReturn(validationRule);
-            return this;
-        }
-
-        MockResourceValidationPolicy roleRule(ValidationRule<SecuredResource> validationRule) {
-            when(this.policy.roleAuthoritiesRule()).thenReturn(validationRule);
             return this;
         }
 

@@ -16,15 +16,15 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 
 import static cube8540.oauth.authentication.credentials.resource.application.SecuredResourceApplicationTestHelper.ADD_AUTHORITIES;
+import static cube8540.oauth.authentication.credentials.resource.application.SecuredResourceApplicationTestHelper.ADD_REQUEST_AUTHORITIES;
 import static cube8540.oauth.authentication.credentials.resource.application.SecuredResourceApplicationTestHelper.AUTHORITIES;
 import static cube8540.oauth.authentication.credentials.resource.application.SecuredResourceApplicationTestHelper.MODIFY_RESOURCE_URI;
-import static cube8540.oauth.authentication.credentials.resource.application.SecuredResourceApplicationTestHelper.RAW_ADD_AUTHORITIES;
-import static cube8540.oauth.authentication.credentials.resource.application.SecuredResourceApplicationTestHelper.RAW_AUTHORITIES;
 import static cube8540.oauth.authentication.credentials.resource.application.SecuredResourceApplicationTestHelper.RAW_MODIFY_RESOURCE_URI;
-import static cube8540.oauth.authentication.credentials.resource.application.SecuredResourceApplicationTestHelper.RAW_REMOVE_AUTHORITIES;
 import static cube8540.oauth.authentication.credentials.resource.application.SecuredResourceApplicationTestHelper.RAW_RESOURCE_ID;
 import static cube8540.oauth.authentication.credentials.resource.application.SecuredResourceApplicationTestHelper.RAW_RESOURCE_URI;
 import static cube8540.oauth.authentication.credentials.resource.application.SecuredResourceApplicationTestHelper.REMOVE_AUTHORITIES;
+import static cube8540.oauth.authentication.credentials.resource.application.SecuredResourceApplicationTestHelper.REMOVE_REQUEST_AUTHORITIES;
+import static cube8540.oauth.authentication.credentials.resource.application.SecuredResourceApplicationTestHelper.REQUEST_AUTHORITIES;
 import static cube8540.oauth.authentication.credentials.resource.application.SecuredResourceApplicationTestHelper.RESOURCE_ID;
 import static cube8540.oauth.authentication.credentials.resource.application.SecuredResourceApplicationTestHelper.RESOURCE_URI;
 import static cube8540.oauth.authentication.credentials.resource.application.SecuredResourceApplicationTestHelper.mockResourceRepository;
@@ -95,7 +95,7 @@ class DefaultSecuredResourceManagementServiceTest {
 
                 @Override
                 protected SecuredResourceRegisterRequest request() {
-                    return new SecuredResourceRegisterRequest(RAW_RESOURCE_ID, RAW_RESOURCE_URI, "POST", RAW_AUTHORITIES);
+                    return new SecuredResourceRegisterRequest(RAW_RESOURCE_ID, RAW_RESOURCE_URI, "POST", REQUEST_AUTHORITIES);
                 }
 
                 @Test
@@ -104,7 +104,7 @@ class DefaultSecuredResourceManagementServiceTest {
                     ArgumentCaptor<SecuredResource> resourceCaptor = ArgumentCaptor.forClass(SecuredResource.class);
 
                     service.registerNewResource(registerRequest);
-                    verifySaveAfterValidation(authoritiesRule, resourceCaptor);
+                    verifySaveAfterValidation(scopeRule, resourceCaptor);
                     assertEquals(AUTHORITIES, resourceCaptor.getValue().getAuthorities());
                 }
             }
@@ -152,7 +152,7 @@ class DefaultSecuredResourceManagementServiceTest {
                 void shouldNotRemoveAuthorityToResource() {
                     service.modifyResource(RAW_RESOURCE_ID, modifyRequest);
 
-                    verify(securedResource, never()).removeAuthority(any());
+                    verify(securedResource, never()).removeAuthority(any(), any());
                 }
             }
 
@@ -170,7 +170,7 @@ class DefaultSecuredResourceManagementServiceTest {
                 void shouldNotAddAuthorityToResource() {
                     service.modifyResource(RAW_RESOURCE_ID, modifyRequest);
 
-                    verify(securedResource, never()).addAuthority(any());
+                    verify(securedResource, never()).addAuthority(any(), any());
                 }
             }
 
@@ -180,7 +180,7 @@ class DefaultSecuredResourceManagementServiceTest {
 
                 @Override
                 protected SecuredResourceModifyRequest request() {
-                    return new SecuredResourceModifyRequest(RAW_MODIFY_RESOURCE_URI, "PUT", null, RAW_REMOVE_AUTHORITIES);
+                    return new SecuredResourceModifyRequest(RAW_MODIFY_RESOURCE_URI, "PUT", null, REMOVE_REQUEST_AUTHORITIES);
                 }
 
                 @Test
@@ -189,7 +189,7 @@ class DefaultSecuredResourceManagementServiceTest {
                     InOrder inOrder = inOrder(securedResource, repository);
 
                     service.modifyResource(RAW_RESOURCE_ID, modifyRequest);
-                    REMOVE_AUTHORITIES.forEach(authority -> inOrder.verify(securedResource, times(1)).removeAuthority(authority));
+                    REMOVE_AUTHORITIES.forEach(auth -> inOrder.verify(securedResource, times(1)).removeAuthority(auth.getAuthority(), auth.getAuthorityType()));
                     inOrder.verify(securedResource, times(1)).validation(policy);
                     inOrder.verify(repository, times(1)).save(securedResource);
                 }
@@ -201,7 +201,7 @@ class DefaultSecuredResourceManagementServiceTest {
 
                 @Override
                 protected SecuredResourceModifyRequest request() {
-                    return new SecuredResourceModifyRequest(RAW_MODIFY_RESOURCE_URI, "PUT", RAW_ADD_AUTHORITIES, RAW_REMOVE_AUTHORITIES);
+                    return new SecuredResourceModifyRequest(RAW_MODIFY_RESOURCE_URI, "PUT", ADD_REQUEST_AUTHORITIES, REMOVE_REQUEST_AUTHORITIES);
                 }
 
                 @Test
@@ -210,7 +210,7 @@ class DefaultSecuredResourceManagementServiceTest {
                     InOrder inOrder = inOrder(securedResource, repository);
 
                     service.modifyResource(RAW_RESOURCE_ID, modifyRequest);
-                    ADD_AUTHORITIES.forEach(authority -> inOrder.verify(securedResource, times(1)).addAuthority(authority));
+                    ADD_AUTHORITIES.forEach(auth -> inOrder.verify(securedResource, times(1)).addAuthority(auth.getAuthority(), auth.getAuthorityType()));
                     inOrder.verify(securedResource, times(1)).validation(policy);
                     inOrder.verify(repository, times(1)).save(securedResource);
                 }
@@ -278,7 +278,8 @@ class DefaultSecuredResourceManagementServiceTest {
         protected ValidationRule<SecuredResource> resourceIdRule;
         protected ValidationRule<SecuredResource> resourceRule;
         protected ValidationRule<SecuredResource> methodRule;
-        protected ValidationRule<SecuredResource> authoritiesRule;
+        protected ValidationRule<SecuredResource> scopeRule;
+        protected ValidationRule<SecuredResource> roleRule;
 
         @BeforeEach
         void setupRequest() {
@@ -286,10 +287,11 @@ class DefaultSecuredResourceManagementServiceTest {
             this.resourceIdRule = mockResourceValidationRule().configReturnTrue().build();
             this.resourceRule = mockResourceValidationRule().configReturnTrue().build();
             this.methodRule = mockResourceValidationRule().configReturnTrue().build();
-            this.authoritiesRule = mockResourceValidationRule().configReturnTrue().build();
+            this.scopeRule = mockResourceValidationRule().configReturnTrue().build();
+            this.roleRule = mockResourceValidationRule().configReturnTrue().build();
 
             SecuredResourceValidationPolicy policy = mockResourceValidationPolicy().resourceIdRule(resourceIdRule)
-                    .resourceRule(resourceRule).methodRule(methodRule).authoritiesRule(authoritiesRule).build();
+                    .resourceRule(resourceRule).methodRule(methodRule).scopeRule(scopeRule).roleRule(roleRule).build();
             this.service.setValidationPolicy(policy);
         }
 

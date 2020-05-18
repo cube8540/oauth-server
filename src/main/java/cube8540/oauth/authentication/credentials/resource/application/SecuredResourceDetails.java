@@ -19,7 +19,7 @@ public interface SecuredResourceDetails {
     @ApiModelProperty(value = "보호 자원 메소드", required = true, example = "GET")
     ResourceMethod getMethod();
 
-    @ApiModelProperty(value = "보호 자원 접근 가능 스코프", required = true, example = "[\"test.scope0\", \"test.scope1\"]")
-    List<String> getAuthorities();
+    @ApiModelProperty(value = "보호 자원 접근 가능 스코프", required = true, example = "[{\"authority\": \"ROLE_USER\", \"authorityType\": \"AUTHORITY\"}, {\"authority\": \"access.test\", \"authorityType\": \"SCOPE\"}]")
+    List<AccessibleAuthorityValue> getAuthorities();
 
 }

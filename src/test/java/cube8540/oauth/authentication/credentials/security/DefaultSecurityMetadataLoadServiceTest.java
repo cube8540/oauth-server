@@ -1,6 +1,6 @@
-package cube8540.oauth.authentication.credentials.resource.application;
+package cube8540.oauth.authentication.credentials.security;
 
-import cube8540.oauth.authentication.credentials.domain.AuthorityCode;
+import cube8540.oauth.authentication.credentials.resource.domain.AccessibleAuthority;
 import cube8540.oauth.authentication.credentials.resource.domain.ResourceMethod;
 import cube8540.oauth.authentication.credentials.resource.domain.SecuredResource;
 import cube8540.oauth.authentication.credentials.resource.domain.SecuredResourceRepository;
@@ -8,7 +8,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.access.ConfigAttribute;
-import org.springframework.security.access.SecurityConfig;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
@@ -19,9 +18,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
-import static cube8540.oauth.authentication.credentials.resource.application.SecuredResourceApplicationTestHelper.mockSecuredResource;
+import static cube8540.oauth.authentication.credentials.security.SecurityApplicationTestHelper.mockSecuredResource;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -41,12 +39,12 @@ class DefaultSecurityMetadataLoadServiceTest {
     private static final ResourceMethod RESOURCE_2_METHOD = ResourceMethod.PUT;
     private static final ResourceMethod RESOURCE_3_METHOD = ResourceMethod.ALL;
 
-    private static final Set<AuthorityCode> AUTHORITIES_1 = new HashSet<>(Arrays.asList(
-            new AuthorityCode("AUTHORITY-1"), new AuthorityCode("AUTHORITY-2"), new AuthorityCode("AUTHORITY-3")));
-    private static final Set<AuthorityCode> AUTHORITIES_2 = new HashSet<>(Arrays.asList(
-            new AuthorityCode("AUTHORITY-1"), new AuthorityCode("AUTHORITY-4"), new AuthorityCode("AUTHORITY-5")));
-    private static final Set<AuthorityCode> AUTHORITIES_3 = new HashSet<>(Arrays.asList(
-            new AuthorityCode("AUTHORITY-5"), new AuthorityCode("AUTHORITY-6"), new AuthorityCode("AUTHORITY-7")));
+    private static final Set<AccessibleAuthority> AUTHORITIES_1 = new HashSet<>(Arrays.asList(
+            new AccessibleAuthority("AUTHORITY-1", AccessibleAuthority.AuthorityType.OAUTH2_SCOPE), new AccessibleAuthority("AUTHORITY-2", AccessibleAuthority.AuthorityType.AUTHORITY), new AccessibleAuthority("AUTHORITY-3", AccessibleAuthority.AuthorityType.OAUTH2_SCOPE)));
+    private static final Set<AccessibleAuthority> AUTHORITIES_2 = new HashSet<>(Arrays.asList(
+            new AccessibleAuthority("AUTHORITY-1", AccessibleAuthority.AuthorityType.OAUTH2_SCOPE), new AccessibleAuthority("AUTHORITY-4", AccessibleAuthority.AuthorityType.AUTHORITY), new AccessibleAuthority("AUTHORITY-5", AccessibleAuthority.AuthorityType.OAUTH2_SCOPE)));
+    private static final Set<AccessibleAuthority> AUTHORITIES_3 = new HashSet<>(Arrays.asList(
+            new AccessibleAuthority("AUTHORITY-5", AccessibleAuthority.AuthorityType.OAUTH2_SCOPE), new AccessibleAuthority("AUTHORITY-6", AccessibleAuthority.AuthorityType.AUTHORITY), new AccessibleAuthority("AUTHORITY-7", AccessibleAuthority.AuthorityType.OAUTH2_SCOPE)));
 
     private SecuredResourceRepository repository;
 
@@ -81,8 +79,12 @@ class DefaultSecurityMetadataLoadServiceTest {
         }
     }
 
-    private Collection<ConfigAttribute> securityConfig(Set<AuthorityCode> authorityCodes) {
-        return authorityCodes.stream().map(AuthorityCode::getValue).map(SecurityConfig::new).collect(Collectors.toList());
+    private Collection<ConfigAttribute> securityConfig(Set<AccessibleAuthority> authorityCodes) {
+        Collection<ConfigAttribute> attributes = new HashSet<>();
+        authorityCodes.stream().filter(auth -> auth.getAuthorityType().equals(AccessibleAuthority.AuthorityType.OAUTH2_SCOPE)).forEach(auth -> attributes.add(new ScopeSecurityConfig(auth.getAuthority())));
+        authorityCodes.stream().filter(auth -> auth.getAuthorityType().equals(AccessibleAuthority.AuthorityType.AUTHORITY)).forEach(auth -> attributes.add(new RoleSecurityConfig(auth.getAuthority())));
+
+        return attributes;
     }
 
 }

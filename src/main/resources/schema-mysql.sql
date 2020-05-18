@@ -1,5 +1,5 @@
 create table if not exists initialize (
-	initialize_datetime datetime(6) default current_datetime(6)() not null
+	initialize_datetime datetime(6) default current_timestamp() not null
 );
 
 create table if not exists role (
@@ -142,9 +142,8 @@ create table if not exists secured_resource (
 create table if not exists authority_accessible_resources (
 	authority varchar(32) not null,
 	resource_id varchar(128) not null,
-	primary key (authority, resource_id),
-	constraint fk_accessible_resource_resource foreign key (resource_id) references secured_resource (resource_id) on delete cascade,
-	constraint fk_accessible_resource_authority foreign key (authority) references oauth2_scope (scope_id) on delete cascade
+	authority_type varchar(16) not null,
+	constraint fk_accessible_resource_resource foreign key (resource_id) references secured_resource (resource_id) on delete cascade
 );
 
 commit;

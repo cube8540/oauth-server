@@ -82,7 +82,7 @@ public class SwaggerConfiguration {
                 .ignoredParameterTypes(Authentication.class)
                 .ignoredParameterTypes(Principal.class)
                 .select()
-                .apis(RequestHandlerSelectors.basePackage("cube8540.oauth.authentication.credentials.authority.endpoint"))
+                .apis(RequestHandlerSelectors.basePackage("cube8540.oauth.authentication.credentials.resource.endpoint"))
                 .paths(PathSelectors.ant("/api/secured-resources/**"))
                 .build()
                 .groupName("Secured Resource API")

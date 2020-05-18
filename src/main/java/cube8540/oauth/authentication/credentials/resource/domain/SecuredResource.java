@@ -1,6 +1,5 @@
 package cube8540.oauth.authentication.credentials.resource.domain;
 
-import cube8540.oauth.authentication.credentials.domain.AuthorityCode;
 import cube8540.oauth.authentication.credentials.resource.domain.converter.ResourceConverter;
 import cube8540.oauth.authentication.credentials.resource.domain.exception.ResourceInvalidException;
 import cube8540.validator.core.Validator;
@@ -49,8 +48,7 @@ public class SecuredResource extends AbstractAggregateRoot<SecuredResource> {
 
     @ElementCollection
     @CollectionTable(name = "authority_accessible_resources", joinColumns = @JoinColumn(name = "resource_id", nullable = false))
-    @AttributeOverride(name = "value", column = @Column(name = "authority", length = 32, nullable = false))
-    private Set<AuthorityCode> authorities;
+    private Set<AccessibleAuthority> authorities;
 
     public SecuredResource(SecuredResourceId resourceId, URI resource, ResourceMethod method) {
         this.resourceId = resourceId;
@@ -65,17 +63,17 @@ public class SecuredResource extends AbstractAggregateRoot<SecuredResource> {
         registerSecuredResourceChangedEvent();
     }
 
-    public void addAuthority(AuthorityCode scope) {
+    public void addAuthority(String code, AccessibleAuthority.AuthorityType authorityType) {
         if (this.authorities == null) {
             this.authorities = new HashSet<>();
         }
-        this.authorities.add(scope);
+        this.authorities.add(new AccessibleAuthority(code, authorityType));
 
         registerSecuredResourceChangedEvent();
     }
 
-    public void removeAuthority(AuthorityCode scope) {
-        Optional.ofNullable(authorities).ifPresent(auth -> auth.remove(scope));
+    public void removeAuthority(String code, AccessibleAuthority.AuthorityType authorityType) {
+        Optional.ofNullable(authorities).ifPresent(auth -> auth.remove(new AccessibleAuthority(code, authorityType)));
 
         registerSecuredResourceChangedEvent();
     }
@@ -84,7 +82,8 @@ public class SecuredResource extends AbstractAggregateRoot<SecuredResource> {
         Validator.of(this).registerRule(policy.resourceIdRule())
                 .registerRule(policy.resourceRule())
                 .registerRule(policy.methodRule())
-                .registerRule(policy.authoritiesRule())
+                .registerRule(policy.scopeAuthoritiesRule())
+                .registerRule(policy.roleAuthoritiesRule())
                 .getResult().hasErrorThrows(ResourceInvalidException::instance);
     }
 

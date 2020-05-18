@@ -1,6 +1,5 @@
 package cube8540.oauth.authentication.credentials.resource.application;
 
-import cube8540.oauth.authentication.credentials.domain.AuthorityCode;
 import cube8540.oauth.authentication.credentials.resource.domain.ResourceMethod;
 import cube8540.oauth.authentication.credentials.resource.domain.SecuredResource;
 import cube8540.oauth.authentication.credentials.resource.domain.SecuredResourceId;
@@ -49,7 +48,7 @@ public class DefaultSecuredResourceManagementService implements SecuredResourceM
         SecuredResource resource = new SecuredResource(new SecuredResourceId(registerRequest.getResourceId()),
                 URI.create(registerRequest.getResource()), ResourceMethod.of(registerRequest.getMethod()));
         Optional.ofNullable(registerRequest.getAuthorities()).orElse(Collections.emptyList())
-                .stream().map(AuthorityCode::new).forEach(resource::addAuthority);
+                .forEach(auth -> resource.addAuthority(auth.getAuthority(), auth.getAuthorityType()));
         resource.validation(validationPolicy);
         return DefaultSecuredResourceDetails.of(repository.save(resource));
     }
@@ -59,9 +58,9 @@ public class DefaultSecuredResourceManagementService implements SecuredResourceM
         SecuredResource resource = getResource(resourceId);
         resource.changeResourceInfo(URI.create(modifyRequest.getResource()), ResourceMethod.of(modifyRequest.getMethod()));
         Optional.ofNullable(modifyRequest.getRemoveAuthorities()).orElse(Collections.emptyList())
-                .stream().map(AuthorityCode::new).forEach(resource::removeAuthority);
+                .forEach(auth -> resource.removeAuthority(auth.getAuthority(), auth.getAuthorityType()));
         Optional.ofNullable(modifyRequest.getNewAuthorities()).orElse(Collections.emptyList())
-                .stream().map(AuthorityCode::new).forEach(resource::addAuthority);
+                .forEach(auth -> resource.addAuthority(auth.getAuthority(), auth.getAuthorityType()));
         resource.validation(validationPolicy);
         return DefaultSecuredResourceDetails.of(repository.save(resource));
     }
