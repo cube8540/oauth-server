@@ -1,9 +1,9 @@
 package cube8540.oauth.authentication.credentials.oauth.client.infra.rule;
 
+import cube8540.oauth.authentication.credentials.AuthorityDetails;
+import cube8540.oauth.authentication.credentials.domain.AuthorityCode;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2Client;
 import cube8540.oauth.authentication.credentials.oauth.scope.application.OAuth2AccessibleScopeDetailsService;
-import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ScopeDetails;
-import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -127,8 +127,8 @@ class ClientCanGrantedScopeValidationRuleTest {
             Authentication authentication = mock(Authentication.class);
             OAuth2AccessibleScopeDetailsService scopeDetailsService = mock(OAuth2AccessibleScopeDetailsService.class);
             SecurityContext securityContext = mock(SecurityContext.class);
-            List<OAuth2ScopeDetails> scopes = Arrays.asList(mocking("SCOPE-1"), mocking("SCOPE-2"), mocking("SCOPE-3"));
-            Set<OAuth2ScopeId> clientScopes = new HashSet<>(Arrays.asList(new OAuth2ScopeId("SCOPE-1"), new OAuth2ScopeId("SCOPE-2"), new OAuth2ScopeId("SCOPE-6")));
+            List<AuthorityDetails> scopes = Arrays.asList(mocking("SCOPE-1"), mocking("SCOPE-2"), mocking("SCOPE-3"));
+            Set<AuthorityCode> clientScopes = new HashSet<>(Arrays.asList(new AuthorityCode("SCOPE-1"), new AuthorityCode("SCOPE-2"), new AuthorityCode("SCOPE-6")));
 
             this.client = mock(OAuth2Client.class);
 
@@ -146,10 +146,10 @@ class ClientCanGrantedScopeValidationRuleTest {
             assertFalse(rule.isValid(client));
         }
 
-        private OAuth2ScopeDetails mocking(String scopeId) {
-            OAuth2ScopeDetails scopeDetails = mock(OAuth2ScopeDetails.class);
+        private AuthorityDetails mocking(String scopeId) {
+            AuthorityDetails scopeDetails = mock(AuthorityDetails.class);
 
-            when(scopeDetails.getScopeId()).thenReturn(scopeId);
+            when(scopeDetails.getCode()).thenReturn(scopeId);
             return scopeDetails;
         }
     }
@@ -165,8 +165,8 @@ class ClientCanGrantedScopeValidationRuleTest {
             Authentication authentication = mock(Authentication.class);
             OAuth2AccessibleScopeDetailsService scopeDetailsService = mock(OAuth2AccessibleScopeDetailsService.class);
             SecurityContext securityContext = mock(SecurityContext.class);
-            List<OAuth2ScopeDetails> scopes = Arrays.asList(mocking("SCOPE-1"), mocking("SCOPE-2"), mocking("SCOPE-3"));
-            Set<OAuth2ScopeId> clientScopes = new HashSet<>(Arrays.asList(new OAuth2ScopeId("SCOPE-1"), new OAuth2ScopeId("SCOPE-2"), new OAuth2ScopeId("SCOPE-3")));
+            List<AuthorityDetails> scopes = Arrays.asList(mocking("SCOPE-1"), mocking("SCOPE-2"), mocking("SCOPE-3"));
+            Set<AuthorityCode> clientScopes = new HashSet<>(Arrays.asList(new AuthorityCode("SCOPE-1"), new AuthorityCode("SCOPE-2"), new AuthorityCode("SCOPE-3")));
 
             this.client = mock(OAuth2Client.class);
 
@@ -184,10 +184,10 @@ class ClientCanGrantedScopeValidationRuleTest {
             assertTrue(rule.isValid(client));
         }
 
-        private OAuth2ScopeDetails mocking(String scopeId) {
-            OAuth2ScopeDetails scopeDetails = mock(OAuth2ScopeDetails.class);
+        private AuthorityDetails mocking(String scopeId) {
+            AuthorityDetails scopeDetails = mock(AuthorityDetails.class);
 
-            when(scopeDetails.getScopeId()).thenReturn(scopeId);
+            when(scopeDetails.getCode()).thenReturn(scopeId);
             return scopeDetails;
         }
     }

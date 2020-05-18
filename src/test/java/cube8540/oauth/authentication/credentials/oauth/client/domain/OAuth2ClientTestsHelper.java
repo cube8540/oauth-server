@@ -1,6 +1,6 @@
 package cube8540.oauth.authentication.credentials.oauth.client.domain;
 
-import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
+import cube8540.oauth.authentication.credentials.domain.AuthorityCode;
 import cube8540.validator.core.ValidationError;
 import cube8540.validator.core.ValidationRule;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -19,7 +19,7 @@ class OAuth2ClientTestsHelper {
     static final String RAW_CHANGE_SECRET = "CHANGE-SECRET";
 
     static final String RAW_ADDED_SCOPE = "ADD-SCOPE";
-    static final OAuth2ScopeId ADDED_SCOPE = new OAuth2ScopeId(RAW_ADDED_SCOPE);
+    static final AuthorityCode ADDED_SCOPE = new AuthorityCode(RAW_ADDED_SCOPE);
 
     static final URI REDIRECT_URI = URI.create("http://localhost:8080");
 

@@ -1,9 +1,9 @@
 package cube8540.oauth.authentication.credentials.oauth.token.domain;
 
 import cube8540.oauth.authentication.AuthenticationApplication;
+import cube8540.oauth.authentication.credentials.domain.AuthorityCode;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
 import cube8540.oauth.authentication.credentials.oauth.converter.AuthorizationGrantTypeConverter;
-import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -79,7 +79,7 @@ public class OAuth2AuthorizedAccessToken extends AbstractAggregateRoot<OAuth2Aut
     @Fetch(FetchMode.JOIN)
     @CollectionTable(name = "oauth2_token_scope", joinColumns = @JoinColumn(name = "token_id", nullable = false))
     @AttributeOverride(name = "value", column = @Column(name = "scope_id", length = 32, nullable = false))
-    private Set<OAuth2ScopeId> scopes;
+    private Set<AuthorityCode> scopes;
 
     @Column(name = "expiration", nullable = false)
     private LocalDateTime expiration;

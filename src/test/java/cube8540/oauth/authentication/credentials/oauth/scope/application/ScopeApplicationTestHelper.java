@@ -1,7 +1,7 @@
 package cube8540.oauth.authentication.credentials.oauth.scope.application;
 
+import cube8540.oauth.authentication.credentials.domain.AuthorityCode;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2Scope;
-import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeRepository;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeValidationPolicy;
 import cube8540.validator.core.ValidationError;
@@ -24,19 +24,19 @@ import static org.mockito.Mockito.when;
 class ScopeApplicationTestHelper {
 
     static final String RAW_SCOPE_ID = "SCOPE-ID";
-    static final OAuth2ScopeId SCOPE_ID = new OAuth2ScopeId(RAW_SCOPE_ID);
+    static final AuthorityCode SCOPE_ID = new AuthorityCode(RAW_SCOPE_ID);
 
     static final String DESCRIPTION = "DESCRIPTION";
     static final String NEW_DESCRIPTION = "NEW-DESCRIPTION";
 
-    static final Set<OAuth2ScopeId> AUTHORITIES = new HashSet<>(Arrays.asList(new OAuth2ScopeId("AUTH-CODE-1"), new OAuth2ScopeId("AUTH-CODE-2"),new OAuth2ScopeId("AUTH-CODE-3")));
-    static final List<String> RAW_AUTHORITIES = AUTHORITIES.stream().map(OAuth2ScopeId::getValue).collect(Collectors.toList());
+    static final Set<AuthorityCode> AUTHORITIES = new HashSet<>(Arrays.asList(new AuthorityCode("AUTH-CODE-1"), new AuthorityCode("AUTH-CODE-2"),new AuthorityCode("AUTH-CODE-3")));
+    static final List<String> RAW_AUTHORITIES = AUTHORITIES.stream().map(AuthorityCode::getValue).collect(Collectors.toList());
 
-    static final List<OAuth2ScopeId> NEW_AUTHORITIES = Arrays.asList(new OAuth2ScopeId("NEW-AUTH-1"), new OAuth2ScopeId("NEW-AUTH-2"), new OAuth2ScopeId("NEW-AUTH-3"));
-    static final List<String> RAW_NEW_AUTHORITIES = NEW_AUTHORITIES.stream().map(OAuth2ScopeId::getValue).collect(Collectors.toList());
+    static final List<AuthorityCode> NEW_AUTHORITIES = Arrays.asList(new AuthorityCode("NEW-AUTH-1"), new AuthorityCode("NEW-AUTH-2"), new AuthorityCode("NEW-AUTH-3"));
+    static final List<String> RAW_NEW_AUTHORITIES = NEW_AUTHORITIES.stream().map(AuthorityCode::getValue).collect(Collectors.toList());
 
-    static final List<OAuth2ScopeId> REMOVE_AUTHORITIES = Arrays.asList(new OAuth2ScopeId("REMOVE-AUTH-1"), new OAuth2ScopeId("REMOVE-AUTH-2"), new OAuth2ScopeId("REMOVE-AUTH-3"));
-    static final List<String> RAW_REMOVE_AUTHORITIES = REMOVE_AUTHORITIES.stream().map(OAuth2ScopeId::getValue).collect(Collectors.toList());
+    static final List<AuthorityCode> REMOVE_AUTHORITIES = Arrays.asList(new AuthorityCode("REMOVE-AUTH-1"), new AuthorityCode("REMOVE-AUTH-2"), new AuthorityCode("REMOVE-AUTH-3"));
+    static final List<String> RAW_REMOVE_AUTHORITIES = REMOVE_AUTHORITIES.stream().map(AuthorityCode::getValue).collect(Collectors.toList());
 
     static MockScope mockScope() {
         return new MockScope();
@@ -69,7 +69,7 @@ class ScopeApplicationTestHelper {
         }
 
         MockScope configDefaultScopeId() {
-            when(scope.getId()).thenReturn(SCOPE_ID);
+            when(scope.getCode()).thenReturn(SCOPE_ID);
             return this;
         }
 

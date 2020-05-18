@@ -1,5 +1,6 @@
 package cube8540.oauth.authentication.credentials.oauth.scope.domain;
 
+import cube8540.oauth.authentication.credentials.domain.AuthorityCode;
 import cube8540.validator.core.ValidationError;
 import cube8540.validator.core.ValidationRule;
 import org.springframework.security.core.Authentication;
@@ -22,10 +23,10 @@ class OAuth2ScopeTestHelper {
     static final String DESCRIPTION = "DESCRIPTION";
 
     static final String RAW_AUTHORITY_CODE = "AUTHORITY-CODE";
-    static final OAuth2ScopeId AUTHORITY_CODE = new OAuth2ScopeId(RAW_AUTHORITY_CODE);
+    static final AuthorityCode AUTHORITY_CODE = new AuthorityCode(RAW_AUTHORITY_CODE);
 
     static final Set<String> RAW_ACCESSIBLE_AUTHORITY = new HashSet<>(Arrays.asList("AUTHORITY-CODE-1", "AUTHORITY-CODE-2", "AUTHORITY-CODE-3"));
-    static final Set<OAuth2ScopeId> ACCESSIBLE_AUTHORITY = RAW_ACCESSIBLE_AUTHORITY.stream().map(OAuth2ScopeId::new).collect(Collectors.toSet());
+    static final Set<AuthorityCode> ACCESSIBLE_AUTHORITY = RAW_ACCESSIBLE_AUTHORITY.stream().map(AuthorityCode::new).collect(Collectors.toSet());
 
     static final Collection<? extends GrantedAuthority> GRANTED_AUTHORITIES = RAW_ACCESSIBLE_AUTHORITY.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toSet());
     static final Collection<? extends GrantedAuthority> NOT_ACCESSIBLE_AUTHORITIES = new HashSet<>(Arrays.asList(

@@ -1,6 +1,6 @@
 package cube8540.oauth.authentication.credentials.resource.domain;
 
-import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
+import cube8540.oauth.authentication.credentials.domain.AuthorityCode;
 import cube8540.validator.core.ValidationError;
 import cube8540.validator.core.ValidationRule;
 
@@ -12,7 +12,7 @@ import static org.mockito.Mockito.when;
 class SecuredResourceTestHelper {
 
     static final String RAW_AUTHORITY_CODE = "AUTHORITY_CODE";
-    static final OAuth2ScopeId AUTHORITY_CODE = new OAuth2ScopeId(RAW_AUTHORITY_CODE);
+    static final AuthorityCode AUTHORITY_CODE = new AuthorityCode(RAW_AUTHORITY_CODE);
 
     static final String RAW_RESOURCE_ID = "RESOURCE-ID";
     static final SecuredResourceId RESOURCE_ID = new SecuredResourceId(RAW_RESOURCE_ID);

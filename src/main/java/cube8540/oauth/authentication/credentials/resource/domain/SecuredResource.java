@@ -1,8 +1,8 @@
 package cube8540.oauth.authentication.credentials.resource.domain;
 
+import cube8540.oauth.authentication.credentials.domain.AuthorityCode;
 import cube8540.oauth.authentication.credentials.resource.domain.converter.ResourceConverter;
 import cube8540.oauth.authentication.credentials.resource.domain.exception.ResourceInvalidException;
-import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import cube8540.validator.core.Validator;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -50,7 +50,7 @@ public class SecuredResource extends AbstractAggregateRoot<SecuredResource> {
     @ElementCollection
     @CollectionTable(name = "authority_accessible_resources", joinColumns = @JoinColumn(name = "resource_id", nullable = false))
     @AttributeOverride(name = "value", column = @Column(name = "authority", length = 32, nullable = false))
-    private Set<OAuth2ScopeId> authorities;
+    private Set<AuthorityCode> authorities;
 
     public SecuredResource(SecuredResourceId resourceId, URI resource, ResourceMethod method) {
         this.resourceId = resourceId;
@@ -65,7 +65,7 @@ public class SecuredResource extends AbstractAggregateRoot<SecuredResource> {
         registerSecuredResourceChangedEvent();
     }
 
-    public void addAuthority(OAuth2ScopeId scope) {
+    public void addAuthority(AuthorityCode scope) {
         if (this.authorities == null) {
             this.authorities = new HashSet<>();
         }
@@ -74,7 +74,7 @@ public class SecuredResource extends AbstractAggregateRoot<SecuredResource> {
         registerSecuredResourceChangedEvent();
     }
 
-    public void removeAuthority(OAuth2ScopeId scope) {
+    public void removeAuthority(AuthorityCode scope) {
         Optional.ofNullable(authorities).ifPresent(auth -> auth.remove(scope));
 
         registerSecuredResourceChangedEvent();

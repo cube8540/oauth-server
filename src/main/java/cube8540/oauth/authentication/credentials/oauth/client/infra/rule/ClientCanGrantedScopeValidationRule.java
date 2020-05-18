@@ -1,9 +1,9 @@
 package cube8540.oauth.authentication.credentials.oauth.client.infra.rule;
 
+import cube8540.oauth.authentication.credentials.AuthorityDetails;
+import cube8540.oauth.authentication.credentials.domain.AuthorityCode;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2Client;
 import cube8540.oauth.authentication.credentials.oauth.scope.application.OAuth2AccessibleScopeDetailsService;
-import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ScopeDetails;
-import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import cube8540.validator.core.ValidationError;
 import cube8540.validator.core.ValidationRule;
 import lombok.Setter;
@@ -48,9 +48,9 @@ public class ClientCanGrantedScopeValidationRule implements ValidationRule<OAuth
         if (target.getScopes() == null || target.getScopes().isEmpty()) {
             return false;
         }
-        Set<OAuth2ScopeId> accessibleScopes = scopeDetailsService.readAccessibleScopes(securityContext.getAuthentication())
-                .stream().map(OAuth2ScopeDetails::getScopeId)
-                .map(OAuth2ScopeId::new).collect(Collectors.toSet());
+        Set<AuthorityCode> accessibleScopes = scopeDetailsService.readAccessibleScopes(securityContext.getAuthentication())
+                .stream().map(AuthorityDetails::getCode)
+                .map(AuthorityCode::new).collect(Collectors.toSet());
         return accessibleScopes.containsAll(target.getScopes());
     }
 }

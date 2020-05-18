@@ -1,7 +1,7 @@
 package cube8540.oauth.authentication.credentials.oauth.token.application;
 
 import cube8540.oauth.authentication.AuthenticationApplication;
-import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
+import cube8540.oauth.authentication.credentials.domain.AuthorityCode;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2TokenRequest;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedAccessToken;
@@ -78,7 +78,7 @@ class ImplicitTokenGranterTest {
             @Test
             @DisplayName("토큰의 스코프는 토큰 요청 정보에 저장된 스코프이어야 한다.")
             void shouldScopeIsStoredInRequest() {
-                Set<OAuth2ScopeId> exceptedScopes = OAuth2TokenApplicationTestHelper.RAW_SCOPES.stream().map(OAuth2ScopeId::new).collect(Collectors.toSet());
+                Set<AuthorityCode> exceptedScopes = OAuth2TokenApplicationTestHelper.RAW_SCOPES.stream().map(AuthorityCode::new).collect(Collectors.toSet());
 
                 OAuth2AuthorizedAccessToken accessToken = granter.createAccessToken(clientDetails, tokenRequest);
                 assertEquals(exceptedScopes, accessToken.getScopes());

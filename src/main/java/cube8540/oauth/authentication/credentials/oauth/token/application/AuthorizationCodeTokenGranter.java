@@ -1,8 +1,8 @@
 package cube8540.oauth.authentication.credentials.oauth.token.application;
 
+import cube8540.oauth.authentication.credentials.domain.AuthorityCode;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidGrantException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidRequestException;
-import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import cube8540.oauth.authentication.credentials.oauth.security.AuthorizationRequest;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2TokenRequest;
@@ -36,7 +36,7 @@ public class AuthorizationCodeTokenGranter extends AbstractOAuth2TokenGranter {
                 .orElseThrow(() -> InvalidRequestException.invalidRequest("authorization code not found"));
 
         Set<String> authorizationCodeScope = Optional.ofNullable(authorizationCode.getApprovedScopes())
-                .orElse(Collections.emptySet()).stream().map(OAuth2ScopeId::getValue).collect(Collectors.toSet());
+                .orElse(Collections.emptySet()).stream().map(AuthorityCode::getValue).collect(Collectors.toSet());
         if (authorizationCodeScope.isEmpty()) {
             throw InvalidGrantException.invalidScope("cannot not grant empty scope");
         }

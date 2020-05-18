@@ -1,5 +1,7 @@
 package cube8540.oauth.authentication.credentials.oauth.security.endpoint;
 
+import cube8540.oauth.authentication.credentials.AuthorityDetails;
+import cube8540.oauth.authentication.credentials.AuthorityDetailsService;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2Utils;
 import cube8540.oauth.authentication.credentials.oauth.error.AbstractOAuth2AuthenticationException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidGrantException;
@@ -13,8 +15,6 @@ import cube8540.oauth.authentication.credentials.oauth.security.DefaultOAuth2Req
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetailsService;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2RequestValidator;
-import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ScopeDetails;
-import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ScopeDetailsService;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,7 +64,7 @@ public class AuthorizationEndpoint {
 
     private final OAuth2ClientDetailsService clientDetailsService;
 
-    private final OAuth2ScopeDetailsService scopeDetailsService;
+    private final AuthorityDetailsService scopeDetailsService;
 
     private final AuthorizationResponseEnhancer responseEnhancer;
 
@@ -89,7 +89,7 @@ public class AuthorizationEndpoint {
 
     @Autowired
     public AuthorizationEndpoint(@Qualifier("defaultOAuth2ClientDetailsService") OAuth2ClientDetailsService clientDetailsService,
-                                 OAuth2ScopeDetailsService scopeDetailsService,
+                                 @Qualifier("defaultScopeDetailsService") AuthorityDetailsService scopeDetailsService,
                                  AuthorizationResponseEnhancer responseEnhancer) {
         this.clientDetailsService = clientDetailsService;
         this.scopeDetailsService = scopeDetailsService;
@@ -115,7 +115,7 @@ public class AuthorizationEndpoint {
         }
         authorizationRequest.setRequestScopes(extractRequestScope(clientDetails, authorizationRequest));
 
-        Collection<OAuth2ScopeDetails> scopeDetails = scopeDetailsService.loadScopeDetailsByScopeIds(authorizationRequest.getRequestScopes());
+        Collection<AuthorityDetails> scopeDetails = scopeDetailsService.loadAuthorityByAuthorityCodes(authorizationRequest.getRequestScopes());
         model.put(AUTHORIZATION_REQUEST_ATTRIBUTE, authorizationRequest);
         model.put(ORIGINAL_AUTHORIZATION_REQUEST_ATTRIBUTE, parameters);
         return new ModelAndView(approvalPage)

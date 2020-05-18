@@ -291,7 +291,7 @@ class DefaultScopeDetailsServiceTest {
 
             service.registerNewScope(registerRequest);
             verifySaveAfterValidation(scopeIdRule, scopeCaptor);
-            Assertions.assertEquals(ScopeApplicationTestHelper.SCOPE_ID, scopeCaptor.getValue().getId());
+            Assertions.assertEquals(ScopeApplicationTestHelper.SCOPE_ID, scopeCaptor.getValue().getCode());
         }
 
         @Test

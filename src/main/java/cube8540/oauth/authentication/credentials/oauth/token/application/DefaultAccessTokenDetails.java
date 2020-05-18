@@ -1,6 +1,6 @@
 package cube8540.oauth.authentication.credentials.oauth.token.application;
 
-import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
+import cube8540.oauth.authentication.credentials.domain.AuthorityCode;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AccessTokenDetails;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2RefreshTokenDetails;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedAccessToken;
@@ -39,7 +39,7 @@ public class DefaultAccessTokenDetails implements OAuth2AccessTokenDetails {
                 .expiresIn(accessToken.expiresIn())
                 .isExpired(accessToken.isExpired())
                 .tokenType(TOKEN_TYPE);
-        builder.scopes(Optional.ofNullable(accessToken.getScopes()).orElse(Collections.emptySet()).stream().map(OAuth2ScopeId::getValue).collect(Collectors.toSet()));
+        builder.scopes(Optional.ofNullable(accessToken.getScopes()).orElse(Collections.emptySet()).stream().map(AuthorityCode::getValue).collect(Collectors.toSet()));
         builder.username(Optional.ofNullable(accessToken.getUsername()).map(PrincipalUsername::getValue).orElse(null));
         builder.refreshToken(Optional.ofNullable(accessToken.getRefreshToken()).map(DefaultRefreshTokenDetails::of).orElse(null));
         builder.additionalInformation(Optional.ofNullable(accessToken.getAdditionalInformation()).orElse(null));

@@ -1,9 +1,9 @@
 package cube8540.oauth.authentication.credentials.resource.infra.rule;
 
+import cube8540.oauth.authentication.credentials.AuthorityDetails;
+import cube8540.oauth.authentication.credentials.AuthorityDetailsService;
+import cube8540.oauth.authentication.credentials.domain.AuthorityCode;
 import cube8540.oauth.authentication.credentials.resource.domain.SecuredResource;
-import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
-import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ScopeDetails;
-import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ScopeDetailsService;
 import cube8540.validator.core.ValidationError;
 import cube8540.validator.core.ValidationRule;
 import lombok.Setter;
@@ -20,7 +20,7 @@ public class SecuredResourceAuthoritiesRule implements ValidationRule<SecuredRes
     private String message;
 
     @Setter
-    private OAuth2ScopeDetailsService scopeDetailsService;
+    private AuthorityDetailsService scopeDetailsService;
 
     public SecuredResourceAuthoritiesRule() {
         this(DEFAULT_PROPERTY, DEFAULT_MESSAGE);
@@ -45,9 +45,9 @@ public class SecuredResourceAuthoritiesRule implements ValidationRule<SecuredRes
             return false;
         }
 
-        List<String> targetScopes = target.getAuthorities().stream().map(OAuth2ScopeId::getValue).collect(Collectors.toList());
-        return scopeDetailsService.loadScopeDetailsByScopeIds(targetScopes).stream()
-                .map(OAuth2ScopeDetails::getScopeId).map(OAuth2ScopeId::new)
+        List<String> targetScopes = target.getAuthorities().stream().map(AuthorityCode::getValue).collect(Collectors.toList());
+        return scopeDetailsService.loadAuthorityByAuthorityCodes(targetScopes).stream()
+                .map(AuthorityDetails::getCode).map(AuthorityCode::new)
                 .collect(Collectors.toSet()).containsAll(target.getAuthorities());
     }
 }

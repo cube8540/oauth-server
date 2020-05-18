@@ -1,4 +1,4 @@
-package cube8540.oauth.authentication.credentials.oauth.scope.domain;
+package cube8540.oauth.authentication.credentials.domain;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -16,7 +16,8 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Embeddable
-public class OAuth2ScopeId implements Serializable {
+public class AuthorityCode implements Serializable {
 
     private String value;
+
 }

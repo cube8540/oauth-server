@@ -1,10 +1,10 @@
 package cube8540.oauth.authentication.credentials.oauth.scope.endpoint;
 
+import cube8540.oauth.authentication.credentials.AuthorityDetails;
 import cube8540.oauth.authentication.credentials.oauth.scope.application.OAuth2AccessibleScopeDetailsService;
 import cube8540.oauth.authentication.credentials.oauth.scope.application.OAuth2ScopeManagementService;
 import cube8540.oauth.authentication.credentials.oauth.scope.application.OAuth2ScopeModifyRequest;
 import cube8540.oauth.authentication.credentials.oauth.scope.application.OAuth2ScopeRegisterRequest;
-import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ScopeDetails;
 import cube8540.oauth.authentication.error.ExceptionTranslator;
 import cube8540.oauth.authentication.error.message.ErrorMessage;
 import io.swagger.annotations.Api;
@@ -57,8 +57,8 @@ public class ScopeManagementAPIEndpoint {
             @ApiResponse(code = 403, message = "로그인이 되어 있지 않습니다."),
             @ApiResponse(code = 500, message = "서버에서 알 수 없는 에러가 발생 했습니다.")
     })
-    public Map<String, Collection<OAuth2ScopeDetails>> scopes(@AuthenticationPrincipal Authentication authentication) {
-        Collection<OAuth2ScopeDetails> scopes = accessibleScopeDetailsService.readAccessibleScopes(authentication);
+    public Map<String, Collection<AuthorityDetails>> scopes(@AuthenticationPrincipal Authentication authentication) {
+        Collection<AuthorityDetails> scopes = accessibleScopeDetailsService.readAccessibleScopes(authentication);
 
         return Collections.singletonMap("scopes", scopes);
     }
@@ -73,7 +73,7 @@ public class ScopeManagementAPIEndpoint {
             @ApiResponse(code = 404, message = "요청 하신 스코프는 등록 되지 않은 스코프 입니다."),
             @ApiResponse(code = 500, message = "서버에서 알 수 없는 에러가 발생 했습니다.")
     })
-    public OAuth2ScopeDetails registerNewScopes(@RequestBody OAuth2ScopeRegisterRequest registerRequest) {
+    public AuthorityDetails registerNewScopes(@RequestBody OAuth2ScopeRegisterRequest registerRequest) {
         return managementService.registerNewScope(registerRequest);
     }
 
@@ -87,7 +87,7 @@ public class ScopeManagementAPIEndpoint {
             @ApiResponse(code = 404, message = "요청 하신 스코프는 등록 되지 않은 스코프 입니다."),
             @ApiResponse(code = 500, message = "서버에서 알 수 없는 에러가 발생 했습니다.")
     })
-    public OAuth2ScopeDetails modifyScope(@PathVariable("id") String id, @RequestBody OAuth2ScopeModifyRequest modifyRequest) {
+    public AuthorityDetails modifyScope(@PathVariable("id") String id, @RequestBody OAuth2ScopeModifyRequest modifyRequest) {
         return managementService.modifyScope(id, modifyRequest);
     }
 
@@ -100,7 +100,7 @@ public class ScopeManagementAPIEndpoint {
             @ApiResponse(code = 404, message = "요청 하신 스코프는 등록 되지 않은 스코프 입니다."),
             @ApiResponse(code = 500, message = "서버에서 알 수 없는 에러가 발생 했습니다.")
     })
-    public OAuth2ScopeDetails removeScope(@PathVariable("id") String id) {
+    public AuthorityDetails removeScope(@PathVariable("id") String id) {
         return managementService.removeScope(id);
     }
 

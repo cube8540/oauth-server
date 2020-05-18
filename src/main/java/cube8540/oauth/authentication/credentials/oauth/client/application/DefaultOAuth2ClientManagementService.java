@@ -1,5 +1,6 @@
 package cube8540.oauth.authentication.credentials.oauth.client.application;
 
+import cube8540.oauth.authentication.credentials.domain.AuthorityCode;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2Utils;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.ClientOwner;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2Client;
@@ -9,7 +10,6 @@ import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2Clien
 import cube8540.oauth.authentication.credentials.oauth.client.domain.exception.ClientAuthorizationException;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.exception.ClientNotFoundException;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.exception.ClientRegisterException;
-import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetails;
 import lombok.Setter;
 import org.springframework.data.domain.Page;
@@ -57,7 +57,7 @@ public class DefaultOAuth2ClientManagementService extends DefaultOAuth2ClientDet
         Optional.ofNullable(registerRequest.getGrantTypes())
                 .ifPresent(grantType -> grantType.forEach(grant -> client.addGrantType(OAuth2Utils.extractGrantType(grant))));
         Optional.ofNullable(registerRequest.getScopes())
-                .ifPresent(scope -> scope.forEach(s -> client.addScope(new OAuth2ScopeId(s))));
+                .ifPresent(scope -> scope.forEach(s -> client.addScope(new AuthorityCode(s))));
         Optional.ofNullable(registerRequest.getRedirectUris())
                 .ifPresent(redirectUri -> redirectUri.forEach(uri -> client.addRedirectUri(URI.create(uri))));
 
@@ -82,9 +82,9 @@ public class DefaultOAuth2ClientManagementService extends DefaultOAuth2ClientDet
         Optional.ofNullable(modifyRequest.getNewGrantTypes())
                 .ifPresent(grantType -> grantType.forEach(grant -> client.addGrantType(OAuth2Utils.extractGrantType(grant))));
         Optional.ofNullable(modifyRequest.getRemoveScopes())
-                .ifPresent(scope -> scope.forEach(s -> client.removeScope(new OAuth2ScopeId(s))));
+                .ifPresent(scope -> scope.forEach(s -> client.removeScope(new AuthorityCode(s))));
         Optional.ofNullable(modifyRequest.getNewScopes())
-                .ifPresent(scope -> scope.forEach(s -> client.addScope(new OAuth2ScopeId(s))));
+                .ifPresent(scope -> scope.forEach(s -> client.addScope(new AuthorityCode(s))));
 
         client.validate(validatePolicy);
         return DefaultOAuth2ClientDetails.of(getRepository().save(client));

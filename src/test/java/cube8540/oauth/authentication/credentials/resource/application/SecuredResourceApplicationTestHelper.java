@@ -1,11 +1,11 @@
 package cube8540.oauth.authentication.credentials.resource.application;
 
+import cube8540.oauth.authentication.credentials.domain.AuthorityCode;
 import cube8540.oauth.authentication.credentials.resource.domain.ResourceMethod;
 import cube8540.oauth.authentication.credentials.resource.domain.SecuredResource;
 import cube8540.oauth.authentication.credentials.resource.domain.SecuredResourceId;
 import cube8540.oauth.authentication.credentials.resource.domain.SecuredResourceRepository;
 import cube8540.oauth.authentication.credentials.resource.domain.SecuredResourceValidationPolicy;
-import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import cube8540.validator.core.ValidationRule;
 
 import java.net.URI;
@@ -33,11 +33,11 @@ class SecuredResourceApplicationTestHelper {
     static final URI MODIFY_RESOURCE_URI = URI.create(RAW_MODIFY_RESOURCE_URI);
 
     static final List<String> RAW_AUTHORITIES = Arrays.asList("AUTHORITY-1", "AUTHORITY-2", "AUTHORITY-3");
-    static final Set<OAuth2ScopeId> AUTHORITIES = RAW_AUTHORITIES.stream().map(OAuth2ScopeId::new).collect(Collectors.toSet());
+    static final Set<AuthorityCode> AUTHORITIES = RAW_AUTHORITIES.stream().map(AuthorityCode::new).collect(Collectors.toSet());
     static final List<String> RAW_REMOVE_AUTHORITIES = Arrays.asList("REMOVE-AUTHORITY-1", "REMOVE-AUTHORITY-2", "REMOVE-AUTHORITY-3");
     static final List<String> RAW_ADD_AUTHORITIES = Arrays.asList("ADD-AUTHORITY-1", "ADD-AUTHORITY-2", "ADD-AUTHORITY-3");
-    static final List<OAuth2ScopeId> REMOVE_AUTHORITIES = RAW_REMOVE_AUTHORITIES.stream().map(OAuth2ScopeId::new).collect(Collectors.toList());
-    static final List<OAuth2ScopeId> ADD_AUTHORITIES = RAW_ADD_AUTHORITIES.stream().map(OAuth2ScopeId::new).collect(Collectors.toList());
+    static final List<AuthorityCode> REMOVE_AUTHORITIES = RAW_REMOVE_AUTHORITIES.stream().map(AuthorityCode::new).collect(Collectors.toList());
+    static final List<AuthorityCode> ADD_AUTHORITIES = RAW_ADD_AUTHORITIES.stream().map(AuthorityCode::new).collect(Collectors.toList());
 
     static MockResourceRepository mockResourceRepository() {
         return new MockResourceRepository();
@@ -92,7 +92,7 @@ class SecuredResourceApplicationTestHelper {
             return this;
         }
 
-        MockSecuredResource authorities(Set<OAuth2ScopeId> authorities) {
+        MockSecuredResource authorities(Set<AuthorityCode> authorities) {
             when(resource.getAuthorities()).thenReturn(authorities);
             return this;
         }

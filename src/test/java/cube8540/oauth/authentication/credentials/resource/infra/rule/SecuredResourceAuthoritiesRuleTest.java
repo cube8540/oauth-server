@@ -1,9 +1,9 @@
 package cube8540.oauth.authentication.credentials.resource.infra.rule;
 
+import cube8540.oauth.authentication.credentials.AuthorityDetails;
+import cube8540.oauth.authentication.credentials.AuthorityDetailsService;
+import cube8540.oauth.authentication.credentials.domain.AuthorityCode;
 import cube8540.oauth.authentication.credentials.resource.domain.SecuredResource;
-import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
-import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ScopeDetails;
-import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ScopeDetailsService;
 import cube8540.validator.core.ValidationError;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -27,7 +27,7 @@ class SecuredResourceAuthoritiesRuleTest {
 
     private static List<String> RAW_AUTHORITIES = Arrays.asList("AUTHORITY-1", "AUTHORITY-2", "AUTHORITY-3", "AUTHORITY-4");
 
-    private static Set<OAuth2ScopeId> AUTHORITIES = RAW_AUTHORITIES.stream().map(OAuth2ScopeId::new).collect(Collectors.toSet());
+    private static Set<AuthorityCode> AUTHORITIES = RAW_AUTHORITIES.stream().map(AuthorityCode::new).collect(Collectors.toSet());
 
     @Test
     @DisplayName("에러 메시지 확인")
@@ -112,11 +112,11 @@ class SecuredResourceAuthoritiesRuleTest {
             this.securedResource = mock(SecuredResource.class);
             this.rule = new SecuredResourceAuthoritiesRule();
 
-            OAuth2ScopeDetailsService service = mock(OAuth2ScopeDetailsService.class);
-            List<OAuth2ScopeDetails> authorities = Arrays.asList(mocking("AUTHORITY-1"), mocking("AUTHORITY-2"), mocking("AUTHORITY-3"));
+            AuthorityDetailsService service = mock(AuthorityDetailsService.class);
+            List<AuthorityDetails> authorities = Arrays.asList(mocking("AUTHORITY-1"), mocking("AUTHORITY-2"), mocking("AUTHORITY-3"));
 
             when(securedResource.getAuthorities()).thenReturn(AUTHORITIES);
-            when(service.loadScopeDetailsByScopeIds(RAW_AUTHORITIES)).thenReturn(authorities);
+            when(service.loadAuthorityByAuthorityCodes(RAW_AUTHORITIES)).thenReturn(authorities);
 
             this.rule.setScopeDetailsService(service);
         }
@@ -139,11 +139,11 @@ class SecuredResourceAuthoritiesRuleTest {
             this.securedResource = mock(SecuredResource.class);
             this.rule = new SecuredResourceAuthoritiesRule();
 
-            OAuth2ScopeDetailsService service = mock(OAuth2ScopeDetailsService.class);
-            List<OAuth2ScopeDetails> authorities = Arrays.asList(mocking("AUTHORITY-1"), mocking("AUTHORITY-2"), mocking("AUTHORITY-3"), mocking("AUTHORITY-4"));
+            AuthorityDetailsService service = mock(AuthorityDetailsService.class);
+            List<AuthorityDetails> authorities = Arrays.asList(mocking("AUTHORITY-1"), mocking("AUTHORITY-2"), mocking("AUTHORITY-3"), mocking("AUTHORITY-4"));
 
             when(securedResource.getAuthorities()).thenReturn(AUTHORITIES);
-            when(service.loadScopeDetailsByScopeIds(RAW_AUTHORITIES)).thenReturn(authorities);
+            when(service.loadAuthorityByAuthorityCodes(RAW_AUTHORITIES)).thenReturn(authorities);
 
             this.rule.setScopeDetailsService(service);
         }
@@ -156,10 +156,10 @@ class SecuredResourceAuthoritiesRuleTest {
     }
 
 
-    private OAuth2ScopeDetails mocking(String code) {
-        OAuth2ScopeDetails authority = mock(OAuth2ScopeDetails.class);
+    private AuthorityDetails mocking(String code) {
+        AuthorityDetails authority = mock(AuthorityDetails.class);
 
-        when(authority.getScopeId()).thenReturn(code);
+        when(authority.getCode()).thenReturn(code);
         return authority;
     }
 
