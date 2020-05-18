@@ -1,5 +1,5 @@
 create table if not exists initialize (
-	initialize_datetime timestamp default current_timestamp() not null
+	initialize_datetime datetime(6) default current_datetime(6)() not null
 );
 
 create table if not exists role (
@@ -11,16 +11,24 @@ create table if not exists role (
 create table if not exists `user` (
     username varchar(32) not null primary key,
 	email varchar(128) not null,
-	credentials_key_expiry_datetime timestamp,
+	credentials_key_expiry_datetime datetime(6),
 	credentials_key varchar(32),
-	last_updated_at timestamp not null,
+	last_updated_at datetime(6) not null,
 	password varchar(64) not null,
-	password_credentials_key_expiry_datetime timestamp,
+	password_credentials_key_expiry_datetime datetime(6),
 	password_credentials_key varchar(32),
 	is_credentials boolean not null default false,
-	registered_at timestamp not null,
+	registered_at datetime(6) not null,
 
 	unique key uk_user_email (email)
+);
+
+create table if not exists user_authority (
+    username varchar(32) not null,
+    authority_code varchar(32) not null,
+
+    constraint fk_user_authority_username foreign key (username) references user(username) on delete cascade,
+    constraint fk_user_authority_role foreign key (authority_code) references role(code) on delete cascade
 );
 
 create table if not exists oauth2_clients (
@@ -42,10 +50,10 @@ create table if not exists oauth2_scope (
 create table if not exists oauth2_access_token (
 	token_id varchar(32) not null primary key,
 	client_id varchar(32) not null,
-	expiration timestamp not null,
+	expiration datetime(6) not null,
 	grant_type varchar(32) not null,
 	username varchar(32),
-	issued_at timestamp not null,
+	issued_at datetime(6) not null,
 	constraint client_authentication_username unique (client_id, username),
 	constraint fk_access_token_client_id foreign key (client_id) references oauth2_clients (client_id) on delete cascade,
 	constraint fk_access_token_username foreign key (username) references user (username) on delete cascade
@@ -62,7 +70,7 @@ create table if not exists oauth2_access_token_additional_information (
 create table if not exists oauth2_authorization_code (
 	authorization_code varchar(6) not null primary key,
 	client_id varchar(32) not null,
-	expiration_at timestamp not null,
+	expiration_at datetime(6) not null,
 	redirect_uri varchar(128) null,
 	state varchar(12),
 	username varchar(32),
@@ -104,7 +112,7 @@ create table if not exists oauth2_code_approved_scope
 
 create table if not exists oauth2_refresh_token (
 	token_id varchar(32) not null primary key,
-	expiration timestamp not null,
+	expiration datetime(6) not null,
 	access_token_token_id varchar(32) null,
 	constraint fk_refresh_token_access_token foreign key (access_token_token_id) references oauth2_access_token (token_id) on delete cascade
 );

@@ -10,6 +10,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 
+import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.AUTHORITIES;
+import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.mockBasicAuthorityService;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.times;
@@ -48,7 +50,7 @@ class DefaultUserCredentialsServiceTest {
                 this.repository = UserApplicationTestHelper.mockUserRepository().registerUser(user).build();
                 this.keyGenerator = UserApplicationTestHelper.mockKeyGenerator();
 
-                this.service = new DefaultUserCredentialsService(repository);
+                this.service = new DefaultUserCredentialsService(repository, mockBasicAuthorityService().build());
                 this.service.setKeyGenerator(keyGenerator);
             }
 
@@ -100,7 +102,7 @@ class DefaultUserCredentialsServiceTest {
                 this.user = UserApplicationTestHelper.configDefaultMockUser().build();
                 this.repository = UserApplicationTestHelper.mockUserRepository().registerUser(user).build();
 
-                this.service = new DefaultUserCredentialsService(repository);
+                this.service = new DefaultUserCredentialsService(repository, mockBasicAuthorityService().basicAuthority().build());
             }
 
             @Test
@@ -112,12 +114,22 @@ class DefaultUserCredentialsServiceTest {
             }
 
             @Test
-            @DisplayName("계정 인증후 저장소에 저장해야 한다.")
-            void shouldSaveUserForRepositoryAfterAccountCredentials() {
+            @DisplayName("계정 인증후 권한을 할당 해야 한다.")
+            void shouldGrantAuthorityAfterAccountCredentials() {
+                service.accountCredentials(UserApplicationTestHelper.RAW_USERNAME, UserApplicationTestHelper.RAW_CREDENTIALS_KEY);
+
+                InOrder inOrder = inOrder(user);
+                inOrder.verify(user, times(1)).credentials(UserApplicationTestHelper.RAW_CREDENTIALS_KEY);
+                AUTHORITIES.forEach(authority -> inOrder.verify(user, times(1)).grantAuthority(authority));
+            }
+
+            @Test
+            @DisplayName("계정에 권한을 할당 한 이후 저장소에 저장 해야 한다.")
+            void shouldSaveAfterGrantAuthority() {
                 service.accountCredentials(UserApplicationTestHelper.RAW_USERNAME, UserApplicationTestHelper.RAW_CREDENTIALS_KEY);
 
                 InOrder inOrder = inOrder(user, repository);
-                inOrder.verify(user, times(1)).credentials(UserApplicationTestHelper.RAW_CREDENTIALS_KEY);
+                AUTHORITIES.forEach(authority -> inOrder.verify(user, times(1)).grantAuthority(authority));
                 inOrder.verify(repository, times(1)).save(user);
             }
         }
@@ -130,7 +142,7 @@ class DefaultUserCredentialsServiceTest {
         void setup() {
             UserRepository repository = UserApplicationTestHelper.mockUserRepository().emptyUser().build();
 
-            this.service = new DefaultUserCredentialsService(repository);
+            this.service = new DefaultUserCredentialsService(repository, mockBasicAuthorityService().build());
         }
     }
 }

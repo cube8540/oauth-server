@@ -2,8 +2,12 @@
 insert into user(username, email, password, registered_at, last_updated_at, is_credentials) select 'admin', 'admin', '$2a$10$uTSfWKXF20lwumttjUbxteWVJBedSEQkYxC6qJJbEVUYjzvM6q7Q2', current_timestamp, current_timestamp, true where not exists (select initialize_datetime from initialize);
 
 -- insert default role
-insert into role(code, description, basic) select 'ROEL_ADMIN', 'Admin Role', false where not exists (select initialize_datetime from initialize);
-insert into role(code, description, basic) select 'ROEL_USER', 'Default User Role', true where not exists (select initialize_datetime from initialize);
+insert into role(code, description, basic) select 'ROLE_ADMIN', 'Admin Role', false where not exists (select initialize_datetime from initialize);
+insert into role(code, description, basic) select 'ROLE_USER', 'Default User Role', true where not exists (select initialize_datetime from initialize);
+
+-- insert user default role
+insert into user_authority(username, authority_code) select 'admin', 'ROLE_ADMIN' where not exists (select initialize_datetime from initialize);
+insert into user_authority(username, authority_code) select 'admin', 'ROLE_USER' where not exists (select initialize_datetime from initialize);
 
 -- insert default client
 insert into oauth2_clients(client_id, client_secret, client_name, access_token_validity, refresh_token_validity, oauth2_client_owner) select 'oauth-client', '$2a$10$IKIfJYgEf7s5fAdpDFLmIu7.nEIFFgqDRRbfptstuHNav6kVdvFxK', 'client-name', 600000000000, 7200000000000, 'admin' where not exists (select initialize_datetime from initialize);

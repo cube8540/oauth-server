@@ -23,6 +23,14 @@ create table if not exists `user` (
 	unique key uk_user_email (email)
 );
 
+create table if not exists user_authority (
+    username varchar(32) not null,
+    authority_code varchar(32) not null,
+
+    constraint fk_user_authority_username foreign key (username) references user (username) on delete cascade,
+    constraint fk_user_authority_role foreign key (authority_code) references role (code) on delete cascade
+);
+
 create table if not exists oauth2_clients (
 	client_id varchar(32) not null primary key,
 	access_token_validity bigint not null,
