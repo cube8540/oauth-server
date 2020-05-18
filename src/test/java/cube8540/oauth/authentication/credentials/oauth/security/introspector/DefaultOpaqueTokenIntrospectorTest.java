@@ -6,21 +6,26 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal;
 import org.springframework.security.oauth2.server.resource.introspection.OAuth2IntrospectionClaimNames;
 import org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import static cube8540.oauth.authentication.credentials.oauth.security.introspector.OpaqueTokenIntrospectorTestSupport.RAW_AUTHORITIES;
 import static cube8540.oauth.authentication.credentials.oauth.security.introspector.OpaqueTokenIntrospectorTestSupport.RAW_PRINCIPAL_NAME;
+import static cube8540.oauth.authentication.credentials.oauth.security.introspector.OpaqueTokenIntrospectorTestSupport.RAW_ROLE_AUTHORITY;
+import static cube8540.oauth.authentication.credentials.oauth.security.introspector.OpaqueTokenIntrospectorTestSupport.RAW_SCOPE_AUTHORITY;
 import static cube8540.oauth.authentication.credentials.oauth.security.introspector.OpaqueTokenIntrospectorTestSupport.RAW_TOKEN;
+import static cube8540.oauth.authentication.credentials.oauth.security.introspector.OpaqueTokenIntrospectorTestSupport.ROLE_AUTHORITIES;
 import static cube8540.oauth.authentication.credentials.oauth.security.introspector.OpaqueTokenIntrospectorTestSupport.mockOAuthAuthenticatedPrincipal;
+import static cube8540.oauth.authentication.credentials.oauth.security.introspector.OpaqueTokenIntrospectorTestSupport.mockUser;
+import static cube8540.oauth.authentication.credentials.oauth.security.introspector.OpaqueTokenIntrospectorTestSupport.mockUserDetailsService;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -33,8 +38,8 @@ class DefaultOpaqueTokenIntrospectorTest {
     class introspect {
 
         @Nested
-        @DisplayName("권한이 null 일시")
-        class WhenAuthoritiesIsNull {
+        @DisplayName("스코프가 null 일시")
+        class WhenScopeIsNull {
             private DefaultOpaqueTokenIntrospector introspector;
             private Map<String, Object> attributes;
 
@@ -48,12 +53,12 @@ class DefaultOpaqueTokenIntrospectorTest {
                         .configAuthoritiesInAttribute(null)
                         .configAttributes(this.attributes)
                         .build();
-
                 when(delegate.introspect(RAW_TOKEN)).thenReturn(mockPrincipal);
-                this.introspector = new DefaultOpaqueTokenIntrospector(delegate);
 
+                User user = mockUser().configAuthorities(ROLE_AUTHORITIES).build();
+                this.introspector = new DefaultOpaqueTokenIntrospector(delegate, mockUserDetailsService().registerUser(user).build());
                 this.attributes.put(OAuth2IntrospectionClaimNames.USERNAME, RAW_PRINCIPAL_NAME);
-                this.attributes.put(OAuth2IntrospectionClaimNames.SCOPE, RAW_AUTHORITIES);
+                this.attributes.put(OAuth2IntrospectionClaimNames.SCOPE, RAW_SCOPE_AUTHORITY);
             }
 
             @Test
@@ -73,17 +78,17 @@ class DefaultOpaqueTokenIntrospectorTest {
             }
 
             @Test
-            @DisplayName("스코프는 빈 배열이어야 한다.")
-            void shouldScopeGetFromAuthenticationAttribute() {
+            @DisplayName("권한은 검색해서 나온 유저의 권한만 가지고 있어야 한다.")
+            void shouldAuthorityIsOnlySearchUsersAuthorities() {
                 OAuth2AuthenticatedPrincipal principal = this.introspector.introspect(RAW_TOKEN);
 
-                assertEquals(Collections.emptyList(), new ArrayList<GrantedAuthority>(principal.getAuthorities()));
+                assertEquals(ROLE_AUTHORITIES, new HashSet<GrantedAuthority>(principal.getAuthorities()));
             }
         }
 
         @Nested
-        @DisplayName("권한이 null이 아닐시")
-        class WhenAuthoritiesIsNotNull {
+        @DisplayName("스코프가 null이 아닐시")
+        class WhenScopesIsNotNull {
             private DefaultOpaqueTokenIntrospector introspector;
             private Map<String, Object> attributes;
 
@@ -94,15 +99,16 @@ class DefaultOpaqueTokenIntrospectorTest {
                 OAuth2AuthenticatedPrincipal mockPrincipal = mockOAuthAuthenticatedPrincipal()
                         .configDefault()
                         .configUsernameInAttribute(RAW_PRINCIPAL_NAME)
-                        .configAuthoritiesInAttribute(RAW_AUTHORITIES)
+                        .configAuthoritiesInAttribute(RAW_SCOPE_AUTHORITY)
                         .configAttributes(this.attributes)
                         .build();
 
                 when(delegate.introspect(RAW_TOKEN)).thenReturn(mockPrincipal);
-                this.introspector = new DefaultOpaqueTokenIntrospector(delegate);
 
+                User user = mockUser().configAuthorities(ROLE_AUTHORITIES).build();
+                this.introspector = new DefaultOpaqueTokenIntrospector(delegate, mockUserDetailsService().registerUser(user).build());
                 this.attributes.put(OAuth2IntrospectionClaimNames.USERNAME, RAW_PRINCIPAL_NAME);
-                this.attributes.put(OAuth2IntrospectionClaimNames.SCOPE, RAW_AUTHORITIES);
+                this.attributes.put(OAuth2IntrospectionClaimNames.SCOPE, RAW_SCOPE_AUTHORITY);
             }
 
             @Test
@@ -114,7 +120,7 @@ class DefaultOpaqueTokenIntrospectorTest {
             }
 
             @Test
-            @DisplayName("속성은 검색된 인증 주처의 속성과 같아야 한다.")
+            @DisplayName("속성은 검색된 인증 주체의 속성과 같아야 한다.")
             void shouldPrincipalAttributeIsEqualsToAuthenticationAttribute() {
                 OAuth2AuthenticatedPrincipal principal = this.introspector.introspect(RAW_TOKEN);
 
@@ -122,12 +128,15 @@ class DefaultOpaqueTokenIntrospectorTest {
             }
 
             @Test
-            @DisplayName("스코프는 검색된 인증 주체의 속성에서 가져온 스코프 이어야 한다.")
+            @DisplayName("스코프는 검색된 인증 주체의 속성에서 가져온 스코프와 검색된 유저의 권한을 합친 권한 이어야 한다.")
             void shouldScopeGetFromAuthenticationAttribute() {
                 OAuth2AuthenticatedPrincipal principal = this.introspector.introspect(RAW_TOKEN);
 
-                Collection<SimpleGrantedAuthority> expected = RAW_AUTHORITIES.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
-                assertEquals(expected, new ArrayList<GrantedAuthority>(principal.getAuthorities()));
+                Collection<GrantedAuthority> expected = Stream.concat(
+                        RAW_SCOPE_AUTHORITY.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList()).stream(),
+                        RAW_ROLE_AUTHORITY.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList()).stream())
+                        .collect(Collectors.toSet());
+                assertEquals(expected, new HashSet<>(principal.getAuthorities()));
             }
         }
     }

@@ -22,6 +22,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.server.resource.introspection.NimbusOpaqueTokenIntrospector;
 import org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -44,6 +45,9 @@ public class OAuth2ResourceEndpointSecurityConfiguration extends WebSecurityConf
 
     @Setter(onMethod_ = @Autowired)
     private FilterInvocationSecurityMetadataSource securityMetadataLoadService;
+
+    @Setter(onMethod_ = {@Autowired, @Qualifier("defaultUserService")})
+    private UserDetailsService userDetailsService;
 
     @Setter(onMethod_ = {@Autowired, @Qualifier("escapeObjectMapper")})
     private ObjectMapper objectMapper;
@@ -79,7 +83,7 @@ public class OAuth2ResourceEndpointSecurityConfiguration extends WebSecurityConf
         String clientSecret = Optional.ofNullable(environment.getProperty("oauth-resource-server.client-secret")).orElse("");
         OpaqueTokenIntrospector delegate = new NimbusOpaqueTokenIntrospector(introspectUrl, clientId, clientSecret);
 
-        return new DefaultOpaqueTokenIntrospector(delegate);
+        return new DefaultOpaqueTokenIntrospector(delegate, userDetailsService);
     }
 
     @Bean
