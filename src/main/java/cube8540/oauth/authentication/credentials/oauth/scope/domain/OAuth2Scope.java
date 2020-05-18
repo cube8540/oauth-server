@@ -15,7 +15,6 @@ import org.springframework.security.core.GrantedAuthority;
 import javax.persistence.AttributeOverride;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
-import javax.persistence.DiscriminatorValue;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -29,7 +28,7 @@ import java.util.Set;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "oauth2_scope")
-@DiscriminatorValue(value = "OAUTH2_SCOPE")
+@AttributeOverride(name = "code.value", column = @Column(name = "scope_id", length = 32))
 public class OAuth2Scope extends AbstractAuthority {
 
     @ElementCollection
