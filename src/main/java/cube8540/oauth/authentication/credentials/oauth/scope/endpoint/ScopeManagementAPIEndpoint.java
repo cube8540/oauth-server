@@ -70,7 +70,6 @@ public class ScopeManagementAPIEndpoint {
             @ApiResponse(code = 400, message = "이미 사용중인 스코프 아이디 이거나, 요청 정보중 허용 되지 않는 정보가 있습니다."),
             @ApiResponse(code = 401, message = "잘못된 OAuth2 엑세스 토큰 입니다."),
             @ApiResponse(code = 403, message = "로그인이 되어 있지 않습니다."),
-            @ApiResponse(code = 404, message = "요청 하신 스코프는 등록 되지 않은 스코프 입니다."),
             @ApiResponse(code = 500, message = "서버에서 알 수 없는 에러가 발생 했습니다.")
     })
     public AuthorityDetails registerNewScopes(@RequestBody OAuth2ScopeRegisterRequest registerRequest) {

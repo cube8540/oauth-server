@@ -9,6 +9,7 @@ import cube8540.oauth.authentication.error.ExceptionTranslator;
 import cube8540.oauth.authentication.error.message.ErrorMessage;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -20,7 +21,7 @@ public class SecuredResourceConfiguration {
     @Setter(onMethod_ = @Autowired)
     private DefaultSecuredResourceManagementService securedResourceManagementService;
 
-    @Setter(onMethod_ = @Autowired)
+    @Setter(onMethod_ = {@Autowired, @Qualifier("defaultScopeDetailsService")})
     private AuthorityDetailsService scopeDetailsService;
 
     @PostConstruct

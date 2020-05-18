@@ -69,7 +69,7 @@ class DefaultScopeDetailsServiceTest {
                 }
 
                 @Test
-                @DisplayName("스코프에 저장소를 저장하지 않아야 한다.")
+                @DisplayName("스코프를 저장소에 저장하지 않아야 한다.")
                 void shouldNotSaveAccessibleAuthority() {
                     ArgumentCaptor<OAuth2Scope> scopeCaptor = ArgumentCaptor.forClass(OAuth2Scope.class);
 
