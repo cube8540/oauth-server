@@ -12,6 +12,7 @@ import org.springframework.security.oauth2.server.resource.introspection.OAuth2I
 import org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -38,106 +39,139 @@ class DefaultOpaqueTokenIntrospectorTest {
     class introspect {
 
         @Nested
-        @DisplayName("스코프가 null 일시")
-        class WhenScopeIsNull {
-            private DefaultOpaqueTokenIntrospector introspector;
-            private Map<String, Object> attributes;
+        @DisplayName("유저 아이디가 null이 아닐시")
+        class whenUsernameIsNotNull {
 
-            @BeforeEach
-            void setup() {
-                this.attributes = new HashMap<>();
-                OpaqueTokenIntrospector delegate = mock(OpaqueTokenIntrospector.class);
-                OAuth2AuthenticatedPrincipal mockPrincipal = mockOAuthAuthenticatedPrincipal()
-                        .configDefault()
-                        .configUsernameInAttribute(RAW_PRINCIPAL_NAME)
-                        .configAuthoritiesInAttribute(null)
-                        .configAttributes(this.attributes)
-                        .build();
-                when(delegate.introspect(RAW_TOKEN)).thenReturn(mockPrincipal);
+            @Nested
+            @DisplayName("스코프가 null 일시")
+            class WhenScopeIsNull extends IntrospectSetup {
 
-                User user = mockUser().configAuthorities(ROLE_AUTHORITIES).build();
-                this.introspector = new DefaultOpaqueTokenIntrospector(delegate, mockUserDetailsService().registerUser(user).build());
-                this.attributes.put(OAuth2IntrospectionClaimNames.USERNAME, RAW_PRINCIPAL_NAME);
-                this.attributes.put(OAuth2IntrospectionClaimNames.SCOPE, RAW_SCOPE_AUTHORITY);
+                @Test
+                @DisplayName("아이디는 검색된 인증 주체의 속성에서 가져온 아이디 이어야 한다.")
+                void shouldPrincipalNameGetFromAuthenticationAttribute() {
+                    OAuth2AuthenticatedPrincipal principal = this.introspector.introspect(RAW_TOKEN);
+
+                    assertEquals(RAW_PRINCIPAL_NAME, principal.getName());
+                }
+
+                @Test
+                @DisplayName("권한은 검색해서 나온 유저의 권한만 가지고 있어야 한다.")
+                void shouldAuthorityIsOnlySearchUsersAuthorities() {
+                    OAuth2AuthenticatedPrincipal principal = this.introspector.introspect(RAW_TOKEN);
+
+                    assertEquals(ROLE_AUTHORITIES, new HashSet<GrantedAuthority>(principal.getAuthorities()));
+                }
             }
 
-            @Test
-            @DisplayName("아이디는 검색된 인증 주체의 속성에서 가져온 아이디 이어야 한다.")
-            void shouldPrincipalNameGetFromAuthenticationAttribute() {
-                OAuth2AuthenticatedPrincipal principal = this.introspector.introspect(RAW_TOKEN);
+            @Nested
+            @DisplayName("스코프가 null이 아닐시")
+            class WhenScopesIsNotNull extends IntrospectSetup {
 
-                assertEquals(RAW_PRINCIPAL_NAME, principal.getName());
-            }
+                @Test
+                @DisplayName("아이디는 검색된 인증 주체의 속성에서 가져온 아이디 이어야 한다.")
+                void shouldPrincipalNameGetFromAuthenticationAttribute() {
+                    OAuth2AuthenticatedPrincipal principal = this.introspector.introspect(RAW_TOKEN);
 
-            @Test
-            @DisplayName("속성은 검색된 인증 주처의 속성과 같아야 한다.")
-            void shouldPrincipalAttributeIsEqualsToAuthenticationAttribute() {
-                OAuth2AuthenticatedPrincipal principal = this.introspector.introspect(RAW_TOKEN);
+                    assertEquals(RAW_PRINCIPAL_NAME, principal.getName());
+                }
 
-                assertEquals(this.attributes, principal.getAttributes());
-            }
+                @Override
+                protected void configAuthentication(OpaqueTokenIntrospectorTestSupport.MockOAuthAuthenticatedPrincipal principal) {
+                    principal.configAuthoritiesInAttribute(RAW_SCOPE_AUTHORITY);
+                }
 
-            @Test
-            @DisplayName("권한은 검색해서 나온 유저의 권한만 가지고 있어야 한다.")
-            void shouldAuthorityIsOnlySearchUsersAuthorities() {
-                OAuth2AuthenticatedPrincipal principal = this.introspector.introspect(RAW_TOKEN);
+                @Test
+                @DisplayName("스코프는 검색된 인증 주체의 속성에서 가져온 스코프와 검색된 유저의 권한을 합친 권한 이어야 한다.")
+                void shouldScopeGetFromAuthenticationAttribute() {
+                    OAuth2AuthenticatedPrincipal principal = this.introspector.introspect(RAW_TOKEN);
 
-                assertEquals(ROLE_AUTHORITIES, new HashSet<GrantedAuthority>(principal.getAuthorities()));
+                    Collection<GrantedAuthority> expected = Stream.concat(
+                            RAW_SCOPE_AUTHORITY.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList()).stream(),
+                            RAW_ROLE_AUTHORITY.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList()).stream())
+                            .collect(Collectors.toSet());
+                    assertEquals(expected, new HashSet<>(principal.getAuthorities()));
+                }
             }
         }
 
         @Nested
-        @DisplayName("스코프가 null이 아닐시")
-        class WhenScopesIsNotNull {
-            private DefaultOpaqueTokenIntrospector introspector;
-            private Map<String, Object> attributes;
+        @DisplayName("유저 아이디가 null 일시")
+        class WhenUsernameIsNull {
 
-            @BeforeEach
-            void setup() {
-                this.attributes = new HashMap<>();
-                OpaqueTokenIntrospector delegate = mock(OpaqueTokenIntrospector.class);
-                OAuth2AuthenticatedPrincipal mockPrincipal = mockOAuthAuthenticatedPrincipal()
-                        .configDefault()
-                        .configUsernameInAttribute(RAW_PRINCIPAL_NAME)
-                        .configAuthoritiesInAttribute(RAW_SCOPE_AUTHORITY)
-                        .configAttributes(this.attributes)
-                        .build();
+            @Nested
+            @DisplayName("스코프가 null 일시")
+            class WhenScopeIsNull extends IntrospectSetup {
 
-                when(delegate.introspect(RAW_TOKEN)).thenReturn(mockPrincipal);
+                @Override
+                protected void configAuthentication(OpaqueTokenIntrospectorTestSupport.MockOAuthAuthenticatedPrincipal principal) {
+                    principal.configClientCredentials();
+                }
 
-                User user = mockUser().configAuthorities(ROLE_AUTHORITIES).build();
-                this.introspector = new DefaultOpaqueTokenIntrospector(delegate, mockUserDetailsService().registerUser(user).build());
-                this.attributes.put(OAuth2IntrospectionClaimNames.USERNAME, RAW_PRINCIPAL_NAME);
-                this.attributes.put(OAuth2IntrospectionClaimNames.SCOPE, RAW_SCOPE_AUTHORITY);
+                @Test
+                @DisplayName("권한은 빈 배열 이어야 한다.")
+                void shouldAuthoritiesIsEmptySet() {
+                    OAuth2AuthenticatedPrincipal principal = this.introspector.introspect(RAW_TOKEN);
+
+                    assertEquals(Collections.emptySet(), new HashSet<GrantedAuthority>(principal.getAuthorities()));
+                }
             }
 
-            @Test
-            @DisplayName("아이디는 검색된 인증 주체의 속성에서 가져온 아이디 이어야 한다.")
-            void shouldPrincipalNameGetFromAuthenticationAttribute() {
-                OAuth2AuthenticatedPrincipal principal = this.introspector.introspect(RAW_TOKEN);
+            @Nested
+            @DisplayName("스코프가 null이 아닐시")
+            class WhenScopesIsNotNull extends IntrospectSetup {
 
-                assertEquals(RAW_PRINCIPAL_NAME, principal.getName());
+                @Override
+                protected void configAuthentication(OpaqueTokenIntrospectorTestSupport.MockOAuthAuthenticatedPrincipal principal) {
+                    principal.configClientCredentials().configAuthoritiesInAttribute(RAW_SCOPE_AUTHORITY);
+                }
+
+                @Test
+                @DisplayName("권한은 검색된 스코프만 가지고 있어야 한다.")
+                void shouldAuthoritiesOnlySearchedScopes() {
+                    OAuth2AuthenticatedPrincipal principal = this.introspector.introspect(RAW_TOKEN);
+
+                    Collection<GrantedAuthority> expected = RAW_SCOPE_AUTHORITY.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toSet());
+                    assertEquals(expected, new HashSet<>(principal.getAuthorities()));
+                }
             }
+        }
+    }
 
-            @Test
-            @DisplayName("속성은 검색된 인증 주체의 속성과 같아야 한다.")
-            void shouldPrincipalAttributeIsEqualsToAuthenticationAttribute() {
-                OAuth2AuthenticatedPrincipal principal = this.introspector.introspect(RAW_TOKEN);
+    private static class IntrospectSetup {
+        protected DefaultOpaqueTokenIntrospector introspector;
+        private Map<String, Object> attributes;
 
-                assertEquals(this.attributes, principal.getAttributes());
-            }
+        @BeforeEach
+        void setup() {
+            this.attributes = new HashMap<>();
+            OpaqueTokenIntrospector delegate = mock(OpaqueTokenIntrospector.class);
+            OpaqueTokenIntrospectorTestSupport.MockOAuthAuthenticatedPrincipal mockPrincipal = mockOAuthAuthenticatedPrincipal()
+                    .configDefault()
+                    .configUsernameInAttribute(RAW_PRINCIPAL_NAME)
+                    .configAuthoritiesInAttribute(null)
+                    .configAttributes(this.attributes);
 
-            @Test
-            @DisplayName("스코프는 검색된 인증 주체의 속성에서 가져온 스코프와 검색된 유저의 권한을 합친 권한 이어야 한다.")
-            void shouldScopeGetFromAuthenticationAttribute() {
-                OAuth2AuthenticatedPrincipal principal = this.introspector.introspect(RAW_TOKEN);
+            User user = mockUser().configAuthorities(ROLE_AUTHORITIES).build();
+            this.introspector = new DefaultOpaqueTokenIntrospector(delegate, mockUserDetailsService().registerUser(user).build());
+            this.attributes.put(OAuth2IntrospectionClaimNames.USERNAME, RAW_PRINCIPAL_NAME);
+            this.attributes.put(OAuth2IntrospectionClaimNames.SCOPE, RAW_SCOPE_AUTHORITY);
 
-                Collection<GrantedAuthority> expected = Stream.concat(
-                        RAW_SCOPE_AUTHORITY.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList()).stream(),
-                        RAW_ROLE_AUTHORITY.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList()).stream())
-                        .collect(Collectors.toSet());
-                assertEquals(expected, new HashSet<>(principal.getAuthorities()));
-            }
+            configAttributes(this.attributes);
+            configAuthentication(mockPrincipal);
+
+            when(delegate.introspect(RAW_TOKEN)).thenReturn(mockPrincipal.build());
+        }
+
+        protected void configAttributes(Map<String, Object> attributes) {}
+
+        protected void configAuthentication(OpaqueTokenIntrospectorTestSupport.MockOAuthAuthenticatedPrincipal principal) {}
+
+        @Test
+        @DisplayName("속성은 검색된 인증 주처의 속성과 같아야 한다.")
+        void shouldPrincipalAttributeIsEqualsToAuthenticationAttribute() {
+            OAuth2AuthenticatedPrincipal principal = this.introspector.introspect(RAW_TOKEN);
+
+            assertEquals(this.attributes, principal.getAttributes());
         }
     }
 }
