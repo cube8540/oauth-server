@@ -51,6 +51,12 @@ public class OpaqueTokenIntrospectorTestSupport {
             return this;
         }
 
+        public MockOAuthAuthenticatedPrincipal configClientCredentials() {
+            when(principal.getAttribute(OAuth2IntrospectionClaimNames.USERNAME)).thenReturn(null);
+            when(principal.getName()).thenReturn(null);
+            return this;
+        }
+
         public MockOAuthAuthenticatedPrincipal configUsernameInAttribute(String username) {
             when(principal.getAttribute(OAuth2IntrospectionClaimNames.USERNAME)).thenReturn(username);
             return this;

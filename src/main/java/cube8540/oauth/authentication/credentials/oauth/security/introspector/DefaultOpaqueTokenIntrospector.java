@@ -33,7 +33,8 @@ public class DefaultOpaqueTokenIntrospector implements OpaqueTokenIntrospector {
     }
 
     private Collection<GrantedAuthority> extractAuthorities(OAuth2AuthenticatedPrincipal principal) {
-        Collection<String> roles = getUserAuthorities(principal);
+        Collection<String> roles = principal.getAttribute(OAuth2IntrospectionClaimNames.USERNAME) != null ?
+                getUserAuthorities(principal) : Collections.emptySet();
         Collection<String> scopes = getUserScopes(principal);
 
         return Stream.concat(roles.stream(), scopes.stream()).map(SimpleGrantedAuthority::new).collect(Collectors.toSet());
