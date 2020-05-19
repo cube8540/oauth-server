@@ -1,15 +1,15 @@
 package cube8540.oauth.authentication.credentials.oauth.token.application;
 
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
-import cube8540.oauth.authentication.credentials.oauth.security.OAuth2TokenRequest;
-import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidGrantException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidRequestException;
 import cube8540.oauth.authentication.credentials.oauth.error.UserDeniedAuthorizationException;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetails;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2TokenRequest;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenRepository;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedAccessToken;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2TokenIdGenerator;
-import cube8540.oauth.authentication.users.domain.UserEmail;
+import cube8540.oauth.authentication.credentials.oauth.token.domain.PrincipalUsername;
 import org.springframework.security.authentication.AccountStatusException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -41,7 +41,7 @@ public class ResourceOwnerPasswordTokenGranter extends AbstractOAuth2TokenGrante
         OAuth2AuthorizedAccessToken accessToken = OAuth2AuthorizedAccessToken.builder(getTokenIdGenerator())
                 .expiration(extractTokenExpiration(clientDetails))
                 .client(new OAuth2ClientId(clientDetails.getClientId()))
-                .username(new UserEmail(authentication.getName()))
+                .username(new PrincipalUsername(authentication.getName()))
                 .scopes(extractGrantScope(clientDetails, tokenRequest))
                 .tokenGrantType(AuthorizationGrantType.PASSWORD)
                 .issuedAt(LocalDateTime.now(clock))

@@ -25,7 +25,7 @@
                     <div class="scopes">
                         <div class="scope" th:each="scope : ${authorizationRequestScopes}">
                             <label class="description" th:text="${scope.description}"></label>
-                            <input type="hidden" value="true" th:name="${scope.scopeId}">
+                            <input type="hidden" value="true" th:name="${scope.code}">
                         </div>
                     </div>
                 </form>

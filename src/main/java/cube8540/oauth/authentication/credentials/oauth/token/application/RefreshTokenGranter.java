@@ -1,11 +1,11 @@
 package cube8540.oauth.authentication.credentials.oauth.token.application;
 
+import cube8540.oauth.authentication.credentials.AuthorityCode;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
-import cube8540.oauth.authentication.credentials.oauth.security.OAuth2TokenRequest;
-import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidClientException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidGrantException;
-import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetails;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2TokenRequest;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenRepository;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedAccessToken;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedRefreshToken;
@@ -41,7 +41,7 @@ public class RefreshTokenGranter extends AbstractOAuth2TokenGranter {
             throw InvalidGrantException.invalidGrant("refresh token is expired");
         }
 
-        Set<String> storedAccessTokenScopes = storedAccessToken.getScopes().stream().map(OAuth2ScopeId::getValue).collect(Collectors.toSet());
+        Set<String> storedAccessTokenScopes = storedAccessToken.getScopes().stream().map(AuthorityCode::getValue).collect(Collectors.toSet());
         if (!getTokenRequestValidator().validateScopes(storedAccessTokenScopes, tokenRequest.getScopes())) {
             throw InvalidGrantException.invalidScope("cannot grant scope");
         }
@@ -58,8 +58,8 @@ public class RefreshTokenGranter extends AbstractOAuth2TokenGranter {
         return accessToken;
     }
 
-    protected Set<OAuth2ScopeId> extractGrantScope(OAuth2AuthorizedAccessToken accessToken, OAuth2TokenRequest tokenRequest) {
+    protected Set<AuthorityCode> extractGrantScope(OAuth2AuthorizedAccessToken accessToken, OAuth2TokenRequest tokenRequest) {
         return (tokenRequest.getScopes() == null || tokenRequest.getScopes().isEmpty()) ? accessToken.getScopes() :
-                tokenRequest.getScopes().stream().map(OAuth2ScopeId::new).collect(Collectors.toSet());
+                tokenRequest.getScopes().stream().map(AuthorityCode::new).collect(Collectors.toSet());
     }
 }

@@ -1,10 +1,9 @@
 package cube8540.oauth.authentication.credentials.oauth.token.domain;
 
+import cube8540.oauth.authentication.credentials.AuthorityCode;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
-import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import cube8540.oauth.authentication.credentials.oauth.security.AuthorizationCode;
 import cube8540.oauth.authentication.credentials.oauth.security.AuthorizationRequest;
-import cube8540.oauth.authentication.users.domain.UserEmail;
 
 import java.net.URI;
 import java.time.LocalDateTime;
@@ -24,7 +23,7 @@ class OAuth2AuthorizationCodeTestHelper {
     static final OAuth2ClientId CLIENT_ID = new OAuth2ClientId(RAW_CLIENT_ID);
 
     static final String RAW_USERNAME = "email@email.com";
-    static final UserEmail USERNAME = new UserEmail(RAW_USERNAME);
+    static final PrincipalUsername USERNAME = new PrincipalUsername(RAW_USERNAME);
 
     static final String STATE = "STATE";
 
@@ -35,7 +34,7 @@ class OAuth2AuthorizationCodeTestHelper {
     static final LocalDateTime EXPIRATION_DATETIME = NOW.plusMinutes(5);
 
     static final Set<String> RAW_SCOPES = new HashSet<>(Arrays.asList("SCOPE-1", "SCOPE-2", "SCOPE-3"));
-    static final Set<OAuth2ScopeId> SCOPES = RAW_SCOPES.stream().map(OAuth2ScopeId::new).collect(Collectors.toSet());
+    static final Set<AuthorityCode> SCOPES = RAW_SCOPES.stream().map(AuthorityCode::new).collect(Collectors.toSet());
 
     static AuthorizationCodeGenerator configDefaultCodeGenerator() {
         AuthorizationCodeGenerator generator = mock(AuthorizationCodeGenerator.class);

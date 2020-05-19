@@ -1,10 +1,10 @@
 package cube8540.oauth.authentication.credentials.oauth.client.application;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetails;
+import cube8540.oauth.authentication.credentials.AuthorityCode;
+import cube8540.oauth.authentication.credentials.oauth.client.domain.ClientOwner;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2Client;
-import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
-import cube8540.oauth.authentication.users.domain.UserEmail;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetails;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -52,14 +52,14 @@ public class DefaultOAuth2ClientDetails implements OAuth2ClientDetails, Credenti
 
     public static DefaultOAuth2ClientDetails of(OAuth2Client client) {
         Set<String> scope = Optional.ofNullable(client.getScopes()).orElse(Collections.emptySet())
-                .stream().map(OAuth2ScopeId::getValue).collect(Collectors.toSet());
+                .stream().map(AuthorityCode::getValue).collect(Collectors.toSet());
         Long tokenValidity = Optional.ofNullable(client.getAccessTokenValidity()).map(Duration::toSeconds).orElse(0L);
         Long refreshValidity = Optional.ofNullable(client.getRefreshTokenValidity()).map(Duration::toSeconds).orElse(0L);
 
         return builder().clientId(client.getClientId().getValue())
                 .clientSecret(client.getSecret())
                 .clientName(client.getClientName())
-                .owner(Optional.ofNullable(client.getOwner()).map(UserEmail::getValue).orElse(null))
+                .owner(Optional.ofNullable(client.getOwner()).map(ClientOwner::getValue).orElse(null))
                 .scopes(scope)
                 .accessTokenValiditySeconds(tokenValidity.intValue())
                 .refreshTokenValiditySeconds(refreshValidity.intValue())

@@ -1,8 +1,8 @@
 package cube8540.oauth.authentication.credentials.oauth.token.infra.read;
 
+import cube8540.oauth.authentication.credentials.oauth.token.domain.PrincipalUsername;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.read.Oauth2AccessTokenReadRepository;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.read.model.AccessTokenDetailsWithClient;
-import cube8540.oauth.authentication.users.domain.UserEmail;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -26,7 +26,7 @@ public class DefaultAccessTokenReadRepository implements Oauth2AccessTokenReadRe
     @Override
     public List<AccessTokenDetailsWithClient> readAccessTokenWithClientByUsername(String username) {
         return entityManager.createQuery(ACCESS_TOKEN_WITH_CLIENT_BY_USERNAME_QUERY, AccessTokenDetailsWithClient.class)
-                .setParameter("username", new UserEmail(username))
+                .setParameter("username", new PrincipalUsername(username))
                 .getResultList();
     }
 }

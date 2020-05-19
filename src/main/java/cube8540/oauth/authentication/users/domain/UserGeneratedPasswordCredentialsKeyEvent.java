@@ -8,8 +8,8 @@ import lombok.Value;
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserGeneratedPasswordCredentialsKeyEvent {
 
-    private UserEmail email;
+    UserEmail email;
 
-    private UserCredentialsKey key;
+    UserCredentialsKey key;
 
 }

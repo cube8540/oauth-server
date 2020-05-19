@@ -20,6 +20,8 @@ import static cube8540.oauth.authentication.users.application.UserApplicationTes
 import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.ENCODED_PASSWORD;
 import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.PASSWORD;
 import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.RAW_EMAIL;
+import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.RAW_USERNAME;
+import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.USERNAME;
 import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.configDefaultMockUser;
 import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.mockPasswordEncoder;
 import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.mockUserRepository;
@@ -52,7 +54,7 @@ class DefaultUserManagementServiceTest {
         @Test
         @DisplayName("저장소에서 검색된 유저의 카운터를 반환해야 한다.")
         void shouldReturnsUserCount() {
-            long count = service.countUser(RAW_EMAIL);
+            long count = service.countUser(RAW_USERNAME);
 
             assertEquals(randomCount, count);
         }
@@ -69,7 +71,7 @@ class DefaultUserManagementServiceTest {
             @Test
             @DisplayName("UserNotFoundException 이 발생해야 한다.")
             void shouldThrowsUserNotFoundException() {
-                assertThrows(UserNotFoundException.class, () -> service.loadUserProfile(RAW_EMAIL));
+                assertThrows(UserNotFoundException.class, () -> service.loadUserProfile(RAW_USERNAME));
             }
         }
     }
@@ -79,8 +81,8 @@ class DefaultUserManagementServiceTest {
     class RegisterUser {
 
         @Nested
-        @DisplayName("저장소에 이미 저장된 유저 이메일일시")
-        class WhenExistingEmailInRepository {
+        @DisplayName("저장소에 이미 저장된 아이디일시")
+        class WhenExistingUsernameInRepository {
             private UserRegisterRequest registerRequest;
 
             private DefaultUserManagementService service;
@@ -89,7 +91,7 @@ class DefaultUserManagementServiceTest {
             void setup() {
                 UserRepository repository = mockUserRepository().countUser(1L).build();
 
-                this.registerRequest = new UserRegisterRequest(RAW_EMAIL, PASSWORD);
+                this.registerRequest = new UserRegisterRequest(RAW_USERNAME, RAW_EMAIL, PASSWORD);
                 this.service = new DefaultUserManagementService(repository, mockPasswordEncoder().build());
             }
 
@@ -105,6 +107,8 @@ class DefaultUserManagementServiceTest {
         @DisplayName("저장소에 저장되지 않은 유저일시")
         class WhenNotRegisterInRepository {
             private UserRepository repository;
+
+            private ValidationRule<User> usernameRule;
             private ValidationRule<User> emailRule;
             private ValidationRule<User> passwordRule;
 
@@ -115,17 +119,28 @@ class DefaultUserManagementServiceTest {
             @BeforeEach
             void setup() {
                 this.repository = mockUserRepository().countUser(0).build();
+                this.usernameRule = mockValidationRule().configReturnsTrue().build();
                 this.emailRule = mockValidationRule().configReturnsTrue().build();
                 this.passwordRule = mockValidationRule().configReturnsTrue().build();
 
                 UserValidationPolicy policy = mockValidationPolicy()
-                        .email(emailRule).password(passwordRule).build();
+                        .username(usernameRule).email(emailRule).password(passwordRule).build();
                 PasswordEncoder encoder = mockPasswordEncoder().encode().build();
 
                 this.service = new DefaultUserManagementService(repository, encoder);
                 this.service.setValidationPolicy(policy);
 
-                this.registerRequest = new UserRegisterRequest(RAW_EMAIL, PASSWORD);
+                this.registerRequest = new UserRegisterRequest(RAW_USERNAME, RAW_EMAIL, PASSWORD);
+            }
+
+            @Test
+            @DisplayName("요청 받은 유저 아이디의 유효성 검사를 해야 한다.")
+            void shouldSaveRequestingUsernameAfterValidation() {
+                ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+
+                service.registerUser(registerRequest);
+                verifySaveAfterValidation(usernameRule, userCaptor);
+                assertEquals(USERNAME, userCaptor.getValue().getUsername());
             }
 
             @Test
@@ -193,7 +208,7 @@ class DefaultUserManagementServiceTest {
             void shouldRemoveUserToRepository() {
                 ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
 
-                service.removeUser(RAW_EMAIL);
+                service.removeUser(RAW_USERNAME);
                 verify(repository, times(1)).delete(userCaptor.capture());
                 assertEquals(user, userCaptor.getValue());
             }

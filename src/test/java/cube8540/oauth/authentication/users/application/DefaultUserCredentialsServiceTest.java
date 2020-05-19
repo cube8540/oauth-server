@@ -1,6 +1,5 @@
 package cube8540.oauth.authentication.users.application;
 
-import cube8540.oauth.authentication.credentials.authority.BasicAuthorityService;
 import cube8540.oauth.authentication.users.domain.User;
 import cube8540.oauth.authentication.users.domain.UserCredentialsKeyGenerator;
 import cube8540.oauth.authentication.users.domain.UserRepository;
@@ -11,6 +10,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 
+import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.AUTHORITIES;
+import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.mockBasicAuthorityService;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.times;
@@ -28,9 +29,9 @@ class DefaultUserCredentialsServiceTest {
         class WhenUserNotRegisteredInRepository extends UserNotFoundSetup {
 
             @Test
-            @DisplayName("UserNotFoundException 이 발생해야 한다.")
+            @DisplayName("UserNotFoundException이 발생 해야 한다.")
             void shouldThrowsUserNotFoundException() {
-                assertThrows(UserNotFoundException.class, () -> service.grantCredentialsKey(UserApplicationTestHelper.RAW_EMAIL));
+                assertThrows(UserNotFoundException.class, () -> service.grantCredentialsKey(UserApplicationTestHelper.RAW_USERNAME));
             }
         }
 
@@ -49,14 +50,14 @@ class DefaultUserCredentialsServiceTest {
                 this.repository = UserApplicationTestHelper.mockUserRepository().registerUser(user).build();
                 this.keyGenerator = UserApplicationTestHelper.mockKeyGenerator();
 
-                this.service = new DefaultUserCredentialsService(repository, UserApplicationTestHelper.mockBasicAuthorityService().build());
+                this.service = new DefaultUserCredentialsService(repository, mockBasicAuthorityService().build());
                 this.service.setKeyGenerator(keyGenerator);
             }
 
             @Test
             @DisplayName("검색된 유저에게 인증키를 할당해야 한다.")
             void shouldGrantCredentialsKeyForUser() {
-                service.grantCredentialsKey(UserApplicationTestHelper.RAW_EMAIL);
+                service.grantCredentialsKey(UserApplicationTestHelper.RAW_USERNAME);
 
                 verify(user, times(1)).generateCredentialsKey(keyGenerator);
             }
@@ -64,7 +65,7 @@ class DefaultUserCredentialsServiceTest {
             @Test
             @DisplayName("검색된 유저에게 인증키를 할당한 후 저장소에 저장해야 한다")
             void shouldSaveUserForRepositoryAfterGrantCredentialsKey() {
-                service.grantCredentialsKey(UserApplicationTestHelper.RAW_EMAIL);
+                service.grantCredentialsKey(UserApplicationTestHelper.RAW_USERNAME);
 
                 InOrder inOrder = inOrder(user, repository);
                 inOrder.verify(user, times(1)).generateCredentialsKey(keyGenerator);
@@ -84,7 +85,7 @@ class DefaultUserCredentialsServiceTest {
             @Test
             @DisplayName("UserNotFoundException 이 발생해야 한다.")
             void shouldThrowsUserNotFoundException() {
-                assertThrows(UserNotFoundException.class, () -> service.accountCredentials(UserApplicationTestHelper.RAW_EMAIL, UserApplicationTestHelper.RAW_CREDENTIALS_KEY));
+                assertThrows(UserNotFoundException.class, () -> service.accountCredentials(UserApplicationTestHelper.RAW_USERNAME, UserApplicationTestHelper.RAW_CREDENTIALS_KEY));
             }
         }
 
@@ -101,26 +102,34 @@ class DefaultUserCredentialsServiceTest {
                 this.user = UserApplicationTestHelper.configDefaultMockUser().build();
                 this.repository = UserApplicationTestHelper.mockUserRepository().registerUser(user).build();
 
-                BasicAuthorityService basicAuthorityService = UserApplicationTestHelper.mockBasicAuthorityService().basicAuthority().build();
-
-                this.service = new DefaultUserCredentialsService(repository, basicAuthorityService);
+                this.service = new DefaultUserCredentialsService(repository, mockBasicAuthorityService().basicAuthority().build());
             }
 
             @Test
-            @DisplayName("요청 받은 인증키와 기본 권한으로 계정 인증을 해야 한다.")
-            void shouldAccountCredentialsByRequestingCredentialsKeyAndBasicAuthority() {
-                service.accountCredentials(UserApplicationTestHelper.RAW_EMAIL, UserApplicationTestHelper.RAW_CREDENTIALS_KEY);
+            @DisplayName("요청 받은 인증키로 인증을 해야 한다.")
+            void shouldAccountCredentialsByRequestingCredentialsKey() {
+                service.accountCredentials(UserApplicationTestHelper.RAW_USERNAME, UserApplicationTestHelper.RAW_CREDENTIALS_KEY);
 
-                verify(user, times(1)).credentials(UserApplicationTestHelper.RAW_CREDENTIALS_KEY, UserApplicationTestHelper.BASIC_AUTHORITIES);
+                verify(user, times(1)).credentials(UserApplicationTestHelper.RAW_CREDENTIALS_KEY);
             }
 
             @Test
-            @DisplayName("계정 인증후 저장소에 저장해야 한다.")
-            void shouldSaveUserForRepositoryAfterAccountCredentials() {
-                service.accountCredentials(UserApplicationTestHelper.RAW_EMAIL, UserApplicationTestHelper.RAW_CREDENTIALS_KEY);
+            @DisplayName("계정 인증후 권한을 할당 해야 한다.")
+            void shouldGrantAuthorityAfterAccountCredentials() {
+                service.accountCredentials(UserApplicationTestHelper.RAW_USERNAME, UserApplicationTestHelper.RAW_CREDENTIALS_KEY);
+
+                InOrder inOrder = inOrder(user);
+                inOrder.verify(user, times(1)).credentials(UserApplicationTestHelper.RAW_CREDENTIALS_KEY);
+                AUTHORITIES.forEach(authority -> inOrder.verify(user, times(1)).grantAuthority(authority));
+            }
+
+            @Test
+            @DisplayName("계정에 권한을 할당 한 이후 저장소에 저장 해야 한다.")
+            void shouldSaveAfterGrantAuthority() {
+                service.accountCredentials(UserApplicationTestHelper.RAW_USERNAME, UserApplicationTestHelper.RAW_CREDENTIALS_KEY);
 
                 InOrder inOrder = inOrder(user, repository);
-                inOrder.verify(user, times(1)).credentials(UserApplicationTestHelper.RAW_CREDENTIALS_KEY, UserApplicationTestHelper.BASIC_AUTHORITIES);
+                AUTHORITIES.forEach(authority -> inOrder.verify(user, times(1)).grantAuthority(authority));
                 inOrder.verify(repository, times(1)).save(user);
             }
         }
@@ -133,7 +142,7 @@ class DefaultUserCredentialsServiceTest {
         void setup() {
             UserRepository repository = UserApplicationTestHelper.mockUserRepository().emptyUser().build();
 
-            this.service = new DefaultUserCredentialsService(repository, UserApplicationTestHelper.mockBasicAuthorityService().build());
+            this.service = new DefaultUserCredentialsService(repository, mockBasicAuthorityService().build());
         }
     }
 }

@@ -7,6 +7,6 @@ import java.io.Serializable;
 @Value
 public class AuthorizationCode implements Serializable {
 
-    private String value;
+    String value;
 
 }

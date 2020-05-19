@@ -18,8 +18,8 @@ import java.security.Principal;
 
 import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.NEW_PASSWORD;
 import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.PASSWORD;
-import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.RAW_EMAIL;
 import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.RAW_PASSWORD_CREDENTIALS_KEY;
+import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.RAW_USERNAME;
 import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.configDefaultMockUser;
 import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.mockCredentialsKey;
 import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.mockKeyGenerator;
@@ -48,7 +48,7 @@ class DefaultUserPasswordServiceTest {
             @Test
             @DisplayName("UserNotFoundException 이 발생해야 한다.")
             void shouldThrowsUserNotFoundException() {
-                Principal principal = mockPrincipal(RAW_EMAIL);
+                Principal principal = mockPrincipal(RAW_USERNAME);
                 ChangePasswordRequest changeRequest = new ChangePasswordRequest(PASSWORD, NEW_PASSWORD);
 
                 assertThrows(UserNotFoundException.class, () -> service.changePassword(principal, changeRequest));
@@ -63,7 +63,7 @@ class DefaultUserPasswordServiceTest {
 
             @BeforeEach
             void setupRequest() {
-                this.principal = mockPrincipal(RAW_EMAIL);
+                this.principal = mockPrincipal(RAW_USERNAME);
                 this.changeRequest = new ChangePasswordRequest(PASSWORD, NEW_PASSWORD);
             }
 
@@ -118,7 +118,7 @@ class DefaultUserPasswordServiceTest {
             @Test
             @DisplayName("UserNotFoundException이 발생해야한다.")
             void shouldThrowsUserNotFoundException() {
-                assertThrows(UserNotFoundException.class, () -> service.forgotPassword(RAW_EMAIL));
+                assertThrows(UserNotFoundException.class, () -> service.forgotPassword(RAW_USERNAME));
             }
         }
 
@@ -144,7 +144,7 @@ class DefaultUserPasswordServiceTest {
             @Test
             @DisplayName("검색된 유저에게 패스워드 인증키를 할당해야 한다.")
             void shouldGeneratePasswordCredentialsKeyForUser() {
-                service.forgotPassword(RAW_EMAIL);
+                service.forgotPassword(RAW_USERNAME);
 
                 verify(user, times(1)).forgotPassword(keyGenerator);
             }
@@ -152,7 +152,7 @@ class DefaultUserPasswordServiceTest {
             @Test
             @DisplayName("패스워드 인증키를 할당한 후 저장소에 저장해야 한다.")
             void shouldSaveUserForRepositoryAfterGenerateCredentialsKey() {
-                service.forgotPassword(RAW_EMAIL);
+                service.forgotPassword(RAW_USERNAME);
 
                 InOrder inOrder = inOrder(user, repository);
                 inOrder.verify(user, times(1)).forgotPassword(keyGenerator);
@@ -172,7 +172,7 @@ class DefaultUserPasswordServiceTest {
             @Test
             @DisplayName("UserNotFoundException이 발생해야한다.")
             void shouldThrowsUserNotFoundException() {
-                assertThrows(UserNotFoundException.class, () -> service.forgotPassword(RAW_EMAIL));
+                assertThrows(UserNotFoundException.class, () -> service.forgotPassword(RAW_USERNAME));
             }
         }
 
@@ -199,7 +199,7 @@ class DefaultUserPasswordServiceTest {
                 @Test
                 @DisplayName("검사 결과는 false여야 한다.")
                 void shouldValidateResultIsFalse() {
-                    boolean validate = service.validateCredentialsKey(RAW_EMAIL, RAW_PASSWORD_CREDENTIALS_KEY);
+                    boolean validate = service.validateCredentialsKey(RAW_USERNAME, RAW_PASSWORD_CREDENTIALS_KEY);
 
                     assertFalse(validate);
                 }
@@ -224,7 +224,7 @@ class DefaultUserPasswordServiceTest {
                 @Test
                 @DisplayName("검사 결과는 false여야 한다.")
                 void shouldValidateResultIsFalse() {
-                    boolean validate = service.validateCredentialsKey(RAW_EMAIL, RAW_PASSWORD_CREDENTIALS_KEY);
+                    boolean validate = service.validateCredentialsKey(RAW_USERNAME, RAW_PASSWORD_CREDENTIALS_KEY);
 
                     assertFalse(validate);
                 }
@@ -249,7 +249,7 @@ class DefaultUserPasswordServiceTest {
                 @Test
                 @DisplayName("검삭 결과는 true여야 한다.")
                 void shouldValidateResultIsTrue() {
-                    boolean validate = service.validateCredentialsKey(RAW_EMAIL, RAW_PASSWORD_CREDENTIALS_KEY);
+                    boolean validate = service.validateCredentialsKey(RAW_USERNAME, RAW_PASSWORD_CREDENTIALS_KEY);
 
                     assertTrue(validate);
                 }
@@ -268,7 +268,7 @@ class DefaultUserPasswordServiceTest {
             @Test
             @DisplayName("UserNotFoundException이 발생해야 한다.")
             void shouldThrowsUserNotFoundException() {
-                ResetPasswordRequest request = new ResetPasswordRequest(RAW_EMAIL, RAW_PASSWORD_CREDENTIALS_KEY, NEW_PASSWORD);
+                ResetPasswordRequest request = new ResetPasswordRequest(RAW_USERNAME, RAW_PASSWORD_CREDENTIALS_KEY, NEW_PASSWORD);
 
                 assertThrows(UserNotFoundException.class, () -> service.resetPassword(request));
             }
@@ -281,7 +281,7 @@ class DefaultUserPasswordServiceTest {
 
             @BeforeEach
             void setupRequest() {
-                this.request = new ResetPasswordRequest(RAW_EMAIL, RAW_PASSWORD_CREDENTIALS_KEY, NEW_PASSWORD);
+                this.request = new ResetPasswordRequest(RAW_USERNAME, RAW_PASSWORD_CREDENTIALS_KEY, NEW_PASSWORD);
             }
 
             @Test

@@ -1,11 +1,10 @@
 package cube8540.oauth.authentication.credentials.oauth.client.domain;
 
+import cube8540.oauth.authentication.credentials.AuthorityCode;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.exception.ClientAuthorizationException;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.exception.ClientInvalidException;
 import cube8540.oauth.authentication.credentials.oauth.converter.AuthorizationGrantTypeConverter;
 import cube8540.oauth.authentication.credentials.oauth.converter.RedirectUriConverter;
-import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
-import cube8540.oauth.authentication.users.domain.UserEmail;
 import cube8540.validator.core.Validator;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -75,12 +74,12 @@ public class OAuth2Client extends AbstractAggregateRoot<OAuth2Client> {
     @Fetch(FetchMode.JOIN)
     @CollectionTable(name = "oauth2_client_scope", joinColumns = @JoinColumn(name = "client_id", nullable = false))
     @AttributeOverride(name = "value", column = @Column(name = "scope_id", length = 32, nullable = false))
-    private Set<OAuth2ScopeId> scopes;
+    private Set<AuthorityCode> scopes;
 
     @Setter
     @Embedded
     @AttributeOverride(name = "value", column = @Column(name = "oauth2_client_owner", nullable = false, length = 128))
-    private UserEmail owner;
+    private ClientOwner owner;
 
     @Column(name = "access_token_validity", nullable = false)
     private Duration accessTokenValidity;
@@ -123,14 +122,14 @@ public class OAuth2Client extends AbstractAggregateRoot<OAuth2Client> {
                 .ifPresent(types -> types.remove(grantType));
     }
 
-    public void addScope(OAuth2ScopeId scope) {
+    public void addScope(AuthorityCode scope) {
         if (this.scopes == null) {
             this.scopes = new HashSet<>();
         }
         this.scopes.add(scope);
     }
 
-    public void removeScope(OAuth2ScopeId scope) {
+    public void removeScope(AuthorityCode scope) {
         Optional.ofNullable(this.scopes)
                 .ifPresent(s -> s.remove(scope));
     }

@@ -1,9 +1,9 @@
 package cube8540.oauth.authentication.users.application;
 
 import cube8540.oauth.authentication.users.domain.User;
-import cube8540.oauth.authentication.users.domain.UserEmail;
 import cube8540.oauth.authentication.users.domain.UserRepository;
 import cube8540.oauth.authentication.users.domain.UserValidationPolicy;
+import cube8540.oauth.authentication.users.domain.Username;
 import cube8540.oauth.authentication.users.domain.exception.UserNotFoundException;
 import cube8540.oauth.authentication.users.domain.exception.UserRegisterException;
 import cube8540.oauth.authentication.users.infra.DefaultUserValidationPolicy;
@@ -29,22 +29,22 @@ public class DefaultUserManagementService implements UserManagementService {
     }
 
     @Override
-    public Long countUser(String email) {
-        return repository.countByEmail(new UserEmail(email));
+    public Long countUser(String username) {
+        return repository.countByUsername(new Username(username));
     }
 
     @Override
-    public UserProfile loadUserProfile(String email) {
-        return UserProfile.of(getUser(email));
+    public UserProfile loadUserProfile(String username) {
+        return UserProfile.of(getUser(username));
     }
 
     @Override
     @Transactional
     public UserProfile registerUser(UserRegisterRequest registerRequest) {
-        if (repository.countByEmail(new UserEmail(registerRequest.getEmail())) > 0) {
-            throw UserRegisterException.existsIdentifier(registerRequest.getEmail() + " is exists");
+        if (repository.countByUsername(new Username(registerRequest.getUsername())) > 0) {
+            throw UserRegisterException.existsIdentifier(registerRequest.getUsername() + " is exists");
         }
-        User registerUser = new User(registerRequest.getEmail(), registerRequest.getPassword());
+        User registerUser = new User(registerRequest.getUsername(), registerRequest.getEmail(), registerRequest.getPassword());
         registerUser.validation(validationPolicy);
         registerUser.encrypted(encoder);
         return UserProfile.of(repository.save(registerUser));
@@ -52,15 +52,15 @@ public class DefaultUserManagementService implements UserManagementService {
 
     @Override
     @Transactional
-    public UserProfile removeUser(String email) {
-        User registerUser = getUser(email);
+    public UserProfile removeUser(String username) {
+        User registerUser = getUser(username);
 
         repository.delete(registerUser);
         return UserProfile.of(registerUser);
     }
 
-    private User getUser(String email) {
-        return repository.findByEmail(new UserEmail(email))
-                .orElseThrow(() -> UserNotFoundException.instance(email + " is not found"));
+    private User getUser(String username) {
+        return repository.findByUsername(new Username(username))
+                .orElseThrow(() -> UserNotFoundException.instance(username + " is not found"));
     }
 }

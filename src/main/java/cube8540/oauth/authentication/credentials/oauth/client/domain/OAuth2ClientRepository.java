@@ -1,6 +1,5 @@
 package cube8540.oauth.authentication.credentials.oauth.client.domain;
 
-import cube8540.oauth.authentication.users.domain.UserEmail;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -15,5 +14,5 @@ public interface OAuth2ClientRepository extends JpaRepository<OAuth2Client, OAut
     @EntityGraph(attributePaths = {"redirectUris", "grantTypes", "scopes"})
     Optional<OAuth2Client> findByClientId(OAuth2ClientId clientId);
 
-    Page<OAuth2Client> findByOwner(UserEmail owner, Pageable pageable);
+    Page<OAuth2Client> findByOwner(ClientOwner owner, Pageable pageable);
 }

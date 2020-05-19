@@ -1,38 +1,37 @@
 package cube8540.oauth.authentication.users.application;
 
-import cube8540.oauth.authentication.credentials.authority.BasicAuthorityService;
-import cube8540.oauth.authentication.credentials.authority.domain.AuthorityCode;
+import cube8540.oauth.authentication.credentials.AuthorityDetails;
+import cube8540.oauth.authentication.credentials.BasicAuthorityDetailsService;
 import cube8540.oauth.authentication.users.domain.User;
+import cube8540.oauth.authentication.users.domain.UserAuthority;
 import cube8540.oauth.authentication.users.domain.UserCredentialsKeyGenerator;
-import cube8540.oauth.authentication.users.domain.UserEmail;
 import cube8540.oauth.authentication.users.domain.UserRepository;
+import cube8540.oauth.authentication.users.domain.Username;
 import cube8540.oauth.authentication.users.domain.exception.UserNotFoundException;
 import cube8540.oauth.authentication.users.infra.DefaultUserCredentialsKeyGenerator;
 import lombok.Setter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
 @Service
 public class DefaultUserCredentialsService implements UserCredentialsService {
 
     private final UserRepository repository;
 
-    private final BasicAuthorityService authorityService;
+    private final BasicAuthorityDetailsService basicAuthorityDetailsService;
 
     @Setter
     private UserCredentialsKeyGenerator keyGenerator = new DefaultUserCredentialsKeyGenerator();
 
-    public DefaultUserCredentialsService(UserRepository repository, BasicAuthorityService authorityService) {
+    public DefaultUserCredentialsService(UserRepository repository, BasicAuthorityDetailsService basicAuthorityDetailsService) {
         this.repository = repository;
-        this.authorityService = authorityService;
+        this.basicAuthorityDetailsService = basicAuthorityDetailsService;
     }
 
     @Override
     @Transactional
-    public UserProfile grantCredentialsKey(String email) {
-        User user = getUser(email);
+    public UserProfile grantCredentialsKey(String username) {
+        User user = getUser(username);
 
         user.generateCredentialsKey(keyGenerator);
         return UserProfile.of(repository.save(user));
@@ -40,16 +39,19 @@ public class DefaultUserCredentialsService implements UserCredentialsService {
 
     @Override
     @Transactional
-    public UserProfile accountCredentials(String email, String credentialsKey) {
-        User user = getUser(email);
-        List<AuthorityCode> authorityCodes = authorityService.getBasicAuthority();
+    public UserProfile accountCredentials(String username, String credentialsKey) {
+        User user = getUser(username);
 
-        user.credentials(credentialsKey, authorityCodes);
+        user.credentials(credentialsKey);
+
+        basicAuthorityDetailsService.loadBasicAuthorities().stream()
+                .map(AuthorityDetails::getCode).map(UserAuthority::new)
+                .forEach(user::grantAuthority);
         return UserProfile.of(repository.save(user));
     }
 
-    private User getUser(String email) {
-        return repository.findByEmail(new UserEmail(email))
-                .orElseThrow(() -> UserNotFoundException.instance(email + " is not found"));
+    private User getUser(String username) {
+        return repository.findByUsername(new Username(username))
+                .orElseThrow(() -> UserNotFoundException.instance(username + " is not found"));
     }
 }

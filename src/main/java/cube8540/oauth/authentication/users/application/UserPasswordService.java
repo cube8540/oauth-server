@@ -6,9 +6,9 @@ public interface UserPasswordService {
 
     UserProfile changePassword(Principal principal, ChangePasswordRequest changeRequest);
 
-    UserProfile forgotPassword(String email);
+    UserProfile forgotPassword(String username);
 
-    boolean validateCredentialsKey(String email, String credentialsKey);
+    boolean validateCredentialsKey(String username, String credentialsKey);
 
     UserProfile resetPassword(ResetPasswordRequest resetRequest);
 

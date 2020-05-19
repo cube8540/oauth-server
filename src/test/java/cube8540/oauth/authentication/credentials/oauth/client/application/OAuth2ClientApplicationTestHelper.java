@@ -1,11 +1,11 @@
 package cube8540.oauth.authentication.credentials.oauth.client.application;
 
+import cube8540.oauth.authentication.credentials.AuthorityCode;
+import cube8540.oauth.authentication.credentials.oauth.client.domain.ClientOwner;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2Client;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientRepository;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientValidatePolicy;
-import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
-import cube8540.oauth.authentication.users.domain.UserEmail;
 import cube8540.validator.core.ValidationRule;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -54,15 +54,15 @@ public class OAuth2ClientApplicationTestHelper {
     static final List<String> RAW_NEW_GRANT_TYPES = NEW_GRANT_TYPES.stream().map(AuthorizationGrantType::getValue).collect(Collectors.toList());
     static final List<String> RAW_REMOVE_GRANT_TYPES = REMOVE_GRANT_TYPES.stream().map(AuthorizationGrantType::getValue).collect(Collectors.toList());
 
-    static final Set<OAuth2ScopeId> SCOPES = new HashSet<>(Arrays.asList(new OAuth2ScopeId("SCOPE-1"), new OAuth2ScopeId("SCOPE-2"), new OAuth2ScopeId("SCOPE-3")));
-    static final Set<OAuth2ScopeId> NEW_SCOPES = new HashSet<>(Arrays.asList(new OAuth2ScopeId("NEW-SCOPE-1"), new OAuth2ScopeId("NEW-SCOPE-1"), new OAuth2ScopeId("NEW-SCOPE-1")));
-    static final Set<OAuth2ScopeId> REMOVE_SCOPES = new HashSet<>(Arrays.asList(new OAuth2ScopeId("REMOVE-SCOPE-1"), new OAuth2ScopeId("REMOVE-SCOPE-2"), new OAuth2ScopeId("REMOVE-SCOPE-3")));
-    static final List<String> RAW_SCOPES = SCOPES.stream().map(OAuth2ScopeId::getValue).collect(Collectors.toList());
-    static final List<String> RAW_NEW_SCOPES = NEW_SCOPES.stream().map(OAuth2ScopeId::getValue).collect(Collectors.toList());
-    static final List<String> RAW_REMOVE_SCOPES = REMOVE_SCOPES.stream().map(OAuth2ScopeId::getValue).collect(Collectors.toList());
+    static final Set<AuthorityCode> SCOPES = new HashSet<>(Arrays.asList(new AuthorityCode("SCOPE-1"), new AuthorityCode("SCOPE-2"), new AuthorityCode("SCOPE-3")));
+    static final Set<AuthorityCode> NEW_SCOPES = new HashSet<>(Arrays.asList(new AuthorityCode("NEW-SCOPE-1"), new AuthorityCode("NEW-SCOPE-1"), new AuthorityCode("NEW-SCOPE-1")));
+    static final Set<AuthorityCode> REMOVE_SCOPES = new HashSet<>(Arrays.asList(new AuthorityCode("REMOVE-SCOPE-1"), new AuthorityCode("REMOVE-SCOPE-2"), new AuthorityCode("REMOVE-SCOPE-3")));
+    static final List<String> RAW_SCOPES = SCOPES.stream().map(AuthorityCode::getValue).collect(Collectors.toList());
+    static final List<String> RAW_NEW_SCOPES = NEW_SCOPES.stream().map(AuthorityCode::getValue).collect(Collectors.toList());
+    static final List<String> RAW_REMOVE_SCOPES = REMOVE_SCOPES.stream().map(AuthorityCode::getValue).collect(Collectors.toList());
 
     static final String RAW_OWNER = "owner@email.com";
-    static final UserEmail OWNER = new UserEmail(RAW_OWNER);
+    static final ClientOwner OWNER = new ClientOwner(RAW_OWNER);
 
     static final Duration ACCESS_TOKEN_VALIDITY = Duration.ofMinutes(10);
     static final Duration REFRESH_TOKEN_VALIDITY = Duration.ofHours(12);

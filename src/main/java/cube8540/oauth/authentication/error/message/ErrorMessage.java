@@ -11,9 +11,9 @@ public class ErrorMessage<T> implements Serializable {
 
     public static final ErrorMessage<Object> UNKNOWN_SERVER_ERROR = ErrorMessage.instance(ErrorCodes.SERVER_ERROR, "unknown server error");
 
-    private String errorCode;
+    String errorCode;
 
-    private T description;
+    T description;
 
     public static <T> ErrorMessage<T> instance(String errorCode, T description) {
         return new ErrorMessage<>(errorCode, description);

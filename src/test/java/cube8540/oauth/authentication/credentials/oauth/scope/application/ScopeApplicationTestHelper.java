@@ -1,8 +1,7 @@
 package cube8540.oauth.authentication.credentials.oauth.scope.application;
 
-import cube8540.oauth.authentication.credentials.authority.domain.AuthorityCode;
+import cube8540.oauth.authentication.credentials.AuthorityCode;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2Scope;
-import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeId;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeRepository;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeValidationPolicy;
 import cube8540.validator.core.ValidationError;
@@ -25,7 +24,7 @@ import static org.mockito.Mockito.when;
 class ScopeApplicationTestHelper {
 
     static final String RAW_SCOPE_ID = "SCOPE-ID";
-    static final OAuth2ScopeId SCOPE_ID = new OAuth2ScopeId(RAW_SCOPE_ID);
+    static final AuthorityCode SCOPE_ID = new AuthorityCode(RAW_SCOPE_ID);
 
     static final String DESCRIPTION = "DESCRIPTION";
     static final String NEW_DESCRIPTION = "NEW-DESCRIPTION";
@@ -70,7 +69,7 @@ class ScopeApplicationTestHelper {
         }
 
         MockScope configDefaultScopeId() {
-            when(scope.getId()).thenReturn(SCOPE_ID);
+            when(scope.getCode()).thenReturn(SCOPE_ID);
             return this;
         }
 
@@ -98,19 +97,19 @@ class ScopeApplicationTestHelper {
         }
 
         MockScopeRepository count(long count) {
-            when(repository.countById(SCOPE_ID)).thenReturn(count);
+            when(repository.countByCode(SCOPE_ID)).thenReturn(count);
             return this;
         }
 
         MockScopeRepository registerScope(OAuth2Scope scope) {
             when(repository.findById(SCOPE_ID)).thenReturn(Optional.of(scope));
-            when(repository.countById(SCOPE_ID)).thenReturn(1L);
+            when(repository.countByCode(SCOPE_ID)).thenReturn(1L);
             return this;
         }
 
         MockScopeRepository emptyScope() {
             when(repository.findById(SCOPE_ID)).thenReturn(Optional.empty());
-            when(repository.countById(SCOPE_ID)).thenReturn(0L);
+            when(repository.countByCode(SCOPE_ID)).thenReturn(0L);
             return this;
         }
 

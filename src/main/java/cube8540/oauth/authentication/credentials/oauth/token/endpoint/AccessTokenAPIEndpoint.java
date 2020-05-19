@@ -6,6 +6,12 @@ import cube8540.oauth.authentication.credentials.oauth.token.application.AccessT
 import cube8540.oauth.authentication.credentials.oauth.token.domain.read.model.AccessTokenDetailsWithClient;
 import cube8540.oauth.authentication.error.ExceptionTranslator;
 import cube8540.oauth.authentication.error.message.ErrorMessage;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -23,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
+@Api(value = "OAuth2 엑세스 토큰 API 엔드 포인트")
 public class AccessTokenAPIEndpoint {
 
     private final AccessTokenReadService service;
@@ -38,6 +45,12 @@ public class AccessTokenAPIEndpoint {
     }
 
     @GetMapping(value = "/api/tokens")
+    @ApiOperation(value = "OAuth2 토큰 검색", notes = "현재 로그인된 계정의 OAuth 토큰을 검색 합니다.")
+    @ApiImplicitParam(value = "OAuth2 엑세스 토큰", name = "Authorization", required = true, paramType = "header", example = "Bearer xxxxxxxxxx")
+    @ApiResponses(value = {
+            @ApiResponse(code = 401, message = "잘못된 OAuth2 엑세스 토큰 입니다."),
+            @ApiResponse(code = 403, message = "로그인이 되어 있지 않습니다.")
+    })
     public Map<String, List<AccessTokenDetailsWithClient>> getUserAccessToken(@AuthenticationPrincipal Authentication authentication) {
         List<AccessTokenDetailsWithClient> tokens = service.getAuthorizeAccessTokens(authentication);
 
@@ -45,7 +58,15 @@ public class AccessTokenAPIEndpoint {
     }
 
     @DeleteMapping(value = "/api/tokens/{accessToken}")
-    public OAuth2TokenDetails deleteUserAccessToken(@PathVariable("accessToken") String accessToken) {
+    @ApiOperation(value = "OAuth2 토큰  삭제", notes = "OAuth 토큰을 삭제 합니다.")
+    @ApiImplicitParam(value = "OAuth2 엑세스 토큰", name = "Authorization", required = true, paramType = "header", example = "Bearer xxxxxxxxxx")
+    @ApiResponses(value = {
+            @ApiResponse(code = 401, message = "잘못된 OAuth2 엑세스 토큰 입니다."),
+            @ApiResponse(code = 403, message = "로그인이 되어 있지 않습니다."),
+            @ApiResponse(code = 404, message = "요청 하신 토큰은 등록 되지 않은 토큰 입니다."),
+            @ApiResponse(code = 500, message = "서버에서 알 수 없는 에러가 발생 했습니다.")
+    })
+    public OAuth2TokenDetails deleteUserAccessToken(@ApiParam(value = "삭제할 엑세스 토큰", required = true, example = "xxxxxxxxxx") @PathVariable("accessToken") String accessToken) {
         return revoker.revoke(accessToken);
     }
 

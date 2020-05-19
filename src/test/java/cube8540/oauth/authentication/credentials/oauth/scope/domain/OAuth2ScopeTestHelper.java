@@ -1,6 +1,6 @@
 package cube8540.oauth.authentication.credentials.oauth.scope.domain;
 
-import cube8540.oauth.authentication.credentials.authority.domain.AuthorityCode;
+import cube8540.oauth.authentication.credentials.AuthorityCode;
 import cube8540.validator.core.ValidationError;
 import cube8540.validator.core.ValidationRule;
 import org.springframework.security.core.Authentication;
