@@ -2,7 +2,6 @@ package cube8540.oauth.authentication.credentials.oauth.token.application;
 
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidClientException;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AccessTokenDetails;
-import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenExpiredException;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenNotFoundException;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenRepository;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedAccessToken;
@@ -27,6 +26,7 @@ import static cube8540.oauth.authentication.credentials.oauth.token.application.
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -69,12 +69,15 @@ class DefaultOAuth2AccessTokenDetailsServiceTest {
                     OAuth2AuthorizedAccessToken accessToken = mockAccessToken().configDefault().configExpired().build();
                     OAuth2AccessTokenRepository repository = mockAccessTokenRepository().registerAccessToken(accessToken).build();
                     this.service = new DefaultOAuth2AccessTokenDetailsService(repository, mockUserDetailsService().build());
+                    SecurityContextHolder.getContext().setAuthentication(mockAuthentication(RAW_CLIENT_ID));
                 }
 
                 @Test
-                @DisplayName("OAuth2AccessTokenExpiredException 이 발생해야 한다.")
-                void shouldThrowsOAuth2AccessTokenExpiredException() {
-                    assertThrows(OAuth2AccessTokenExpiredException.class, () -> service.readAccessToken(RAW_ACCESS_TOKEN_ID));
+                @DisplayName("만료 여부는 true로 반환 되어야 한다.")
+                void shouldExpiredOrNotReturnsTrue() {
+                    OAuth2AccessTokenDetails accessToken = service.readAccessToken(RAW_ACCESS_TOKEN_ID);
+
+                    assertTrue(accessToken.isExpired());
                 }
             }
 

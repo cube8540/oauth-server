@@ -16,6 +16,7 @@ import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.
 import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.TokenEndpointTestHelper.RAW_SCOPES;
 import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.TokenEndpointTestHelper.RAW_USERNAME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -56,6 +57,36 @@ class DefaultOAuth2AccessTokenIntrospectionConverterTest {
                 Assertions.assertEquals(RAW_USERNAME, result.get(OAuth2Utils.AccessTokenIntrospectionKey.USERNAME));
             }
         }
+
+        @Nested
+        @DisplayName("엑세스 토큰이 만료 되었을시")
+        class WhenAccessTokenIsExpired extends AccessTokenAssertSetup {
+            @Override
+            protected void configAccessToken(TokenEndpointTestHelper.MockAccessToken mockAccessToken) {
+                mockAccessToken.configExpired();
+            }
+
+            @Test
+            @DisplayName("active 속성은 false로 반환되어야 한다.")
+            void shouldActivePropertyIsFalse() {
+                Map<String, Object> result = converter.convertAccessToken(accessToken);
+
+                assertFalse(Boolean.parseBoolean(result.get(OAuth2Utils.AccessTokenIntrospectionKey.ACTIVE).toString()));
+            }
+        }
+
+        @Nested
+        @DisplayName("엑세스 토큰이 만료 되지 않았을시")
+        class WhenAccessTokenIsNotExpired extends AccessTokenAssertSetup {
+
+            @Test
+            @DisplayName("active 속성은 true로 반환되어야 한다.")
+            void shouldActivePropertyIsTrue() {
+                Map<String, Object> result = converter.convertAccessToken(accessToken);
+
+                assertTrue(Boolean.parseBoolean(result.get(OAuth2Utils.AccessTokenIntrospectionKey.ACTIVE).toString()));
+            }
+        }
     }
 
     private static abstract class AccessTokenAssertSetup {
@@ -73,14 +104,6 @@ class DefaultOAuth2AccessTokenIntrospectionConverterTest {
         }
 
         protected void configAccessToken(TokenEndpointTestHelper.MockAccessToken mockAccessToken) {}
-
-        @Test
-        @DisplayName("active 플래그는 true 로 설정되어야 한다.")
-        void shouldActiveFlagIsTrue() {
-            Map<String, Object> result = converter.convertAccessToken(accessToken);
-
-            assertTrue(Boolean.parseBoolean(result.get(OAuth2Utils.AccessTokenIntrospectionKey.ACTIVE).toString()));
-        }
 
         @Test
         @DisplayName("엑세스 토큰의 클라이언트 아이디를 반환해야 한다.")
