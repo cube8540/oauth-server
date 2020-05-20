@@ -107,6 +107,12 @@ class TokenEndpointTestHelper {
             when(token.getUsername()).thenReturn(RAW_USERNAME);
             when(token.getExpiration()).thenReturn(EXPIRATION);
             when(token.getScopes()).thenReturn(RAW_SCOPES);
+            when(token.isExpired()).thenReturn(false);
+            return this;
+        }
+
+        MockAccessToken configExpired() {
+            when(token.isExpired()).thenReturn(true);
             return this;
         }
 

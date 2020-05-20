@@ -12,7 +12,7 @@ public class DefaultOAuth2AccessTokenIntrospectionConverter implements OAuth2Acc
     public Map<String, Object> convertAccessToken(OAuth2AccessTokenDetails accessToken) {
         Map<String, Object> result = new HashMap<>();
 
-        result.put(OAuth2Utils.AccessTokenIntrospectionKey.ACTIVE, true);
+        result.put(OAuth2Utils.AccessTokenIntrospectionKey.ACTIVE, !accessToken.isExpired());
         result.put(OAuth2Utils.AccessTokenIntrospectionKey.CLIENT_ID, accessToken.getClientId());
         if (accessToken.getUsername() != null) {
             result.put(OAuth2Utils.AccessTokenIntrospectionKey.USERNAME, accessToken.getUsername());
