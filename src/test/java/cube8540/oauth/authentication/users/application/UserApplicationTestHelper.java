@@ -19,13 +19,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.security.Principal;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -56,227 +56,150 @@ class UserApplicationTestHelper {
         return authorityDetails;
     }
 
-    static MockUser mockUser() {
-        return new MockUser();
+    static UserRepository makeUserRepository(Username username, User user) {
+        UserRepository repository = mock(UserRepository.class);
+
+        when(repository.findByUsername(username)).thenReturn(Optional.ofNullable(user));
+        when(repository.countByUsername(username)).thenReturn(1L);
+        doAnswer(returnsFirstArg()).when(repository).save(isA(User.class));
+
+        return repository;
     }
 
-    static MockUser configDefaultMockUser() {
-        return mockUser().username().email()
-                .password();
+    static UserRepository makeCountingUserRepository(Username username, long count) {
+        UserRepository repository = mock(UserRepository.class);
+
+        when(repository.countByUsername(username)).thenReturn(count);
+
+        return repository;
     }
 
-    static MockPasswordEncoder mockPasswordEncoder() {
-        return new MockPasswordEncoder();
+    static UserRepository makeEmptyUserRepository() {
+        UserRepository repository = mock(UserRepository.class);
+
+        doAnswer(returnsFirstArg()).when(repository).save(isA(User.class));
+
+        return repository;
     }
 
-    static MockUserRepository mockUserRepository() {
-        return new MockUserRepository();
+    static BasicAuthorityDetailsService makeEmptyAuthorityDetailsService() {
+        return mock(BasicAuthorityDetailsService.class);
     }
 
-    static MockValidationRule<User> mockValidationRule() {
-        return new MockValidationRule<>();
+    static User makeDefaultUser() {
+        User user = mock(User.class);
+
+        when(user.getUsername()).thenReturn(USERNAME);
+        when(user.getEmail()).thenReturn(EMAIL);
+        when(user.getPassword()).thenReturn(PASSWORD);
+
+        return user;
     }
 
-    static MockUserValidationPolicy mockValidationPolicy() {
-        return new MockUserValidationPolicy();
+    static UserCredentialsKeyGenerator makeKeyGenerator() {
+        return mock(UserCredentialsKeyGenerator.class);
     }
 
-    static MockCredentialsKey mockCredentialsKey() {
-        return new MockCredentialsKey();
+    static BasicAuthorityDetailsService makeBasicAuthorityDetailsService(Collection<AuthorityDetails> authorities) {
+        BasicAuthorityDetailsService service = mock(BasicAuthorityDetailsService.class);
+
+        when(service.loadBasicAuthorities()).thenReturn(authorities);
+
+        return service;
     }
 
-    static UserCredentialsKeyGenerator mockKeyGenerator() {
-        UserCredentialsKeyGenerator generator = mock(UserCredentialsKeyGenerator.class);
-        when(generator.generateKey()).thenReturn(null);
-        return generator;
+    static PasswordEncoder makePasswordEncoder(String rawPassword, String encodedPassword) {
+        PasswordEncoder encoder = mock(PasswordEncoder.class);
+
+        when(encoder.encode(rawPassword)).thenReturn(encodedPassword);
+        when(encoder.matches(rawPassword, encodedPassword)).thenReturn(true);
+
+        return encoder;
     }
 
-    static Principal mockPrincipal(String username) {
+    static UserRegisterRequest makeUserRegisterRequest() {
+        return new UserRegisterRequest(RAW_USERNAME, RAW_EMAIL, PASSWORD);
+    }
+
+    static ChangePasswordRequest makeChangePasswordRequest() {
+        return new ChangePasswordRequest(PASSWORD, NEW_PASSWORD);
+    }
+
+    static ResetPasswordRequest makeResetPasswordRequest() {
+        return new ResetPasswordRequest(RAW_USERNAME, RAW_PASSWORD_CREDENTIALS_KEY, NEW_PASSWORD);
+    }
+
+    @SuppressWarnings("unchecked")
+    static UserValidationPolicy makeValidationPolicy() {
+        ValidationRule<User> usernameRule = mock(ValidationRule.class);
+        ValidationRule<User> passwordRule = mock(ValidationRule.class);
+        ValidationRule<User> emailRule = mock(ValidationRule.class);
+
+        UserValidationPolicy policy = mock(UserValidationPolicy.class);
+
+        when(usernameRule.isValid(isA(User.class))).thenReturn(true);
+        when(passwordRule.isValid(isA(User.class))).thenReturn(true);
+        when(emailRule.isValid(isA(User.class))).thenReturn(true);
+        when(policy.usernameRule()).thenReturn(usernameRule);
+        when(policy.passwordRule()).thenReturn(passwordRule);
+        when(policy.emailRule()).thenReturn(emailRule);
+
+        return policy;
+    }
+
+    static User makeNotCertifiedUser() {
+        User user = makeDefaultUser();
+
+        when(user.isCredentials()).thenReturn(false);
+        when(user.getAuthorities()).thenReturn(Collections.emptySet());
+
+        return user;
+    }
+
+    static User makeCertifiedUser() {
+        User user = makeDefaultUser();
+
+        when(user.isCredentials()).thenReturn(true);
+        when(user.getAuthorities()).thenReturn(new HashSet<>(AUTHORITIES));
+
+        return user;
+    }
+
+    static User makeExpiredPasswordCredentialsKeyUser() {
+        User user = makeDefaultUser();
+        UserCredentialsKey key = mock(UserCredentialsKey.class);
+
+        when(key.matches(RAW_PASSWORD_CREDENTIALS_KEY)).thenReturn(UserKeyMatchedResult.EXPIRED);
+        when(user.getPasswordCredentialsKey()).thenReturn(key);
+
+        return user;
+    }
+
+    static User makeNotMatchedPasswordCredentialsKeyUser() {
+        User user = makeDefaultUser();
+        UserCredentialsKey key = mock(UserCredentialsKey.class);
+
+        when(key.matches(RAW_PASSWORD_CREDENTIALS_KEY)).thenReturn(UserKeyMatchedResult.NOT_MATCHED);
+        when(user.getPasswordCredentialsKey()).thenReturn(key);
+
+        return user;
+    }
+
+    static User makeMatchedPasswordCredentialsKeyUser() {
+        User user = makeDefaultUser();
+        UserCredentialsKey key = mock(UserCredentialsKey.class);
+
+        when(key.matches(RAW_PASSWORD_CREDENTIALS_KEY)).thenReturn(UserKeyMatchedResult.MATCHED);
+        when(user.getPasswordCredentialsKey()).thenReturn(key);
+
+        return user;
+    }
+
+    static Principal makePrincipal(String username) {
         Principal principal = mock(Principal.class);
 
         when(principal.getName()).thenReturn(username);
         return principal;
-    }
-
-    static MockBasicAuthorityService mockBasicAuthorityService() {
-        return new MockBasicAuthorityService();
-    }
-
-    static class MockUser {
-        private User user;
-
-        private MockUser() {
-            this.user = mock(User.class);
-        }
-
-        MockUser username() {
-            when(user.getUsername()).thenReturn(UserApplicationTestHelper.USERNAME);
-            return this;
-        }
-
-        MockUser email() {
-            when(user.getEmail()).thenReturn(UserApplicationTestHelper.EMAIL);
-            return this;
-        }
-
-        MockUser password() {
-            when(user.getPassword()).thenReturn(UserApplicationTestHelper.PASSWORD);
-            return this;
-        }
-
-        MockUser certified() {
-            when(user.isCredentials()).thenReturn(true);
-            when(user.getAuthorities()).thenReturn(new HashSet<>(AUTHORITIES));
-            return this;
-        }
-
-        MockUser passwordCredentialsKey(UserCredentialsKey key) {
-            when(user.getPasswordCredentialsKey()).thenReturn(key);
-            return this;
-        }
-
-        User build() {
-            return user;
-        }
-    }
-
-    static class MockUserRepository {
-        private UserRepository repository;
-
-        private MockUserRepository() {
-            this.repository = mock(UserRepository.class);
-            doAnswer(returnsFirstArg()).when(repository).save(isA(User.class));
-        }
-
-        MockUserRepository emptyUser() {
-            when(repository.findByUsername(USERNAME)).thenReturn(Optional.empty());
-            return this;
-        }
-
-        MockUserRepository registerUser(User user) {
-            when(repository.findByUsername(USERNAME)).thenReturn(Optional.of(user));
-            return this;
-        }
-
-        MockUserRepository countUser(long count) {
-            when(repository.countByUsername(USERNAME)).thenReturn(count);
-            return this;
-        }
-
-        UserRepository build() {
-            return repository;
-        }
-    }
-
-    static class MockPasswordEncoder {
-        private PasswordEncoder encoder;
-
-        private MockPasswordEncoder() {
-            this.encoder = mock(PasswordEncoder.class);
-        }
-
-        MockPasswordEncoder encode() {
-            when(encoder.encode(PASSWORD)).thenReturn(ENCODED_PASSWORD);
-            return this;
-        }
-
-        PasswordEncoder build() {
-            return encoder;
-        }
-    }
-
-    static class MockCredentialsKey {
-        private UserCredentialsKey key;
-
-        private MockCredentialsKey() {
-            this.key = mock(UserCredentialsKey.class);
-        }
-
-        MockCredentialsKey key(String key) {
-            when(this.key.getKeyValue()).thenReturn(key);
-            return this;
-        }
-
-        MockCredentialsKey matches() {
-            when(this.key.matches(RAW_PASSWORD_CREDENTIALS_KEY)).thenReturn(UserKeyMatchedResult.MATCHED);
-            return this;
-        }
-
-        MockCredentialsKey expired() {
-            when(this.key.matches(RAW_PASSWORD_CREDENTIALS_KEY)).thenReturn(UserKeyMatchedResult.EXPIRED);
-            return this;
-        }
-
-        MockCredentialsKey mismatches() {
-            when(this.key.matches(RAW_PASSWORD_CREDENTIALS_KEY)).thenReturn(UserKeyMatchedResult.NOT_MATCHED);
-            return this;
-        }
-
-        UserCredentialsKey build() {
-            return key;
-        }
-    }
-
-    static class MockValidationRule<T> {
-        private ValidationRule<T> validationRule;
-
-        @SuppressWarnings("unchecked")
-        private MockValidationRule() {
-            this.validationRule = mock(ValidationRule.class);
-        }
-
-        MockValidationRule<T> configReturnsTrue() {
-            when(validationRule.isValid(any())).thenReturn(true);
-            return this;
-        }
-
-        ValidationRule<T> build() {
-            return validationRule;
-        }
-    }
-
-    static class MockUserValidationPolicy {
-        private UserValidationPolicy policy;
-
-        private MockUserValidationPolicy() {
-            this.policy = mock(UserValidationPolicy.class);
-        }
-
-        MockUserValidationPolicy username(ValidationRule<User> validationRule) {
-            when(policy.usernameRule()).thenReturn(validationRule);
-            return this;
-        }
-
-        MockUserValidationPolicy email(ValidationRule<User> validationRule) {
-            when(policy.emailRule()).thenReturn(validationRule);
-            return this;
-        }
-
-        MockUserValidationPolicy password(ValidationRule<User> validationRule) {
-            when(policy.passwordRule()).thenReturn(validationRule);
-            return this;
-        }
-
-        UserValidationPolicy build() {
-            return policy;
-        }
-    }
-
-    static class MockBasicAuthorityService {
-        private BasicAuthorityDetailsService service;
-
-        private MockBasicAuthorityService() {
-            this.service = mock(BasicAuthorityDetailsService.class);
-        }
-
-        MockBasicAuthorityService basicAuthority() {
-            when(service.loadBasicAuthorities()).thenReturn(BASIC_AUTHORITIES);
-            return this;
-        }
-
-        BasicAuthorityDetailsService build() {
-            return service;
-        }
     }
 
     static Set<GrantedAuthority> convertGrantAuthority(Collection<UserAuthority> authorities) {

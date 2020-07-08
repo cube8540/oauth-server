@@ -2,9 +2,7 @@ package cube8540.oauth.authentication.users.application;
 
 import cube8540.oauth.authentication.users.domain.User;
 import cube8540.oauth.authentication.users.domain.UserRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,6 +10,12 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.util.Set;
 
+import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.RAW_USERNAME;
+import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.USERNAME;
+import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.makeCertifiedUser;
+import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.makeEmptyUserRepository;
+import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.makeNotCertifiedUser;
+import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.makeUserRepository;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -20,83 +24,40 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("기본 유저 서비스 테스트")
 class DefaultUserServiceTest {
 
-    @Nested
-    @DisplayName("저장소의 유저를 로딩")
-    class WhenLoadingUser {
+    @Test
+    @DisplayName("저장소에 저장 되지 않은 유저 로딩")
+    void loadUserNotRegisteredInRepository() {
+        UserRepository repository = makeEmptyUserRepository();
 
-        @Nested
-        @DisplayName("저장소에 유저가 없을시")
-        class WhenNotRegisteredUserInRepository {
-            private DefaultUserService service;
+        DefaultUserService service = new DefaultUserService(repository);
 
-            @BeforeEach
-            void setup() {
-                UserRepository repository = UserApplicationTestHelper.mockUserRepository().emptyUser().build();
-                this.service = new DefaultUserService(repository);
-            }
+        assertThrows(UsernameNotFoundException.class, () -> service.loadUserByUsername(RAW_USERNAME));
+    }
 
-            @Test
-            @DisplayName("UsernameNotFoundException 이 발생해야 한다.")
-            void shouldThrowsUsernameNotFoundException() {
-                assertThrows(UsernameNotFoundException.class, () -> service.loadUserByUsername(UserApplicationTestHelper.RAW_USERNAME));
-            }
-        }
+    @Test
+    @DisplayName("인증 받지 못한 유저 로딩")
+    void loadNotCertifiedUser() {
+        User user = makeNotCertifiedUser();
+        UserRepository repository = makeUserRepository(USERNAME, user);
 
-        @Nested
-        @DisplayName("저장소에 유저가 있을시")
-        class WhenRegisteredUserInRepository {
+        DefaultUserService service = new DefaultUserService(repository);
 
-            @Nested
-            @DisplayName("등록된 유저가 인증을 받지 않은 상태일시")
-            class WhenRegisteredUserIsNotCertified {
-                private DefaultUserService service;
+        UserDetails result = service.loadUserByUsername(RAW_USERNAME);
+        assertFalse(result.isAccountNonLocked());
+    }
 
-                @BeforeEach
-                void setup() {
-                    User user = UserApplicationTestHelper.configDefaultMockUser().build();
-                    UserRepository repository = UserApplicationTestHelper.mockUserRepository().registerUser(user).build();
-                    this.service = new DefaultUserService(repository);
-                }
+    @Test
+    @DisplayName("인증된 유저 로딩")
+    void loadCertifiedUser() {
+        User user = makeCertifiedUser();
+        UserRepository repository = makeUserRepository(USERNAME, user);
 
-                @Test
-                @DisplayName("계정의 잠금된 설정으로 반환되어야 한다.")
-                void shouldAccountIsNotLocked() {
-                    UserDetails result = service.loadUserByUsername(UserApplicationTestHelper.RAW_USERNAME);
+        DefaultUserService service = new DefaultUserService(repository);
 
-                    assertFalse(result.isAccountNonLocked());
-                }
-            }
-
-            @Nested
-            @DisplayName("등록된 유저가 인증을 받은 상태일시")
-            class WhenRegisteredUserIsCertified {
-                private DefaultUserService service;
-
-                @BeforeEach
-                void setup() {
-                    User user = UserApplicationTestHelper.configDefaultMockUser().certified().build();
-                    UserRepository repository = UserApplicationTestHelper.mockUserRepository().registerUser(user).build();
-                    this.service = new DefaultUserService(repository);
-                }
-
-                @Test
-                @DisplayName("저장소에서 찾은 유저의 권한을 반환 해야 한다.")
-                void shouldReturnsGrantedAuthority() {
-                    UserDetails result = service.loadUserByUsername(UserApplicationTestHelper.RAW_USERNAME);
-
-                    Set<GrantedAuthority> expectedAuthorities = UserApplicationTestHelper.convertGrantAuthority(UserApplicationTestHelper.AUTHORITIES);
-                    assertEquals(expectedAuthorities, result.getAuthorities());
-                }
-
-                @Test
-                @DisplayName("계정의 잠금되지 않은 설정으로 반환되어야 한다.")
-                void shouldAccountIsNotLocked() {
-                    UserDetails result = service.loadUserByUsername(UserApplicationTestHelper.RAW_USERNAME);
-
-                    assertTrue(result.isAccountNonLocked());
-                }
-            }
-        }
+        UserDetails result = service.loadUserByUsername(RAW_USERNAME);
+        Set<GrantedAuthority> expectedAuthorities = UserApplicationTestHelper.convertGrantAuthority(UserApplicationTestHelper.AUTHORITIES);
+        assertTrue(result.isAccountNonLocked());
+        assertEquals(expectedAuthorities, result.getAuthorities());
     }
 
 }
