@@ -1,11 +1,14 @@
 package cube8540.oauth.authentication.users.domain;
 
+import cube8540.oauth.authentication.AuthenticationApplication;
 import cube8540.validator.core.ValidationError;
 import cube8540.validator.core.ValidationRule;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
 
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -38,114 +41,80 @@ class UserTestHelper {
     static final String RAW_AUTHORITY = "AUTHORITY";
     static final UserAuthority AUTHORITY = new UserAuthority(RAW_AUTHORITY);
 
-    static MockPasswordEncoder mockPasswordEncoder() {
-        return new MockPasswordEncoder();
+    static Clock makeDefaultClock() {
+        return Clock.fixed(NOW.toInstant(AuthenticationApplication.DEFAULT_ZONE_OFFSET), AuthenticationApplication.DEFAULT_TIME_ZONE.toZoneId());
     }
 
-    static MockCredentialsKey mockCredentialsKey() {
-        return new MockCredentialsKey();
+    static Clock makeExpiredClock() {
+        return Clock.fixed(NOT_EXPIRATION_DATETIME.toInstant(AuthenticationApplication.DEFAULT_ZONE_OFFSET), AuthenticationApplication.DEFAULT_TIME_ZONE.toZoneId());
     }
 
-    static UserCredentialsKeyGenerator mockKeyGenerator(UserCredentialsKey credentialsKey) {
+    @SuppressWarnings("unchecked")
+    static ValidationRule<User> makePassValidationRule(User user) {
+        ValidationRule<User> validationRule = mock(ValidationRule.class);
+
+        when(validationRule.isValid(user)).thenReturn(true);
+
+        return validationRule;
+    }
+
+    @SuppressWarnings("unchecked")
+    static ValidationRule<User> makeErrorValidationRule(User user, ValidationError error) {
+        ValidationRule<User> validationRule = mock(ValidationRule.class);
+
+        when(validationRule.isValid(user)).thenReturn(false);
+        when(validationRule.error()).thenReturn(error);
+
+        return validationRule;
+    }
+
+    static PasswordEncoder makePasswordEncoder(String rawPassword, String encodedPassword) {
+        PasswordEncoder encoder = mock(PasswordEncoder.class);
+
+        when(encoder.encode(rawPassword)).thenReturn(encodedPassword);
+        when(encoder.matches(rawPassword, encodedPassword)).thenReturn(true);
+
+        return encoder;
+    }
+
+    static PasswordEncoder makeMismatchesEncoder(String rawPassword, String encodedPassword) {
+        PasswordEncoder encoder = mock(PasswordEncoder.class);
+
+        when(encoder.matches(rawPassword, encodedPassword)).thenReturn(false);
+
+        return encoder;
+    }
+
+    static UserCredentialsKey makeMismatchedKey() {
+        UserCredentialsKey key = mock(UserCredentialsKey.class);
+
+        when(key.matches(anyString())).thenReturn(UserKeyMatchedResult.NOT_MATCHED);
+        return key;
+    }
+
+    static UserCredentialsKey makeExpiredKey() {
+        UserCredentialsKey key = mock(UserCredentialsKey.class);
+
+        when(key.matches(anyString())).thenReturn(UserKeyMatchedResult.EXPIRED);
+        return key;
+    }
+
+    static UserCredentialsKey makeCredentialsKey(String credentialsKey) {
+        UserCredentialsKey key = mock(UserCredentialsKey.class);
+
+        when(key.matches(credentialsKey)).thenReturn(UserKeyMatchedResult.MATCHED);
+        return key;
+    }
+
+    static UserCredentialsKeyGenerator makeKeyGenerator(UserCredentialsKey credentialsKey) {
         UserCredentialsKeyGenerator keyGenerator = mock(UserCredentialsKeyGenerator.class);
 
         when(keyGenerator.generateKey()).thenReturn(credentialsKey);
         return keyGenerator;
     }
 
-    static MockValidationRule<User> mockValidationRule() {
-        return new MockValidationRule<>();
-    }
-
-    static MockValidationPolicy mockValidationPolicy() {
+    static MockValidationPolicy makeValidationPolicy() {
         return new MockValidationPolicy();
-    }
-
-    static final class MockPasswordEncoder {
-        private PasswordEncoder encoder;
-
-        private MockPasswordEncoder() {
-            this.encoder = mock(PasswordEncoder.class);
-        }
-
-        MockPasswordEncoder encode() {
-            when(this.encoder.encode(PASSWORD)).thenReturn(ENCRYPTED_PASSWORD);
-            return this;
-        }
-
-        MockPasswordEncoder matches() {
-            when(this.encoder.matches(PASSWORD, PASSWORD)).thenReturn(true);
-            return this;
-        }
-
-        MockPasswordEncoder mismatches() {
-            when(this.encoder.matches(PASSWORD, PASSWORD)).thenReturn(false);
-            return this;
-        }
-
-        PasswordEncoder build() {
-            return encoder;
-        }
-    }
-
-    static final class MockCredentialsKey {
-        private UserCredentialsKey key;
-
-        private MockCredentialsKey() {
-            this.key = mock(UserCredentialsKey.class);
-        }
-
-        MockCredentialsKey key(String key) {
-            when(this.key.getKeyValue()).thenReturn(key);
-            return this;
-        }
-
-        MockCredentialsKey matches(String key) {
-            when(this.key.matches(key)).thenReturn(UserKeyMatchedResult.MATCHED);
-            return this;
-        }
-
-        MockCredentialsKey mismatches(String key) {
-            when(this.key.matches(key)).thenReturn(UserKeyMatchedResult.NOT_MATCHED);
-            return this;
-        }
-
-        MockCredentialsKey expired(String key) {
-            when(this.key.matches(key)).thenReturn(UserKeyMatchedResult.EXPIRED);
-            return this;
-        }
-
-        UserCredentialsKey build() {
-            return key;
-        }
-    }
-
-    static final class MockValidationRule<T> {
-        private ValidationRule<T> rule;
-
-        @SuppressWarnings("unchecked")
-        private MockValidationRule() {
-            this.rule = mock(ValidationRule.class);
-        }
-
-        MockValidationRule<T> configReturnTrue(T target) {
-            when(this.rule.isValid(target)).thenReturn(true);
-            return this;
-        }
-
-        MockValidationRule<T> configReturnFalse(T target) {
-            when(this.rule.isValid(target)).thenReturn(false);
-            return this;
-        }
-
-        MockValidationRule<T> validationError(ValidationError error) {
-            when(this.rule.error()).thenReturn(error);
-            return this;
-        }
-
-        ValidationRule<T> build() {
-            return rule;
-        }
     }
 
     static final class MockValidationPolicy {
