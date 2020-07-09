@@ -5,7 +5,6 @@ import cube8540.oauth.authentication.users.application.UserProfile;
 import cube8540.oauth.authentication.users.application.UserRegisterRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -33,27 +32,15 @@ class UserManagementAPIEndpointTest {
         this.endpoint = new UserManagementAPIEndpoint(service);
     }
 
-    @Nested
-    @DisplayName("새 유저 추가 엔드 포인트 테스트")
-    class RegisterNewUser {
+    @Test
+    @DisplayName("새 유저 추가")
+    void registerNewUser() {
+        UserRegisterRequest request = new UserRegisterRequest(USERNAME, EMAIL, PASSWORD);
+        UserProfile userProfile = new UserProfile(USERNAME, EMAIL, REGISTERED_DATE_TIME);
 
-        private UserRegisterRequest registerRequest;
+        when(service.registerUser(request)).thenReturn(userProfile);
 
-        @BeforeEach
-        void setup() {
-            this.registerRequest = new UserRegisterRequest(USERNAME, EMAIL, PASSWORD);
-
-            UserProfile userProfile = new UserProfile(USERNAME, EMAIL, REGISTERED_DATE_TIME);
-            when(service.registerUser(registerRequest)).thenReturn(userProfile);
-        }
-
-        @Test
-        @DisplayName("요청 받은 새 유저 정보를 등록해야 한다.")
-        void shouldRegisterNewUserByInputData() {
-            endpoint.registerUserAccounts(registerRequest);
-
-            verify(service, times(1)).registerUser(registerRequest);
-        }
+        endpoint.registerUserAccounts(request);
+        verify(service, times(1)).registerUser(request);
     }
-
 }
