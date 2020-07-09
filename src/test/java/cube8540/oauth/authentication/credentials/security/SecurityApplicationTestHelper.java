@@ -1,187 +1,95 @@
 package cube8540.oauth.authentication.credentials.security;
 
-import cube8540.oauth.authentication.credentials.resource.application.AccessibleAuthorityValue;
 import cube8540.oauth.authentication.credentials.resource.domain.AccessibleAuthority;
 import cube8540.oauth.authentication.credentials.resource.domain.ResourceMethod;
 import cube8540.oauth.authentication.credentials.resource.domain.SecuredResource;
 import cube8540.oauth.authentication.credentials.resource.domain.SecuredResourceId;
-import cube8540.oauth.authentication.credentials.resource.domain.SecuredResourceRepository;
-import cube8540.oauth.authentication.credentials.resource.domain.SecuredResourceValidationPolicy;
-import cube8540.validator.core.ValidationRule;
+import org.springframework.security.access.ConfigAttribute;
+import org.springframework.security.access.SecurityConfig;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 
+import javax.servlet.http.HttpServletRequest;
 import java.net.URI;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
-import static org.mockito.AdditionalAnswers.returnsFirstArg;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 class SecurityApplicationTestHelper {
+
+    static final String RESOURCE_1_ID = "RESOURCE_1";
+    static final String RESOURCE_2_ID = "RESOURCE_2";
+    static final String RESOURCE_3_ID = "RESOURCE_3";
+
+    static final URI RESOURCE_1_URI = URI.create("/resource-1/**");
+    static final URI RESOURCE_2_URI = URI.create("/resource-2/**");
+    static final URI RESOURCE_3_URI = URI.create("/resource-3/**");
+
+    static final ResourceMethod RESOURCE_1_METHOD = ResourceMethod.POST;
+    static final ResourceMethod RESOURCE_2_METHOD = ResourceMethod.PUT;
+    static final ResourceMethod RESOURCE_3_METHOD = ResourceMethod.ALL;
+
+    static final Set<AccessibleAuthority> AUTHORITIES_1 = new HashSet<>(Arrays.asList(
+            new AccessibleAuthority("AUTHORITY-1", AccessibleAuthority.AuthorityType.OAUTH2_SCOPE), new AccessibleAuthority("AUTHORITY-2", AccessibleAuthority.AuthorityType.AUTHORITY), new AccessibleAuthority("AUTHORITY-3", AccessibleAuthority.AuthorityType.OAUTH2_SCOPE)));
+    static final Set<AccessibleAuthority> AUTHORITIES_2 = new HashSet<>(Arrays.asList(
+            new AccessibleAuthority("AUTHORITY-1", AccessibleAuthority.AuthorityType.OAUTH2_SCOPE), new AccessibleAuthority("AUTHORITY-4", AccessibleAuthority.AuthorityType.AUTHORITY), new AccessibleAuthority("AUTHORITY-5", AccessibleAuthority.AuthorityType.OAUTH2_SCOPE)));
+    static final Set<AccessibleAuthority> AUTHORITIES_3 = new HashSet<>(Arrays.asList(
+            new AccessibleAuthority("AUTHORITY-5", AccessibleAuthority.AuthorityType.OAUTH2_SCOPE), new AccessibleAuthority("AUTHORITY-6", AccessibleAuthority.AuthorityType.AUTHORITY), new AccessibleAuthority("AUTHORITY-7", AccessibleAuthority.AuthorityType.OAUTH2_SCOPE)));
 
     static final String RAW_RESOURCE_ID = "RESOURCE-ID";
     static final SecuredResourceId RESOURCE_ID = new SecuredResourceId(RAW_RESOURCE_ID);
 
     static final String RAW_RESOURCE_URI = "/resource/**";
     static final URI RESOURCE_URI = URI.create(RAW_RESOURCE_URI);
-    static final String RAW_MODIFY_RESOURCE_URI = "/modify-resource/**";
-    static final URI MODIFY_RESOURCE_URI = URI.create(RAW_MODIFY_RESOURCE_URI);
 
-    static final List<String> RAW_AUTHORITIES = Arrays.asList("AUTHORITY-1", "AUTHORITY-2", "AUTHORITY-3");
-    static final List<AccessibleAuthorityValue> REQUEST_AUTHORITIES = RAW_AUTHORITIES.stream().map(auth -> new AccessibleAuthorityValue(auth, AccessibleAuthority.AuthorityType.OAUTH2_SCOPE)).collect(Collectors.toList());
-    static final Set<AccessibleAuthority> AUTHORITIES = RAW_AUTHORITIES.stream().map(auth -> new AccessibleAuthority(auth, AccessibleAuthority.AuthorityType.OAUTH2_SCOPE)).collect(Collectors.toSet());
-    static final List<String> RAW_REMOVE_AUTHORITIES = Arrays.asList("REMOVE-AUTHORITY-1", "REMOVE-AUTHORITY-2", "REMOVE-AUTHORITY-3");
-    static final List<String> RAW_ADD_AUTHORITIES = Arrays.asList("ADD-AUTHORITY-1", "ADD-AUTHORITY-2", "ADD-AUTHORITY-3");
-    static final List<AccessibleAuthorityValue> REMOVE_REQUEST_AUTHORITIES = RAW_REMOVE_AUTHORITIES.stream().map(auth -> new AccessibleAuthorityValue(auth, AccessibleAuthority.AuthorityType.OAUTH2_SCOPE)).collect(Collectors.toList());
-    static final List<AccessibleAuthority> REMOVE_AUTHORITIES = RAW_REMOVE_AUTHORITIES.stream().map(auth -> new AccessibleAuthority(auth, AccessibleAuthority.AuthorityType.OAUTH2_SCOPE)).collect(Collectors.toList());
-    static final List<AccessibleAuthorityValue> ADD_REQUEST_AUTHORITIES = RAW_ADD_AUTHORITIES.stream().map(auth -> new AccessibleAuthorityValue(auth, AccessibleAuthority.AuthorityType.OAUTH2_SCOPE)).collect(Collectors.toList());
-    static final List<AccessibleAuthority> ADD_AUTHORITIES = RAW_ADD_AUTHORITIES.stream().map(auth -> new AccessibleAuthority(auth, AccessibleAuthority.AuthorityType.OAUTH2_SCOPE)).collect(Collectors.toList());
+    static RequestMatcher makeMatcher(HttpServletRequest request, boolean accessible) {
+        RequestMatcher matcher = mock(RequestMatcher.class);
 
-    static MockResourceRepository mockResourceRepository() {
-        return new MockResourceRepository();
+        when(matcher.matches(request)).thenReturn(accessible);
+
+        return matcher;
     }
 
-    static MockSecuredResource mockSecuredResource() {
-        return new MockSecuredResource();
+    static Map<RequestMatcher, Collection<ConfigAttribute>> makeMetadata(HttpServletRequest request) {
+        Map<RequestMatcher, Collection<ConfigAttribute>> metadata = new HashMap<>();
+
+        metadata.put(makeMatcher(request, true), Arrays.asList(new SecurityConfig("TEST1"), new SecurityConfig("TEST2"), new SecurityConfig("TEST3")));
+        metadata.put(makeMatcher(request, false), Arrays.asList(new SecurityConfig("TEST3"), new SecurityConfig("TEST4"), new SecurityConfig("TEST5")));
+        metadata.put(makeMatcher(request, true), Arrays.asList(new SecurityConfig("TEST5"), new SecurityConfig("TEST6"), new SecurityConfig("TEST7")));
+
+        return metadata;
     }
 
-    static MockValidationRule<SecuredResource> mockResourceValidationRule() {
-        return new MockValidationRule<>();
+    static Set<ConfigAttribute> makeAllMetadata() {
+        return new HashSet<>(Arrays.asList(new SecurityConfig("TEST1"), new SecurityConfig("TEST2"), new SecurityConfig("TEST3"),
+                new SecurityConfig("TEST4"), new SecurityConfig("TEST5"), new SecurityConfig("TEST6"), new SecurityConfig("TEST7")));
     }
 
-    static MockResourceValidationPolicy mockResourceValidationPolicy() {
-        return new MockResourceValidationPolicy();
+    static Set<ConfigAttribute> makeAccessibleMetadata() {
+        return new HashSet<>(Arrays.asList(new SecurityConfig("TEST1"), new SecurityConfig("TEST2"), new SecurityConfig("TEST3"),
+                new SecurityConfig("TEST5"), new SecurityConfig("TEST6"), new SecurityConfig("TEST7")));
     }
 
-    final static class MockSecuredResource {
-        private SecuredResource resource;
-
-        private MockSecuredResource() {
-            this.resource = mock(SecuredResource.class);
-        }
-
-        MockSecuredResource resourceId() {
-            when(resource.getResourceId()).thenReturn(RESOURCE_ID);
-            return this;
-        }
-
-        MockSecuredResource resourceId(String resourceId) {
-            when(resource.getResourceId()).thenReturn(new SecuredResourceId(resourceId));
-            return this;
-        }
-
-        MockSecuredResource resource() {
-            when(resource.getResource()).thenReturn(RESOURCE_URI);
-            return this;
-        }
-
-        MockSecuredResource resource(URI resource) {
-            when(this.resource.getResource()).thenReturn(resource);
-            return this;
-        }
-
-        MockSecuredResource method() {
-            when(resource.getMethod()).thenReturn(ResourceMethod.ALL);
-            return this;
-        }
-
-        MockSecuredResource method(ResourceMethod method) {
-            when(resource.getMethod()).thenReturn(method);
-            return this;
-        }
-
-        MockSecuredResource authorities(Set<AccessibleAuthority> authorities) {
-            when(resource.getAuthorities()).thenReturn(authorities);
-            return this;
-        }
-
-        SecuredResource build() {
-            return resource;
-        }
+    static List<SecuredResource> makeSecuredResources() {
+        return Arrays.asList(makeSecuredResource(RESOURCE_1_ID, RESOURCE_1_URI, RESOURCE_1_METHOD, AUTHORITIES_1),
+                makeSecuredResource(RESOURCE_2_ID, RESOURCE_2_URI, RESOURCE_2_METHOD, AUTHORITIES_2),
+                makeSecuredResource(RESOURCE_3_ID, RESOURCE_3_URI, RESOURCE_3_METHOD, AUTHORITIES_3));
     }
 
+    static SecuredResource makeSecuredResource(String resourceId, URI resourceUri, ResourceMethod resourceMethod, Set<AccessibleAuthority> authorities) {
+        SecuredResource resource = mock(SecuredResource.class);
 
-    final static class MockResourceRepository {
-        private SecuredResourceRepository repository;
+        when(resource.getResourceId()).thenReturn(new SecuredResourceId(resourceId));
+        when(resource.getResource()).thenReturn(resourceUri);
+        when(resource.getMethod()).thenReturn(resourceMethod);
+        when(resource.getAuthorities()).thenReturn(authorities);
 
-        private MockResourceRepository() {
-            this.repository = mock(SecuredResourceRepository.class);
-
-            doAnswer(returnsFirstArg()).when(repository).save(isA(SecuredResource.class));
-        }
-
-        MockResourceRepository emptyResource() {
-            when(repository.findById(RESOURCE_ID)).thenReturn(Optional.empty());
-            when(repository.countByResourceId(RESOURCE_ID)).thenReturn(0L);
-            return this;
-        }
-
-        MockResourceRepository registerResource(SecuredResource resource) {
-            when(repository.findById(RESOURCE_ID)).thenReturn(Optional.of(resource));
-            when(repository.countByResourceId(RESOURCE_ID)).thenReturn(1L);
-            return this;
-        }
-
-        SecuredResourceRepository build() {
-            return repository;
-        }
+        return resource;
     }
-
-    static final class MockValidationRule<T> {
-        private ValidationRule<T> rule;
-
-        @SuppressWarnings("unchecked")
-        private MockValidationRule() {
-            this.rule = mock(ValidationRule.class);
-        }
-
-        MockValidationRule<T> configReturnTrue() {
-            when(this.rule.isValid(any())).thenReturn(true);
-            return this;
-        }
-
-
-        ValidationRule<T> build() {
-            return rule;
-        }
-    }
-
-    static final class MockResourceValidationPolicy {
-        private SecuredResourceValidationPolicy policy;
-
-        private MockResourceValidationPolicy() {
-            this.policy = mock(SecuredResourceValidationPolicy.class);
-        }
-
-        MockResourceValidationPolicy resourceIdRule(ValidationRule<SecuredResource> validationRule) {
-            when(this.policy.resourceIdRule()).thenReturn(validationRule);
-            return this;
-        }
-
-        MockResourceValidationPolicy resourceRule(ValidationRule<SecuredResource> validationRule) {
-            when(this.policy.resourceRule()).thenReturn(validationRule);
-            return this;
-        }
-
-        MockResourceValidationPolicy methodRule(ValidationRule<SecuredResource> validationRule) {
-            when(this.policy.methodRule()).thenReturn(validationRule);
-            return this;
-        }
-
-        MockResourceValidationPolicy authoritiesRule(ValidationRule<SecuredResource> validationRule) {
-            when(this.policy.scopeAuthoritiesRule()).thenReturn(validationRule);
-            return this;
-        }
-
-        SecuredResourceValidationPolicy build() {
-            return policy;
-        }
-    }
-
 }
