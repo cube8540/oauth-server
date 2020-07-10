@@ -12,7 +12,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 
 import java.net.URI;
-import java.time.Duration;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -35,7 +34,6 @@ public class OAuth2ClientApplicationTestHelper {
     static final String SECRET = "SECRET";
     static final String ENCODING_SECRET = "ENCODING-SECRET";
     static final String MODIFY_SECRET = "MODIFY-SECRET";
-    static final String ENCODING_MODIFY_SECRET = "ENCODING-MODIFY-SECRET";
 
     static final String CLIENT_NAME = "CLIENT-NAME";
     static final String MODIFY_CLIENT_NAME = "MODIFY-CLIENT-NAME";
@@ -64,179 +62,83 @@ public class OAuth2ClientApplicationTestHelper {
     static final String RAW_OWNER = "owner@email.com";
     static final ClientOwner OWNER = new ClientOwner(RAW_OWNER);
 
-    static final Duration ACCESS_TOKEN_VALIDITY = Duration.ofMinutes(10);
-    static final Duration REFRESH_TOKEN_VALIDITY = Duration.ofHours(12);
+    static OAuth2ClientRepository makeEmptyClientRepository() {
+        OAuth2ClientRepository repository = mock(OAuth2ClientRepository.class);
 
-    static MockOAuth2Client mockOAuth2Client() {
-        return new MockOAuth2Client();
+        doAnswer(returnsFirstArg()).when(repository).save(isA(OAuth2Client.class));
+
+        return repository;
     }
 
-    static MockOAuth2ClientRepository mockOAuth2ClientRepository() {
-        return new MockOAuth2ClientRepository();
+    static OAuth2ClientRepository makeClientRepository(OAuth2ClientId clientId, OAuth2Client client) {
+        OAuth2ClientRepository repository = mock(OAuth2ClientRepository.class);
+
+        when(repository.countByClientId(clientId)).thenReturn(1L);
+        when(repository.findByClientId(clientId)).thenReturn(Optional.of(client));
+        doAnswer(returnsFirstArg()).when(repository).save(isA(OAuth2Client.class));
+
+        return repository;
     }
 
-    static MockPasswordEncoder mockPasswordEncoder() {
-        return new MockPasswordEncoder();
+    static OAuth2Client makeDefaultClient() {
+        OAuth2Client client = mock(OAuth2Client.class);
+
+        when(client.getClientId()).thenReturn(CLIENT_ID);
+        when(client.getSecret()).thenReturn(ENCODING_SECRET);
+        when(client.getClientName()).thenReturn(CLIENT_NAME);
+        when(client.getRedirectUris()).thenReturn(REDIRECT_URIS);
+        when(client.getGrantTypes()).thenReturn(GRANT_TYPES);
+        when(client.getScopes()).thenReturn(SCOPES);
+        when(client.getOwner()).thenReturn(OWNER);
+
+        return client;
     }
 
-    static MocKValidationRule<OAuth2Client> mocKValidationRule() {
-        return new MocKValidationRule<>();
+    static PasswordEncoder makeEncoder(String rawSecret, String encodingSecret) {
+        PasswordEncoder encoder = mock(PasswordEncoder.class);
+
+        when(encoder.encode(rawSecret)).thenReturn(encodingSecret);
+        when(encoder.matches(rawSecret, encodingSecret)).thenReturn(true);
+
+        return encoder;
     }
 
-    static MockValidationPolicy mockValidationPolicy() {
-        return new MockValidationPolicy();
+    @SuppressWarnings("unchecked")
+    static OAuth2ClientValidatePolicy makeValidatePolicy() {
+        OAuth2ClientValidatePolicy policy = mock(OAuth2ClientValidatePolicy.class);
+        ValidationRule<OAuth2Client> clientIdRule = mock(ValidationRule.class);
+        ValidationRule<OAuth2Client> secretRule = mock(ValidationRule.class);
+        ValidationRule<OAuth2Client> ownerRule = mock(ValidationRule.class);
+        ValidationRule<OAuth2Client> clientNameRule = mock(ValidationRule.class);
+        ValidationRule<OAuth2Client> grantTypeRule = mock(ValidationRule.class);
+        ValidationRule<OAuth2Client> scopeRule = mock(ValidationRule.class);
+
+        when(clientIdRule.isValid(any())).thenReturn(true);
+        when(secretRule.isValid(any())).thenReturn(true);
+        when(ownerRule.isValid(any())).thenReturn(true);
+        when(clientNameRule.isValid(any())).thenReturn(true);
+        when(grantTypeRule.isValid(any())).thenReturn(true);
+        when(scopeRule.isValid(any())).thenReturn(true);
+
+        when(policy.clientIdRule()).thenReturn(clientIdRule);
+        when(policy.secretRule()).thenReturn(secretRule);
+        when(policy.ownerRule()).thenReturn(ownerRule);
+        when(policy.clientNameRule()).thenReturn(clientNameRule);
+        when(policy.grantTypeRule()).thenReturn(grantTypeRule);
+        when(policy.scopeRule()).thenReturn(scopeRule);
+
+        return policy;
     }
 
-    static Authentication mockAuthentication() {
+    static Authentication makeAuthentication() {
         Authentication authentication = mock(Authentication.class);
         when(authentication.getName()).thenReturn(RAW_OWNER);
         return authentication;
     }
 
-    static Authentication mockDifferentAuthentication() {
+    static Authentication makeDifferentAuthentication() {
         Authentication authentication = mock(Authentication.class);
         when(authentication.getName()).thenReturn("DIFFERENT OWNER");
         return authentication;
-    }
-
-    static class MockOAuth2Client {
-        private OAuth2Client client;
-
-        private MockOAuth2Client() {
-            this.client = mock(OAuth2Client.class);
-        }
-
-        MockOAuth2Client configDefault() {
-            when(client.getClientId()).thenReturn(CLIENT_ID);
-            when(client.getSecret()).thenReturn(ENCODING_SECRET);
-            when(client.getClientName()).thenReturn(CLIENT_NAME);
-            when(client.getRedirectUris()).thenReturn(REDIRECT_URIS);
-            when(client.getGrantTypes()).thenReturn(GRANT_TYPES);
-            when(client.getScopes()).thenReturn(SCOPES);
-            when(client.getOwner()).thenReturn(OWNER);
-
-            return this;
-        }
-
-        OAuth2Client build() {
-            return client;
-        }
-    }
-
-    static class MockOAuth2ClientRepository {
-        private OAuth2ClientRepository repository;
-
-        private MockOAuth2ClientRepository() {
-            this.repository = mock(OAuth2ClientRepository.class);
-            doAnswer(returnsFirstArg()).when(repository).save(isA(OAuth2Client.class));
-        }
-
-        MockOAuth2ClientRepository registerClient(OAuth2Client client) {
-            when(repository.findByClientId(CLIENT_ID)).thenReturn(Optional.of(client));
-            when(repository.countByClientId(CLIENT_ID)).thenReturn(1L);
-            return this;
-        }
-
-        MockOAuth2ClientRepository emptyClient() {
-            when(repository.findByClientId(CLIENT_ID)).thenReturn(Optional.empty());
-            when(repository.countByClientId(CLIENT_ID)).thenReturn(0L);
-            return this;
-        }
-
-        OAuth2ClientRepository build() {
-            return repository;
-        }
-    }
-
-    static class MockPasswordEncoder {
-        private PasswordEncoder encoder;
-
-        private MockPasswordEncoder() {
-            this.encoder = mock(PasswordEncoder.class);
-        }
-
-        MockPasswordEncoder encode(String raw, String encoded) {
-            when(encoder.encode(raw)).thenReturn(encoded);
-            return this;
-        }
-
-        MockPasswordEncoder matches(String raw, String encoded) {
-            when(encoder.matches(raw, encoded)).thenReturn(true);
-            return this;
-        }
-
-        MockPasswordEncoder mismatches(String raw, String encoded) {
-            when(encoder.matches(raw, encoded)).thenReturn(false);
-            return this;
-        }
-
-        PasswordEncoder build() {
-            return encoder;
-        }
-    }
-
-    static class MockValidationPolicy {
-        private OAuth2ClientValidatePolicy policy;
-
-        private MockValidationPolicy() {
-            this.policy = mock(OAuth2ClientValidatePolicy.class);
-        }
-
-        MockValidationPolicy clientIdRule(ValidationRule<OAuth2Client> clientIdRule) {
-            when(policy.clientIdRule()).thenReturn(clientIdRule);
-            return this;
-        }
-
-        MockValidationPolicy secretRule(ValidationRule<OAuth2Client> secretRule) {
-            when(policy.secretRule()).thenReturn(secretRule);
-            return this;
-        }
-
-        MockValidationPolicy clientNameRule(ValidationRule<OAuth2Client> clientNameRule) {
-            when(policy.clientNameRule()).thenReturn(clientNameRule);
-            return this;
-        }
-
-        MockValidationPolicy grantTypeRule(ValidationRule<OAuth2Client> grantTypeRule) {
-            when(policy.grantTypeRule()).thenReturn(grantTypeRule);
-            return this;
-        }
-
-        MockValidationPolicy scopeRule(ValidationRule<OAuth2Client> scopeRule) {
-            when(policy.scopeRule()).thenReturn(scopeRule);
-            return this;
-        }
-
-        MockValidationPolicy ownerRule(ValidationRule<OAuth2Client> ownerRule) {
-            when(policy.ownerRule()).thenReturn(ownerRule);
-            return this;
-        }
-
-        OAuth2ClientValidatePolicy build() {
-            return policy;
-        }
-    }
-
-    static class MocKValidationRule<T> {
-        private ValidationRule<T> validationRule;
-
-        @SuppressWarnings("unchecked")
-        private MocKValidationRule() {
-            this.validationRule = mock(ValidationRule.class);
-        }
-
-        MocKValidationRule<T> configValidationTrue() {
-            when(validationRule.isValid(any())).thenReturn(true);
-            return this;
-        }
-
-        MocKValidationRule<T> configValidationFalse() {
-            when(validationRule.isValid(any())).thenReturn(false);
-            return this;
-        }
-
-        ValidationRule<T> build() {
-            return validationRule;
-        }
     }
 }
