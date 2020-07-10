@@ -28,40 +28,27 @@ class SecuredResourceTestHelper {
     static final ResourceMethod RESOURCE_METHOD = ResourceMethod.ALL;
     static final ResourceMethod CHANGE_RESOURCE_METHOD = ResourceMethod.POST;
 
-    static MockResourceValidationPolicy mockResourceValidationPolicy() {
+    @SuppressWarnings("unchecked")
+    static ValidationRule<SecuredResource> makePassValidation(SecuredResource resource) {
+        ValidationRule<SecuredResource> validation = mock(ValidationRule.class);
+
+        when(validation.isValid(resource)).thenReturn(true);
+
+        return validation;
+    }
+
+    @SuppressWarnings("unchecked")
+    static ValidationRule<SecuredResource> makeErrorValidation(SecuredResource resource, ValidationError error) {
+        ValidationRule<SecuredResource> validation = mock(ValidationRule.class);
+
+        when(validation.isValid(resource)).thenReturn(false);
+        when(validation.error()).thenReturn(error);
+
+        return validation;
+    }
+
+    static MockResourceValidationPolicy makeResourceValidationPolicy() {
         return new MockResourceValidationPolicy();
-    }
-
-    static MockValidationRule<SecuredResource> mockResourceValidationRule() {
-        return new MockValidationRule<>();
-    }
-
-    static final class MockValidationRule<T> {
-        private ValidationRule<T> rule;
-
-        @SuppressWarnings("unchecked")
-        private MockValidationRule() {
-            this.rule = mock(ValidationRule.class);
-        }
-
-        MockValidationRule<T> configReturnTrue(T target) {
-            when(this.rule.isValid(target)).thenReturn(true);
-            return this;
-        }
-
-        MockValidationRule<T> configReturnFalse(T target) {
-            when(this.rule.isValid(target)).thenReturn(false);
-            return this;
-        }
-
-        MockValidationRule<T> validationError(ValidationError error) {
-            when(this.rule.error()).thenReturn(error);
-            return this;
-        }
-
-        ValidationRule<T> build() {
-            return rule;
-        }
     }
 
     static final class MockResourceValidationPolicy {

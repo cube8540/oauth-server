@@ -5,9 +5,7 @@ import cube8540.oauth.authentication.credentials.AuthorityDetailsService;
 import cube8540.oauth.authentication.credentials.resource.domain.AccessibleAuthority;
 import cube8540.oauth.authentication.credentials.resource.domain.SecuredResource;
 import cube8540.validator.core.ValidationError;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -44,157 +42,90 @@ class SecuredResourceAuthoritiesRuleTest {
         assertEquals(excepted, rule.error());
     }
 
-    @Nested
-    @DisplayName("부여된 권한 검색 서비스가 null 일시")
-    class WhenAuthoritiesReadServiceIsNull {
-        private SecuredResource securedResource;
-        private SecuredResourceAuthoritiesRule rule;
+    @Test
+    @DisplayName("부여된 권한 검색 서비스가 null 일때 유효성 검사")
+    void validationWhenAuthoritiesReadServiceIsNull() {
+        SecuredResource resource = mock(SecuredResource.class);
+        SecuredResourceAuthoritiesRule rule = new SecuredResourceAuthoritiesRule(AccessibleAuthority.AuthorityType.OAUTH2_SCOPE);
 
-        @BeforeEach
-        void setup() {
-            this.securedResource = mock(SecuredResource.class);
-            this.rule = new SecuredResourceAuthoritiesRule(AccessibleAuthority.AuthorityType.OAUTH2_SCOPE);
+        when(resource.getAuthorities()).thenReturn(ROLE_AUTHORITIES);
 
-            when(securedResource.getAuthorities()).thenReturn(ROLE_AUTHORITIES);
-        }
-
-        @Test
-        @DisplayName("유효성 검사 결과는 false 가 반환되어야 한다.")
-        void shouldReturnsFalse() {
-            assertFalse(rule.isValid(securedResource));
-        }
+        assertFalse(rule.isValid(resource));
     }
 
-    @Nested
-    @DisplayName("보호 자원의 권한이 null 일시")
-    class WhenSecuredResourceAuthoritiesIsNull {
-        private SecuredResource securedResource;
-        private SecuredResourceAuthoritiesRule rule;
+    @Test
+    @DisplayName("보호 자원의 권한이 null 일때 유효성 검사")
+    void validationWhenSecuredResourceAuthoritiesIsNull() {
+        SecuredResource resource = mock(SecuredResource.class);
+        AuthorityDetailsService service = mock(AuthorityDetailsService.class);
+        SecuredResourceAuthoritiesRule rule = new SecuredResourceAuthoritiesRule(AccessibleAuthority.AuthorityType.OAUTH2_SCOPE);
 
-        @BeforeEach
-        void setup() {
-            this.securedResource = mock(SecuredResource.class);
-            this.rule = new SecuredResourceAuthoritiesRule(AccessibleAuthority.AuthorityType.OAUTH2_SCOPE);
+        when(resource.getAuthorities()).thenReturn(null);
+        rule.setScopeDetailsService(service);
 
-            when(securedResource.getAuthorities()).thenReturn(null);
-        }
-
-        @Test
-        @DisplayName("유효성 검사 결과는 true 가 반환되어야 한다.")
-        void shouldReturnTrue() {
-            assertTrue(rule.isValid(securedResource));
-        }
+        assertTrue(rule.isValid(resource));
     }
 
-    @Nested
-    @DisplayName("보호 자원의 권한이 비어 있을시")
-    class WhenSecuredResourceAuthoritiesIsEmpty {
-        private SecuredResource securedResource;
-        private SecuredResourceAuthoritiesRule rule;
+    @Test
+    @DisplayName("보호 자원의 권한이 비어 있을시 유효성 검사")
+    void validationWhenSecuredResourceAuthoritiesIsEmpty() {
+        SecuredResource resource = mock(SecuredResource.class);
+        AuthorityDetailsService service = mock(AuthorityDetailsService.class);
+        SecuredResourceAuthoritiesRule rule = new SecuredResourceAuthoritiesRule(AccessibleAuthority.AuthorityType.OAUTH2_SCOPE);
 
-        @BeforeEach
-        void setup() {
-            this.securedResource = mock(SecuredResource.class);
-            this.rule = new SecuredResourceAuthoritiesRule(AccessibleAuthority.AuthorityType.OAUTH2_SCOPE);
+        when(resource.getAuthorities()).thenReturn(Collections.emptySet());
+        rule.setScopeDetailsService(service);
 
-            when(securedResource.getAuthorities()).thenReturn(Collections.emptySet());
-        }
-
-        @Test
-        @DisplayName("유효성 검사 결과는 true 가 반환되어야 한다.")
-        void shouldReturnTrue() {
-            assertTrue(rule.isValid(securedResource));
-        }
+        assertTrue(rule.isValid(resource));
     }
 
-    @Nested
-    @DisplayName("보호 자원의 접근 권한중 검색 되지 않는 권한이 있을시")
-    class WhenAuthoritiesContainsNotSearchedAuthority {
-        private SecuredResource securedResource;
-        private SecuredResourceAuthoritiesRule rule;
+    @Test
+    @DisplayName("보호 자원의 접근 권한 중 검색 되지 않는 권한이 있을시 유효성 검사")
+    void validationWhenContainsUnsearchableAuthority() {
+        SecuredResource resource = mock(SecuredResource.class);
+        AuthorityDetailsService service = mock(AuthorityDetailsService.class);
+        List<AuthorityDetails> authorities = Arrays.asList(makeAuthority("AUTHORITY-1"), makeAuthority("AUTHORITY-2"), makeAuthority("AUTHORITY-3"));
+        SecuredResourceAuthoritiesRule rule = new SecuredResourceAuthoritiesRule(AccessibleAuthority.AuthorityType.AUTHORITY);
 
-        @BeforeEach
-        void setup() {
-            this.securedResource = mock(SecuredResource.class);
-            this.rule = new SecuredResourceAuthoritiesRule(AccessibleAuthority.AuthorityType.AUTHORITY);
+        when(resource.getAuthorities()).thenReturn(ROLE_AUTHORITIES);
+        when(service.loadAuthorityByAuthorityCodes(RAW_ROLE_AUTHORITIES)).thenReturn(authorities);
+        rule.setScopeDetailsService(service);
 
-            AuthorityDetailsService service = mock(AuthorityDetailsService.class);
-            List<AuthorityDetails> authorities = Arrays.asList(mocking("AUTHORITY-1"), mocking("AUTHORITY-2"), mocking("AUTHORITY-3"));
-
-            when(securedResource.getAuthorities()).thenReturn(ROLE_AUTHORITIES);
-            when(service.loadAuthorityByAuthorityCodes(RAW_ROLE_AUTHORITIES)).thenReturn(authorities);
-
-            this.rule.setScopeDetailsService(service);
-        }
-
-        @Test
-        @DisplayName("유효성 검사 결과는 false 가 반환 되어야 한다.")
-        void shouldReturnsFalse() {
-            assertFalse(rule.isValid(securedResource));
-        }
+        assertFalse(rule.isValid(resource));
     }
 
-    @Nested
-    @DisplayName("보호 자원의 접근 권한이 모두 검색 될 시")
-    class WhenAuthoritiesAllCanSearched {
+    @Test
+    @DisplayName("검사할 권한 타입이 AUTHORITY 일때 유효성 검사")
+    void validationWhenAuthoritiesTypeIsAuthority() {
+        SecuredResource resource = mock(SecuredResource.class);
+        AuthorityDetailsService service = mock(AuthorityDetailsService.class);
+        List<AuthorityDetails> authorities = RAW_ROLE_AUTHORITIES.stream().map(this::makeAuthority).collect(Collectors.toList());
+        SecuredResourceAuthoritiesRule rule = new SecuredResourceAuthoritiesRule(AccessibleAuthority.AuthorityType.AUTHORITY);
 
-        @Nested
-        @DisplayName("검사할 권한 타입이 AUTHORITY 일시")
-        class WhenAuthoritiesTypeIsAuthority {
-            private SecuredResource securedResource;
-            private SecuredResourceAuthoritiesRule rule;
+        when(resource.getAuthorities()).thenReturn(COMPLEX_AUTHORITIES);
+        when(service.loadAuthorityByAuthorityCodes(RAW_ROLE_AUTHORITIES)).thenReturn(authorities);
+        rule.setScopeDetailsService(service);
 
-            @BeforeEach
-            void setup() {
-                this.securedResource = mock(SecuredResource.class);
-                this.rule = new SecuredResourceAuthoritiesRule(AccessibleAuthority.AuthorityType.AUTHORITY);
+        assertTrue(rule.isValid(resource));
+    }
 
-                AuthorityDetailsService service = mock(AuthorityDetailsService.class);
-                List<AuthorityDetails> authorities = RAW_ROLE_AUTHORITIES.stream().map(SecuredResourceAuthoritiesRuleTest.this::mocking).collect(Collectors.toList());
+    @Test
+    @DisplayName("검사할 권한 타입이 OAUTH2_SCOPE 일때 유효성 검사")
+    void validationWhenAuthoritiesTypeIsOAuth2Scope() {
+        SecuredResource resource = mock(SecuredResource.class);
+        AuthorityDetailsService service = mock(AuthorityDetailsService.class);
+        List<AuthorityDetails> authorities = RAW_SCOPE_AUTHORITIES.stream().map(this::makeAuthority).collect(Collectors.toList());
+        SecuredResourceAuthoritiesRule rule = new SecuredResourceAuthoritiesRule(AccessibleAuthority.AuthorityType.OAUTH2_SCOPE);
 
-                when(securedResource.getAuthorities()).thenReturn(COMPLEX_AUTHORITIES);
-                when(service.loadAuthorityByAuthorityCodes(RAW_ROLE_AUTHORITIES)).thenReturn(authorities);
+        when(resource.getAuthorities()).thenReturn(COMPLEX_AUTHORITIES);
+        when(service.loadAuthorityByAuthorityCodes(RAW_SCOPE_AUTHORITIES)).thenReturn(authorities);
+        rule.setScopeDetailsService(service);
 
-                this.rule.setScopeDetailsService(service);
-            }
-
-            @Test
-            @DisplayName("유효성 검사 결과는 true 가 반환 되어야 한다.")
-            void shouldReturnTrue() {
-                assertTrue(rule.isValid(securedResource));
-            }
-        }
-
-        @Nested
-        @DisplayName("검사할 권한 타입이 OATUH2_SCOPE 일시")
-        class WhenAuthoritiesTypeIsOAuth2Scope {
-            private SecuredResource securedResource;
-            private SecuredResourceAuthoritiesRule rule;
-
-            @BeforeEach
-            void setup() {
-                this.securedResource = mock(SecuredResource.class);
-                this.rule = new SecuredResourceAuthoritiesRule(AccessibleAuthority.AuthorityType.OAUTH2_SCOPE);
-
-                AuthorityDetailsService service = mock(AuthorityDetailsService.class);
-                List<AuthorityDetails> authorities = RAW_SCOPE_AUTHORITIES.stream().map(SecuredResourceAuthoritiesRuleTest.this::mocking).collect(Collectors.toList());
-
-                when(securedResource.getAuthorities()).thenReturn(COMPLEX_AUTHORITIES);
-                when(service.loadAuthorityByAuthorityCodes(RAW_SCOPE_AUTHORITIES)).thenReturn(authorities);
-
-                this.rule.setScopeDetailsService(service);
-            }
-
-            @Test
-            @DisplayName("유효성 검사 결과는 true 가 반환 되어야 한다.")
-            void shouldReturnTrue() {
-                assertTrue(rule.isValid(securedResource));
-            }
-        }
+        assertTrue(rule.isValid(resource));
     }
 
 
-    private AuthorityDetails mocking(String code) {
+    private AuthorityDetails makeAuthority(String code) {
         AuthorityDetails authority = mock(AuthorityDetails.class);
 
         when(authority.getCode()).thenReturn(code);

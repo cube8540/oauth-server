@@ -6,10 +6,8 @@ import cube8540.oauth.authentication.credentials.resource.domain.exception.Resou
 import cube8540.oauth.authentication.error.message.ErrorCodes;
 import cube8540.oauth.authentication.error.message.ErrorMessage;
 import cube8540.validator.core.ValidationError;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -31,144 +30,51 @@ class SecuredResourceExceptionTranslatorTest {
         this.translator = new SecuredResourceExceptionTranslator();
     }
 
-    @Nested
+    @Test
     @DisplayName("ResourceNotFoundException 변환")
-    class TranslateResourceNotFoundException {
-        private ResourceNotFoundException exception;
+    void translateResourceNotFoundException() {
+        ResourceNotFoundException e = ResourceNotFoundException.instance(DESCRIPTION);
 
-        @BeforeEach
-        void setup() {
-            this.exception = ResourceNotFoundException.instance(DESCRIPTION);
-        }
-
-        @Test
-        @DisplayName("상태 코드는 404 이어야 한다.")
-        void shouldHttpStatusCodeIs404() {
-            ResponseEntity<ErrorMessage<Object>> response = translator.translate(exception);
-
-            assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        }
-
-        @Test
-        @DisplayName("에러 코드는 NOT_FOUND 이어야 한다.")
-        void shouldErrorCodeIsNotFound() {
-            ResponseEntity<ErrorMessage<Object>> response = translator.translate(exception);
-
-            assertNotNull(response.getBody());
-            assertEquals(ErrorCodes.NOT_FOUND, response.getBody().getErrorCode());
-        }
-
-        @Test
-        @DisplayName("에러에 대한 정보가 포함되어야 한다.")
-        void shouldIncludeErrorDescription() {
-            ResponseEntity<ErrorMessage<Object>> response = translator.translate(exception);
-
-            assertNotNull(response.getBody());
-            assertEquals(DESCRIPTION, response.getBody().getDescription());
-        }
+        ResponseEntity<ErrorMessage<Object>> response = translator.translate(e);
+        assertNotNull(response.getBody());
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertEquals(ErrorCodes.NOT_FOUND, response.getBody().getErrorCode());
+        assertEquals(DESCRIPTION, response.getBody().getDescription());
     }
 
-    @Nested
+    @Test
     @DisplayName("ResourceRegisterException 변환")
-    class TranslateResourceRegisterException {
-        private ResourceRegisterException exception;
+    void translateResourceRegisterException() {
+        ResourceRegisterException e = ResourceRegisterException.existsIdentifier(DESCRIPTION);
 
-        @BeforeEach
-        void setup() {
-            this.exception = ResourceRegisterException.existsIdentifier(DESCRIPTION);
-        }
-
-        @Test
-        @DisplayName("상태 코드는 400 이어야 한다.")
-        void shouldHttpStatusCodeIs400() {
-            ResponseEntity<ErrorMessage<Object>> response = translator.translate(exception);
-
-            assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        }
-
-        @Test
-        @DisplayName("에러 코드는 예외에 저장되어 있는 에러 코드 이어야 한다.")
-        void shouldErrorCodeIsNotFound() {
-            ResponseEntity<ErrorMessage<Object>> response = translator.translate(exception);
-
-            assertNotNull(response.getBody());
-            assertEquals(exception.getCode(), response.getBody().getErrorCode());
-        }
-
-        @Test
-        @DisplayName("에러에 대한 정보가 포함되어야 한다.")
-        void shouldIncludeErrorDescription() {
-            ResponseEntity<ErrorMessage<Object>> response = translator.translate(exception);
-
-            assertNotNull(response.getBody());
-            assertEquals(exception.getDescription(), response.getBody().getDescription());
-        }
+        ResponseEntity<ErrorMessage<Object>> response = translator.translate(e);
+        assertNotNull(response.getBody());
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(ErrorCodes.EXISTS_IDENTIFIER, response.getBody().getErrorCode());
+        assertEquals(DESCRIPTION, response.getBody().getDescription());
     }
 
-    @Nested
+    @Test
     @DisplayName("ResourceInvalidException 변환")
-    class TranslateResourceInvalidException {
-        private ResourceInvalidException exception;
-        private List<ValidationError> errors;
+    void translateResourceInvalidException() {
+        List<ValidationError> errors = Arrays.asList(new ValidationError("p", "v"), new ValidationError("p", "v1"), new ValidationError("p", "v2"));
+        ResourceInvalidException e = ResourceInvalidException.instance(errors);
 
-        @BeforeEach
-        void setup() {
-            this.errors = Arrays.asList(new ValidationError("p", "v"), new ValidationError("p", "v1"), new ValidationError("p", "v2"));
-            this.exception = ResourceInvalidException.instance(errors);
-        }
-
-        @Test
-        @DisplayName("상태 코드는 400 이어야 한다.")
-        void shouldHttpStatusCodeIs400() {
-            ResponseEntity<ErrorMessage<Object>> response = translator.translate(exception);
-
-            assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        }
-
-        @Test
-        @DisplayName("에러 코드는 예외에 저장되어 있는 에러 코드 이어야 한다.")
-        void shouldErrorCodeIsNotFound() {
-            ResponseEntity<ErrorMessage<Object>> response = translator.translate(exception);
-
-            assertNotNull(response.getBody());
-            assertEquals(exception.getCode(), response.getBody().getErrorCode());
-        }
-
-        @Test
-        @DisplayName("잘못된 속성에 대한 정보가 포함되어야 한다.")
-        void shouldIncludeInvalidPropertyInfo() {
-            ResponseEntity<ErrorMessage<Object>> response = translator.translate(exception);
-
-            assertNotNull(response.getBody());
-            Assertions.assertArrayEquals(errors.toArray(), (Object[]) response.getBody().getDescription());
-        }
+        ResponseEntity<ErrorMessage<Object>> response = translator.translate(e);
+        assertNotNull(response.getBody());
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(ErrorCodes.INVALID_REQUEST, response.getBody().getErrorCode());
+        assertArrayEquals(errors.toArray(), (Object[]) response.getBody().getDescription());
     }
 
-    @Nested
-    @DisplayName("기타 예외 상황일시")
-    class TranslateException {
-        private Exception exception;
+    @Test
+    @DisplayName("기타 예외 상황 일시")
+    void translateException() {
+        Exception exception = new Exception();
 
-        @BeforeEach
-        void setup() {
-            this.exception = new Exception();
-        }
-
-        @Test
-        @DisplayName("HTTP 상태 코드는 500 이어야 한다.")
-        void shouldHttpStatusCodeIs500() {
-            ResponseEntity<ErrorMessage<Object>> response = translator.translate(exception);
-
-            assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-        }
-
-        @Test
-        @DisplayName("에러 코드는 SERVER_ERROR 이어야 한다.")
-        void shouldErrorCodeIsServerError() {
-            ResponseEntity<ErrorMessage<Object>> response = translator.translate(exception);
-
-            assertNotNull(response.getBody());
-            assertEquals(ErrorCodes.SERVER_ERROR, response.getBody().getErrorCode());
-        }
+        ResponseEntity<ErrorMessage<Object>> response = translator.translate(exception);
+        assertNotNull(response.getBody());
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        assertEquals(ErrorCodes.SERVER_ERROR, response.getBody().getErrorCode());
     }
 }
