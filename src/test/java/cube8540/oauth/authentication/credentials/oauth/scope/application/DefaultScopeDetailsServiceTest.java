@@ -197,6 +197,9 @@ class DefaultScopeDetailsServiceTest {
         InOrder inOrder = inOrder(rule, repository);
         inOrder.verify(rule, times(1)).isValid(scopeCaptor.capture());
         inOrder.verify(repository, times(1)).save(scopeCaptor.capture());
-        assertEquals(scopeCaptor.getAllValues().get(0), scopeCaptor.getAllValues().get(1));
+
+        for (OAuth2Scope scope : scopeCaptor.getAllValues()) {
+            assertEquals(scopeCaptor.getAllValues().get(0), scope);
+        }
     }
 }

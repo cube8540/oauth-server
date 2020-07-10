@@ -121,6 +121,9 @@ class DefaultUserManagementServiceTest {
         InOrder inOrder = inOrder(rule, repository);
         inOrder.verify(rule, times(1)).isValid(argumentCaptor.capture());
         inOrder.verify(repository, times(1)).save(argumentCaptor.capture());
-        assertEquals(argumentCaptor.getAllValues().get(0), argumentCaptor.getAllValues().get(1));
+
+        for (User user : argumentCaptor.getAllValues()) {
+            assertEquals(argumentCaptor.getAllValues().get(0), user);
+        }
     }
 }
