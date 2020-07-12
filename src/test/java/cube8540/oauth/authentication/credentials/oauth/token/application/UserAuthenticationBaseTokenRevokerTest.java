@@ -5,18 +5,19 @@ import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2Access
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedAccessToken;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.exception.TokenAccessDeniedException;
 import cube8540.oauth.authentication.error.message.ErrorCodes;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.ACCESS_TOKEN_ID;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.RAW_ACCESS_TOKEN_ID;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.RAW_DIFFERENT_USERNAME;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.RAW_USERNAME;
-import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.mockAccessToken;
-import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.mockAccessTokenRepository;
-import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.mockAuthentication;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeAccessToken;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeAccessTokenRepository;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeAuthentication;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeEmptyAccessTokenRepository;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.times;
@@ -25,79 +26,40 @@ import static org.mockito.Mockito.verify;
 @DisplayName("유저 인증 기준 토큰 삭제 서비스")
 class UserAuthenticationBaseTokenRevokerTest {
 
-    @Nested
-    @DisplayName("토큰 삭제")
-    class TokenRevoke {
+    @Test
+    @DisplayName("저장소에 등록 되어 있지 않은 토큰 삭제")
+    void revokeNotRegisteredTokenInRepository() {
+        OAuth2AccessTokenRepository repository = makeEmptyAccessTokenRepository();
+        UserAuthenticationBaseTokenRevoker revoker = new UserAuthenticationBaseTokenRevoker(repository);
 
-        @Nested
-        @DisplayName("삭제하려는 토큰이 저장소에 등록되어 있지 않을시")
-        class RevokeTokenIsNotRegisteredInRepository {
-            private UserAuthenticationBaseTokenRevoker revoker;
+        assertThrows(OAuth2AccessTokenNotFoundException.class, () -> revoker.revoke(RAW_ACCESS_TOKEN_ID));
+    }
 
-            @BeforeEach
-            void setup() {
-                this.revoker = new UserAuthenticationBaseTokenRevoker(mockAccessTokenRepository().emptyAccessToken().build());
-            }
+    @Test
+    @DisplayName("요청자와 토큰의 주인이 다를시")
+    void whenRequesterAndOwnerOfTokenAreDifferent() {
+        OAuth2AuthorizedAccessToken accessToken = makeAccessToken();
+        OAuth2AccessTokenRepository repository = makeAccessTokenRepository(ACCESS_TOKEN_ID, accessToken);
+        Authentication authentication = makeAuthentication(RAW_DIFFERENT_USERNAME);
+        UserAuthenticationBaseTokenRevoker revoker = new UserAuthenticationBaseTokenRevoker(repository);
 
-            @Test
-            @DisplayName("OAuth2AccessTokenNotFoundException 이 발생해야 한다.")
-            void shouldThrowsAccessTokenNotfoundException() {
-                assertThrows(OAuth2AccessTokenNotFoundException.class, () -> revoker.revoke(RAW_ACCESS_TOKEN_ID));
-            }
-        }
+        SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        @Nested
-        @DisplayName("삭제하려는 토큰이 저장소에 등록되어 있을시")
-        class RevokeTokenIsRegisteredInRepository {
+        String errorCode = assertThrows(TokenAccessDeniedException.class, () -> revoker.revoke(RAW_ACCESS_TOKEN_ID)).getCode();
+        assertEquals(ErrorCodes.ACCESS_DENIED, errorCode);
+    }
 
-            @Nested
-            @DisplayName("검색된 엑세스 토큰의 소유자와 요청한 유저의 정보가 일치하지 않을시")
-            class WhenDifferentSearchedAccessTokensUsernameAndRequestingUsername {
-                private UserAuthenticationBaseTokenRevoker revoker;
+    @Test
+    @DisplayName("액세스 토큰 삭제")
+    void revokeAccessToken() {
+        OAuth2AuthorizedAccessToken accessToken = makeAccessToken();
+        OAuth2AccessTokenRepository repository = makeAccessTokenRepository(ACCESS_TOKEN_ID, accessToken);
+        Authentication authentication = makeAuthentication(RAW_USERNAME);
+        UserAuthenticationBaseTokenRevoker revoker = new UserAuthenticationBaseTokenRevoker(repository);
 
-                @BeforeEach
-                void setup() {
-                    OAuth2AuthorizedAccessToken token = mockAccessToken().configDefault().build();
-                    OAuth2AccessTokenRepository repository = mockAccessTokenRepository().registerAccessToken(token).build();
+        SecurityContextHolder.getContext().setAuthentication(authentication);
 
-                    this.revoker = new UserAuthenticationBaseTokenRevoker(repository);
-
-                    SecurityContextHolder.getContext().setAuthentication(mockAuthentication(RAW_DIFFERENT_USERNAME));
-                }
-
-                @Test
-                @DisplayName("AuthenticationDeniedException 이 발생해야 하며 에러 코드는 ACCESS_DENIED 이어야 한다.")
-                void shouldThrowsAuthenticationDeniedException() {
-                    String errorCode = assertThrows(TokenAccessDeniedException.class, () -> revoker.revoke(RAW_ACCESS_TOKEN_ID))
-                            .getCode();
-                    assertEquals(ErrorCodes.ACCESS_DENIED, errorCode);
-                }
-            }
-
-            @Nested
-            @DisplayName("검색된 엑세스 토큰의 소유자와 요청한 유저의 정보가 일치할시")
-            class WhenSameSearchedAccessTokenUserAndRequestingUser {
-                private OAuth2AuthorizedAccessToken token;
-                private OAuth2AccessTokenRepository repository;
-                private UserAuthenticationBaseTokenRevoker revoker;
-
-                @BeforeEach
-                void setup() {
-                    this.token = mockAccessToken().configDefault().build();
-                    this.repository = mockAccessTokenRepository().registerAccessToken(token).build();
-                    this.revoker = new UserAuthenticationBaseTokenRevoker(repository);
-
-                    SecurityContextHolder.getContext().setAuthentication(mockAuthentication(RAW_USERNAME));
-                }
-
-                @Test
-                @DisplayName("저장소의 토큰을 삭제해야 한다.")
-                void shouldRemoveToken() {
-                    revoker.revoke(RAW_ACCESS_TOKEN_ID);
-
-                    verify(repository, times(1)).delete(token);
-                }
-            }
-        }
+        revoker.revoke(RAW_ACCESS_TOKEN_ID);
+        verify(repository, times(1)).delete(accessToken);
     }
 }
