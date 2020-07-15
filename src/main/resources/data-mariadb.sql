@@ -1,14 +1,6 @@
 -- insert default user
 insert into user(username, email, password, registered_at, last_updated_at, is_credentials) select 'admin', 'admin', '$2a$10$uTSfWKXF20lwumttjUbxteWVJBedSEQkYxC6qJJbEVUYjzvM6q7Q2', current_timestamp, current_timestamp, true where not exists (select initialize_datetime from initialize);
 
--- insert default role
-insert into role(code, description, basic) select 'ROLE_ADMIN', 'Admin Role', false where not exists (select initialize_datetime from initialize);
-insert into role(code, description, basic) select 'ROLE_USER', 'Default User Role', true where not exists (select initialize_datetime from initialize);
-
--- insert user default role
-insert into user_authority(username, authority_code) select 'admin', 'ROLE_ADMIN' where not exists (select initialize_datetime from initialize);
-insert into user_authority(username, authority_code) select 'admin', 'ROLE_USER' where not exists (select initialize_datetime from initialize);
-
 -- insert default client
 insert into oauth2_clients(client_id, client_secret, client_name, access_token_validity, refresh_token_validity, oauth2_client_owner) select 'oauth-client', '$2a$10$IKIfJYgEf7s5fAdpDFLmIu7.nEIFFgqDRRbfptstuHNav6kVdvFxK', 'client-name', 600000000000, 7200000000000, 'admin' where not exists (select initialize_datetime from initialize);
 insert into oauth2_client_grant_type(client_id, grant_type) select 'oauth-client', 'authorization_code' where not exists (select initialize_datetime from initialize);
@@ -73,29 +65,22 @@ insert into secured_resource(resource_id, method, resource) select 'USER-PASSWOR
 insert into secured_resource(resource_id, method, resource) select 'USER-ME-API', 'GET', '/api/accounts/me' where not exists (select initialize_datetime from initialize);
 
 -- connect security resource and scope
-insert into authority_accessible_resources(authority, resource_id, authority_type) select 'access.oauth.token', 'TOKEN-READ-API', 'OAUTH2_SCOPE' where not exists (select initialize_datetime from initialize);
-insert into authority_accessible_resources(authority, resource_id, authority_type) select 'access.oauth.client', 'OAUTH2-CLIENT-READ-API', 'OAUTH2_SCOPE' where not exists (select initialize_datetime from initialize);
-insert into authority_accessible_resources(authority, resource_id, authority_type) select 'access.oauth.client', 'OAUTH2-CLIENT-REGISTER-API', 'OAUTH2_SCOPE' where not exists (select initialize_datetime from initialize);
-insert into authority_accessible_resources(authority, resource_id, authority_type) select 'access.oauth.client', 'OAUTH2-CLIENT-MODIFY-API', 'OAUTH2_SCOPE' where not exists (select initialize_datetime from initialize);
-insert into authority_accessible_resources(authority, resource_id, authority_type) select 'access.oauth.client', 'OAUTH2-CLIENT-REMOVE-API', 'OAUTH2_SCOPE' where not exists (select initialize_datetime from initialize);
+insert into authority_accessible_resources(authority, resource_id) select 'access.oauth.token', 'TOKEN-READ-API' where not exists (select initialize_datetime from initialize);
+insert into authority_accessible_resources(authority, resource_id) select 'access.oauth.client', 'OAUTH2-CLIENT-READ-API' where not exists (select initialize_datetime from initialize);
+insert into authority_accessible_resources(authority, resource_id) select 'access.oauth.client', 'OAUTH2-CLIENT-REGISTER-API' where not exists (select initialize_datetime from initialize);
+insert into authority_accessible_resources(authority, resource_id) select 'access.oauth.client', 'OAUTH2-CLIENT-MODIFY-API' where not exists (select initialize_datetime from initialize);
+insert into authority_accessible_resources(authority, resource_id) select 'access.oauth.client', 'OAUTH2-CLIENT-REMOVE-API' where not exists (select initialize_datetime from initialize);
 
-insert into authority_accessible_resources(authority, resource_id, authority_type) select 'access.oauth.scope', 'OAUTH2-SCOPE-READ-API', 'OAUTH2_SCOPE' where not exists (select initialize_datetime from initialize);
-insert into authority_accessible_resources(authority, resource_id, authority_type) select 'management.oauth', 'OAUTH2-SCOPE-REGISTER-API', 'OAUTH2_SCOPE' where not exists (select initialize_datetime from initialize);
-insert into authority_accessible_resources(authority, resource_id, authority_type) select 'management.oauth', 'OAUTH2-SCOPE-MODIFY-API', 'OAUTH2_SCOPE' where not exists (select initialize_datetime from initialize);
-insert into authority_accessible_resources(authority, resource_id, authority_type) select 'management.oauth', 'OAUTH2-SCOPE-REMOVE-API', 'OAUTH2_SCOPE' where not exists (select initialize_datetime from initialize);
-insert into authority_accessible_resources(authority, resource_id, authority_type) select 'management.server', 'AUTHORITIES-API', 'OAUTH2_SCOPE' where not exists (select initialize_datetime from initialize);
+insert into authority_accessible_resources(authority, resource_id) select 'access.oauth.scope', 'OAUTH2-SCOPE-READ-API' where not exists (select initialize_datetime from initialize);
+insert into authority_accessible_resources(authority, resource_id) select 'management.oauth', 'OAUTH2-SCOPE-REGISTER-API' where not exists (select initialize_datetime from initialize);
+insert into authority_accessible_resources(authority, resource_id) select 'management.oauth', 'OAUTH2-SCOPE-MODIFY-API' where not exists (select initialize_datetime from initialize);
+insert into authority_accessible_resources(authority, resource_id) select 'management.oauth', 'OAUTH2-SCOPE-REMOVE-API' where not exists (select initialize_datetime from initialize);
+insert into authority_accessible_resources(authority, resource_id) select 'management.server', 'AUTHORITIES-API' where not exists (select initialize_datetime from initialize);
 
-insert into authority_accessible_resources(authority, resource_id, authority_type) select 'ROLE_ADMIN', 'OAUTH2-SCOPE-REGISTER-API', 'AUTHORITY' where not exists (select initialize_datetime from initialize);
-insert into authority_accessible_resources(authority, resource_id, authority_type) select 'ROLE_ADMIN', 'OAUTH2-SCOPE-MODIFY-API', 'AUTHORITY' where not exists (select initialize_datetime from initialize);
-insert into authority_accessible_resources(authority, resource_id, authority_type) select 'ROLE_ADMIN', 'OAUTH2-SCOPE-REMOVE-API', 'AUTHORITY' where not exists (select initialize_datetime from initialize);
-insert into authority_accessible_resources(authority, resource_id, authority_type) select 'ROLE_ADMIN', 'AUTHORITIES-API', 'AUTHORITY' where not exists (select initialize_datetime from initialize);
+insert into authority_accessible_resources(authority, resource_id) select 'management.server', 'SECURED-RESOURCE-API' where not exists (select initialize_datetime from initialize);
 
-insert into authority_accessible_resources(authority, resource_id, authority_type) select 'management.server', 'SECURED-RESOURCE-API', 'OAUTH2_SCOPE' where not exists (select initialize_datetime from initialize);
-
-insert into authority_accessible_resources(authority, resource_id, authority_type) select 'ROLE_ADMIN', 'SECURED-RESOURCE-API', 'AUTHORITY' where not exists (select initialize_datetime from initialize);
-
-insert into authority_accessible_resources(authority, resource_id, authority_type) select 'modify.user.attribute', 'USER-PASSWORD-CHANGE-API', 'OAUTH2_SCOPE' where not exists (select initialize_datetime from initialize);
-insert into authority_accessible_resources(authority, resource_id, authority_type) select 'access.user.attribute', 'USER-ME-API', 'OAUTH2_SCOPE' where not exists (select initialize_datetime from initialize);
+insert into authority_accessible_resources(authority, resource_id) select 'modify.user.attribute', 'USER-PASSWORD-CHANGE-API' where not exists (select initialize_datetime from initialize);
+insert into authority_accessible_resources(authority, resource_id) select 'access.user.attribute', 'USER-ME-API' where not exists (select initialize_datetime from initialize);
 
 
 insert into initialize select current_timestamp where not exists (select * from initialize);

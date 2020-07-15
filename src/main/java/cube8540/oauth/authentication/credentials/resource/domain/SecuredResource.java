@@ -63,17 +63,17 @@ public class SecuredResource extends AbstractAggregateRoot<SecuredResource> {
         registerSecuredResourceChangedEvent();
     }
 
-    public void addAuthority(String code, AccessibleAuthority.AuthorityType authorityType) {
+    public void addAuthority(String code) {
         if (this.authorities == null) {
             this.authorities = new HashSet<>();
         }
-        this.authorities.add(new AccessibleAuthority(code, authorityType));
+        this.authorities.add(new AccessibleAuthority(code));
 
         registerSecuredResourceChangedEvent();
     }
 
-    public void removeAuthority(String code, AccessibleAuthority.AuthorityType authorityType) {
-        Optional.ofNullable(authorities).ifPresent(auth -> auth.remove(new AccessibleAuthority(code, authorityType)));
+    public void removeAuthority(String code) {
+        Optional.ofNullable(authorities).ifPresent(auth -> auth.remove(new AccessibleAuthority(code)));
 
         registerSecuredResourceChangedEvent();
     }
@@ -83,7 +83,6 @@ public class SecuredResource extends AbstractAggregateRoot<SecuredResource> {
                 .registerRule(policy.resourceRule())
                 .registerRule(policy.methodRule())
                 .registerRule(policy.scopeAuthoritiesRule())
-                .registerRule(policy.roleAuthoritiesRule())
                 .getResult().hasErrorThrows(ResourceInvalidException::instance);
     }
 

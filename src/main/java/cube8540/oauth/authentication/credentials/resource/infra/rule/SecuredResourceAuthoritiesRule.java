@@ -18,19 +18,17 @@ public class SecuredResourceAuthoritiesRule implements ValidationRule<SecuredRes
 
     private final String property;
     private final String message;
-    private final AccessibleAuthority.AuthorityType authorityType;
 
     @Setter
     private AuthorityDetailsService scopeDetailsService;
 
-    public SecuredResourceAuthoritiesRule(AccessibleAuthority.AuthorityType authorityType) {
-        this(DEFAULT_PROPERTY, DEFAULT_MESSAGE, authorityType);
+    public SecuredResourceAuthoritiesRule() {
+        this(DEFAULT_PROPERTY, DEFAULT_MESSAGE);
     }
 
-    public SecuredResourceAuthoritiesRule(String property, String message, AccessibleAuthority.AuthorityType authorityType) {
+    public SecuredResourceAuthoritiesRule(String property, String message) {
         this.property = property;
         this.message = message;
-        this.authorityType = authorityType;
     }
 
     @Override
@@ -47,7 +45,6 @@ public class SecuredResourceAuthoritiesRule implements ValidationRule<SecuredRes
             return false;
         }
         Collection<String> targetScopes = target.getAuthorities().stream()
-                .filter(auth -> auth.getAuthorityType().equals(this.authorityType))
                 .map(AccessibleAuthority::getAuthority).collect(Collectors.toSet());
 
         return scopeDetailsService.loadAuthorityByAuthorityCodes(targetScopes).stream()

@@ -6,7 +6,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static cube8540.oauth.authentication.credentials.resource.domain.SecuredResourceTestHelper.ACCESSIBLE_AUTHORITY;
-import static cube8540.oauth.authentication.credentials.resource.domain.SecuredResourceTestHelper.AUTHORITY_TYPE;
 import static cube8540.oauth.authentication.credentials.resource.domain.SecuredResourceTestHelper.CHANGE_RESOURCE;
 import static cube8540.oauth.authentication.credentials.resource.domain.SecuredResourceTestHelper.CHANGE_RESOURCE_METHOD;
 import static cube8540.oauth.authentication.credentials.resource.domain.SecuredResourceTestHelper.ERROR_MESSAGE;
@@ -41,7 +40,7 @@ class SecuredResourceTest {
     void addAuthority() {
         SecuredResource resource = new SecuredResource(RESOURCE_ID, RESOURCE, RESOURCE_METHOD);
 
-        resource.addAuthority(RAW_AUTHORITY_CODE, AUTHORITY_TYPE);
+        resource.addAuthority(RAW_AUTHORITY_CODE);
         assertTrue(resource.getAuthorities().contains(ACCESSIBLE_AUTHORITY));
     }
 
@@ -49,9 +48,9 @@ class SecuredResourceTest {
     @DisplayName("접근 권한 삭제")
     void removeAuthority() {
         SecuredResource resource = new SecuredResource(RESOURCE_ID, RESOURCE, RESOURCE_METHOD);
-        resource.addAuthority(RAW_AUTHORITY_CODE, AUTHORITY_TYPE);
+        resource.addAuthority(RAW_AUTHORITY_CODE);
 
-        resource.removeAuthority(RAW_AUTHORITY_CODE, AUTHORITY_TYPE);
+        resource.removeAuthority(RAW_AUTHORITY_CODE);
         assertFalse(resource.getAuthorities().contains(ACCESSIBLE_AUTHORITY));
     }
 
@@ -63,8 +62,7 @@ class SecuredResourceTest {
         SecuredResourceValidationPolicy policy = makeResourceValidationPolicy().resourceIdRule(makeErrorValidation(resource, error))
                 .resourceRule(makePassValidation(resource))
                 .methodRule(makePassValidation(resource))
-                .scopeAuthoritiesRule(makePassValidation(resource))
-                .roleAuthoritiesRule(makePassValidation(resource)).build();
+                .scopeAuthoritiesRule(makePassValidation(resource)).build();
 
         ResourceInvalidException exception = assertThrows(ResourceInvalidException.class, () -> resource.validation(policy));
         assertTrue(exception.getErrors().contains(error));
@@ -78,8 +76,7 @@ class SecuredResourceTest {
         SecuredResourceValidationPolicy policy = makeResourceValidationPolicy().resourceIdRule(makePassValidation(resource))
                 .resourceRule(makeErrorValidation(resource, error))
                 .methodRule(makePassValidation(resource))
-                .scopeAuthoritiesRule(makePassValidation(resource))
-                .roleAuthoritiesRule(makePassValidation(resource)).build();
+                .scopeAuthoritiesRule(makePassValidation(resource)).build();
 
         ResourceInvalidException exception = assertThrows(ResourceInvalidException.class, () -> resource.validation(policy));
         assertTrue(exception.getErrors().contains(error));
@@ -93,8 +90,7 @@ class SecuredResourceTest {
         SecuredResourceValidationPolicy policy = makeResourceValidationPolicy().resourceIdRule(makePassValidation(resource))
                 .resourceRule(makePassValidation(resource))
                 .methodRule(makeErrorValidation(resource, error))
-                .scopeAuthoritiesRule(makePassValidation(resource))
-                .roleAuthoritiesRule(makePassValidation(resource)).build();
+                .scopeAuthoritiesRule(makePassValidation(resource)).build();
 
         ResourceInvalidException exception = assertThrows(ResourceInvalidException.class, () -> resource.validation(policy));
         assertTrue(exception.getErrors().contains(error));
@@ -108,23 +104,7 @@ class SecuredResourceTest {
         SecuredResourceValidationPolicy policy = makeResourceValidationPolicy().resourceIdRule(makePassValidation(resource))
                 .resourceRule(makePassValidation(resource))
                 .methodRule(makePassValidation(resource))
-                .scopeAuthoritiesRule(makeErrorValidation(resource, error))
-                .roleAuthoritiesRule(makePassValidation(resource)).build();
-
-        ResourceInvalidException exception = assertThrows(ResourceInvalidException.class, () -> resource.validation(policy));
-        assertTrue(exception.getErrors().contains(error));
-    }
-
-    @Test
-    @DisplayName("허용 되지 않은 접근 권한 일때 유효성 검사")
-    void validationWhenNotAllowedAuthorities() {
-        SecuredResource resource = new SecuredResource(RESOURCE_ID, RESOURCE, RESOURCE_METHOD);
-        ValidationError error = new ValidationError(ERROR_PROPERTY, ERROR_MESSAGE);
-        SecuredResourceValidationPolicy policy = makeResourceValidationPolicy().resourceIdRule(makePassValidation(resource))
-                .resourceRule(makePassValidation(resource))
-                .methodRule(makePassValidation(resource))
-                .scopeAuthoritiesRule(makePassValidation(resource))
-                .roleAuthoritiesRule(makeErrorValidation(resource, error)).build();
+                .scopeAuthoritiesRule(makeErrorValidation(resource, error)).build();
 
         ResourceInvalidException exception = assertThrows(ResourceInvalidException.class, () -> resource.validation(policy));
         assertTrue(exception.getErrors().contains(error));

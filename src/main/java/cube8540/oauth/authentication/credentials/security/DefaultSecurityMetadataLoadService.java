@@ -44,12 +44,8 @@ public class DefaultSecurityMetadataLoadService implements SecurityMetadataLoadS
     private Collection<ConfigAttribute> authorityToConfigAttribute(Set<AccessibleAuthority> authorities) {
         Collection<ConfigAttribute> configAttributes = new HashSet<>();
 
-        Optional.ofNullable(authorities).orElse(Collections.emptySet()).stream()
-                .filter(auth -> auth.getAuthorityType().equals(AccessibleAuthority.AuthorityType.OAUTH2_SCOPE))
+        Optional.ofNullable(authorities).orElse(Collections.emptySet())
                 .forEach(auth -> configAttributes.add(new ScopeSecurityConfig(auth.getAuthority())));
-        Optional.ofNullable(authorities).orElse(Collections.emptySet()).stream()
-                .filter(auth -> auth.getAuthorityType().equals(AccessibleAuthority.AuthorityType.AUTHORITY))
-                .forEach(auth -> configAttributes.add(new RoleSecurityConfig(auth.getAuthority())));
 
         return configAttributes;
     }
