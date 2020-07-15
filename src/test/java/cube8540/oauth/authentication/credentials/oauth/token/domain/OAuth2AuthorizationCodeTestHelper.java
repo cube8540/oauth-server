@@ -22,6 +22,8 @@ class OAuth2AuthorizationCodeTestHelper {
     static final String RAW_CLIENT_ID = "CLIENT-ID";
     static final OAuth2ClientId CLIENT_ID = new OAuth2ClientId(RAW_CLIENT_ID);
 
+    static final String RAW_DIFFERENT_CLIENT_ID = "DIFFERENT-CLIENT-ID";
+
     static final String RAW_USERNAME = "email@email.com";
     static final PrincipalUsername USERNAME = new PrincipalUsername(RAW_USERNAME);
 
@@ -30,85 +32,30 @@ class OAuth2AuthorizationCodeTestHelper {
     static final String RAW_REDIRECT_URI = "http://localhost";
     static final URI REDIRECT_URI = URI.create(RAW_REDIRECT_URI);
 
+    static final String RAW_DIFFERENT_REDIRECT_URI = "http://localhost:8080";
+    static final URI DIFFERENT_REDIRECT_URI = URI.create(RAW_DIFFERENT_REDIRECT_URI);
+
     static final LocalDateTime NOW = LocalDateTime.of(2020, 2, 8, 23, 22);
     static final LocalDateTime EXPIRATION_DATETIME = NOW.plusMinutes(5);
 
     static final Set<String> RAW_SCOPES = new HashSet<>(Arrays.asList("SCOPE-1", "SCOPE-2", "SCOPE-3"));
     static final Set<AuthorityCode> SCOPES = RAW_SCOPES.stream().map(AuthorityCode::new).collect(Collectors.toSet());
 
-    static AuthorizationCodeGenerator configDefaultCodeGenerator() {
+    static AuthorizationCodeGenerator makeDefaultCodeGenerator() {
         AuthorizationCodeGenerator generator = mock(AuthorizationCodeGenerator.class);
         when(generator.generate()).thenReturn(RAW_CODE);
         return generator;
     }
 
-    static MockAuthorizationRequest mockAuthorizationRequest() {
-        return new MockAuthorizationRequest();
-    }
+    static AuthorizationRequest makeAuthorizationRequest() {
+        AuthorizationRequest request = mock(AuthorizationRequest.class);
 
-    static class MockAuthorizationRequest {
-        private AuthorizationRequest request;
+        when(request.getClientId()).thenReturn(RAW_CLIENT_ID);
+        when(request.getUsername()).thenReturn(RAW_USERNAME);
+        when(request.getState()).thenReturn(STATE);
+        when(request.getRedirectUri()).thenReturn(REDIRECT_URI);
+        when(request.getRequestScopes()).thenReturn(RAW_SCOPES);
 
-        private MockAuthorizationRequest() {
-            this.request = mock(AuthorizationRequest.class);
-        }
-
-        MockAuthorizationRequest configDefaultSetup() {
-            configDefaultClientId();
-            configDefaultUsername();
-            configDefaultState();
-            configDefaultRedirectUri();
-            configDefaultRequestScope();
-            return this;
-        }
-
-        MockAuthorizationRequest configDefaultClientId() {
-            when(request.getClientId()).thenReturn(RAW_CLIENT_ID);
-            return this;
-        }
-
-        MockAuthorizationRequest configMismatchesClientId() {
-            when(request.getClientId()).thenReturn("NOT MATCHED CLIENT ID");
-            return this;
-        }
-
-        MockAuthorizationRequest configDefaultUsername() {
-            when(request.getUsername()).thenReturn(RAW_USERNAME);
-            return this;
-        }
-
-        MockAuthorizationRequest configDefaultState() {
-            when(request.getState()).thenReturn(STATE);
-            return this;
-        }
-
-        MockAuthorizationRequest configMismatchesState() {
-            when(request.getState()).thenReturn("NOT MATCHED STATE");
-            return this;
-        }
-
-        MockAuthorizationRequest configDefaultRedirectUri() {
-            when(request.getRedirectUri()).thenReturn(REDIRECT_URI);
-            return this;
-        }
-
-        MockAuthorizationRequest configRedirectUriNull() {
-            when(request.getRedirectUri()).thenReturn(null);
-            return this;
-        }
-
-        MockAuthorizationRequest configMismatchesRedirectUri() {
-            when(request.getRedirectUri()).thenReturn(URI.create("http://localhost:8081"));
-            return this;
-        }
-
-        MockAuthorizationRequest configDefaultRequestScope() {
-            when(request.getRequestScopes()).thenReturn(RAW_SCOPES);
-            return this;
-        }
-
-        AuthorizationRequest build() {
-            return request;
-        }
+        return request;
     }
 }

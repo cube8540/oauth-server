@@ -23,43 +23,36 @@ class OAuth2ClientTestsHelper {
 
     static final URI REDIRECT_URI = URI.create("http://localhost:8080");
 
-    static MockPasswordEncoder mockPasswordEncoder() {
-        return new MockPasswordEncoder();
+    static PasswordEncoder makePasswordEncoder(String secret, String encodingSecret) {
+        PasswordEncoder encoder = mock(PasswordEncoder.class);
+
+        when(encoder.encode(secret)).thenReturn(encodingSecret);
+        when(encoder.matches(secret, encodingSecret)).thenReturn(true);
+
+        return encoder;
     }
 
-    static MocKValidationRule<OAuth2Client> mocKValidationRule() {
-        return new MocKValidationRule<>();
+    @SuppressWarnings("unchecked")
+    static ValidationRule<OAuth2Client> makePassValidationRule(OAuth2Client client) {
+        ValidationRule<OAuth2Client> rule = mock(ValidationRule.class);
+
+        when(rule.isValid(client)).thenReturn(true);
+
+        return rule;
     }
 
-    static MockValidationPolicy mockValidationPolicy() {
+    @SuppressWarnings("unchecked")
+    static ValidationRule<OAuth2Client> makeErrorValidationRule(OAuth2Client client, ValidationError error) {
+        ValidationRule<OAuth2Client> rule = mock(ValidationRule.class);
+
+        when(rule.isValid(client)).thenReturn(false);
+        when(rule.error()).thenReturn(error);
+
+        return rule;
+    }
+
+    static MockValidationPolicy makeValidationPolicy() {
         return new MockValidationPolicy();
-    }
-
-    static class MockPasswordEncoder {
-        private PasswordEncoder encoder;
-
-        private MockPasswordEncoder() {
-            this.encoder = mock(PasswordEncoder.class);
-        }
-
-        MockPasswordEncoder encode() {
-            when(encoder.encode(RAW_SECRET)).thenReturn(RAW_ENCODING_SECRET);
-            return this;
-        }
-
-        MockPasswordEncoder matches() {
-            when(encoder.matches(RAW_SECRET, RAW_ENCODING_SECRET)).thenReturn(true);
-            return this;
-        }
-
-        MockPasswordEncoder mismatches() {
-            when(encoder.matches(RAW_SECRET, RAW_ENCODING_SECRET)).thenReturn(false);
-            return this;
-        }
-
-        PasswordEncoder build() {
-            return encoder;
-        }
     }
 
     static class MockValidationPolicy {
@@ -101,34 +94,6 @@ class OAuth2ClientTestsHelper {
 
         OAuth2ClientValidatePolicy build() {
             return policy;
-        }
-    }
-
-    static class MocKValidationRule<T> {
-        private ValidationRule<T> validationRule;
-
-        @SuppressWarnings("unchecked")
-        private MocKValidationRule() {
-            this.validationRule = mock(ValidationRule.class);
-        }
-
-        MocKValidationRule<T> configValidationTrue(T target) {
-            when(validationRule.isValid(target)).thenReturn(true);
-            return this;
-        }
-
-        MocKValidationRule<T> configValidationFalse(T target) {
-            when(validationRule.isValid(target)).thenReturn(false);
-            return this;
-        }
-
-        MocKValidationRule<T> error(ValidationError error) {
-            when(validationRule.error()).thenReturn(error);
-            return this;
-        }
-
-        ValidationRule<T> build() {
-            return validationRule;
         }
     }
 }

@@ -1,8 +1,6 @@
 package cube8540.oauth.authentication.credentials.oauth.error;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.http.CacheControl;
@@ -33,143 +31,94 @@ import static org.mockito.Mockito.when;
 @DisplayName("OAuth2 기본 예외 응답 메시지 클래스 테스트")
 class OAuth2ExceptionResponseRendererTest {
 
-    private HttpServletRequest request0;
-    private HttpServletResponse response0;
-    private ServletWebRequest webRequest0;
-    private HttpMessageConverter<Object> messageConverter;
+    @Test
+    @DisplayName("지원 되지 않는 미디어 타입으로 클래스 초기화")
+    void initializeByNotSupportedMediaType() {
+        HttpMessageConverter<Object> messageConverter = makeConverter();
 
-    @BeforeEach
+        when(messageConverter.canWrite(any(), any())).thenReturn(false);
+
+        assertThrows(HttpMediaTypeNotSupportedException.class, () -> new OAuth2ExceptionResponseRenderer(messageConverter));
+    }
+
+    @Test
+    @DisplayName("ResponseEntity가 null 일때 응답 메시지 작성")
+    void writeResponseMessageWhenResponseEntityIsNull() throws Exception {
+        HttpMessageConverter<Object> messageConverter = makeConverter();
+        OAuth2ExceptionResponseRenderer renderer = new OAuth2ExceptionResponseRenderer(messageConverter);
+        ServletWebRequest webRequest = makeWebRequest();
+
+        renderer.rendering(null, webRequest);
+        verifyNoMoreInteractions(webRequest.getResponse());
+    }
+
+    @Test
+    @DisplayName("ResponseEntity의 body가 null 일때 응답 객체에 메시지 작성")
+    void writeResponseMessageToResponseObjectWhenResponseEntityBodyIsNull() throws Exception {
+        HttpMessageConverter<Object> messageConverter = makeConverter();
+        ResponseEntity<OAuth2Error> responseEntity = makeResponseEntity(null);
+        OAuth2ExceptionResponseRenderer renderer = new OAuth2ExceptionResponseRenderer(messageConverter);
+        ServletWebRequest webRequest = makeWebRequest();
+
+        renderer.rendering(responseEntity, webRequest);
+        verify(webRequest.getResponse(), times(1)).setStatus(HttpStatus.UNAUTHORIZED.value());
+        verify(webRequest.getResponse(), times(1)).addHeader(HttpHeaders.CACHE_CONTROL, CacheControl.noStore().getHeaderValue());
+        verify(webRequest.getResponse(), times(1)).addHeader(HttpHeaders.PRAGMA, "no-cache");
+        verify(messageConverter, never()).write(any(), any(), any());
+    }
+
+    @Test
+    @DisplayName("응답 객체에 메시지 작성")
+    void writeResponseMessageToResponseObject() throws Exception {
+        OAuth2Error error = mock(OAuth2Error.class);
+        HttpMessageConverter<Object> messageConverter = makeConverter();
+        ResponseEntity<OAuth2Error> responseEntity = makeResponseEntity(error);
+        ArgumentCaptor<ServletServerHttpResponse> responseCaptor = ArgumentCaptor.forClass(ServletServerHttpResponse.class);
+        ServletWebRequest webRequest = makeWebRequest();
+        OAuth2ExceptionResponseRenderer renderer = new OAuth2ExceptionResponseRenderer(messageConverter);
+
+        renderer.rendering(responseEntity, webRequest);
+        verify(webRequest.getResponse(), times(1)).setStatus(HttpStatus.UNAUTHORIZED.value());
+        verify(messageConverter, times(1)).write(eq(error), eq(MediaType.ALL), responseCaptor.capture());
+        responseCaptor.getValue().getBody(); // header flush
+        verify(webRequest.getResponse(), times(1)).addHeader(HttpHeaders.CACHE_CONTROL, CacheControl.noStore().getHeaderValue());
+        verify(webRequest.getResponse(), times(1)).addHeader(HttpHeaders.PRAGMA, "no-cache");
+        assertEquals(webRequest.getResponse(), responseCaptor.getValue().getServletResponse());
+    }
+
     @SuppressWarnings("unchecked")
-    void setup() {
-        this.messageConverter = mock(HttpMessageConverter.class);
-        this.request0 = mock(HttpServletRequest.class);
-        this.response0 = mock(HttpServletResponse.class);
-        this.webRequest0 = new ServletWebRequest(request0, response0);
+    private HttpMessageConverter<Object> makeConverter() {
+        HttpMessageConverter<Object> converter = mock(HttpMessageConverter.class);
+
+        when(converter.canWrite(any(), any())).thenReturn(true);
+
+        return converter;
     }
 
-    @Nested
-    @DisplayName("객체 생성")
-    class InitializeRenderer {
+    private HttpHeaders makeHeaders() {
+        HttpHeaders header = new HttpHeaders();
 
-        @Nested
-        @DisplayName("지원되지 않는 미디어 타입일시")
-        class WhenNotSupportedMediaType {
+        header.setCacheControl(CacheControl.noStore());
+        header.setPragma("no-cache");
 
-            @BeforeEach
-            void setup() {
-                when(messageConverter.canWrite(any(), any())).thenReturn(false);
-            }
-
-            @Test
-            @DisplayName("HttpMediaTypeNotSupportedException이 발생해야 한다.")
-            void shouldThrowsHttpMediaTypeNotSupportedException() {
-                assertThrows(HttpMediaTypeNotSupportedException.class, () -> new OAuth2ExceptionResponseRenderer(messageConverter));
-            }
-        }
+        return header;
     }
 
-    @Nested
-    @DisplayName("Response 객체에 응답 메시지를 작성")
-    class WriteResponseMessage {
-        private OAuth2ExceptionResponseRenderer renderer;
+    @SuppressWarnings("unchecked")
+    private ResponseEntity<OAuth2Error> makeResponseEntity(OAuth2Error body) {
+        ResponseEntity<OAuth2Error>responseEntity = mock(ResponseEntity.class);
 
-        @BeforeEach
-        void setup() throws Exception {
-            when(messageConverter.canWrite(any(), any())).thenReturn(true);
-            this.renderer = new OAuth2ExceptionResponseRenderer(messageConverter);
-        }
+        when(responseEntity.getBody()).thenReturn(body);
+        when(responseEntity.getStatusCode()).thenReturn(HttpStatus.UNAUTHORIZED);
+        when(responseEntity.getHeaders()).thenReturn(makeHeaders());
 
-        @Nested
-        @DisplayName("ResponseEntity가 null일시")
-        class WhenResponseEntityNull {
+        return responseEntity;
+    }
 
-            @Test
-            @DisplayName("아무 행동도 하지 않아야 한다.")
-            void shouldDoNothing() throws Exception {
-                renderer.rendering(null, webRequest0);
-                verifyNoMoreInteractions(response0);
-            }
-        }
+    private ServletWebRequest makeWebRequest() {
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
 
-        @Nested
-        @DisplayName("ResponserEntity가 null이 아닐시")
-        class WhenResponseEntityNotNull {
-            private OAuth2Error error0;
-            private ResponseEntity<OAuth2Error> responseEntity0;
-            private HttpHeaders headers = new HttpHeaders();
-
-            @BeforeEach
-            @SuppressWarnings("unchecked")
-            void setup() {
-                this.error0 = mock(OAuth2Error.class);
-                this.responseEntity0 = mock(ResponseEntity.class);
-
-                when(responseEntity0.getBody()).thenReturn(error0);
-                when(responseEntity0.getStatusCode()).thenReturn(HttpStatus.UNAUTHORIZED);
-                when(responseEntity0.getHeaders()).thenReturn(headers);
-                headers.setCacheControl(CacheControl.noStore());
-                headers.setPragma("no-cache");
-            }
-
-            @Test
-            @DisplayName("응답 객체에 ResponseEntity에 저장된 HTTP 상태 코드를 복사해야 한다.")
-            void shouldCopyResponseEntityHttpStatusCode() throws Exception {
-                renderer.rendering(responseEntity0, webRequest0);
-
-                verify(response0, times(1)).setStatus(HttpStatus.UNAUTHORIZED.value());
-            }
-
-            @Nested
-            @DisplayName("ResponseEntity의 Body가 null일시")
-            class WhenResponseEntityBodyNull {
-
-                @BeforeEach
-                void setup() {
-                    when(responseEntity0.getBody()).thenReturn(null);
-                }
-
-                @Test
-                @DisplayName("응답 객체에 ResponseEntity에 저장된 헤더를 복사해야 한다.")
-                void shouldCopyResponseEntityHeaders() throws Exception {
-                    renderer.rendering(responseEntity0, webRequest0);
-                    verify(response0, times(1)).addHeader(HttpHeaders.CACHE_CONTROL, CacheControl.noStore().getHeaderValue());
-                    verify(response0, times(1)).addHeader(HttpHeaders.PRAGMA, "no-cache");
-                }
-
-                @Test
-                @DisplayName("컨버터를 이용하여 응답 객체에 응답 메시지를 쓰지 않아야 한다.")
-                void shouldDontWriteResponseMessageByConverter() throws Exception {
-                    renderer.rendering(responseEntity0, webRequest0);
-                    verify(messageConverter, never()).write(any(), any(), any());
-                }
-            }
-
-            @Nested
-            @DisplayName("ResponseEntity의 Body가 null이 아닐시")
-            class WhenResponseEntityBodyNotNull {
-
-                @Test
-                @DisplayName("응답 객체에 ResponseEntity에 저장된 헤더를 복사해야 한다.")
-                void shouldCopyResponseEntityHeaders() throws Exception {
-                    ArgumentCaptor<ServletServerHttpResponse> responseCaptor = ArgumentCaptor.forClass(ServletServerHttpResponse.class);
-
-                    renderer.rendering(responseEntity0, webRequest0);
-                    verify(messageConverter, times(1)).write(eq(error0), eq(MediaType.ALL), responseCaptor.capture());
-                    responseCaptor.getValue().getBody(); // header flush
-                    verify(response0, times(1)).addHeader(HttpHeaders.CACHE_CONTROL, CacheControl.noStore().getHeaderValue());
-                    verify(response0, times(1)).addHeader(HttpHeaders.PRAGMA, "no-cache");
-                }
-
-                @Test
-                @DisplayName("컨버터를 이용하여 응답 객체에 응답 메시지를 써야 한다.")
-                void shouldWriteResponseMessageByConverter() throws Exception {
-                    ArgumentCaptor<ServletServerHttpResponse> responseCaptor = ArgumentCaptor.forClass(ServletServerHttpResponse.class);
-
-                    renderer.rendering(responseEntity0, webRequest0);
-                    verify(messageConverter, times(1)).write(eq(error0), eq(MediaType.ALL), responseCaptor.capture());
-                    assertEquals(response0, responseCaptor.getValue().getServletResponse());
-                }
-            }
-        }
+        return new ServletWebRequest(request, response);
     }
 }

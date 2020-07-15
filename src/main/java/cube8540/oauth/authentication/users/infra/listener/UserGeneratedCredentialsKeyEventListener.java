@@ -1,6 +1,7 @@
 package cube8540.oauth.authentication.users.infra.listener;
 
 import cube8540.oauth.authentication.users.domain.UserGeneratedCredentialsKeyEvent;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -24,6 +25,8 @@ public class UserGeneratedCredentialsKeyEventListener {
 
     private final JavaMailSender mailSender;
     private final ITemplateEngine templateEngine;
+
+    @Setter
     private String subject;
 
     public UserGeneratedCredentialsKeyEventListener() {

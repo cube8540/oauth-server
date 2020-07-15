@@ -6,7 +6,6 @@ import cube8540.oauth.authentication.credentials.oauth.scope.domain.exception.Sc
 import cube8540.oauth.authentication.error.message.ErrorMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,60 +23,30 @@ class ScopeAPIExceptionTranslatorTest {
         this.translator = new ScopeAPIExceptionTranslator();
     }
 
-    @Nested
+    @Test
     @DisplayName("ScopeInvalidException 변환")
-    class TranslateScopeInvalidException {
-        private ScopeInvalidException e;
+    void translateScopeInvalidException() {
+        ScopeInvalidException e = mock(ScopeInvalidException.class);
 
-        @BeforeEach
-        void setup() {
-            this.e = mock(ScopeInvalidException.class);
-        }
-
-        @Test
-        @DisplayName("HTTP 상태 코드는 400 이어야 한다.")
-        void shouldHttpStatusCodeIs400() {
-            ResponseEntity<ErrorMessage<Object>> response = translator.translate(e);
-            assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        }
+        ResponseEntity<ErrorMessage<Object>> response = translator.translate(e);
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }
 
-    @Nested
+    @Test
     @DisplayName("ScopeNotFoundException 변환")
-    class TranslateScopeNotFoundException {
-        private ScopeNotFoundException e;
+    void translateScopeNotFoundException() {
+        ScopeNotFoundException e = mock(ScopeNotFoundException.class);
 
-        @BeforeEach
-        void setup() {
-            this.e = mock(ScopeNotFoundException.class);
-        }
-
-        @Test
-        @DisplayName("HTTP 상태 코드는 404 이어야 한다.")
-        void shouldHttpStatusCodeIs404() {
-            ResponseEntity<ErrorMessage<Object>> response = translator.translate(e);
-            assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        }
-
+        ResponseEntity<ErrorMessage<Object>> response = translator.translate(e);
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
 
-    @Nested
+    @Test
     @DisplayName("ScopeRegisterException 변환")
-    class TranslateScopeRegisterException {
-        private ScopeRegisterException e;
+    void translateScopeRegisterException() {
+        ScopeRegisterException e = mock(ScopeRegisterException.class);
 
-        @BeforeEach
-        void setup() {
-            this.e = mock(ScopeRegisterException.class);
-        }
-
-        @Test
-        @DisplayName("HTTP 상태 코드는 400 이어야 한다.")
-        void shouldHttpStatusCodeIs400() {
-            ResponseEntity<ErrorMessage<Object>> response = translator.translate(e);
-            assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        }
-
+        ResponseEntity<ErrorMessage<Object>> response = translator.translate(e);
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }
-
 }

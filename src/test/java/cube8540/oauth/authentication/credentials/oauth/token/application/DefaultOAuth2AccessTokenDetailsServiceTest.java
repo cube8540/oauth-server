@@ -1,258 +1,100 @@
 package cube8540.oauth.authentication.credentials.oauth.token.application;
 
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidClientException;
-import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AccessTokenDetails;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenNotFoundException;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenRepository;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedAccessToken;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.ACCESS_TOKEN_ID;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.RAW_ACCESS_TOKEN_ID;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.RAW_CLIENT_ID;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.RAW_DIFFERENT_CLIENT;
-import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.mockAccessToken;
-import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.mockAccessTokenRepository;
-import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.mockAuthentication;
-import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.mockUser;
-import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.mockUserDetailsService;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.RAW_USERNAME;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeAccessToken;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeAccessTokenRepository;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeAuthentication;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeEmptyAccessTokenRepository;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeEmptyUserDetailsService;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeUserDetails;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeUserDetailsService;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @DisplayName("기본 토큰 부여 서비스 테스트")
 class DefaultOAuth2AccessTokenDetailsServiceTest {
 
-    @Nested
-    @DisplayName("엑세스 토큰 읽기")
-    class ReadAccessToken {
+    @Test
+    @DisplayName("저장소에 등록 되지 않은 액세스 토큰 검색")
+    void getNotRegisteredAccessTokenInRepository() {
+        OAuth2AccessTokenRepository repository = makeEmptyAccessTokenRepository();
+        UserDetailsService userDetailsService = makeEmptyUserDetailsService();
+        DefaultOAuth2AccessTokenDetailsService service = new DefaultOAuth2AccessTokenDetailsService(repository, userDetailsService);
 
-        @Nested
-        @DisplayName("저장소에서 엑세스 토큰을 찾을 수 없을시")
-        class WhenAccessTokenNotFound {
-            private DefaultOAuth2AccessTokenDetailsService service;
-
-            @BeforeEach
-            void setup() {
-                OAuth2AccessTokenRepository repository = mockAccessTokenRepository().emptyAccessToken().build();
-                this.service = new DefaultOAuth2AccessTokenDetailsService(repository, mockUserDetailsService().build());
-            }
-
-            @Test
-            @DisplayName("OAuth2AccessTokenNotFoundException 이 발생해야 한다.")
-            void shouldThrowsOAuth2AccessTokenNotFoundException() {
-                assertThrows(OAuth2AccessTokenNotFoundException.class, () -> service.readAccessToken(RAW_ACCESS_TOKEN_ID));
-            }
-        }
-
-        @Nested
-        @DisplayName("저장소에서 엑세스 토큰을 찾았을시")
-        class WhenAccessTokenFound {
-
-            @Nested
-            @DisplayName("엑세스 토큰이 만료되었을시")
-            class WhenAccessTokenIsExpired {
-                private DefaultOAuth2AccessTokenDetailsService service;
-
-                @BeforeEach
-                void setup() {
-                    OAuth2AuthorizedAccessToken accessToken = mockAccessToken().configDefault().configExpired().build();
-                    OAuth2AccessTokenRepository repository = mockAccessTokenRepository().registerAccessToken(accessToken).build();
-                    this.service = new DefaultOAuth2AccessTokenDetailsService(repository, mockUserDetailsService().build());
-                    SecurityContextHolder.getContext().setAuthentication(mockAuthentication(RAW_CLIENT_ID));
-                }
-
-                @Test
-                @DisplayName("만료 여부는 true로 반환 되어야 한다.")
-                void shouldExpiredOrNotReturnsTrue() {
-                    OAuth2AccessTokenDetails accessToken = service.readAccessToken(RAW_ACCESS_TOKEN_ID);
-
-                    assertTrue(accessToken.isExpired());
-                }
-            }
-
-            @Nested
-            @DisplayName("엑세스 토큰의 클라이언트와 요청한 클라이언트의 정보가 일치하지 않을시")
-            class WhenDifferentSearchedAccessTokensClientAndRequestingClient {
-                private DefaultOAuth2AccessTokenDetailsService service;
-
-                @BeforeEach
-                void setup() {
-                    OAuth2AuthorizedAccessToken accessToken = mockAccessToken().configDefault().configNotExpired().build();
-                    OAuth2AccessTokenRepository repository = mockAccessTokenRepository().registerAccessToken(accessToken).build();
-                    SecurityContextHolder.getContext().setAuthentication(mockAuthentication(RAW_DIFFERENT_CLIENT));
-
-                    this.service = new DefaultOAuth2AccessTokenDetailsService(repository, mockUserDetailsService().build());
-                }
-
-                @Test
-                @DisplayName("InvalidClientException 이 발생해야 하며 에러 코드는 INVALID_CLIENT 이어야 한다.")
-                void shouldThrowsInvalidClientExceptionAndErrorCodeIsInvalidClient() {
-                    String errorCode = assertThrows(InvalidClientException.class, () -> service.readAccessToken(RAW_ACCESS_TOKEN_ID))
-                            .getError().getErrorCode();
-                    assertEquals(OAuth2ErrorCodes.INVALID_CLIENT, errorCode);
-                }
-
-                @AfterEach
-                void after() {
-                    SecurityContextHolder.clearContext();
-                }
-            }
-
-            @Nested
-            @DisplayName("엑세스 토큰의 리플래시 토큰이 null 일시")
-            class WhenAccessTokensRefreshTokenIsNull {
-                private DefaultOAuth2AccessTokenDetailsService service;
-
-                @BeforeEach
-                void setup() {
-                    OAuth2AuthorizedAccessToken accessToken = mockAccessToken()
-                            .configDefault().configNotExpired().configEmptyRefreshToken().build();
-                    OAuth2AccessTokenRepository repository = mockAccessTokenRepository().registerAccessToken(accessToken).build();
-                    SecurityContextHolder.getContext().setAuthentication(mockAuthentication(RAW_CLIENT_ID));
-
-                    this.service = new DefaultOAuth2AccessTokenDetailsService(repository, mockUserDetailsService().build());
-                }
-
-                @Test
-                @DisplayName("리플래시 토큰 정보는 null 로 반환해야 한다.")
-                void shouldReturnsRefreshTokenIsNull() {
-                    OAuth2AccessTokenDetails accessToken = service.readAccessToken(RAW_ACCESS_TOKEN_ID);
-
-                    assertNull(accessToken.getRefreshToken());
-                }
-
-                @AfterEach
-                void after() {
-                    SecurityContextHolder.clearContext();
-                }
-            }
-
-            @Nested
-            @DisplayName("엑세스 토큰의 추가 확장 정보가 null 일시")
-            class WhenAccessTokenAdditionalInformationIsNull {
-                private DefaultOAuth2AccessTokenDetailsService service;
-
-                @BeforeEach
-                void setup() {
-                    OAuth2AuthorizedAccessToken accessToken = mockAccessToken()
-                            .configDefault().configNotExpired().configNullAdditionalInfo().build();
-                    OAuth2AccessTokenRepository repository = mockAccessTokenRepository().registerAccessToken(accessToken).build();
-                    SecurityContextHolder.getContext().setAuthentication(mockAuthentication(RAW_CLIENT_ID));
-
-                    this.service = new DefaultOAuth2AccessTokenDetailsService(repository, mockUserDetailsService().build());
-                }
-
-                @Test
-                @DisplayName("추가 확장 정보는 null 로 반환해야 한다.")
-                void shouldReturnsAdditionalInformationIsNull() {
-                    OAuth2AccessTokenDetails accessToken = service.readAccessToken(RAW_ACCESS_TOKEN_ID);
-
-                    assertNull(accessToken.getAdditionalInformation());
-                }
-
-                @AfterEach
-                void after() {
-                    SecurityContextHolder.clearContext();
-                }
-            }
-        }
+        assertThrows(OAuth2AccessTokenNotFoundException.class, () -> service.readAccessToken(RAW_ACCESS_TOKEN_ID));
     }
 
-    @Nested
-    @DisplayName("엑세스 토큰의 유저 검색")
-    class ReadAccessTokenUser {
+    @Test
+    @DisplayName("요청한 클라이언트와 액세스 토큰의 클라이언트가 일치 하지 않을때 액세스 토큰 검색")
+    void getAccessTokenWhenRequestedClientAndClientOfAccessTokenDoNotMatch() {
+        OAuth2AuthorizedAccessToken accessToken = makeAccessToken();
+        OAuth2AccessTokenRepository repository = makeAccessTokenRepository(ACCESS_TOKEN_ID, accessToken);
+        UserDetailsService userDetailsService = makeEmptyUserDetailsService();
+        Authentication authentication = makeAuthentication(RAW_DIFFERENT_CLIENT);
+        DefaultOAuth2AccessTokenDetailsService service = new DefaultOAuth2AccessTokenDetailsService(repository, userDetailsService);
 
-        @Nested
-        @DisplayName("검색하려는 엑세스 토큰의 저장소에 저장되어 있지 않을시")
-        class WhenReadAccessTokenIsNotRegisteredInRepository {
-            private DefaultOAuth2AccessTokenDetailsService service;
+        SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            @BeforeEach
-            void setup() {
-                OAuth2AccessTokenRepository repository = mockAccessTokenRepository().emptyAccessToken().build();
-                this.service = new DefaultOAuth2AccessTokenDetailsService(repository, mockUserDetailsService().build());
-            }
+        String errorCode = assertThrows(InvalidClientException.class, () -> service.readAccessToken(RAW_ACCESS_TOKEN_ID)).getError().getErrorCode();
+        assertEquals(OAuth2ErrorCodes.INVALID_CLIENT, errorCode);
+    }
 
-            @Test
-            @DisplayName("OAuth2AccessTokenNotFoundException 이 발생해야 한다.")
-            void shouldThrowsOAuth2AccessTokenNotFoundException() {
-                assertThrows(OAuth2AccessTokenNotFoundException.class, () -> service.readAccessTokenUser(RAW_ACCESS_TOKEN_ID));
-            }
-        }
+    @Test
+    @DisplayName("저장소에 등록 되지 않은 액세스 토큰 소유자 검색")
+    void getNotRegisteredOwnerOfAccessTokenInRepository() {
+        OAuth2AccessTokenRepository repository = makeEmptyAccessTokenRepository();
+        UserDetailsService userDetailsService = makeEmptyUserDetailsService();
+        DefaultOAuth2AccessTokenDetailsService service = new DefaultOAuth2AccessTokenDetailsService(repository, userDetailsService);
 
-        @Nested
-        @DisplayName("검색하려는 엑세스 토큰이 저장소에 저장되어 있을시")
-        class WhenReadAccessTokenIsRegisteredInRepository {
+        assertThrows(OAuth2AccessTokenNotFoundException.class, () -> service.readAccessTokenUser(RAW_ACCESS_TOKEN_ID));
+    }
 
-            @Nested
-            @DisplayName("검색된 토큰의 클라이언트 정보와 요청한 클라이언트 정보가 일치하지 않을시")
-            class WhenDifferentSearchedAccessTokenClientAndRequestingClient {
-                private DefaultOAuth2AccessTokenDetailsService service;
+    @Test
+    @DisplayName("요청한 클라이언트와 액세스 토큰의 클라이언트가 일치 하지 않을때 액세스 토큰 소유자 검색")
+    void getAccessTokenOwnerWhenRequestedClientAndClientOfAccessTokenDoNotMatch() {
+        OAuth2AuthorizedAccessToken accessToken = makeAccessToken();
+        OAuth2AccessTokenRepository repository = makeAccessTokenRepository(ACCESS_TOKEN_ID, accessToken);
+        UserDetailsService userDetailsService = makeEmptyUserDetailsService();
+        Authentication authentication = makeAuthentication(RAW_DIFFERENT_CLIENT);
+        DefaultOAuth2AccessTokenDetailsService service = new DefaultOAuth2AccessTokenDetailsService(repository, userDetailsService);
 
-                @BeforeEach
-                void setup() {
-                    OAuth2AuthorizedAccessToken accessToken = mockAccessToken().configDefault().build();
-                    OAuth2AccessTokenRepository repository = mockAccessTokenRepository().registerAccessToken(accessToken).build();
-                    SecurityContextHolder.getContext().setAuthentication(mockAuthentication(RAW_DIFFERENT_CLIENT));
+        SecurityContextHolder.getContext().setAuthentication(authentication);
 
-                    this.service = new DefaultOAuth2AccessTokenDetailsService(repository, mockUserDetailsService().build());
-                }
+        String errorCode = assertThrows(InvalidClientException.class, () -> service.readAccessTokenUser(RAW_ACCESS_TOKEN_ID)).getError().getErrorCode();
+        assertEquals(OAuth2ErrorCodes.INVALID_CLIENT, errorCode);
+    }
 
-                @Test
-                @DisplayName("InvalidClientException 이 발생해야 하며 에러 코드는 INVALID_CLIENT 이어야 한다.")
-                void shouldThrowsInvalidClientExceptionAndErrorCodeIsInvalidClient() {
-                    String errorCode = assertThrows(InvalidClientException.class, () -> service.readAccessTokenUser(RAW_ACCESS_TOKEN_ID))
-                            .getError().getErrorCode();
-                    assertEquals(OAuth2ErrorCodes.INVALID_CLIENT, errorCode);
-                }
+    @Test
+    @DisplayName("검색된 유저의 민감한 데이터 삭제")
+    void eraseSearchedUserSensitiveData() {
+        User userDetails = makeUserDetails();
+        UserDetailsService userDetailsService = makeUserDetailsService(RAW_USERNAME, userDetails);
+        OAuth2AuthorizedAccessToken accessToken = makeAccessToken();
+        OAuth2AccessTokenRepository repository = makeAccessTokenRepository(ACCESS_TOKEN_ID, accessToken);
+        Authentication authentication = makeAuthentication(RAW_CLIENT_ID);
+        DefaultOAuth2AccessTokenDetailsService service = new DefaultOAuth2AccessTokenDetailsService(repository, userDetailsService);
 
-                @AfterEach
-                void after() {
-                    SecurityContextHolder.clearContext();
-                }
-            }
+        SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            @Nested
-            @DisplayName("검색된 유저 객체가 CredentialsContainer 를 구현하고 있을시")
-            class WhenUserDetailsObjectImplementCredentialsContainer {
-                private User userDetails;
-                private DefaultOAuth2AccessTokenDetailsService service;
-
-                @BeforeEach
-                void setup() {
-                    this.userDetails = mockUser();
-
-                    OAuth2AuthorizedAccessToken accessToken = mockAccessToken().configDefault().build();
-                    OAuth2AccessTokenRepository repository = mockAccessTokenRepository().registerAccessToken(accessToken).build();
-                    UserDetailsService userDetailsService = mockUserDetailsService().registerUser(userDetails).build();
-                    SecurityContextHolder.getContext().setAuthentication(mockAuthentication(RAW_CLIENT_ID));
-
-                    this.service = new DefaultOAuth2AccessTokenDetailsService(repository, userDetailsService);
-                }
-
-                @Test
-                @DisplayName("검색된 유저 객체에서 민감한 정보는 삭제해야 한다.")
-                void shouldErasedCredentials() {
-                    service.readAccessTokenUser(RAW_ACCESS_TOKEN_ID);
-                    verify(userDetails, times(1)).eraseCredentials();
-                }
-
-                @AfterEach
-                void after() {
-                    SecurityContextHolder.clearContext();
-                }
-            }
-        }
+        service.readAccessTokenUser(RAW_ACCESS_TOKEN_ID);
+        verify(userDetails, times(1)).eraseCredentials();
     }
 }

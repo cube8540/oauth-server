@@ -2,9 +2,7 @@ package cube8540.oauth.authentication.error.security;
 
 import cube8540.oauth.authentication.error.message.ErrorCodes;
 import cube8540.oauth.authentication.error.message.ErrorMessage;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.http.CacheControl;
@@ -34,143 +32,102 @@ import static org.mockito.Mockito.when;
 @DisplayName("접근 거부 예외 응답 메시지 클래스 테스트")
 public class AccessDeniedExceptionResponseRendererTest {
 
-    private HttpServletRequest request0;
-    private HttpServletResponse response0;
-    private ServletWebRequest webRequest0;
-    private HttpMessageConverter<Object> messageConverter;
-
-    @BeforeEach
+    @Test
+    @DisplayName("지원 되지 않는 미디어 타입으로 객체 생성")
     @SuppressWarnings("unchecked")
-    void setup() {
-        this.messageConverter = mock(HttpMessageConverter.class);
-        this.request0 = mock(HttpServletRequest.class);
-        this.response0 = mock(HttpServletResponse.class);
-        this.webRequest0 = new ServletWebRequest(request0, response0);
+    void createObjectByNotSupportedMediaType() {
+        HttpMessageConverter<Object> messageConverter = mock(HttpMessageConverter.class);
+
+        when(messageConverter.canWrite(ErrorMessage.class, MediaType.APPLICATION_JSON)).thenReturn(false);
+
+        assertThrows(HttpMediaTypeNotSupportedException.class, () -> new AccessDeniedExceptionResponseRenderer(messageConverter));
     }
 
-    @Nested
-    @DisplayName("객체 생성")
-    class InitializeRenderer {
+    @Test
+    @DisplayName("ResponseEntity 가 null 일떄 응답 객체에 응답 메시지를 작성")
+    void writeResponseMessageByNullResponseEntity() throws Exception {
+        HttpMessageConverter<Object> messageConverter = makeDefaultMessageConverter();
+        AccessDeniedExceptionResponseRenderer renderer = new AccessDeniedExceptionResponseRenderer(messageConverter);
+        ServletWebRequest webRequest = makeServletWebRequest();
 
-        @Nested
-        @DisplayName("지원되지 않는 미디어 타입일시")
-        class WhenNotSupportedMediaType {
-
-            @BeforeEach
-            void setup() {
-                when(messageConverter.canWrite(ErrorMessage.class, MediaType.APPLICATION_JSON)).thenReturn(false);
-            }
-
-            @Test
-            @DisplayName("HttpMediaTypeNotSupportedException 이 발생해야 한다.")
-            void shouldThrowsHttpMediaTypeNotSupportedException() {
-                assertThrows(HttpMediaTypeNotSupportedException.class, () -> new AccessDeniedExceptionResponseRenderer(messageConverter));
-            }
-        }
+        renderer.rendering(null, webRequest);
+        verifyNoMoreInteractions(webRequest.getResponse());
     }
 
-    @Nested
-    @DisplayName("Response 객체에 응답 메시지를 작성")
-    class WriteResponseMessage {
-        private AccessDeniedExceptionResponseRenderer renderer;
+    @Test
+    @DisplayName("응답 객체에 ResponseEntity 에 저장된 HTTP 상태 코드 복사")
+    void copyHttpStatusCodeInResponseEntityToResponseObject() throws Exception {
+        HttpMessageConverter<Object> messageConverter = makeDefaultMessageConverter();
+        ResponseEntity<ErrorMessage<Object>> responseEntity = makeAccessDeniedResponseEntity(makeAccessDeniedErrorMessage());
+        AccessDeniedExceptionResponseRenderer renderer = new AccessDeniedExceptionResponseRenderer(messageConverter);
+        ServletWebRequest webRequest = makeServletWebRequest();
 
-        @BeforeEach
-        void setup() throws Exception {
-            when(messageConverter.canWrite(any(), any())).thenReturn(true);
-            this.renderer = new AccessDeniedExceptionResponseRenderer(messageConverter);
-        }
+        renderer.rendering(responseEntity, webRequest);
+        verify(webRequest.getResponse(), times(1)).setStatus(HttpStatus.FORBIDDEN.value());
+    }
 
-        @Nested
-        @DisplayName("ResponseEntity 가 null 일시")
-        class WhenResponseEntityNull {
+    @Test
+    @DisplayName("ResponseEntity 의 Body가 null 일때 응답 객체에 응답 메시지를 쓰지 않아야 한다.")
+    void whenResponseEntityBodyNullDoesNotWriteResponseMessage() throws Exception {
+        HttpMessageConverter<Object> messageConverter = makeDefaultMessageConverter();
+        ResponseEntity<ErrorMessage<Object>> responseEntity = makeAccessDeniedResponseEntity(null);
+        AccessDeniedExceptionResponseRenderer renderer = new AccessDeniedExceptionResponseRenderer(messageConverter);
+        ServletWebRequest webRequest = makeServletWebRequest();
 
-            @Test
-            @DisplayName("아무 행동도 하지 않아야 한다.")
-            void shouldDoNothing() throws Exception {
-                renderer.rendering(null, webRequest0);
-                verifyNoMoreInteractions(response0);
-            }
-        }
+        renderer.rendering(responseEntity, webRequest);
+        verify(messageConverter, never()).write(any(), any(), any());
+    }
 
-        @Nested
-        @DisplayName("ResponserEntity 가 null 이 아닐시")
-        class WhenResponseEntityNotNull {
-            private ErrorMessage<Object> error0;
-            private ResponseEntity<ErrorMessage<Object>> responseEntity0;
-            private HttpHeaders headers = new HttpHeaders();
+    @Test
+    @DisplayName("컨버터를 이용한 응답 메시지 작성")
+    void writeResponseMessageByConverter() throws Exception {
+        HttpMessageConverter<Object> messageConverter = makeDefaultMessageConverter();
+        ArgumentCaptor<ServletServerHttpResponse> responseCaptor = ArgumentCaptor.forClass(ServletServerHttpResponse.class);
+        ErrorMessage<Object> errorMessage = makeAccessDeniedErrorMessage();
+        ResponseEntity<ErrorMessage<Object>> responseEntity = makeAccessDeniedResponseEntity(errorMessage);
+        AccessDeniedExceptionResponseRenderer renderer = new AccessDeniedExceptionResponseRenderer(messageConverter);
+        ServletWebRequest webRequest = makeServletWebRequest();
 
-            @BeforeEach
-            @SuppressWarnings("unchecked")
-            void setup() {
-                this.error0 = ErrorMessage.instance(ErrorCodes.ACCESS_DENIED, "TEST");
-                this.responseEntity0 = mock(ResponseEntity.class);
+        renderer.rendering(responseEntity, webRequest);
+        verify(messageConverter, times(1)).write(eq(errorMessage), eq(MediaType.APPLICATION_JSON), responseCaptor.capture());
+        responseCaptor.getValue().getBody(); // header flush
+        assertEquals(webRequest.getResponse(), responseCaptor.getValue().getServletResponse());
+    }
 
-                when(responseEntity0.getBody()).thenReturn(error0);
-                when(responseEntity0.getStatusCode()).thenReturn(HttpStatus.FORBIDDEN);
-                when(responseEntity0.getHeaders()).thenReturn(headers);
-                headers.setCacheControl(CacheControl.noStore());
-                headers.setPragma("no-cache");
-            }
+    @SuppressWarnings("unchecked")
+    private HttpMessageConverter<Object> makeDefaultMessageConverter() {
+        HttpMessageConverter<Object> messageConverter = mock(HttpMessageConverter.class);
+        when(messageConverter.canWrite(any(), any())).thenReturn(true);
+        return messageConverter;
+    }
 
-            @Test
-            @DisplayName("응답 객체에 ResponseEntity 에 저장된 HTTP 상태 코드를 복사해야 한다.")
-            void shouldCopyResponseEntityHttpStatusCode() throws Exception {
-                renderer.rendering(responseEntity0, webRequest0);
+    private ServletWebRequest makeServletWebRequest() {
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
 
-                verify(response0, times(1)).setStatus(HttpStatus.FORBIDDEN.value());
-            }
+        return new ServletWebRequest(request, response);
+    }
 
-            @Nested
-            @DisplayName("ResponseEntity 의 Body 가 null 일시")
-            class WhenResponseEntityBodyNull {
+    private HttpHeaders makeResponseHeader() {
+        HttpHeaders headers = new HttpHeaders();
 
-                @BeforeEach
-                void setup() {
-                    when(responseEntity0.getBody()).thenReturn(null);
-                }
+        headers.setCacheControl(CacheControl.noStore());
+        headers.setPragma("no-cache");
+        return headers;
+    }
 
-                @Test
-                @DisplayName("응답 객체에 ResponseEntity 에 저장된 헤더를 복사해야 한다.")
-                void shouldCopyResponseEntityHeaders() throws Exception {
-                    renderer.rendering(responseEntity0, webRequest0);
-                    verify(response0, times(1)).addHeader(HttpHeaders.CACHE_CONTROL, CacheControl.noStore().getHeaderValue());
-                    verify(response0, times(1)).addHeader(HttpHeaders.PRAGMA, "no-cache");
-                }
+    private ErrorMessage<Object> makeAccessDeniedErrorMessage() {
+        return ErrorMessage.instance(ErrorCodes.ACCESS_DENIED, "TEST");
+    }
 
-                @Test
-                @DisplayName("컨버터를 이용하여 응답 객체에 응답 메시지를 쓰지 않아야 한다.")
-                void shouldDontWriteResponseMessageByConverter() throws Exception {
-                    renderer.rendering(responseEntity0, webRequest0);
-                    verify(messageConverter, never()).write(any(), any(), any());
-                }
-            }
+    @SuppressWarnings("unchecked")
+    private ResponseEntity<ErrorMessage<Object>> makeAccessDeniedResponseEntity(ErrorMessage<Object> errorMessage) {
+        ResponseEntity<ErrorMessage<Object>> responseEntity = mock(ResponseEntity.class);
 
-            @Nested
-            @DisplayName("ResponseEntity 의 Body 가 null 이 아닐시")
-            class WhenResponseEntityBodyNotNull {
+        when(responseEntity.getBody()).thenReturn(errorMessage);
+        when(responseEntity.getStatusCode()).thenReturn(HttpStatus.FORBIDDEN);
+        when(responseEntity.getHeaders()).thenReturn(makeResponseHeader());
 
-                @Test
-                @DisplayName("응답 객체에 ResponseEntity 에 저장된 헤더를 복사해야 한다.")
-                void shouldCopyResponseEntityHeaders() throws Exception {
-                    ArgumentCaptor<ServletServerHttpResponse> responseCaptor = ArgumentCaptor.forClass(ServletServerHttpResponse.class);
-
-                    renderer.rendering(responseEntity0, webRequest0);
-                    verify(messageConverter, times(1)).write(eq(error0), eq(MediaType.APPLICATION_JSON), responseCaptor.capture());
-                    responseCaptor.getValue().getBody(); // header flush
-                    verify(response0, times(1)).addHeader(HttpHeaders.CACHE_CONTROL, CacheControl.noStore().getHeaderValue());
-                    verify(response0, times(1)).addHeader(HttpHeaders.PRAGMA, "no-cache");
-                }
-
-                @Test
-                @DisplayName("컨버터를 이용하여 응답 객체에 응답 메시지를 써야 한다.")
-                void shouldWriteResponseMessageByConverter() throws Exception {
-                    ArgumentCaptor<ServletServerHttpResponse> responseCaptor = ArgumentCaptor.forClass(ServletServerHttpResponse.class);
-
-                    renderer.rendering(responseEntity0, webRequest0);
-                    verify(messageConverter, times(1)).write(eq(error0), eq(MediaType.APPLICATION_JSON), responseCaptor.capture());
-                    assertEquals(response0, responseCaptor.getValue().getServletResponse());
-                }
-            }
-        }
+        return responseEntity;
     }
 }

@@ -27,20 +27,20 @@ class OAuth2AccessTokenTestHelper {
     static final LocalDateTime EXPIRATION_DATETIME = LocalDateTime.of(2020, 1, 29, 22, 51);
     static final LocalDateTime REFRESH_EXPIRATION_DATETIME = LocalDateTime.of(2020, 1, 29, 11, 9);
 
-    static OAuth2TokenIdGenerator configAccessTokenIdGenerator() {
+    static OAuth2TokenIdGenerator makeAccessTokenIdGenerator() {
         OAuth2TokenIdGenerator generator = mock(OAuth2TokenIdGenerator.class);
         when(generator.generateTokenValue()).thenReturn(ACCESS_TOKEN_ID);
         return generator;
     }
 
-    static OAuth2TokenIdGenerator configRefreshTokenIdGenerator() {
+    static OAuth2TokenIdGenerator makeRefreshTokenIdGenerator() {
         OAuth2TokenIdGenerator generator = mock(OAuth2TokenIdGenerator.class);
         when(generator.generateTokenValue()).thenReturn(REFRESH_TOKEN_ID);
         return generator;
     }
 
 
-    static OAuth2AuthorizedAccessToken mockAccessToken() {
+    static OAuth2AuthorizedAccessToken makeAccessToken() {
         return mock(OAuth2AuthorizedAccessToken.class);
     }
 }
