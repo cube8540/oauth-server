@@ -2,7 +2,6 @@ package cube8540.oauth.authentication.error;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.http.ResponseEntity;
@@ -36,41 +35,22 @@ class DefaultAuthenticationExceptionEntryPointTest {
         this.entryPoint = new DefaultAuthenticationExceptionEntryPoint<>(translator, renderer);
     }
 
-    @Nested
-    @DisplayName("예외 처리")
-    class Commences {
-        private ResponseEntity<Object> responseEntity;
-        private AuthenticationException exception;
-        private HttpServletRequest request;
-        private HttpServletResponse response;
+    @Test
+    @DisplayName("응답 메시지 작성")
+    @SuppressWarnings("unchecked")
+    void renderingResponseMessage() throws Exception {
+        ResponseEntity<Object> responseEntity = mock(ResponseEntity.class);
+        AuthenticationException exception = mock(AuthenticationException.class);
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
 
-        @BeforeEach
-        @SuppressWarnings("unchecked")
-        void setup() {
-            this.responseEntity = mock(ResponseEntity.class);
-            this.exception = mock(AuthenticationException.class);
-            this.request = mock(HttpServletRequest.class);
-            this.response = mock(HttpServletResponse.class);
+        when(translator.translate(exception)).thenReturn(responseEntity);
 
-            when(translator.translate(exception)).thenReturn(responseEntity);
-        }
-
-        @Test
-        @DisplayName("Renderer 을 이용하여 응답 메시지를 작성해야 한다.")
-        void shouldUsingRenderer() throws Exception {
-            ArgumentCaptor<ServletWebRequest> requestCaptor = ArgumentCaptor.forClass(ServletWebRequest.class);
-
-            entryPoint.commence(request, response, exception);
-            verify(renderer, times(1)).rendering(eq(responseEntity), requestCaptor.capture());
-            assertEquals(request, requestCaptor.getValue().getRequest());
-            assertEquals(response, requestCaptor.getValue().getResponse());
-        }
-
-        @Test
-        @DisplayName("Response 객체의 버퍼를 비워야 한다.")
-        void shouldFlushBufferResponse() throws Exception {
-            entryPoint.commence(request, response, exception);
-            verify(response, times(1)).flushBuffer();
-        }
+        ArgumentCaptor<ServletWebRequest> requestCaptor = ArgumentCaptor.forClass(ServletWebRequest.class);
+        entryPoint.commence(request, response, exception);
+        verify(renderer, times(1)).rendering(eq(responseEntity), requestCaptor.capture());
+        verify(response, times(1)).flushBuffer();
+        assertEquals(request, requestCaptor.getValue().getRequest());
+        assertEquals(response, requestCaptor.getValue().getResponse());
     }
 }

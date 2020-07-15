@@ -1,5 +1,6 @@
 package cube8540.oauth.authentication.credentials.oauth.security.endpoint;
 
+import cube8540.oauth.authentication.credentials.oauth.OAuth2Utils;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidGrantException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidRequestException;
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ClientRegistrationException;
@@ -10,941 +11,480 @@ import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDeta
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetailsService;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2RequestValidator;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
+import org.springframework.web.bind.support.SessionAttributeStore;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.security.Principal;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
+import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.AuthorizationEndpointTestHelper.CLIENT_NAME;
+import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.AuthorizationEndpointTestHelper.CLIENT_SCOPE;
+import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.AuthorizationEndpointTestHelper.CLIENT_SCOPE_DETAILS;
+import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.AuthorizationEndpointTestHelper.FORWARD_PAGE;
+import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.AuthorizationEndpointTestHelper.INVALID_GRANT_ERROR;
+import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.AuthorizationEndpointTestHelper.INVALID_GRANT_RESPONSE;
+import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.AuthorizationEndpointTestHelper.INVALID_REQUEST_ERROR;
+import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.AuthorizationEndpointTestHelper.INVALID_REQUEST_RESPONSE;
+import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.AuthorizationEndpointTestHelper.RAW_CLIENT_ID;
+import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.AuthorizationEndpointTestHelper.RAW_REDIRECT_URI;
+import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.AuthorizationEndpointTestHelper.RAW_RESOLVED_REDIRECT_URI;
+import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.AuthorizationEndpointTestHelper.RAW_RESOLVED_SCOPES;
+import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.AuthorizationEndpointTestHelper.RAW_USERNAME;
+import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.AuthorizationEndpointTestHelper.RESOLVED_REDIRECT_URI;
+import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.AuthorizationEndpointTestHelper.SCOPE;
+import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.AuthorizationEndpointTestHelper.SCOPE_DETAILS;
+import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.AuthorizationEndpointTestHelper.STATE;
+import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.AuthorizationEndpointTestHelper.UNAUTHORIZED_CLIENT_ERROR;
+import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.AuthorizationEndpointTestHelper.UNAUTHORIZED_CLIENT_RESPONSE;
+import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.AuthorizationEndpointTestHelper.makeAuthenticationTypeNotAuthentication;
+import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.AuthorizationEndpointTestHelper.makeAuthorityDetailsService;
+import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.AuthorizationEndpointTestHelper.makeAuthorizationRequest;
+import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.AuthorizationEndpointTestHelper.makeAuthorizedAuthentication;
+import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.AuthorizationEndpointTestHelper.makeClientDetails;
+import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.AuthorizationEndpointTestHelper.makeClientDetailsService;
+import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.AuthorizationEndpointTestHelper.makeEmptyApprovalParameter;
+import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.AuthorizationEndpointTestHelper.makeEmptyClientDetailsService;
+import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.AuthorizationEndpointTestHelper.makeEmptyModel;
+import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.AuthorizationEndpointTestHelper.makeErrorRequestValidator;
+import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.AuthorizationEndpointTestHelper.makeExceptionTranslator;
+import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.AuthorizationEndpointTestHelper.makeHttpServletRequest;
+import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.AuthorizationEndpointTestHelper.makeMismatchRedirectResolver;
+import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.AuthorizationEndpointTestHelper.makeModel;
+import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.AuthorizationEndpointTestHelper.makeNotAuthorizedAuthentication;
+import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.AuthorizationEndpointTestHelper.makePassRequestValidator;
+import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.AuthorizationEndpointTestHelper.makeRedirectResolver;
+import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.AuthorizationEndpointTestHelper.makeRequestParameter;
+import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.AuthorizationEndpointTestHelper.makeResponseEnhancer;
+import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.AuthorizationEndpointTestHelper.makeScopeApprovalResolver;
+import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.AuthorizationEndpointTestHelper.makeServletWebRequest;
+import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.AuthorizationEndpointTestHelper.makeSessionAttributeStore;
+import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.AuthorizationEndpointTestHelper.makeSessionStatus;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-@DisplayName("인가 엔드포인트 테스트")
+@DisplayName("인가 엔드 포인트 테스트")
 class AuthorizationEndpointTest {
 
-    @Nested
-    @DisplayName("인가")
-    class Authorize {
+    @Test
+    @DisplayName("인증 정보가 Authentication 타입이 아닐때 인가 요청")
+    void requestAuthorizationWhenPrincipalTypeIsNotAuthentication() {
+        Principal principal = makeAuthenticationTypeNotAuthentication();
+        Map<String, Object> model = makeEmptyModel();
+        Map<String, String> parameter = makeRequestParameter();
+        OAuth2ClientDetails clientDetails = makeClientDetails();
+        AuthorizationEndpoint endpoint = new AuthorizationEndpoint(makeClientDetailsService(clientDetails), makeAuthorityDetailsService(), makeResponseEnhancer());
 
-        @Nested
-        @DisplayName("인증 정보가 Authentication 타입이 아닐시")
-        class WhenPrincipalTypeIsNotAuthentication {
-            private Map<String, String> parameter;
-            private Map<String, Object> model;
-            private Principal principal;
-            private AuthorizationEndpoint endpoint;
-
-            @BeforeEach
-            void setup() {
-                this.parameter = AuthorizationEndpointTestHelper.mockAuthorizationRequestMap().build();
-                this.model = new HashMap<>();
-                this.principal = mock(Principal.class);
-                this.endpoint = new AuthorizationEndpoint(AuthorizationEndpointTestHelper.mockClientDetailsService().build(), AuthorizationEndpointTestHelper.mockScopeDetailsService().build(), AuthorizationEndpointTestHelper.mockResponseEnhancer());
-            }
-
-            @Test
-            @DisplayName("InsufficientAuthenticationException 이 발생해야 한다.")
-            void shouldThrowsInsufficientAuthenticationException() {
-                assertThrows(InsufficientAuthenticationException.class, () -> endpoint.authorize(parameter, model, principal));
-            }
-        }
-
-        @Nested
-        @DisplayName("인증 정보의 인증 여부가 false 일시")
-        class WhenAuthenticationObjectIsNotAuthenticated {
-            private Map<String, String> parameter;
-            private Map<String, Object> model;
-            private Principal principal;
-            private AuthorizationEndpoint endpoint;
-
-            @BeforeEach
-            void setup() {
-                this.parameter = AuthorizationEndpointTestHelper.mockAuthorizationRequestMap().build();
-                this.model = new HashMap<>();
-                this.principal = AuthorizationEndpointTestHelper.mockNotAuthorizedAuthentication();
-                this.endpoint = new AuthorizationEndpoint(AuthorizationEndpointTestHelper.mockClientDetailsService().build(), AuthorizationEndpointTestHelper.mockScopeDetailsService().build(), AuthorizationEndpointTestHelper.mockResponseEnhancer());
-            }
-
-            @Test
-            @DisplayName("InsufficientAuthenticationException 이 발생해야 한다.")
-            void shouldThrowsInsufficientAuthenticationException() {
-                assertThrows(InsufficientAuthenticationException.class, () -> endpoint.authorize(parameter, model, principal));
-            }
-        }
-
-        @Nested
-        @DisplayName("유저 인증을 완료한 요청일시")
-        class WhenAuthenticationCompletedRequesting {
-
-            @Nested
-            @DisplayName("요청 받은 응답 타입이 null 일시")
-            class WhenRequestingResponseTypeIsNull {
-                private Map<String, String> parameter;
-                private Map<String, Object> model;
-                private Principal principal;
-                private AuthorizationEndpoint endpoint;
-
-                @BeforeEach
-                void setup() {
-                    this.parameter = AuthorizationEndpointTestHelper.mockAuthorizationRequestMap().configDefault().configResponseType(null).build();
-                    this.model = new HashMap<>();
-                    this.principal = AuthorizationEndpointTestHelper.mockAuthorizedAuthentication();
-                    this.endpoint = new AuthorizationEndpoint(AuthorizationEndpointTestHelper.mockClientDetailsService().build(), AuthorizationEndpointTestHelper.mockScopeDetailsService().build(), AuthorizationEndpointTestHelper.mockResponseEnhancer());
-                }
-
-                @Test
-                @DisplayName("InvalidRequestException 이 발생해야 하며 에러 코드는 INVALID_REQUEST 이어야 한다.")
-                void shouldThrowsUnsupportedResponseTypeExceptionAndErrorCodeIsInvalidRequest() {
-                    OAuth2Error error = assertThrows(InvalidRequestException.class, () -> endpoint.authorize(parameter, model, principal))
-                            .getError();
-
-                    assertEquals(OAuth2ErrorCodes.INVALID_REQUEST, error.getErrorCode());
-                }
-            }
-
-            @Nested
-            @DisplayName("요청 받은 응답 타입이 유효한 응답 타입 일시")
-            class WhenRequestingResponseTypeIsCodeOrToken {
-
-                @Nested
-                @DisplayName("요청한 스코프가 유효하지 않을시")
-                class WhenRequestingScopeIsNotAllowed {
-                    private Map<String, String> parameter;
-                    private Map<String, Object> model;
-                    private Principal principal;
-                    private AuthorizationEndpoint endpoint;
-
-                    @BeforeEach
-                    void setup() {
-                        OAuth2ClientDetails clientDetails = AuthorizationEndpointTestHelper.mockClientDetails().configDefault().build();
-                        OAuth2ClientDetailsService clientDetailsService = AuthorizationEndpointTestHelper.mockClientDetailsService().registerClient(clientDetails).build();
-                        RedirectResolver redirectResolver = AuthorizationEndpointTestHelper.mockRedirectResolver().configResolve(clientDetails, AuthorizationEndpointTestHelper.RAW_REDIRECT_URI, AuthorizationEndpointTestHelper.RESOLVED_REDIRECT_URI).build();
-                        OAuth2RequestValidator requestValidator = AuthorizationEndpointTestHelper.mockRequestValidator().configNotAllowedScopes(clientDetails, AuthorizationEndpointTestHelper.SCOPE).build();
-
-                        this.parameter = AuthorizationEndpointTestHelper.mockAuthorizationRequestMap().configDefault().build();
-                        this.model = new HashMap<>();
-                        this.principal = AuthorizationEndpointTestHelper.mockAuthorizedAuthentication();
-                        this.endpoint = new AuthorizationEndpoint(clientDetailsService, AuthorizationEndpointTestHelper.mockScopeDetailsService().build(), AuthorizationEndpointTestHelper.mockResponseEnhancer());
-                        this.endpoint.setRedirectResolver(redirectResolver);
-                        this.endpoint.setRequestValidator(requestValidator);
-                    }
-
-                    @Test
-                    @DisplayName("InvalidGrantException 이 발생해야 하며 에러 코드는 INVALID_SCOPE 이어야 한다.")
-                    void shouldThrowsInvalidGrantException() {
-                        OAuth2Error error = assertThrows(InvalidGrantException.class, () -> endpoint.authorize(parameter, model, principal))
-                                .getError();
-                        assertEquals(OAuth2ErrorCodes.INVALID_SCOPE, error.getErrorCode());
-                    }
-                }
-
-                @Nested
-                @DisplayName("요청한 스코프가 null 일시")
-                class WhenRequestingScopeIsNull extends AuthorizationRequestEndpointAssertSetup {
-
-                    @Override
-                    protected void configRequestMap(AuthorizationEndpointTestHelper.MockAuthorizationRequestMap requestMap) {
-                        requestMap.configScopeNull();
-                    }
-
-                    @Test
-                    @DisplayName("클라이언트에 저장된 스코프를 세션에 저장해야 한다.")
-                    void shouldSaveClientScopeToSession() {
-                        endpoint.authorize(parameter, model, principal);
-
-                        AuthorizationRequest storedRequest = (AuthorizationRequest) model.get(AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE);
-                        Assertions.assertEquals(AuthorizationEndpointTestHelper.CLIENT_SCOPE, storedRequest.getRequestScopes());
-                    }
-
-                    @Test
-                    @DisplayName("클라이언트에 저장된 스코프를 ModelAndView 에 저장해야 한다.")
-                    void shouldSaveClientScopeToModelAndView() {
-                        ModelAndView modelAndView = endpoint.authorize(parameter, model, principal);
-
-                        Assertions.assertEquals(AuthorizationEndpointTestHelper.CLIENT_SCOPE_DETAILS, modelAndView.getModel().get(AuthorizationEndpoint.AUTHORIZATION_REQUEST_SCOPES_NAME));
-                    }
-                }
-
-                @Nested
-                @DisplayName("요청한 스코프가 null 이 아닐시")
-                class WhenRequestingScopeIsNotNull extends AuthorizationRequestEndpointAssertSetup {
-
-                    @Test
-                    @DisplayName("요청 받은 스코프를 세션에 저장해야 한다.")
-                    void shouldSaveRequestingScopeToSession() {
-                        endpoint.authorize(parameter, model, principal);
-
-                        AuthorizationRequest storedRequest = (AuthorizationRequest) model.get(AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE);
-                        Assertions.assertEquals(AuthorizationEndpointTestHelper.SCOPE, storedRequest.getRequestScopes());
-                    }
-
-                    @Test
-                    @DisplayName("요청 받은 스코프를 ModelAndView 에 저장해야 한다.")
-                    void shouldSaveRequestingScopeToModelAndView() {
-                        ModelAndView modelAndView = endpoint.authorize(parameter, model, principal);
-
-                        Assertions.assertEquals(AuthorizationEndpointTestHelper.SCOPE_DETAILS, modelAndView.getModel().get(AuthorizationEndpoint.AUTHORIZATION_REQUEST_SCOPES_NAME));
-                    }
-                }
-            }
-        }
+        assertThrows(InsufficientAuthenticationException.class, () -> endpoint.authorize(parameter, model, principal));
     }
 
-    @Nested
-    @DisplayName("스코프 허용 확인 엔드포인트")
-    class ScopeApprovalEndpoint {
+    @Test
+    @DisplayName("인증 받지 않은 요청 일때 인가 요청")
+    void requestAuthorizationWhenNotAuthenticationRequest() {
+        Principal principal = makeNotAuthorizedAuthentication();
+        Map<String, Object> model = makeEmptyModel();
+        Map<String, String> parameter = makeRequestParameter();
+        OAuth2ClientDetails clientDetails = makeClientDetails();
+        AuthorizationEndpoint endpoint = new AuthorizationEndpoint(makeClientDetailsService(clientDetails), makeAuthorityDetailsService(), makeResponseEnhancer());
 
-        @Nested
-        @DisplayName("인증 정보가 Authentication 타입이 아닐시")
-        class WhenPrincipalTypeIsNotAuthentication {
-            private Map<String, String> approvalParameter;
-            private Map<String, Object> model;
-            private SessionStatus sessionStatus;
-            private Principal principal;
-            private AuthorizationEndpoint endpoint;
-
-            @BeforeEach
-            void setup() {
-                this.approvalParameter = new HashMap<>();
-                this.model = new HashMap<>();
-                this.sessionStatus = mock(SessionStatus.class);
-                this.principal = mock(Principal.class);
-                this.endpoint = new AuthorizationEndpoint(AuthorizationEndpointTestHelper.mockClientDetailsService().build(), AuthorizationEndpointTestHelper.mockScopeDetailsService().build(), AuthorizationEndpointTestHelper.mockResponseEnhancer());
-            }
-
-            @Test
-            @DisplayName("InsufficientAuthenticationException이 발생해야 한다.")
-            void shouldThrowsInsufficientAuthenticationException() {
-                assertThrows(InsufficientAuthenticationException.class, () -> endpoint.approval(approvalParameter, model, sessionStatus, principal));
-            }
-        }
-
-        @Nested
-        @DisplayName("인증 정보의 인증 여부가 false 일시")
-        class WhenAuthenticationObjectIsNotAuthenticated {
-            private Map<String, String> approvalParameter;
-            private Map<String, Object> model;
-            private SessionStatus sessionStatus;
-            private Authentication principal;
-            private AuthorizationEndpoint endpoint;
-
-            @BeforeEach
-            void setup() {
-                this.approvalParameter = new HashMap<>();
-                this.model = new HashMap<>();
-                this.sessionStatus = mock(SessionStatus.class);
-                this.principal = AuthorizationEndpointTestHelper.mockNotAuthorizedAuthentication();
-                this.endpoint = new AuthorizationEndpoint(AuthorizationEndpointTestHelper.mockClientDetailsService().build(), AuthorizationEndpointTestHelper.mockScopeDetailsService().build(), AuthorizationEndpointTestHelper.mockResponseEnhancer());
-            }
-
-            @Test
-            @DisplayName("InsufficientAuthenticationException 이 발생해야 한다.")
-            void shouldThrowsInsufficientAuthenticationException() {
-                assertThrows(InsufficientAuthenticationException.class, () -> endpoint.approval(approvalParameter, model, sessionStatus, principal));
-            }
-        }
-
-        @Nested
-        @DisplayName("세션에 원본 인가 요청 정보가 없을시")
-        class WhenNotHaveOriginalAuthorizationRequestInSession {
-            private Map<String, String> approvalParameter;
-            private Map<String, Object> model;
-            private SessionStatus sessionStatus;
-            private Authentication principal;
-            private AuthorizationEndpoint endpoint;
-
-            @BeforeEach
-            void setup() {
-                Map<String, String> originalAuthorizationMap = new HashMap<>();
-
-                this.approvalParameter = new HashMap<>();
-                this.model = new HashMap<>();
-                this.sessionStatus = mock(SessionStatus.class);
-                this.principal = AuthorizationEndpointTestHelper.mockAuthorizedAuthentication();
-                this.endpoint = new AuthorizationEndpoint(AuthorizationEndpointTestHelper.mockClientDetailsService().build(), AuthorizationEndpointTestHelper.mockScopeDetailsService().build(), AuthorizationEndpointTestHelper.mockResponseEnhancer());
-
-                this.model.put(AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE, null);
-                this.model.put(AuthorizationEndpoint.ORIGINAL_AUTHORIZATION_REQUEST_ATTRIBUTE, originalAuthorizationMap);
-            }
-
-            @Test
-            @DisplayName("InvalidRequestException 이 발생해야 하며 에러 코드는 INVALID_REQUIEST 이어야 한다.")
-            void shouldThrowsInvalidRequestException() {
-                OAuth2Error error = assertThrows(InvalidRequestException.class, () -> endpoint.approval(approvalParameter, model, sessionStatus, principal))
-                        .getError();
-                assertEquals(OAuth2ErrorCodes.INVALID_REQUEST, error.getErrorCode());
-            }
-        }
-
-        @Nested
-        @DisplayName("세션에 원본 인가 요청 매개변수 정보가 없을시")
-        class WhenNotOriginalAuthorizationRequestInSession {
-            private Map<String, String> approvalParameter;
-            private Map<String, Object> model;
-            private SessionStatus sessionStatus;
-            private Authentication principal;
-            private AuthorizationEndpoint endpoint;
-
-            @BeforeEach
-            void setup() {
-                AuthorizationRequest originalAuthorizationRequest = mock(AuthorizationRequest.class);
-
-                this.approvalParameter = new HashMap<>();
-                this.model = new HashMap<>();
-                this.sessionStatus = mock(SessionStatus.class);
-                this.principal = AuthorizationEndpointTestHelper.mockAuthorizedAuthentication();
-                this.endpoint = new AuthorizationEndpoint(AuthorizationEndpointTestHelper.mockClientDetailsService().build(), AuthorizationEndpointTestHelper.mockScopeDetailsService().build(), AuthorizationEndpointTestHelper.mockResponseEnhancer());
-
-                this.model.put(AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE, originalAuthorizationRequest);
-                this.model.put(AuthorizationEndpoint.ORIGINAL_AUTHORIZATION_REQUEST_ATTRIBUTE, null);
-            }
-
-            @Test
-            @DisplayName("InvalidRequestException 이 발생해야 하며 에러 코드는 INVALID_REQUEST 이어야 한다.")
-            void shouldThrowsInvalidRequestException() {
-                OAuth2Error error = assertThrows(InvalidRequestException.class, () -> endpoint.approval(approvalParameter, model, sessionStatus, principal))
-                        .getError();
-                assertEquals(OAuth2ErrorCodes.INVALID_REQUEST, error.getErrorCode());
-            }
-        }
-
-        @Nested
-        @DisplayName("스코프에 대한 허용을 완료 했을시")
-        class WhenApprovalSuccess {
-
-            protected Map<String, String> approvalParameter;
-            protected Map<String, String> originalAuthorizationRequestMap;
-            protected Map<String, Object> model;
-            protected SessionStatus sessionStatus;
-            protected Authentication authentication;
-            protected AuthorizationRequest originalAuthorizationRequest;
-            protected AuthorizationEndpoint endpoint;
-            protected AuthorizationResponseEnhancer responseEnhancer;
-
-            @BeforeEach
-            void setup() {
-                AuthorizationEndpointTestHelper.MockAuthorizationRequest originalRequest = AuthorizationEndpointTestHelper.mockAuthorizationRequest().configDefault();
-
-                configOriginalAuthorizationRequest(originalRequest);
-
-                this.approvalParameter = new HashMap<>();
-                this.originalAuthorizationRequestMap = new HashMap<>();
-                this.model = new HashMap<>();
-                this.sessionStatus = mock(SessionStatus.class);
-                this.authentication = AuthorizationEndpointTestHelper.mockAuthorizedAuthentication();
-                this.originalAuthorizationRequest = originalRequest.build();
-                this.responseEnhancer = AuthorizationEndpointTestHelper.mockResponseEnhancer();
-                this.endpoint = new AuthorizationEndpoint(AuthorizationEndpointTestHelper.mockClientDetailsService().build(), AuthorizationEndpointTestHelper.mockScopeDetailsService().build(), responseEnhancer);
-
-                configOriginalAuthorizationRequestMap(originalAuthorizationRequestMap);
-
-                this.model.put(AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE, originalAuthorizationRequest);
-                this.model.put(AuthorizationEndpoint.ORIGINAL_AUTHORIZATION_REQUEST_ATTRIBUTE, originalAuthorizationRequestMap);
-                this.endpoint.setApprovalResolver(AuthorizationEndpointTestHelper.mockScopeApprovalResolver().configResolve(originalAuthorizationRequest, approvalParameter, AuthorizationEndpointTestHelper.RAW_RESOLVED_SCOPES).build());
-            }
-
-            protected void configOriginalAuthorizationRequest(AuthorizationEndpointTestHelper.MockAuthorizationRequest request) {}
-
-            protected void configOriginalAuthorizationRequestMap(Map<String, String> originalRequestMap) {}
-
-            @Test
-            @DisplayName("원본 인가 요청에는 어떤 설정도 하지 않아야 한다.")
-            void shouldNotConfigOriginalAuthorizationRequest() {
-                endpoint.approval(approvalParameter, model, sessionStatus, authentication);
-
-                verify(originalAuthorizationRequest, never()).setRequestScopes(any());
-                verify(originalAuthorizationRequest, never()).setRedirectUri(any());
-            }
-
-            @Test
-            @DisplayName("요청한 리다이렉트 주소로 리다이렉트 하는 View 를 설정해야 한다.")
-            void shouldConfigRedirectToRequestingRedirectUriView() {
-                ModelAndView modelAndView = endpoint.approval(approvalParameter, model, sessionStatus, authentication);
-
-                assertTrue(modelAndView.getView() instanceof RedirectView);
-                Assertions.assertEquals(AuthorizationEndpointTestHelper.RESOLVED_REDIRECT_URI.toString(), ((RedirectView) modelAndView.getView()).getUrl());
-            }
-
-            @Test
-            @DisplayName("리다이렉트 주소에 추가 정보를 입력해야 한다.")
-            void shouldSetAddedInformationToRedirectUrl() {
-                ArgumentCaptor<ModelAndView> viewCaptor = ArgumentCaptor.forClass(ModelAndView.class);
-                ModelAndView modelAndView = endpoint.approval(approvalParameter, model, sessionStatus, authentication);
-
-                verify(responseEnhancer, times(1)).enhance(viewCaptor.capture(), any());
-                assertEquals(modelAndView, viewCaptor.getValue());
-            }
-        }
+        assertThrows(InsufficientAuthenticationException.class, () -> endpoint.authorize(parameter, model, principal));
     }
 
-    @Nested
+    @Test
+    @DisplayName("요청 받은 응답 타입이 null 일때 인가 요청")
+    void requestAuthorizationWhenResponseTypeIsNull() {
+        Principal principal = makeAuthorizedAuthentication();
+        Map<String, Object> model = makeEmptyModel();
+        Map<String, String> parameter = makeRequestParameter();
+        OAuth2ClientDetails clientDetails = makeClientDetails();
+        AuthorizationEndpoint endpoint = new AuthorizationEndpoint(makeClientDetailsService(clientDetails), makeAuthorityDetailsService(), makeResponseEnhancer());
+
+        parameter.put(OAuth2Utils.AuthorizationRequestKey.RESPONSE_TYPE, null);
+
+        OAuth2Error error = assertThrows(InvalidRequestException.class, () -> endpoint.authorize(parameter, model, principal)).getError();
+        assertEquals(OAuth2ErrorCodes.INVALID_REQUEST, error.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("요청한 스코프가 유효 하지 않을때 인가 요청")
+    void requestAuthorizationWhenRequestScopeNotAllowed() {
+        Principal principal = makeAuthorizedAuthentication();
+        Map<String, Object> model = makeEmptyModel();
+        Map<String, String> parameter = makeRequestParameter();
+        OAuth2ClientDetails clientDetails = makeClientDetails();
+        OAuth2RequestValidator errorValidator = makeErrorRequestValidator(clientDetails, SCOPE);
+        RedirectResolver redirectResolver = makeRedirectResolver(clientDetails, RAW_REDIRECT_URI, RESOLVED_REDIRECT_URI);
+        AuthorizationEndpoint endpoint = new AuthorizationEndpoint(makeClientDetailsService(clientDetails), makeAuthorityDetailsService(), makeResponseEnhancer());
+
+        endpoint.setRedirectResolver(redirectResolver);
+        endpoint.setRequestValidator(errorValidator);
+
+        OAuth2Error error = assertThrows(InvalidGrantException.class, () -> endpoint.authorize(parameter, model, principal)).getError();
+        assertEquals(OAuth2ErrorCodes.INVALID_SCOPE, error.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("요청한 스코프가 null 일때 인가 요청")
+    void requestAuthorizationWhenRequestScopeIsNull() {
+        Principal principal = makeAuthorizedAuthentication();
+        Map<String, Object> model = makeEmptyModel();
+        Map<String, String> parameter = makeRequestParameter();
+        OAuth2ClientDetails clientDetails = makeClientDetails();
+        OAuth2RequestValidator passValidator = makePassRequestValidator(clientDetails, Collections.emptySet());
+        RedirectResolver redirectResolver = makeRedirectResolver(clientDetails, RAW_REDIRECT_URI, RESOLVED_REDIRECT_URI);
+        AuthorizationEndpoint endpoint = new AuthorizationEndpoint(makeClientDetailsService(clientDetails), makeAuthorityDetailsService(), makeResponseEnhancer());
+
+        endpoint.setRedirectResolver(redirectResolver);
+        endpoint.setRequestValidator(passValidator);
+        endpoint.setApprovalPage(FORWARD_PAGE);
+        parameter.put(OAuth2Utils.AuthorizationRequestKey.SCOPE, null);
+
+        ModelAndView modelAndView = endpoint.authorize(parameter, model, principal);
+        AuthorizationRequest storedRequest = (AuthorizationRequest) model.get(AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE);
+        assertStoredRequest(model, parameter, modelAndView, storedRequest);
+        assertEquals(CLIENT_SCOPE, storedRequest.getRequestScopes());
+        assertEquals(CLIENT_SCOPE_DETAILS, modelAndView.getModel().get(AuthorizationEndpoint.AUTHORIZATION_REQUEST_SCOPES_NAME));
+    }
+
+    @Test
+    @DisplayName("요청 스코프가 유효할 때 인가 요청")
+    void requestAuthorizationWhenRequestScopeAllowed() {
+        Principal principal = makeAuthorizedAuthentication();
+        Map<String, Object> model = makeEmptyModel();
+        Map<String, String> parameter = makeRequestParameter();
+        OAuth2ClientDetails clientDetails = makeClientDetails();
+        OAuth2RequestValidator passValidator = makePassRequestValidator(clientDetails, SCOPE);
+        RedirectResolver redirectResolver = makeRedirectResolver(clientDetails, RAW_REDIRECT_URI, RESOLVED_REDIRECT_URI);
+        AuthorizationEndpoint endpoint = new AuthorizationEndpoint(makeClientDetailsService(clientDetails), makeAuthorityDetailsService(), makeResponseEnhancer());
+
+        endpoint.setRedirectResolver(redirectResolver);
+        endpoint.setRequestValidator(passValidator);
+        endpoint.setApprovalPage(FORWARD_PAGE);
+
+        ModelAndView modelAndView = endpoint.authorize(parameter, model, principal);
+        AuthorizationRequest storedRequest = (AuthorizationRequest) model.get(AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE);
+        assertStoredRequest(model, parameter, modelAndView, storedRequest);
+        assertEquals(SCOPE, storedRequest.getRequestScopes());
+        assertEquals(SCOPE_DETAILS, modelAndView.getModel().get(AuthorizationEndpoint.AUTHORIZATION_REQUEST_SCOPES_NAME));
+    }
+
+    @Test
+    @DisplayName("인증 정보가 Authentication 타입이 아닐때 스코프 허용")
+    void approvalScopeWhenPrincipalTypeIsNotAuthentication() {
+        Principal principal = makeNotAuthorizedAuthentication();
+        Map<String, String> approvalParameter = makeEmptyApprovalParameter();
+        Map<String, Object> model = makeEmptyModel();
+        SessionStatus sessionStatus = makeSessionStatus();
+        OAuth2ClientDetails clientDetails = makeClientDetails();
+        AuthorizationEndpoint endpoint = new AuthorizationEndpoint(makeClientDetailsService(clientDetails), makeAuthorityDetailsService(), makeResponseEnhancer());
+
+        assertThrows(InsufficientAuthenticationException.class, () -> endpoint.approval(approvalParameter, model, sessionStatus, principal));
+    }
+
+    @Test
+    @DisplayName("인증을 받지 않은 요청일 때 스코프 허용")
+    void approvalScopeWhenRequestNotAuthentication() {
+        Principal principal = makeNotAuthorizedAuthentication();
+        Map<String, String> approvalParameter = makeEmptyApprovalParameter();
+        Map<String, Object> model = makeEmptyModel();
+        SessionStatus sessionStatus = makeSessionStatus();
+        OAuth2ClientDetails clientDetails = makeClientDetails();
+        AuthorizationEndpoint endpoint = new AuthorizationEndpoint(makeClientDetailsService(clientDetails), makeAuthorityDetailsService(), makeResponseEnhancer());
+
+        assertThrows(InsufficientAuthenticationException.class, () -> endpoint.approval(approvalParameter, model, sessionStatus, principal));
+    }
+
+    @Test
+    @DisplayName("세션에 원본 인가 요청 정보가 없을떄 스코프 허용")
+    void approvalScopeWhenSessionNotHasOriginalAuthorizationRequest() {
+        Principal principal = makeAuthorizedAuthentication();
+        Map<String, String> approvalParameter = makeEmptyApprovalParameter();
+        Map<String, Object> model = makeModel(null, makeAuthorizationRequest());
+        SessionStatus sessionStatus = makeSessionStatus();
+        OAuth2ClientDetails clientDetails = makeClientDetails();
+        AuthorizationEndpoint endpoint = new AuthorizationEndpoint(makeClientDetailsService(clientDetails), makeAuthorityDetailsService(), makeResponseEnhancer());
+
+        OAuth2Error error = assertThrows(InvalidRequestException.class, () -> endpoint.approval(approvalParameter, model, sessionStatus, principal)).getError();
+        assertEquals(OAuth2ErrorCodes.INVALID_REQUEST, error.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("세션에 인가 요청 정보가 없을때 스코프 허용")
+    void approvalScopeWhenSessionNotHasAuthorizationRequest() {
+        Principal principal = makeAuthorizedAuthentication();
+        Map<String, String> approvalParameter = makeEmptyApprovalParameter();
+        Map<String, Object> model = makeModel(makeRequestParameter(), null);
+        SessionStatus sessionStatus = makeSessionStatus();
+        OAuth2ClientDetails clientDetails = makeClientDetails();
+        AuthorizationEndpoint endpoint = new AuthorizationEndpoint(makeClientDetailsService(clientDetails), makeAuthorityDetailsService(), makeResponseEnhancer());
+
+        OAuth2Error error = assertThrows(InvalidRequestException.class, () -> endpoint.approval(approvalParameter, model, sessionStatus, principal)).getError();
+        assertEquals(OAuth2ErrorCodes.INVALID_REQUEST, error.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("스코프 허용")
+    void approvalScope() {
+        ArgumentCaptor<ModelAndView> viewCaptor = ArgumentCaptor.forClass(ModelAndView.class);
+        Principal principal = makeAuthorizedAuthentication();
+        Map<String, String> approvalParameter = makeEmptyApprovalParameter();
+        Map<String, String> originalAuthorizationRequestMap = makeRequestParameter();
+        AuthorizationRequest originalAuthorizationRequest = makeAuthorizationRequest();
+        Map<String, Object> model = makeModel(originalAuthorizationRequestMap, originalAuthorizationRequest);
+        AuthorizationResponseEnhancer enhancer = makeResponseEnhancer();
+        SessionStatus sessionStatus = makeSessionStatus();
+        ScopeApprovalResolver resolver = makeScopeApprovalResolver(originalAuthorizationRequest, approvalParameter, RAW_RESOLVED_SCOPES);
+        AuthorizationEndpoint endpoint = new AuthorizationEndpoint(makeClientDetailsService(makeClientDetails()), makeAuthorityDetailsService(), enhancer);
+
+        endpoint.setApprovalResolver(resolver);
+
+        ModelAndView modelAndView = endpoint.approval(approvalParameter, model, sessionStatus, principal);
+        verify(originalAuthorizationRequest, never()).setRequestScopes(any());
+        verify(originalAuthorizationRequest, never()).setRedirectUri(any());
+        assertTrue(modelAndView.getView() instanceof RedirectView);
+        assertEquals(RESOLVED_REDIRECT_URI.toString(), ((RedirectView) modelAndView.getView()).getUrl());
+        verify(enhancer, times(1)).enhance(viewCaptor.capture(), any());
+        assertEquals(modelAndView, viewCaptor.getValue());
+    }
+
+    @Test
     @DisplayName("리다이렉트 인증 예외 발생시")
-    class WhenThrowsRedirectMismatchException {
-        private RedirectMismatchException redirectMismatchException;
-        private ServletWebRequest servletWebRequest;
-        private HttpServletResponse servletResponse;
-        private AuthorizationEndpoint endpoint;
+    void whenThrowsRedirectMismatchException() {
+        RedirectMismatchException exception = new RedirectMismatchException("TEST");
+        ServletWebRequest webRequest = makeServletWebRequest();
+        OAuth2ExceptionTranslator translator = makeExceptionTranslator(exception, INVALID_GRANT_RESPONSE);
+        AuthorizationEndpoint endpoint = new AuthorizationEndpoint(makeClientDetailsService(makeClientDetails()), makeAuthorityDetailsService(), makeResponseEnhancer());
 
-        @BeforeEach
-        void setup() {
-            this.redirectMismatchException = new RedirectMismatchException("TEST");
-            this.servletResponse = mock(HttpServletResponse.class);
-            this.servletWebRequest = new ServletWebRequest(mock(HttpServletRequest.class), servletResponse);
-            this.endpoint = new AuthorizationEndpoint(AuthorizationEndpointTestHelper.mockClientDetailsService().build(), AuthorizationEndpointTestHelper.mockScopeDetailsService().build(), AuthorizationEndpointTestHelper.mockResponseEnhancer());
+        endpoint.setExceptionTranslator(translator);
 
-            OAuth2ExceptionTranslator exceptionTranslator = AuthorizationEndpointTestHelper.mockExceptionTranslator().configTranslate(redirectMismatchException, AuthorizationEndpointTestHelper.INVALID_GRANT_RESPONSE).build();
-            this.endpoint.setExceptionTranslator(exceptionTranslator);
-        }
-
-        @Test
-        @DisplayName("HTTP 상태 코드는 401이어야 한다.")
-        void shouldHttpStatusCode401() {
-            endpoint.handleOAuth2AuthenticationException(redirectMismatchException, servletWebRequest);
-
-            verify(servletResponse, times(1)).setStatus(401);
-        }
-
-        @Test
-        @DisplayName("에러페이지로 포워딩 되어야 한다.")
-        void shouldForwardingErrorPage() {
-            ModelAndView modelAndView = endpoint.handleOAuth2AuthenticationException(redirectMismatchException, servletWebRequest);
-
-            assertEquals("/oauth/error", modelAndView.getViewName());
-        }
-
-        @Test
-        @DisplayName("ModelAndView 에 OAuth2 에러 정보를 저장해야 한다.")
-        void shouldSaveOAuth2ErrorCodeToModelAndView() {
-            ModelAndView modelAndView = endpoint.handleOAuth2AuthenticationException(redirectMismatchException, servletWebRequest);
-
-            Assertions.assertEquals(AuthorizationEndpointTestHelper.INVALID_GRANT_ERROR, modelAndView.getModel().get("error"));
-        }
+        ModelAndView modelAndView = endpoint.handleOAuth2AuthenticationException(exception, webRequest);
+        verify(webRequest.getResponse(), times(1)).setStatus(401);
+        assertEquals("/oauth/error", modelAndView.getViewName());
+        assertEquals(INVALID_GRANT_ERROR, modelAndView.getModel().get("error"));
     }
 
-    @Nested
-    @DisplayName("OAuth 클라이언트 인증 예외 발생시")
-    class WhenThrowsClientAuthenticationException {
-        private OAuth2ClientRegistrationException clientRegistrationException;
-        private ServletWebRequest servletWebRequest;
-        private HttpServletResponse servletResponse;
-        private AuthorizationEndpoint endpoint;
+    @Test
+    @DisplayName("OAuth2 클라이언트 인증 예외 발생시")
+    void whenThrowsClientAuthenticationException() {
+        OAuth2ClientRegistrationException exception = new OAuth2ClientRegistrationException("TEST");
+        ServletWebRequest webRequest = makeServletWebRequest();
+        OAuth2ExceptionTranslator translator = makeExceptionTranslator(exception, UNAUTHORIZED_CLIENT_RESPONSE);
+        AuthorizationEndpoint endpoint = new AuthorizationEndpoint(makeClientDetailsService(makeClientDetails()), makeAuthorityDetailsService(), makeResponseEnhancer());
 
-        @BeforeEach
-        void setup() {
-            this.clientRegistrationException = new OAuth2ClientRegistrationException("TEST");
-            this.servletResponse = mock(HttpServletResponse.class);
-            this.servletWebRequest = new ServletWebRequest(mock(HttpServletRequest.class), servletResponse);
-            this.endpoint = new AuthorizationEndpoint(AuthorizationEndpointTestHelper.mockClientDetailsService().build(), AuthorizationEndpointTestHelper.mockScopeDetailsService().build(), AuthorizationEndpointTestHelper.mockResponseEnhancer());
+        endpoint.setExceptionTranslator(translator);
 
-            OAuth2ExceptionTranslator exceptionTranslator = AuthorizationEndpointTestHelper.mockExceptionTranslator().configTranslate(clientRegistrationException, AuthorizationEndpointTestHelper.UNAUTHORIZED_CLIENT_RESPONSE).build();
-            this.endpoint.setExceptionTranslator(exceptionTranslator);
-        }
-
-        @Test
-        @DisplayName("HTTP 상태 코드는 401이어야 한다.")
-        void shouldHttpStatusCode401() {
-            endpoint.handleClientRegistrationException(clientRegistrationException, servletWebRequest);
-
-            verify(servletResponse, times(1)).setStatus(401);
-        }
-
-        @Test
-        @DisplayName("에러페이지로 포워딩 되어야 한다.")
-        void shouldForwardingErrorPage() {
-            ModelAndView modelAndView = endpoint.handleClientRegistrationException(clientRegistrationException, servletWebRequest);
-
-            assertEquals("/oauth/error", modelAndView.getViewName());
-        }
-
-        @Test
-        @DisplayName("ModelAndView 에 OAuth2 에러 정보를 저장해야 한다.")
-        void shouldSaveOAuth2ErrorCodeToModelAndView() {
-            ModelAndView modelAndView = endpoint.handleClientRegistrationException(clientRegistrationException, servletWebRequest);
-
-            Assertions.assertEquals(AuthorizationEndpointTestHelper.UNAUTHORIZED_CLIENT_ERROR, modelAndView.getModel().get("error"));
-        }
+        ModelAndView modelAndView = endpoint.handleClientRegistrationException(exception, webRequest);
+        verify(webRequest.getResponse(), times(1)).setStatus(401);
+        assertEquals("/oauth/error", modelAndView.getViewName());
+        assertEquals(UNAUTHORIZED_CLIENT_ERROR, modelAndView.getModel().get("error"));
     }
 
-    @Nested
-    @DisplayName("예상하지 못한 예외 발생했을시")
-    class WhenThrowsUnexpectedException {
-
-        @Nested
-        @DisplayName("세션에 인가 요청 정보가 남아 있지 않을시")
-        class WhenAuthorizationRequestNotRemainedInSession {
-
-            @Nested
-            @DisplayName("클라이언트 정보 검색중 예외가 발생할시")
-            class WhenThrowsExceptionDuringClientLookup {
-                private Exception exception;
-                private ServletWebRequest servletWebRequest;
-                private AuthorizationEndpoint endpoint;
-
-                @BeforeEach
-                void setup() {
-                    OAuth2ClientDetailsService clientDetailsService = AuthorizationEndpointTestHelper.mockClientDetailsService().emptyClient().build();
-                    HttpServletRequest servletRequest = AuthorizationEndpointTestHelper.mockHttpServletRequest().configDefault().build();
-
-                    this.exception = new Exception("TEST");
-                    this.servletWebRequest = new ServletWebRequest(servletRequest, mock(HttpServletResponse.class));
-
-                    this.endpoint = new AuthorizationEndpoint(clientDetailsService, AuthorizationEndpointTestHelper.mockScopeDetailsService().build(), AuthorizationEndpointTestHelper.mockResponseEnhancer());
-                    this.endpoint.setSessionAttributeStore(AuthorizationEndpointTestHelper.mockSessionAttributeStore().configRetrieveAttribute(servletWebRequest, AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE, null).build());
-                    this.endpoint.setExceptionTranslator(AuthorizationEndpointTestHelper.mockExceptionTranslator().configTranslate(exception, AuthorizationEndpointTestHelper.INVALID_REQUEST_RESPONSE).build());
-                }
-
-                @Test
-                @DisplayName("에러 페이지로 포워딩 해야 한다.")
-                void shouldForwardingErrorPage() {
-                    ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
-
-                    assertEquals("/oauth/error", modelAndView.getViewName());
-                }
-
-                @Test
-                @DisplayName("ModelAndView 에 OAuth2 에러 정보를 저장해야 한다.")
-                void shouldSaveOAuth2ErrorCodeToModelAndView() {
-                    ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
-
-                    Assertions.assertEquals(AuthorizationEndpointTestHelper.INVALID_REQUEST_ERROR, modelAndView.getModel().get("error"));
-                }
-            }
-
-            @Nested
-            @DisplayName("요청 받은 리다이렉트 주소가 유효하지 않을시")
-            class WhenRequestingRedirectUriNotAllowed {
-                private Exception exception;
-                private ServletWebRequest servletWebRequest;
-                private AuthorizationEndpoint endpoint;
-
-                @BeforeEach
-                void setup() {
-                    OAuth2ClientDetails clientDetails = AuthorizationEndpointTestHelper.mockClientDetails().configDefault().build();
-                    OAuth2ClientDetailsService clientDetailsService = AuthorizationEndpointTestHelper.mockClientDetailsService().registerClient(clientDetails).build();
-                    HttpServletRequest servletRequest = AuthorizationEndpointTestHelper.mockHttpServletRequest().configDefault().build();
-
-                    this.exception = new Exception("TEST");
-                    this.servletWebRequest = new ServletWebRequest(servletRequest, mock(HttpServletResponse.class));
-
-                    this.endpoint = new AuthorizationEndpoint(clientDetailsService, AuthorizationEndpointTestHelper.mockScopeDetailsService().build(), AuthorizationEndpointTestHelper.mockResponseEnhancer());
-                    this.endpoint.setRedirectResolver(AuthorizationEndpointTestHelper.mockRedirectResolver().configMismatched(clientDetails, AuthorizationEndpointTestHelper.RAW_REDIRECT_URI).build());
-                    this.endpoint.setSessionAttributeStore(AuthorizationEndpointTestHelper.mockSessionAttributeStore().configRetrieveAttribute(servletWebRequest, AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE, null).build());
-                    this.endpoint.setExceptionTranslator(AuthorizationEndpointTestHelper.mockExceptionTranslator().configTranslate(exception, AuthorizationEndpointTestHelper.INVALID_REQUEST_RESPONSE).build());
-                }
-
-                @Test
-                @DisplayName("에러 페이지로 포워딩 해야 한다.")
-                void shouldForwardingErrorPage() {
-                    ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
-
-                    assertEquals("/oauth/error", modelAndView.getViewName());
-                }
-
-                @Test
-                @DisplayName("ModelAndView 에 OAuth2 에러 정보를 저장해야 한다.")
-                void shouldSaveOAuth2ErrorCodeToModelAndView() {
-                    ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
-
-                    Assertions.assertEquals(AuthorizationEndpointTestHelper.INVALID_REQUEST_ERROR, modelAndView.getModel().get("error"));
-                }
-            }
-
-            @Nested
-            @DisplayName("요청 받은 리다이렉트 주소가 유효할시")
-            class WhenRequestingRedirectUriAllowed {
-
-                @Nested
-                @DisplayName("요청 정보에 state 가 존재할시")
-                class WhenRequestingIncludeState {
-                    private Exception exception;
-                    private ServletWebRequest servletWebRequest;
-                    private AuthorizationEndpoint endpoint;
-
-                    @BeforeEach
-                    void setup() {
-                        OAuth2ClientDetails clientDetails = AuthorizationEndpointTestHelper.mockClientDetails().configDefault().build();
-                        OAuth2ClientDetailsService clientDetailsService = AuthorizationEndpointTestHelper.mockClientDetailsService().registerClient(clientDetails).build();
-                        HttpServletRequest servletRequest = AuthorizationEndpointTestHelper.mockHttpServletRequest().configDefault().configState().build();
-
-                        this.exception = new Exception("TEST");
-                        this.servletWebRequest = new ServletWebRequest(servletRequest, mock(HttpServletResponse.class));
-
-                        this.endpoint = new AuthorizationEndpoint(clientDetailsService, AuthorizationEndpointTestHelper.mockScopeDetailsService().build(), AuthorizationEndpointTestHelper.mockResponseEnhancer());
-                        this.endpoint.setRedirectResolver(AuthorizationEndpointTestHelper.mockRedirectResolver().configResolve(clientDetails, AuthorizationEndpointTestHelper.RAW_REDIRECT_URI, AuthorizationEndpointTestHelper.RESOLVED_REDIRECT_URI).build());
-                        this.endpoint.setSessionAttributeStore(AuthorizationEndpointTestHelper.mockSessionAttributeStore().configRetrieveAttribute(servletWebRequest, AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE, null).build());
-                        this.endpoint.setExceptionTranslator(AuthorizationEndpointTestHelper.mockExceptionTranslator().configTranslate(exception, AuthorizationEndpointTestHelper.INVALID_REQUEST_RESPONSE).build());
-                    }
-
-                    @Test
-                    @DisplayName("에러 코드를 매개변수에 추가하여 리다이렉트 주소로 리다이렉트 해야 한다.")
-                    void shouldRedirectWithErrorCode() {
-                        ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
-
-                        assertNotNull(modelAndView.getView());
-                        assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
-                        Assertions.assertEquals(AuthorizationEndpointTestHelper.INVALID_REQUEST_ERROR.getErrorCode(), modelAndView.getModel().get("error_code"));
-                    }
-
-                    @Test
-                    @DisplayName("에러 메시지를 매개변수에 추가하여 리다이렉트 주소로 리다이렉트 해야 한다.")
-                    void shouldRedirectWithErrorDescription() {
-                        ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
-
-                        assertNotNull(modelAndView.getView());
-                        assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
-                        Assertions.assertEquals(AuthorizationEndpointTestHelper.INVALID_REQUEST_ERROR.getDescription(), modelAndView.getModel().get("error_description"));
-                    }
-
-                    @Test
-                    @DisplayName("STATE 를 매개변수에 추가하여 리다이렉트 주소로 리다이렉트 해야 한다.")
-                    void shouldRedirectWithState() {
-                        ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
-
-                        assertNotNull(modelAndView.getView());
-                        assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
-                        Assertions.assertEquals(AuthorizationEndpointTestHelper.STATE, modelAndView.getModel().get("state"));
-                    }
-                }
-
-                @Nested
-                @DisplayName("요청 정보에 state 가 존재하지 않을시")
-                class WhenRequestingExcludingState {
-                    private Exception exception;
-                    private ServletWebRequest servletWebRequest;
-                    private AuthorizationEndpoint endpoint;
-
-                    @BeforeEach
-                    void setup() {
-                        OAuth2ClientDetails clientDetails = AuthorizationEndpointTestHelper.mockClientDetails().configDefault().build();
-                        OAuth2ClientDetailsService clientDetailsService = AuthorizationEndpointTestHelper.mockClientDetailsService().registerClient(clientDetails).build();
-                        HttpServletRequest servletRequest = AuthorizationEndpointTestHelper.mockHttpServletRequest().configDefault().configNullState().build();
-
-                        this.exception = new Exception("TEST");
-                        this.servletWebRequest = new ServletWebRequest(servletRequest, mock(HttpServletResponse.class));
-
-                        this.endpoint = new AuthorizationEndpoint(clientDetailsService, AuthorizationEndpointTestHelper.mockScopeDetailsService().build(), AuthorizationEndpointTestHelper.mockResponseEnhancer());
-                        this.endpoint.setRedirectResolver(AuthorizationEndpointTestHelper.mockRedirectResolver().configResolve(clientDetails, AuthorizationEndpointTestHelper.RAW_REDIRECT_URI, AuthorizationEndpointTestHelper.RESOLVED_REDIRECT_URI).build());
-                        this.endpoint.setSessionAttributeStore(AuthorizationEndpointTestHelper.mockSessionAttributeStore().configRetrieveAttribute(servletWebRequest, AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE, null).build());
-                        this.endpoint.setExceptionTranslator(AuthorizationEndpointTestHelper.mockExceptionTranslator().configTranslate(exception, AuthorizationEndpointTestHelper.INVALID_REQUEST_RESPONSE).build());
-                    }
-
-                    @Test
-                    @DisplayName("에러 코드를 매개변수에 추가하여 리다이렉트 주소로 리다이렉트 해야 한다.")
-                    void shouldRedirectWithErrorCode() {
-                        ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
-
-                        assertNotNull(modelAndView.getView());
-                        assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
-                        Assertions.assertEquals(AuthorizationEndpointTestHelper.INVALID_REQUEST_ERROR.getErrorCode(), modelAndView.getModel().get("error_code"));
-                    }
-
-                    @Test
-                    @DisplayName("에러 메시지를 매개변수에 추가하여 리다이렉트 주소로 리다이렉트 해야 한다.")
-                    void shouldRedirectWithErrorDescription() {
-                        ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
-
-                        assertNotNull(modelAndView.getView());
-                        assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
-                        Assertions.assertEquals(AuthorizationEndpointTestHelper.INVALID_REQUEST_ERROR.getDescription(), modelAndView.getModel().get("error_description"));
-                    }
-
-                    @Test
-                    @DisplayName("STATE 를 매개변수에서 제외하고 리다이렉트 주소로 리다이렉트 해야 한다.")
-                    void shouldRedirectWithState() {
-                        ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
-
-                        assertNotNull(modelAndView.getView());
-                        assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
-                        assertNull(modelAndView.getModel().get("state"));
-                    }
-                }
-            }
-        }
-
-        @Nested
-        @DisplayName("세션에 인가 요청 정보가 남아 있을시")
-        class WhenAuthorizationRequestRemainedInSession {
-
-            @Nested
-            @DisplayName("클라이언트 정보 검색중 예외가 발생할시")
-            class WhenThrowsExceptionDuringClientLookup {
-                private Exception exception;
-                private ServletWebRequest servletWebRequest;
-                private AuthorizationEndpoint endpoint;
-
-                @BeforeEach
-                void setup() {
-                    OAuth2ClientDetailsService clientDetailsService = AuthorizationEndpointTestHelper.mockClientDetailsService().emptyClient().build();
-                    AuthorizationRequest storedRequest = AuthorizationEndpointTestHelper.mockAuthorizationRequest().configDefault().build();
-
-                    this.exception = new Exception("TEST");
-                    this.servletWebRequest = new ServletWebRequest(mock(HttpServletRequest.class), mock(HttpServletResponse.class));
-
-                    this.endpoint = new AuthorizationEndpoint(clientDetailsService, AuthorizationEndpointTestHelper.mockScopeDetailsService().build(), AuthorizationEndpointTestHelper.mockResponseEnhancer());
-                    this.endpoint.setSessionAttributeStore(AuthorizationEndpointTestHelper.mockSessionAttributeStore().configRetrieveAttribute(servletWebRequest, AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE, storedRequest).build());
-                    this.endpoint.setExceptionTranslator(AuthorizationEndpointTestHelper.mockExceptionTranslator().configTranslate(exception, AuthorizationEndpointTestHelper.INVALID_REQUEST_RESPONSE).build());
-                }
-
-                @Test
-                @DisplayName("에러 페이지로 포워딩 해야 한다.")
-                void shouldForwardingErrorPage() {
-                    ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
-
-                    assertEquals("/oauth/error", modelAndView.getViewName());
-                }
-
-                @Test
-                @DisplayName("ModelAndView 에 OAuth2 에러 정보를 저장해야 한다.")
-                void shouldSaveOAuth2ErrorCodeToModelAndView() {
-                    ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
-
-                    Assertions.assertEquals(AuthorizationEndpointTestHelper.INVALID_REQUEST_ERROR, modelAndView.getModel().get("error"));
-                }
-            }
-
-            @Nested
-            @DisplayName("요청 받은 리다이렉트 주소가 유효하지 않을시")
-            class WhenRequestingRedirectUriNotAllowed {
-                private Exception exception;
-                private ServletWebRequest servletWebRequest;
-                private AuthorizationEndpoint endpoint;
-
-                @BeforeEach
-                void setup() {
-                    OAuth2ClientDetails clientDetails = AuthorizationEndpointTestHelper.mockClientDetails().configDefault().build();
-                    OAuth2ClientDetailsService clientDetailsService = AuthorizationEndpointTestHelper.mockClientDetailsService().registerClient(clientDetails).build();
-                    AuthorizationRequest storedRequest = AuthorizationEndpointTestHelper.mockAuthorizationRequest().configDefault().build();
-
-                    this.exception = new Exception("TEST");
-                    this.servletWebRequest = new ServletWebRequest(mock(HttpServletRequest.class), mock(HttpServletResponse.class));
-
-                    this.endpoint = new AuthorizationEndpoint(clientDetailsService, AuthorizationEndpointTestHelper.mockScopeDetailsService().build(), AuthorizationEndpointTestHelper.mockResponseEnhancer());
-                    this.endpoint.setSessionAttributeStore(AuthorizationEndpointTestHelper.mockSessionAttributeStore().configRetrieveAttribute(servletWebRequest, AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE, storedRequest).build());
-                    this.endpoint.setRedirectResolver(AuthorizationEndpointTestHelper.mockRedirectResolver().configMismatched(clientDetails, AuthorizationEndpointTestHelper.RAW_RESOLVED_REDIRECT_URI).build());
-                    this.endpoint.setExceptionTranslator(AuthorizationEndpointTestHelper.mockExceptionTranslator().configTranslate(exception, AuthorizationEndpointTestHelper.INVALID_REQUEST_RESPONSE).build());
-                }
-
-                @Test
-                @DisplayName("에러 페이지로 포워딩 해야 한다.")
-                void shouldForwardingErrorPage() {
-                    ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
-
-                    assertEquals("/oauth/error", modelAndView.getViewName());
-                }
-
-                @Test
-                @DisplayName("ModelAndView 에 OAuth2 에러 정보를 저장해야 한다.")
-                void shouldSaveOAuth2ErrorCodeToModelAndView() {
-                    ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
-
-                    Assertions.assertEquals(AuthorizationEndpointTestHelper.INVALID_REQUEST_ERROR, modelAndView.getModel().get("error"));
-                }
-            }
-
-            @Nested
-            @DisplayName("요청 받은 리다이렉트 주소가 유효할시")
-            class WhenRequestingRedirectUriAllowed {
-
-                @Nested
-                @DisplayName("요청 정보에 state 가 존재할시")
-                class WhenRequestingIncludeState {
-                    private Exception exception;
-                    private ServletWebRequest servletWebRequest;
-                    private AuthorizationEndpoint endpoint;
-
-                    @BeforeEach
-                    void setup() {
-                        OAuth2ClientDetails clientDetails = AuthorizationEndpointTestHelper.mockClientDetails().configDefault().build();
-                        OAuth2ClientDetailsService clientDetailsService = AuthorizationEndpointTestHelper.mockClientDetailsService().registerClient(clientDetails).build();
-                        AuthorizationRequest storedRequest = AuthorizationEndpointTestHelper.mockAuthorizationRequest().configDefault().configState().build();
-
-                        this.exception = new Exception("TEST");
-                        this.servletWebRequest = new ServletWebRequest(mock(HttpServletRequest.class), mock(HttpServletResponse.class));
-
-                        this.endpoint = new AuthorizationEndpoint(clientDetailsService, AuthorizationEndpointTestHelper.mockScopeDetailsService().build(), AuthorizationEndpointTestHelper.mockResponseEnhancer());
-                        this.endpoint.setSessionAttributeStore(AuthorizationEndpointTestHelper.mockSessionAttributeStore().configRetrieveAttribute(servletWebRequest, AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE, storedRequest).build());
-                        this.endpoint.setRedirectResolver(AuthorizationEndpointTestHelper.mockRedirectResolver().configResolve(clientDetails, AuthorizationEndpointTestHelper.RAW_RESOLVED_REDIRECT_URI, AuthorizationEndpointTestHelper.RESOLVED_REDIRECT_URI).build());
-                        this.endpoint.setExceptionTranslator(AuthorizationEndpointTestHelper.mockExceptionTranslator().configTranslate(exception, AuthorizationEndpointTestHelper.INVALID_REQUEST_RESPONSE).build());
-                    }
-
-                    @Test
-                    @DisplayName("에러 코드를 매개변수에 추가하여 리다이렉트 주소로 리다이렉트 해야 한다.")
-                    void shouldRedirectWithErrorCode() {
-                        ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
-
-                        assertNotNull(modelAndView.getView());
-                        assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
-                        Assertions.assertEquals(AuthorizationEndpointTestHelper.INVALID_REQUEST_ERROR.getErrorCode(), modelAndView.getModel().get("error_code"));
-                    }
-
-                    @Test
-                    @DisplayName("에러 메시지를 매개변수에 추가하여 리다이렉트 주소로 리다이렉트 해야 한다.")
-                    void shouldRedirectWithErrorDescription() {
-                        ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
-
-                        assertNotNull(modelAndView.getView());
-                        assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
-                        Assertions.assertEquals(AuthorizationEndpointTestHelper.INVALID_REQUEST_ERROR.getDescription(), modelAndView.getModel().get("error_description"));
-                    }
-
-                    @Test
-                    @DisplayName("STATE 를 매개변수에 추가하여 리다이렉트 주소로 리다이렉트 해야 한다.")
-                    void shouldRedirectWithState() {
-                        ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
-
-                        assertNotNull(modelAndView.getView());
-                        assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
-                        Assertions.assertEquals(AuthorizationEndpointTestHelper.STATE, modelAndView.getModel().get("state"));
-                    }
-                }
-
-                @Nested
-                @DisplayName("요청 정보에 state 가 존재하지 않을시")
-                class WhenRequestingExcludingState {
-                    private Exception exception;
-                    private ServletWebRequest servletWebRequest;
-                    private AuthorizationEndpoint endpoint;
-
-                    @BeforeEach
-                    void setup() {
-                        OAuth2ClientDetails clientDetails = AuthorizationEndpointTestHelper.mockClientDetails().configDefault().build();
-                        OAuth2ClientDetailsService clientDetailsService = AuthorizationEndpointTestHelper.mockClientDetailsService().registerClient(clientDetails).build();
-                        AuthorizationRequest storedRequest = AuthorizationEndpointTestHelper.mockAuthorizationRequest().configDefault().configNullState().build();
-
-                        this.exception = new Exception("TEST");
-                        this.servletWebRequest = new ServletWebRequest(mock(HttpServletRequest.class), mock(HttpServletResponse.class));
-
-                        this.endpoint = new AuthorizationEndpoint(clientDetailsService, AuthorizationEndpointTestHelper.mockScopeDetailsService().build(), AuthorizationEndpointTestHelper.mockResponseEnhancer());
-                        this.endpoint.setSessionAttributeStore(AuthorizationEndpointTestHelper.mockSessionAttributeStore().configRetrieveAttribute(servletWebRequest, AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE, storedRequest).build());
-                        this.endpoint.setRedirectResolver(AuthorizationEndpointTestHelper.mockRedirectResolver().configResolve(clientDetails, AuthorizationEndpointTestHelper.RAW_RESOLVED_REDIRECT_URI, AuthorizationEndpointTestHelper.RESOLVED_REDIRECT_URI).build());
-                        this.endpoint.setExceptionTranslator(AuthorizationEndpointTestHelper.mockExceptionTranslator().configTranslate(exception, AuthorizationEndpointTestHelper.INVALID_REQUEST_RESPONSE).build());
-                    }
-
-                    @Test
-                    @DisplayName("에러 코드를 매개변수에 추가하여 리다이렉트 주소로 리다이렉트 해야 한다.")
-                    void shouldRedirectWithErrorCode() {
-                        ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
-
-                        assertNotNull(modelAndView.getView());
-                        assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
-                        Assertions.assertEquals(AuthorizationEndpointTestHelper.INVALID_REQUEST_ERROR.getErrorCode(), modelAndView.getModel().get("error_code"));
-                    }
-
-                    @Test
-                    @DisplayName("에러 메시지를 매개변수에 추가하여 리다이렉트 주소로 리다이렉트 해야 한다.")
-                    void shouldRedirectWithErrorDescription() {
-                        ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
-
-                        assertNotNull(modelAndView.getView());
-                        assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
-                        Assertions.assertEquals(AuthorizationEndpointTestHelper.INVALID_REQUEST_ERROR.getDescription(), modelAndView.getModel().get("error_description"));
-                    }
-
-                    @Test
-                    @DisplayName("STATE 를 매개변수에서 제외하고 리다이렉트 주소로 리다이렉트 해야 한다.")
-                    void shouldRedirectWithState() {
-                        ModelAndView modelAndView = endpoint.handleOtherException(exception, servletWebRequest);
-
-                        assertNotNull(modelAndView.getView());
-                        assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
-                        assertNull(modelAndView.getModel().get("state"));
-                    }
-                }
-            }
-        }
+    @Test
+    @DisplayName("세션에 인가 요청에 대한 정보가 있지 않으며 예외 처리 도중 클라이언트 정보 검색 예외가 발생 했을때")
+    void whenSessionNotHasAuthorizationRequestAndThrowsClientRegistrationExceptionDuringExceptionHandling() {
+        Exception exception = new Exception("TEST");
+        ServletWebRequest webRequest = makeServletWebRequest(makeHttpServletRequest());
+        OAuth2ExceptionTranslator translator = makeExceptionTranslator(exception, INVALID_REQUEST_RESPONSE);
+        SessionAttributeStore sessionAttributeStore = makeSessionAttributeStore(webRequest, AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE, null);
+        OAuth2ClientDetailsService clientDetailsService = makeEmptyClientDetailsService();
+        AuthorizationEndpoint endpoint = new AuthorizationEndpoint(clientDetailsService, makeAuthorityDetailsService(), makeResponseEnhancer());
+
+        endpoint.setSessionAttributeStore(sessionAttributeStore);
+        endpoint.setExceptionTranslator(translator);
+
+        ModelAndView modelAndView = endpoint.handleOtherException(exception, webRequest);
+        verify(clientDetailsService, times(1)).loadClientDetailsByClientId(RAW_CLIENT_ID);
+        assertEquals("/oauth/error", modelAndView.getViewName());
+        Assertions.assertEquals(INVALID_REQUEST_ERROR, modelAndView.getModel().get("error"));
     }
 
-    private static abstract class AuthorizationRequestEndpointAssertSetup {
-        protected Map<String, String> parameter;
-        protected Map<String, Object> model;
-        protected Principal principal;
-        protected AuthorizationEndpoint endpoint;
+    @Test
+    @DisplayName("세션에 인가 요청에 대한 정보가 있지 않으며 예외 처리 도중 요청 받은 리다이렉트 주소가 유효 하지 않을때")
+    void whenSessionNotHasAuthorizationRequestAndRequestedRedirectUriIsNotAllowedDuringExceptionHandling() {
+        Exception exception = new Exception("TEST");
+        ServletWebRequest webRequest = makeServletWebRequest(makeHttpServletRequest());
+        OAuth2ClientDetails clientDetails = makeClientDetails();
+        RedirectResolver redirectResolver = makeMismatchRedirectResolver(clientDetails, RAW_REDIRECT_URI);
+        OAuth2ExceptionTranslator translator = makeExceptionTranslator(exception, INVALID_REQUEST_RESPONSE);
+        SessionAttributeStore sessionAttributeStore = makeSessionAttributeStore(webRequest, AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE, null);
+        AuthorizationEndpoint endpoint = new AuthorizationEndpoint(makeClientDetailsService(clientDetails), makeAuthorityDetailsService(), makeResponseEnhancer());
 
-        @BeforeEach
-        void setup() {
-            OAuth2ClientDetails clientDetails = AuthorizationEndpointTestHelper.mockClientDetails().configDefault().build();
-            OAuth2ClientDetailsService clientDetailsService = AuthorizationEndpointTestHelper.mockClientDetailsService().registerClient(clientDetails).build();
-            OAuth2RequestValidator requestValidator = AuthorizationEndpointTestHelper.mockRequestValidator()
-                    .configAllowedScopes(clientDetails, AuthorizationEndpointTestHelper.SCOPE)
-                    .configAllowedScopes(clientDetails, null)
-                    .configAllowedScopes(clientDetails, Collections.emptySet()).build();
-            RedirectResolver redirectResolver = AuthorizationEndpointTestHelper.mockRedirectResolver().configResolve(clientDetails, AuthorizationEndpointTestHelper.RAW_REDIRECT_URI, AuthorizationEndpointTestHelper.RESOLVED_REDIRECT_URI).build();
+        endpoint.setSessionAttributeStore(sessionAttributeStore);
+        endpoint.setRedirectResolver(redirectResolver);
+        endpoint.setExceptionTranslator(translator);
 
-            AuthorizationEndpointTestHelper.MockScopeDetailsService scopeDetailsService = AuthorizationEndpointTestHelper.mockScopeDetailsService().registerScopes(AuthorizationEndpointTestHelper.SCOPE, AuthorizationEndpointTestHelper.SCOPE_DETAILS).registerScopes(AuthorizationEndpointTestHelper.CLIENT_SCOPE, AuthorizationEndpointTestHelper.CLIENT_SCOPE_DETAILS);
-            AuthorizationEndpointTestHelper.MockAuthorizationRequestMap requestMap = AuthorizationEndpointTestHelper.mockAuthorizationRequestMap().configDefault();
-            configRequestMap(requestMap);
-            configScopeDetailsService(scopeDetailsService);
+        ModelAndView modelAndView = endpoint.handleOtherException(exception, webRequest);
+        verify(redirectResolver, times(1)).resolveRedirectURI(RAW_REDIRECT_URI, clientDetails);
+        assertEquals("/oauth/error", modelAndView.getViewName());
+        Assertions.assertEquals(INVALID_REQUEST_ERROR, modelAndView.getModel().get("error"));
+    }
 
-            this.parameter = requestMap.build();
-            this.model = new HashMap<>();
-            this.principal = AuthorizationEndpointTestHelper.mockAuthorizedAuthentication();
-            this.endpoint = new AuthorizationEndpoint(clientDetailsService, scopeDetailsService.build(), AuthorizationEndpointTestHelper.mockResponseEnhancer());
-            this.endpoint.setRequestValidator(requestValidator);
-            this.endpoint.setRedirectResolver(redirectResolver);
-            this.endpoint.setApprovalPage(AuthorizationEndpointTestHelper.FORWARD_PAGE);
-        }
+    @Test
+    @DisplayName("세션에 인가 요청 정보가 없으며 요청 정보에 state 속성이 존재할 때 예외 처리")
+    void exceptionHandlingWhenSessionNotHasAuthorizationRequestAndRequestHasStateAttribute() {
+        Exception exception = new Exception("TEST");
+        HttpServletRequest request = makeHttpServletRequest();
+        ServletWebRequest webRequest = makeServletWebRequest(request);
+        OAuth2ClientDetails clientDetails = makeClientDetails();
+        RedirectResolver redirectResolver = makeRedirectResolver(clientDetails, RAW_REDIRECT_URI, RESOLVED_REDIRECT_URI);
+        OAuth2ExceptionTranslator translator = makeExceptionTranslator(exception, INVALID_REQUEST_RESPONSE);
+        SessionAttributeStore sessionAttributeStore = makeSessionAttributeStore(webRequest, AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE, null);
+        AuthorizationEndpoint endpoint = new AuthorizationEndpoint(makeClientDetailsService(clientDetails), makeAuthorityDetailsService(), makeResponseEnhancer());
 
-        protected void configRequestMap(AuthorizationEndpointTestHelper.MockAuthorizationRequestMap requestMap) {}
+        endpoint.setSessionAttributeStore(sessionAttributeStore);
+        endpoint.setRedirectResolver(redirectResolver);
+        endpoint.setExceptionTranslator(translator);
+        when(request.getParameter(OAuth2Utils.AuthorizationRequestKey.STATE)).thenReturn(STATE);
 
-        protected void configScopeDetailsService(AuthorizationEndpointTestHelper.MockScopeDetailsService service) {}
+        ModelAndView modelAndView = endpoint.handleOtherException(exception, webRequest);
+        assertNotNull(modelAndView.getView());
+        assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
+        assertEquals(INVALID_REQUEST_ERROR.getErrorCode(), modelAndView.getModel().get("error_code"));
+        assertEquals(INVALID_REQUEST_ERROR.getDescription(), modelAndView.getModel().get("error_description"));
+        assertEquals(STATE, modelAndView.getModel().get("state"));
+    }
 
-        @Test
-        @DisplayName("요청 받은 정보를 세션에 저장해야 한다.")
-        void shouldSaveRequestingClientIdToSession() {
-            endpoint.authorize(parameter, model, principal);
+    @Test
+    @DisplayName("세션에 인가 요청 정보가 없으며 요청 정보에 state 속성이 없을 때 예외 처리")
+    void exceptionHandlingWhenSessionNotHasAuthorizationRequestAndRequestNotHasStateAttribute() {
+        Exception exception = new Exception("TEST");
+        HttpServletRequest request = makeHttpServletRequest();
+        ServletWebRequest webRequest = makeServletWebRequest(request);
+        OAuth2ClientDetails clientDetails = makeClientDetails();
+        RedirectResolver redirectResolver = makeRedirectResolver(clientDetails, RAW_REDIRECT_URI, RESOLVED_REDIRECT_URI);
+        OAuth2ExceptionTranslator translator = makeExceptionTranslator(exception, INVALID_REQUEST_RESPONSE);
+        SessionAttributeStore sessionAttributeStore = makeSessionAttributeStore(webRequest, AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE, null);
+        AuthorizationEndpoint endpoint = new AuthorizationEndpoint(makeClientDetailsService(clientDetails), makeAuthorityDetailsService(), makeResponseEnhancer());
 
-            AuthorizationRequest storedRequest = (AuthorizationRequest) model.get(AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE);
-            Assertions.assertEquals(AuthorizationEndpointTestHelper.RAW_CLIENT_ID, storedRequest.getClientId());
-            Assertions.assertEquals(AuthorizationEndpointTestHelper.RAW_USERNAME, storedRequest.getUsername());
-            Assertions.assertEquals(AuthorizationEndpointTestHelper.STATE, storedRequest.getState());
-            Assertions.assertEquals(AuthorizationEndpointTestHelper.RESOLVED_REDIRECT_URI, storedRequest.getRedirectUri());
-        }
+        endpoint.setSessionAttributeStore(sessionAttributeStore);
+        endpoint.setRedirectResolver(redirectResolver);
+        endpoint.setExceptionTranslator(translator);
+        when(request.getParameter(OAuth2Utils.AuthorizationRequestKey.STATE)).thenReturn(null);
 
-        @Test
-        @DisplayName("요청 받은 매개변수들을 세션에 저장해야 한다.")
-        void shouldSaveRequestingParameterToSession() {
-            endpoint.authorize(parameter, model, principal);
+        ModelAndView modelAndView = endpoint.handleOtherException(exception, webRequest);
+        assertNotNull(modelAndView.getView());
+        assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
+        assertEquals(INVALID_REQUEST_ERROR.getErrorCode(), modelAndView.getModel().get("error_code"));
+        assertEquals(INVALID_REQUEST_ERROR.getDescription(), modelAndView.getModel().get("error_description"));
+        assertNull(modelAndView.getModel().get("state"));
+    }
 
-            assertEquals(parameter, model.get(AuthorizationEndpoint.ORIGINAL_AUTHORIZATION_REQUEST_ATTRIBUTE));
-        }
+    @Test
+    @DisplayName("세션에 인가 요청에 대한 정보가 있으며 예외 처리 도중 클라이언트 정보 검색 예외가 발생 했을때")
+    void whenSessionHasAuthorizationRequestAndThrowsClientRegistrationExceptionDuringExceptionHandling() {
+        Exception exception = new Exception("TEST");
+        ServletWebRequest webRequest = makeServletWebRequest();
+        OAuth2ExceptionTranslator translator = makeExceptionTranslator(exception, INVALID_REQUEST_RESPONSE);
+        AuthorizationRequest authorizationRequest = makeAuthorizationRequest();
+        SessionAttributeStore sessionAttributeStore = makeSessionAttributeStore(webRequest, AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE, authorizationRequest);
+        OAuth2ClientDetailsService clientDetailsService = makeEmptyClientDetailsService();
+        AuthorizationEndpoint endpoint = new AuthorizationEndpoint(clientDetailsService, makeAuthorityDetailsService(), makeResponseEnhancer());
 
-        @Test
-        @DisplayName("설정된 Approval 페이지로 포워딩 되어야한다.")
-        void shouldForwardingConfigApprovalPage() {
-            ModelAndView modelAndView = endpoint.authorize(parameter, model, principal);
+        endpoint.setSessionAttributeStore(sessionAttributeStore);
+        endpoint.setExceptionTranslator(translator);
 
-            Assertions.assertEquals("forward:" + AuthorizationEndpointTestHelper.FORWARD_PAGE, modelAndView.getViewName());
-        }
+        ModelAndView modelAndView = endpoint.handleOtherException(exception, webRequest);
+        verify(clientDetailsService, times(1)).loadClientDetailsByClientId(RAW_CLIENT_ID);
+        assertEquals("/oauth/error", modelAndView.getViewName());
+        Assertions.assertEquals(INVALID_REQUEST_ERROR, modelAndView.getModel().get("error"));
+    }
 
-        @Test
-        @DisplayName("클라이언트명을 ModelAndView 에 저장해야 한다.")
-        void shouldSaveClientNameToModeAndView() {
-            ModelAndView modelAndView = endpoint.authorize(parameter, model, principal);
+    @Test
+    @DisplayName("세션에 인가 요청에 대한 정보가 있으며 예외 처리 도중 요청 받은 리다이렉트 주소가 유효 하지 않을때")
+    void whenSessionHasAuthorizationRequestAndRequestedRedirectUriIsNotAllowedDuringExceptionHandling() {
+        Exception exception = new Exception("TEST");
+        ServletWebRequest webRequest = makeServletWebRequest();
+        OAuth2ClientDetails clientDetails = makeClientDetails();
+        RedirectResolver redirectResolver = makeMismatchRedirectResolver(clientDetails, RAW_RESOLVED_REDIRECT_URI);
+        OAuth2ExceptionTranslator translator = makeExceptionTranslator(exception, INVALID_REQUEST_RESPONSE);
+        SessionAttributeStore sessionAttributeStore = makeSessionAttributeStore(webRequest, AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE, makeAuthorizationRequest());
+        AuthorizationEndpoint endpoint = new AuthorizationEndpoint(makeClientDetailsService(clientDetails), makeAuthorityDetailsService(), makeResponseEnhancer());
 
-            Assertions.assertEquals(AuthorizationEndpointTestHelper.CLIENT_NAME, modelAndView.getModel().get(AuthorizationEndpoint.AUTHORIZATION_REQUEST_CLIENT_NAME));
-        }
+        endpoint.setSessionAttributeStore(sessionAttributeStore);
+        endpoint.setRedirectResolver(redirectResolver);
+        endpoint.setExceptionTranslator(translator);
+
+        ModelAndView modelAndView = endpoint.handleOtherException(exception, webRequest);
+        verify(redirectResolver, times(1)).resolveRedirectURI(RAW_RESOLVED_REDIRECT_URI, clientDetails);
+        assertEquals("/oauth/error", modelAndView.getViewName());
+        Assertions.assertEquals(INVALID_REQUEST_ERROR, modelAndView.getModel().get("error"));
+    }
+
+    @Test
+    @DisplayName("세션에 인가 요청 정보가 있으며 요청 정보에 state 속성이 존재할 때 예외 처리")
+    void exceptionHandlingWhenSessionHasAuthorizationRequestAndRequestHasStateAttribute() {
+        Exception exception = new Exception("TEST");
+        AuthorizationRequest authorizationRequest = makeAuthorizationRequest();
+        ServletWebRequest webRequest = makeServletWebRequest();
+        OAuth2ClientDetails clientDetails = makeClientDetails();
+        RedirectResolver redirectResolver = makeRedirectResolver(clientDetails, RAW_RESOLVED_REDIRECT_URI, RESOLVED_REDIRECT_URI);
+        OAuth2ExceptionTranslator translator = makeExceptionTranslator(exception, INVALID_REQUEST_RESPONSE);
+        SessionAttributeStore sessionAttributeStore = makeSessionAttributeStore(webRequest, AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE, authorizationRequest);
+        AuthorizationEndpoint endpoint = new AuthorizationEndpoint(makeClientDetailsService(clientDetails), makeAuthorityDetailsService(), makeResponseEnhancer());
+
+        endpoint.setSessionAttributeStore(sessionAttributeStore);
+        endpoint.setRedirectResolver(redirectResolver);
+        endpoint.setExceptionTranslator(translator);
+        when(authorizationRequest.getState()).thenReturn(STATE);
+
+        ModelAndView modelAndView = endpoint.handleOtherException(exception, webRequest);
+        assertNotNull(modelAndView.getView());
+        assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
+        assertEquals(INVALID_REQUEST_ERROR.getErrorCode(), modelAndView.getModel().get("error_code"));
+        assertEquals(INVALID_REQUEST_ERROR.getDescription(), modelAndView.getModel().get("error_description"));
+        assertEquals(STATE, modelAndView.getModel().get("state"));
+    }
+
+    @Test
+    @DisplayName("세션에 인가 요청 정보가 있으며 요청 정보에 state 속성이 없을 때 예외 처리")
+    void exceptionHandlingWhenSessionHasAuthorizationRequestAndRequestNotHasStateAttribute() {
+        Exception exception = new Exception("TEST");
+        AuthorizationRequest authorizationRequest = makeAuthorizationRequest();
+        ServletWebRequest webRequest = makeServletWebRequest();
+        OAuth2ClientDetails clientDetails = makeClientDetails();
+        RedirectResolver redirectResolver = makeRedirectResolver(clientDetails, RAW_RESOLVED_REDIRECT_URI, RESOLVED_REDIRECT_URI);
+        OAuth2ExceptionTranslator translator = makeExceptionTranslator(exception, INVALID_REQUEST_RESPONSE);
+        SessionAttributeStore sessionAttributeStore = makeSessionAttributeStore(webRequest, AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE, authorizationRequest);
+        AuthorizationEndpoint endpoint = new AuthorizationEndpoint(makeClientDetailsService(clientDetails), makeAuthorityDetailsService(), makeResponseEnhancer());
+
+        endpoint.setSessionAttributeStore(sessionAttributeStore);
+        endpoint.setRedirectResolver(redirectResolver);
+        endpoint.setExceptionTranslator(translator);
+        when(authorizationRequest.getState()).thenReturn(null);
+
+        ModelAndView modelAndView = endpoint.handleOtherException(exception, webRequest);
+        assertNotNull(modelAndView.getView());
+        assertEquals(RedirectView.class.getName(), modelAndView.getView().getClass().getName());
+        assertEquals(INVALID_REQUEST_ERROR.getErrorCode(), modelAndView.getModel().get("error_code"));
+        assertEquals(INVALID_REQUEST_ERROR.getDescription(), modelAndView.getModel().get("error_description"));
+        assertNull(modelAndView.getModel().get("state"));
+    }
+
+    private void assertStoredRequest(Map<String, Object> model, Map<String, String> parameter, ModelAndView modelAndView, AuthorizationRequest storedRequest) {
+        assertEquals(RAW_CLIENT_ID, storedRequest.getClientId());
+        assertEquals(RAW_USERNAME, storedRequest.getUsername());
+        assertEquals(STATE, storedRequest.getState());
+        assertEquals(RESOLVED_REDIRECT_URI, storedRequest.getRedirectUri());
+        assertEquals(parameter, model.get(AuthorizationEndpoint.ORIGINAL_AUTHORIZATION_REQUEST_ATTRIBUTE));
+        assertEquals("forward:" + FORWARD_PAGE, modelAndView.getViewName());
+        assertEquals(CLIENT_NAME, modelAndView.getModel().get(AuthorizationEndpoint.AUTHORIZATION_REQUEST_CLIENT_NAME));
     }
 }

@@ -3,7 +3,6 @@ package cube8540.oauth.authentication.users.endpoint;
 import cube8540.oauth.authentication.users.application.UserCredentialsService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static org.mockito.Mockito.mock;
@@ -26,16 +25,11 @@ class UserCredentialsAPIEndpointTest {
         this.endpoint = new UserCredentialsAPIEndpoint(service);
     }
 
-    @Nested
+    @Test
     @DisplayName("계정 활성화")
-    class UserActive {
+    void userAccountActive() {
+        endpoint.credentials(EMAIL ,CREDENTIALS_KEY);
 
-        @Test
-        @DisplayName("요청 받은 유저를 요청 받은 인증키로 인증 받아야 한다.")
-        void shouldCredentialsRequestUserByInputCredentialsKey() {
-            endpoint.credentials(EMAIL, CREDENTIALS_KEY);
-            verify(service, times(1)).accountCredentials(EMAIL, CREDENTIALS_KEY);
-        }
+        verify(service, times(1)).accountCredentials(EMAIL, CREDENTIALS_KEY);
     }
-
 }

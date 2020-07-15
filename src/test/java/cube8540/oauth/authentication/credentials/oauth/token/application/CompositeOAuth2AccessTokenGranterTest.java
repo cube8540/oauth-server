@@ -1,23 +1,22 @@
 package cube8540.oauth.authentication.credentials.oauth.token.application;
 
-import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AccessTokenGranter;
-import cube8540.oauth.authentication.credentials.oauth.security.OAuth2TokenRequest;
-import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidGrantException;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AccessTokenDetails;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AccessTokenGranter;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetails;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2TokenRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeClientDetails;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeTokenRequest;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @DisplayName("OAuth2 엑세스 토큰 부여 테스트")
@@ -30,78 +29,34 @@ class CompositeOAuth2AccessTokenGranterTest {
         this.accessTokenGranter = new CompositeOAuth2AccessTokenGranter();
     }
 
-    @Nested
-    @DisplayName("엑세스 토큰 생성")
-    class CreateAccessToken {
+    @Test
+    @DisplayName("지원 되지 않는 인증 타입 일때")
+    void whenNotSupportedGrantType() {
+        OAuth2ClientDetails clientDetails = makeClientDetails();
+        OAuth2TokenRequest request = makeTokenRequest();
 
-        @Nested
-        @DisplayName("지원되지 않는 인증 타입일시")
-        class WhenNotSupportedGrantType {
+        when(request.getGrantType()).thenReturn(null);
 
-            private OAuth2ClientDetails clientDetails;
-            private OAuth2TokenRequest tokenRequest;
-
-            @BeforeEach
-            void setup() {
-                this.clientDetails = mock(OAuth2ClientDetails.class);
-                this.tokenRequest = mock(OAuth2TokenRequest.class);
-            }
-
-            @Test
-            @DisplayName("InvalidGrantException이 발생해야 한다.")
-            void shouldThrowsInvalidGrantException() {
-                assertThrows(InvalidGrantException.class, () -> accessTokenGranter.grant(clientDetails, tokenRequest));
-            }
-
-            @Test
-            @DisplayName("에러 코드는 UNSUPPORTED_GRANT_TYPE 이어야 한다.")
-            void shouldErrorCodeIsUnsupportedGrantType() {
-                OAuth2Error error = assertThrows(InvalidGrantException.class, () -> accessTokenGranter.grant(clientDetails, tokenRequest))
-                        .getError();
-                assertEquals(OAuth2ErrorCodes.UNSUPPORTED_GRANT_TYPE, error.getErrorCode());
-            }
-        }
-
-        @Nested
-        @DisplayName("지원 되는 인증 타입일시")
-        class WhenSupportedGrantType {
-            private OAuth2ClientDetails clientDetails;
-            private OAuth2TokenRequest tokenRequest;
-            private OAuth2AccessTokenGranter codeTokenGranter;
-            private OAuth2AccessTokenDetails token;
-
-            @BeforeEach
-            void setup() {
-                this.clientDetails = mock(OAuth2ClientDetails.class);
-                this.tokenRequest = mock(OAuth2TokenRequest.class);
-                this.codeTokenGranter = mock(OAuth2AccessTokenGranter.class);
-                this.token = mock(OAuth2AccessTokenDetails.class);
-
-                when(this.tokenRequest.getGrantType()).thenReturn(AuthorizationGrantType.AUTHORIZATION_CODE);
-                when(this.codeTokenGranter.grant(clientDetails, tokenRequest)).thenReturn(token);
-
-                accessTokenGranter.putTokenGranterMap(AuthorizationGrantType.AUTHORIZATION_CODE, codeTokenGranter);
-                accessTokenGranter.putTokenGranterMap(AuthorizationGrantType.CLIENT_CREDENTIALS, mock(OAuth2AccessTokenGranter.class));
-                accessTokenGranter.putTokenGranterMap(AuthorizationGrantType.REFRESH_TOKEN, mock(OAuth2AccessTokenGranter.class));
-                accessTokenGranter.putTokenGranterMap(AuthorizationGrantType.PASSWORD, mock(OAuth2AccessTokenGranter.class));
-            }
-
-            @Test
-            @DisplayName("인증 타입에 대응되는 토큰 부여 클래스를 찾아 토큰을 생성한다.")
-            void shouldCreateTokenByLookingTokenGranterCorrespondingGrantType() {
-                accessTokenGranter.grant(clientDetails, tokenRequest);
-
-                verify(codeTokenGranter, times(1)).grant(clientDetails, tokenRequest);
-            }
-
-            @Test
-            @DisplayName("토큰 부여 클래스에서 생섣된 토큰을 반환해야 한다.")
-            void shouldReturnsTokenByTokenGranter() {
-                OAuth2AccessTokenDetails accessToken = accessTokenGranter.grant(clientDetails, tokenRequest);
-
-                assertEquals(token, accessToken);
-            }
-        }
+        OAuth2Error error = assertThrows(InvalidGrantException.class, () -> accessTokenGranter.grant(clientDetails, request)).getError();
+        assertEquals(OAuth2ErrorCodes.UNSUPPORTED_GRANT_TYPE, error.getErrorCode());
     }
 
+    @Test
+    @DisplayName("액세스 토큰 생성")
+    void generateAccessToken() {
+        OAuth2ClientDetails clientDetails = makeClientDetails();
+        OAuth2TokenRequest request = makeTokenRequest();
+        OAuth2AccessTokenDetails token = mock(OAuth2AccessTokenDetails.class);
+        OAuth2AccessTokenGranter granter = mock(OAuth2AccessTokenGranter.class);
+
+        when(granter.grant(clientDetails, request)).thenReturn(token);
+        when(request.getGrantType()).thenReturn(AuthorizationGrantType.AUTHORIZATION_CODE);
+        accessTokenGranter.putTokenGranterMap(AuthorizationGrantType.AUTHORIZATION_CODE, granter);
+        accessTokenGranter.putTokenGranterMap(AuthorizationGrantType.CLIENT_CREDENTIALS, mock(OAuth2AccessTokenGranter.class));
+        accessTokenGranter.putTokenGranterMap(AuthorizationGrantType.REFRESH_TOKEN, mock(OAuth2AccessTokenGranter.class));
+        accessTokenGranter.putTokenGranterMap(AuthorizationGrantType.PASSWORD, mock(OAuth2AccessTokenGranter.class));
+
+        OAuth2AccessTokenDetails accessToken = accessTokenGranter.grant(clientDetails, request);
+        assertEquals(token, accessToken);
+    }
 }

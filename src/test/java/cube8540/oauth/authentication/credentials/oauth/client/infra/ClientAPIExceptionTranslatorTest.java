@@ -7,7 +7,6 @@ import cube8540.oauth.authentication.credentials.oauth.client.domain.exception.C
 import cube8540.oauth.authentication.error.message.ErrorMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,76 +24,39 @@ class ClientAPIExceptionTranslatorTest {
         this.translator = new ClientAPIExceptionTranslator();
     }
 
-    @Nested
+    @Test
     @DisplayName("ClientAuthorizationException 변환")
-    class TranslateClientAuthorizationException {
-        private ClientAuthorizationException e;
+    void translateClientAuthorizationException() {
+        ClientAuthorizationException e = mock(ClientAuthorizationException.class);
 
-        @BeforeEach
-        void setup() {
-            this.e = mock(ClientAuthorizationException.class);
-        }
-
-        @Test
-        @DisplayName("HTTP 상태 코드는 401 이어야 한다.")
-        void shouldHttpStatusCodeIs401() {
-            ResponseEntity<ErrorMessage<Object>> response = translator.translate(e);
-            assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
-        }
+        ResponseEntity<ErrorMessage<Object>> result = translator.translate(e);
+        assertEquals(HttpStatus.UNAUTHORIZED, result.getStatusCode());
     }
 
-    @Nested
+    @Test
     @DisplayName("ClientInvalidException 변환")
-    class TranslateClientInvalidException {
-        private ClientInvalidException e;
+    void translateClientInvalidException() {
+        ClientInvalidException e = mock(ClientInvalidException.class);
 
-        @BeforeEach
-        void setup() {
-            this.e = mock(ClientInvalidException.class);
-        }
-
-        @Test
-        @DisplayName("HTTP 상태 코드는 400 이어야 한다.")
-        void shouldHttpStatusCodeIs400() {
-            ResponseEntity<ErrorMessage<Object>> response = translator.translate(e);
-            assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        }
+        ResponseEntity<ErrorMessage<Object>> result = translator.translate(e);
+        assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
     }
 
-    @Nested
+    @Test
     @DisplayName("ClientNotFoundException 변환")
-    class TranslateClientNotFoundException {
-        private ClientNotFoundException e;
+    void translateClientNotFoundException() {
+        ClientNotFoundException e = mock(ClientNotFoundException.class);
 
-        @BeforeEach
-        void setup() {
-            this.e = mock(ClientNotFoundException.class);
-        }
-
-        @Test
-        @DisplayName("HTTP 상태 코드는 404 이어야 한다.")
-        void shouldHttpStatusCodeIs404() {
-            ResponseEntity<ErrorMessage<Object>> response = translator.translate(e);
-            assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        }
+        ResponseEntity<ErrorMessage<Object>> result = translator.translate(e);
+        assertEquals(HttpStatus.NOT_FOUND, result.getStatusCode());
     }
 
-    @Nested
+    @Test
     @DisplayName("ClientRegisterException 변환")
-    class TranslateClientRegisterException {
-        private ClientRegisterException e;
+    void translateClientRegisterException() {
+        ClientRegisterException e = mock(ClientRegisterException.class);
 
-        @BeforeEach
-        void setup() {
-            this.e = mock(ClientRegisterException.class);
-        }
-
-        @Test
-        @DisplayName("HTTP 상태 코드는 400 이어야 한다.")
-        void shouldHttpStatusCodeIs400() {
-            ResponseEntity<ErrorMessage<Object>> response = translator.translate(e);
-            assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        }
+        ResponseEntity<ErrorMessage<Object>> result = translator.translate(e);
+        assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
     }
-
 }

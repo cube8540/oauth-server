@@ -7,9 +7,7 @@ import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AccessToke
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2TokenRequest;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2TokenRevoker;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.http.MediaType;
@@ -30,244 +28,130 @@ import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.
 import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.TokenEndpointTestHelper.RAW_TOKEN_ID;
 import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.TokenEndpointTestHelper.RAW_USERNAME;
 import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.TokenEndpointTestHelper.REDIRECT_URI;
-import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.TokenEndpointTestHelper.mockAccessToken;
-import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.TokenEndpointTestHelper.mockClientDetails;
-import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.TokenEndpointTestHelper.mockDetailsNotOAuth2ClientDetailsPrincipal;
-import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.TokenEndpointTestHelper.mockNotClientCredentialsTokenPrincipal;
-import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.TokenEndpointTestHelper.mockPrincipal;
-import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.TokenEndpointTestHelper.mockRevokeService;
-import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.TokenEndpointTestHelper.mockTokenGrantService;
-import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.TokenEndpointTestHelper.mockTokenRequestMap;
+import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.TokenEndpointTestHelper.makeAccessTokenDetails;
+import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.TokenEndpointTestHelper.makeClientCredentialsToken;
+import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.TokenEndpointTestHelper.makeClientDetails;
+import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.TokenEndpointTestHelper.makeNotClientCredentialsTokenPrincipal;
+import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.TokenEndpointTestHelper.makeRequestMap;
+import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.TokenEndpointTestHelper.makeRequestMapGrantTypeImplicit;
+import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.TokenEndpointTestHelper.makeRequestMapGrantTypeNull;
+import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.TokenEndpointTestHelper.makeRevokeService;
+import static cube8540.oauth.authentication.credentials.oauth.security.endpoint.TokenEndpointTestHelper.makeTokenGrantService;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-@DisplayName("토큰 엔드포인트 테스트")
+@DisplayName("토큰 엔드 포인트 테스트")
 class OAuth2TokenEndpointTest {
 
-    @Nested
-    @DisplayName("새 엑세스 토큰 부여")
-    class GrantNewAccessToken {
+    @Test
+    @DisplayName("요청한 부여 타입이 null 일때 토큰 부여")
+    void grantTokenRequestGrantTypeIsNull() {
+        OAuth2ClientDetails clientDetails = makeClientDetails();
+        Principal principal = makeClientCredentialsToken(clientDetails);
+        OAuth2AccessTokenDetails token = makeAccessTokenDetails();
+        Map<String, String> requestMap = makeRequestMapGrantTypeNull();
+        OAuth2TokenEndpoint endpoint = new OAuth2TokenEndpoint(makeTokenGrantService(token), makeRevokeService(token));
 
-        @Nested
-        @DisplayName("요청한 인증타입이 null 일시")
-        class WhenRequestingGrantTypeNull {
-            private Principal principal;
-            private Map<String, String> badRequestMap;
-            private OAuth2TokenEndpoint endpoint;
-
-            @BeforeEach
-            void setup() {
-                OAuth2AccessTokenDetails token = mockAccessToken().configDefault().build();
-
-                this.principal = mockPrincipal(mockClientDetails().configDefault().build());
-                this.badRequestMap = mockTokenRequestMap().configDefault().configGrantType(null).build();
-                this.endpoint = new OAuth2TokenEndpoint(mockTokenGrantService(token), mockRevokeService(token));
-            }
-
-            @Test
-            @DisplayName("InvalidRequestException 이 발생해야 하며 에러 코드는 INVALID_REQUEST 이어야 한다.")
-            void shouldThrowsInvalidRequestException() {
-                OAuth2Error error = assertThrows(InvalidRequestException.class, () -> endpoint.grantNewAccessToken(principal, badRequestMap))
-                        .getError();
-                assertEquals(OAuth2ErrorCodes.INVALID_REQUEST, error.getErrorCode());
-            }
-        }
-
-        @Nested
-        @DisplayName("인증타입이 implicit 일시")
-        class WhenGrantTypeImplicit {
-            private Principal principal;
-            private Map<String, String> badRequestMap;
-            private OAuth2TokenEndpoint endpoint;
-
-            @BeforeEach
-            void setup() {
-                OAuth2AccessTokenDetails token = mockAccessToken().configDefault().build();
-
-                this.principal = mockPrincipal(mockClientDetails().configDefault().build());
-                this.badRequestMap = mockTokenRequestMap().configDefault().configGrantType(AuthorizationGrantType.IMPLICIT.getValue()).build();
-                this.endpoint = new OAuth2TokenEndpoint(mockTokenGrantService(token), mockRevokeService(token));
-            }
-
-            @Test
-            @DisplayName("InvalidGrantException 이 발생해야 하며 에러 코드는 UNSUPPORTED_GRANT_TYPE 이어야 한다.")
-            void shouldThrowsInvalidGrantException() {
-                OAuth2Error error = assertThrows(InvalidGrantException.class, () -> endpoint.grantNewAccessToken(principal, badRequestMap))
-                        .getError();
-                assertEquals(OAuth2ErrorCodes.UNSUPPORTED_GRANT_TYPE, error.getErrorCode());
-            }
-        }
-
-        @Nested
-        @DisplayName("인증 객체의 타입이 ClientCredentialsToken 이 아닐시")
-        class WhenAuthenticationTypeNotClientCredentialsToken {
-            private Principal principal;
-            private Map<String, String> requestMap;
-            private OAuth2TokenEndpoint endpoint;
-
-            @BeforeEach
-            void setup() {
-                OAuth2AccessTokenDetails token = mockAccessToken().configDefault().build();
-
-                this.principal = mockNotClientCredentialsTokenPrincipal();
-                this.requestMap = mockTokenRequestMap().configDefault().build();
-                this.endpoint = new OAuth2TokenEndpoint(mockTokenGrantService(token), mockRevokeService(token));
-            }
-
-            @Test
-            @DisplayName("InsufficientAuthenticationException 이 발생해야 한다.")
-            void shouldInsufficientAuthenticationException() {
-                assertThrows(InsufficientAuthenticationException.class, () -> endpoint.grantNewAccessToken(principal, requestMap));
-            }
-        }
-
-        @Nested
-        @DisplayName("인증 객체의 주체가 OAuth2ClientDetails 가 아닐시")
-        class WhenPrincipalIsNotOAuth2ClientDetails {
-            private Principal principal;
-            private Map<String, String> requestMap;
-            private OAuth2TokenEndpoint endpoint;
-
-            @BeforeEach
-            void setup() {
-                OAuth2AccessTokenDetails token = mockAccessToken().configDefault().build();
-
-                this.principal = mockDetailsNotOAuth2ClientDetailsPrincipal();
-                this.requestMap = mockTokenRequestMap().configDefault().build();
-                this.endpoint = new OAuth2TokenEndpoint(mockTokenGrantService(token), mockRevokeService(token));
-            }
-
-            @Test
-            @DisplayName("InsufficientAuthenticationException 이 발생해야 한다.")
-            void shouldInsufficientAuthenticationException() {
-                assertThrows(InsufficientAuthenticationException.class, () -> endpoint.grantNewAccessToken(principal, requestMap));
-            }
-        }
-
-        @Nested
-        @DisplayName("요청이 옳바를시")
-        class WhenAllowedRequesting {
-            private Principal principal;
-            private OAuth2ClientDetails clientDetails;
-            private Map<String, String> requestMap;
-            private OAuth2AccessTokenGranter grantService;
-            private OAuth2TokenEndpoint endpoint;
-
-            @BeforeEach
-            void setup() {
-                OAuth2AccessTokenDetails token = mockAccessToken().configDefault().build();
-
-                this.clientDetails = mockClientDetails().configDefault().build();
-                this.principal = mockPrincipal(clientDetails);
-                this.requestMap = mockTokenRequestMap().configDefault().build();
-                this.grantService = mockTokenGrantService(token);
-                this.endpoint = new OAuth2TokenEndpoint(grantService, mockRevokeService(token));
-            }
-
-            @Test
-            @DisplayName("클라이언트 인증 정보와 전달 받은 매개 변수로 엑세스 토큰을 생성해야 한다.")
-            void shouldCreateAccessTokenViaRequestingGrantType() {
-                ArgumentCaptor<OAuth2TokenRequest> requestCaptor = ArgumentCaptor.forClass(OAuth2TokenRequest.class);
-
-                endpoint.grantNewAccessToken(principal, requestMap);
-                verify(grantService, times(1)).grant(eq(clientDetails), requestCaptor.capture());
-                assertEquals(new AuthorizationGrantType(GRANT_TYPE), requestCaptor.getValue().getGrantType());
-                assertEquals(RAW_USERNAME, requestCaptor.getValue().getUsername());
-                assertEquals(RAW_PASSWORD, requestCaptor.getValue().getPassword());
-                assertEquals(RAW_CLIENT_ID, requestCaptor.getValue().getClientId());
-                assertEquals(RAW_CODE, requestCaptor.getValue().getCode());
-                assertEquals(REDIRECT_URI, requestCaptor.getValue().getRedirectUri());
-                assertEquals(RAW_SCOPES, requestCaptor.getValue().getScopes());
-            }
-
-            @Test
-            @DisplayName("헤더의 Pragma 옵션은 no-cache 어야 한다.")
-            void shouldHeaderPragmaIsNoCache() {
-                ResponseEntity<OAuth2AccessTokenDetails> result = endpoint.grantNewAccessToken(principal, requestMap);
-
-                assertEquals("no-cache", result.getHeaders().getPragma());
-            }
-
-            @Test
-            @DisplayName("헤더의 Content-Type 은 application/json 이어야 한다.")
-            void shouldHeaderContentTypeIsApplicationJson() {
-                ResponseEntity<OAuth2AccessTokenDetails> result = endpoint.grantNewAccessToken(principal, requestMap);
-
-                assertEquals(MediaType.APPLICATION_JSON, result.getHeaders().getContentType());
-            }
-        }
+        OAuth2Error error = assertThrows(InvalidRequestException.class, () -> endpoint.grantNewAccessToken(principal, requestMap)).getError();
+        assertEquals(OAuth2ErrorCodes.INVALID_REQUEST, error.getErrorCode());
     }
 
-    @Nested
+    @Test
+    @DisplayName("요청한 부여 타입이 implicit 일때 토큰 부여")
+    void grantTokenRequestGrantTypeImplicit() {
+        OAuth2ClientDetails clientDetails = makeClientDetails();
+        Principal principal = makeClientCredentialsToken(clientDetails);
+        OAuth2AccessTokenDetails token = makeAccessTokenDetails();
+        Map<String, String> requestMap = makeRequestMapGrantTypeImplicit();
+        OAuth2TokenEndpoint endpoint = new OAuth2TokenEndpoint(makeTokenGrantService(token), makeRevokeService(token));
+
+        OAuth2Error error = assertThrows(InvalidGrantException.class, () -> endpoint.grantNewAccessToken(principal, requestMap)).getError();
+        assertEquals(OAuth2ErrorCodes.UNSUPPORTED_GRANT_TYPE, error.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("인증 객체의 타입이 ClientCredentialsToken 이 아닐때 토큰 부여")
+    void grantTokenWhenPrincipalTypeNotClientCredentialsToken() {
+        Principal principal = makeNotClientCredentialsTokenPrincipal();
+        OAuth2AccessTokenDetails token = makeAccessTokenDetails();
+        Map<String, String> requestMap = makeRequestMap();
+        OAuth2TokenEndpoint endpoint = new OAuth2TokenEndpoint(makeTokenGrantService(token), makeRevokeService(token));
+
+        assertThrows(InsufficientAuthenticationException.class, () -> endpoint.grantNewAccessToken(principal, requestMap));
+    }
+
+    @Test
+    @DisplayName("인증 상세 정보가 OAuth2ClientDetails 가 아닐때 토큰 부여")
+    void grantTokenWhenPrincipalDetailsTypeNotOAuth2ClientDetails() {
+        Principal principal = makeClientCredentialsToken(new Object());
+        OAuth2AccessTokenDetails token = makeAccessTokenDetails();
+        Map<String, String> requestMap = makeRequestMap();
+        OAuth2TokenEndpoint endpoint = new OAuth2TokenEndpoint(makeTokenGrantService(token), makeRevokeService(token));
+
+        assertThrows(InsufficientAuthenticationException.class, () -> endpoint.grantNewAccessToken(principal, requestMap));
+    }
+
+    @Test
+    @DisplayName("새 액세스 토큰 부여")
+    void grantNewAccessToken() {
+        ArgumentCaptor<OAuth2TokenRequest> requestCaptor = ArgumentCaptor.forClass(OAuth2TokenRequest.class);
+        OAuth2ClientDetails clientDetails = makeClientDetails();
+        Principal principal = makeClientCredentialsToken(clientDetails);
+        Map<String, String> requestMap = makeRequestMap();
+        OAuth2AccessTokenDetails accessToken = makeAccessTokenDetails();
+        OAuth2AccessTokenGranter granter = makeTokenGrantService(accessToken);
+        OAuth2TokenRevoker revoker = makeRevokeService(accessToken);
+        OAuth2TokenEndpoint endpoint = new OAuth2TokenEndpoint(granter, revoker);
+
+        ResponseEntity<OAuth2AccessTokenDetails> result = endpoint.grantNewAccessToken(principal, requestMap);
+        verify(granter, times(1)).grant(eq(clientDetails), requestCaptor.capture());
+        assertEquals(new AuthorizationGrantType(GRANT_TYPE), requestCaptor.getValue().getGrantType());
+        assertEquals(RAW_USERNAME, requestCaptor.getValue().getUsername());
+        assertEquals(RAW_PASSWORD, requestCaptor.getValue().getPassword());
+        assertEquals(RAW_CLIENT_ID, requestCaptor.getValue().getClientId());
+        assertEquals(RAW_CODE, requestCaptor.getValue().getCode());
+        assertEquals(REDIRECT_URI, requestCaptor.getValue().getRedirectUri());
+        assertEquals(RAW_SCOPES, requestCaptor.getValue().getScopes());
+        assertEquals("no-cache", result.getHeaders().getPragma());
+        assertEquals(MediaType.APPLICATION_JSON, result.getHeaders().getContentType());
+    }
+
+    @Test
+    @DisplayName("인증 객체의 타입이 ClientCredentialsToken이 아닐때 토큰 삭제")
+    void revokeTokenWhenPrincipalTypeNotClientCredentialsToken() {
+        Principal principal = makeNotClientCredentialsTokenPrincipal();
+        OAuth2AccessTokenDetails accessToken = makeAccessTokenDetails();
+        OAuth2TokenEndpoint endpoint = new OAuth2TokenEndpoint(makeTokenGrantService(accessToken), makeRevokeService(accessToken));
+
+        assertThrows(InsufficientAuthenticationException.class, () -> endpoint.revokeAccessToken(principal, ""));
+    }
+
+    @Test
+    @DisplayName("요청 받은 토큰이 null 일때 토큰 삭제")
+    void revokeTokenWhenRequestTokenIsNull() {
+        OAuth2ClientDetails clientDetails = makeClientDetails();
+        Principal principal = makeClientCredentialsToken(clientDetails);
+        OAuth2AccessTokenDetails accessToken = makeAccessTokenDetails();
+        OAuth2TokenEndpoint endpoint = new OAuth2TokenEndpoint(makeTokenGrantService(accessToken), makeRevokeService(accessToken));
+
+        OAuth2Error error = assertThrows(InvalidRequestException.class, () -> endpoint.revokeAccessToken(principal, null)).getError();
+        assertEquals(OAuth2ErrorCodes.INVALID_REQUEST, error.getErrorCode());
+    }
+
+    @Test
     @DisplayName("토큰 삭제")
-    class RevokeToken {
+    void revokeToken() {
+        OAuth2ClientDetails clientDetails = makeClientDetails();
+        Principal principal = makeClientCredentialsToken(clientDetails);
+        OAuth2AccessTokenDetails accessToken = makeAccessTokenDetails();
+        OAuth2AccessTokenGranter granter = makeTokenGrantService(accessToken);
+        OAuth2TokenRevoker revoker = makeRevokeService(accessToken);
+        OAuth2TokenEndpoint endpoint = new OAuth2TokenEndpoint(granter, revoker);
 
-        @Nested
-        @DisplayName("인증 객체의 타입이 ClientCredentialsToken 이 아닐시")
-        class WhenAuthenticationTypeNotClientCredentialsToken {
-            private Principal principal;
-            private OAuth2TokenEndpoint endpoint;
-
-            @BeforeEach
-            void setup() {
-                this.principal = mockNotClientCredentialsTokenPrincipal();
-                this.endpoint = new OAuth2TokenEndpoint(mockTokenGrantService(null), mockRevokeService(null));
-            }
-
-            @Test
-            @DisplayName("InsufficientAuthenticationException 이 발생해야 한다.")
-            void shouldInsufficientAuthenticationException() {
-                assertThrows(InsufficientAuthenticationException.class, () -> endpoint.revokeAccessToken(principal, ""));
-            }
-        }
-
-        @Nested
-        @DisplayName("요청 받은 Token 이 null 일시")
-        class WhenRequestingTokenIsNull {
-            private Principal principal;
-            private OAuth2TokenEndpoint endpoint;
-
-            @BeforeEach
-            void setup() {
-                this.principal = mockPrincipal(mockClientDetails().configDefault().build());
-                this.endpoint = new OAuth2TokenEndpoint(mockTokenGrantService(null), mockRevokeService(null));
-            }
-
-            @Test
-            @DisplayName("InvalidRequestException 이 발생해야 하며 에러 코드는 INVALID_REQUEST 이어야 한다.")
-            void shouldThrowsInvalidRequestException() {
-                OAuth2Error error = assertThrows(InvalidRequestException.class, () -> endpoint.revokeAccessToken(principal, null))
-                        .getError();
-                assertEquals(OAuth2ErrorCodes.INVALID_REQUEST, error.getErrorCode());
-            }
-        }
-
-        @Nested
-        @DisplayName("요청이 옳바를시")
-        class WhenAllowedRequesting {
-            private Principal principal;
-            private OAuth2TokenRevoker revokeService;
-            private OAuth2TokenEndpoint endpoint;
-
-            @BeforeEach
-            void setup() {
-                OAuth2ClientDetails clientDetails = mockClientDetails().configDefault().build();
-                OAuth2AccessTokenDetails accessTokenDetails = mockAccessToken().configDefault().build();
-
-                this.principal = mockPrincipal(clientDetails);
-                this.revokeService = mockRevokeService(accessTokenDetails);
-                this.endpoint = new OAuth2TokenEndpoint(mockTokenGrantService(accessTokenDetails), revokeService);
-            }
-
-            @Test
-            @DisplayName("요청 받은 토큰을 삭제해야 한다.")
-            void shouldRemoveRequestingToken() {
-                endpoint.revokeAccessToken(principal, RAW_TOKEN_ID);
-                verify(revokeService, times(1)).revoke(RAW_TOKEN_ID);
-            }
-        }
+        endpoint.revokeAccessToken(principal, RAW_TOKEN_ID);
+        verify(revoker, times(1)).revoke(RAW_TOKEN_ID);
     }
 }

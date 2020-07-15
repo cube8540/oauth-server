@@ -1,10 +1,9 @@
 package cube8540.oauth.authentication.credentials.resource.domain;
 
-import cube8540.oauth.authentication.credentials.resource.domain.ResourceMethod;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DisplayName("리소스 메소드 테스트")
 class ResourceMethodTest {

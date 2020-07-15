@@ -32,17 +32,32 @@ class OAuth2ScopeTestHelper {
     static final Collection<? extends GrantedAuthority> NOT_ACCESSIBLE_AUTHORITIES = new HashSet<>(Arrays.asList(
             new SimpleGrantedAuthority("AUTHORITY-CODE-4"), new SimpleGrantedAuthority("AUTHORITY-CODE-5"), new SimpleGrantedAuthority("AUTHORITY-CODE-6")));
 
-    static Authentication mockAuthentication(Collection<? extends GrantedAuthority> grantedAuthorities) {
+    static Authentication makeAuthentication(Collection<? extends GrantedAuthority> grantedAuthorities) {
         Authentication authentication = mock(Authentication.class);
         doReturn(grantedAuthorities).when(authentication).getAuthorities();
         return authentication;
     }
 
-    static MocKValidationRule<OAuth2Scope> mocKValidationRule() {
-        return new MocKValidationRule<>();
+    @SuppressWarnings("unchecked")
+    static ValidationRule<OAuth2Scope> makePassValidationRule(OAuth2Scope scope) {
+        ValidationRule<OAuth2Scope> validationRule = mock(ValidationRule.class);
+
+        when(validationRule.isValid(scope)).thenReturn(true);
+
+        return validationRule;
     }
 
-    static MockValidationPolicy mockValidationPolicy() {
+    @SuppressWarnings("unchecked")
+    static ValidationRule<OAuth2Scope> makeErrorValidationRule(OAuth2Scope scope, ValidationError error) {
+        ValidationRule<OAuth2Scope> validationRule = mock(ValidationRule.class);
+
+        when(validationRule.isValid(scope)).thenReturn(false);
+        when(validationRule.error()).thenReturn(error);
+
+        return validationRule;
+    }
+
+    static MockValidationPolicy makeValidationPolicy() {
         return new MockValidationPolicy();
     }
 
@@ -65,34 +80,6 @@ class OAuth2ScopeTestHelper {
 
         OAuth2ScopeValidationPolicy build() {
             return policy;
-        }
-    }
-
-    static class MocKValidationRule<T> {
-        private ValidationRule<T> validationRule;
-
-        @SuppressWarnings("unchecked")
-        private MocKValidationRule() {
-            this.validationRule = mock(ValidationRule.class);
-        }
-
-        MocKValidationRule<T> configValidationTrue(T target) {
-            when(validationRule.isValid(target)).thenReturn(true);
-            return this;
-        }
-
-        MocKValidationRule<T> configValidationFalse(T target) {
-            when(validationRule.isValid(target)).thenReturn(false);
-            return this;
-        }
-
-        MocKValidationRule<T> error(ValidationError error) {
-            when(validationRule.error()).thenReturn(error);
-            return this;
-        }
-
-        ValidationRule<T> build() {
-            return validationRule;
         }
     }
 }

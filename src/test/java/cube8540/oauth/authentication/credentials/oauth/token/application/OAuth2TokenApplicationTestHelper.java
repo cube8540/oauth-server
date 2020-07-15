@@ -2,7 +2,6 @@ package cube8540.oauth.authentication.credentials.oauth.token.application;
 
 import cube8540.oauth.authentication.credentials.AuthorityCode;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
-import cube8540.oauth.authentication.credentials.oauth.security.AuthorizationCode;
 import cube8540.oauth.authentication.credentials.oauth.security.AuthorizationRequest;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2RequestValidator;
@@ -23,6 +22,7 @@ import cube8540.oauth.authentication.credentials.oauth.token.domain.read.model.A
 import org.springframework.security.authentication.AccountStatusException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -32,7 +32,6 @@ import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -41,6 +40,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.mockito.AdditionalAnswers.returnsFirstArg;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -90,538 +92,266 @@ class OAuth2TokenApplicationTestHelper {
     static final URI REDIRECT_URI = URI.create("http://localhost:8080");
 
     static final String RAW_AUTHORIZATION_CODE = "AUTHORIZATION-CODE";
-    static final AuthorizationCode AUTHORIZATION_CODE = new AuthorizationCode(RAW_AUTHORIZATION_CODE);
 
     static final Integer ACCESS_TOKEN_VALIDITY_SECONDS = 600;
     static final Integer REFRESH_TOKEN_VALIDITY_SECONDS = 6000;
 
     static final String STATE = "REQUESTED_STATE";
 
-    static MockAccessToken mockAccessToken() {
-        return new MockAccessToken();
+    static OAuth2AccessTokenRepository makeEmptyAccessTokenRepository() {
+        return mock(OAuth2AccessTokenRepository.class);
     }
 
-    static MockRefreshToken mockRefreshToken() {
-        return new MockRefreshToken();
+    static OAuth2AccessTokenRepository makeAccessTokenRepository(OAuth2TokenId tokenId, OAuth2AuthorizedAccessToken accessToken) {
+        OAuth2AccessTokenRepository repository = mock(OAuth2AccessTokenRepository.class);
+
+        when(repository.findById(tokenId)).thenReturn(Optional.of(accessToken));
+
+        return repository;
     }
 
-    static MockAccessTokenRepository mockAccessTokenRepository() {
-        return new MockAccessTokenRepository();
+    static OAuth2AccessTokenRepository makeAccessTokenRepository(OAuth2ClientId clientId, PrincipalUsername username, OAuth2AuthorizedAccessToken accessToken) {
+        OAuth2AccessTokenRepository repository = mock(OAuth2AccessTokenRepository.class);
+
+        when(repository.findByClientAndUsername(clientId, username)).thenReturn(Optional.of(accessToken));
+
+        return repository;
     }
 
-    static MockRefreshTokenRepository mockRefreshTokenRepository() {
-        return new MockRefreshTokenRepository();
+    static OAuth2RefreshTokenRepository makeEmptyRefreshTokenRepository() {
+        return mock(OAuth2RefreshTokenRepository.class);
     }
 
-    static OAuth2TokenEnhancer mockTokenEnhancer() {
+    static OAuth2RefreshTokenRepository makeRefreshTokenRepository(OAuth2TokenId tokenId, OAuth2AuthorizedRefreshToken refreshToken) {
+        OAuth2RefreshTokenRepository repository = mock(OAuth2RefreshTokenRepository.class);
+
+        when(repository.findById(tokenId)).thenReturn(Optional.of(refreshToken));
+
+        return repository;
+    }
+
+    static Oauth2AccessTokenReadRepository makeAccessTokenReadRepository(String username, List<AccessTokenDetailsWithClient> tokenWithClients) {
+        Oauth2AccessTokenReadRepository repository = mock(Oauth2AccessTokenReadRepository.class);
+
+        when(repository.readAccessTokenWithClientByUsername(username)).thenReturn(tokenWithClients);
+
+        return repository;
+    }
+
+    static AuthorizationCodeRepository makeEmptyAuthorizationCodeRepository() {
+        AuthorizationCodeRepository repository = mock(AuthorizationCodeRepository.class);
+
+        doAnswer(returnsFirstArg()).when(repository).save(isA(OAuth2AuthorizationCode.class));
+
+        return repository;
+    }
+
+    static AuthorizationCodeRepository makeAuthorizationCodeRepository(String code, OAuth2AuthorizationCode authorizationCode) {
+        AuthorizationCodeRepository repository = makeEmptyAuthorizationCodeRepository();
+
+        when(repository.findById(code)).thenReturn(Optional.of(authorizationCode));
+
+        return repository;
+    }
+
+    static OAuth2AuthorizationCodeConsumer makeEmptyCodeConsumer() {
+        return mock(OAuth2AuthorizationCodeConsumer.class);
+    }
+
+    static OAuth2AuthorizationCode makeAuthorizationCode() {
+        OAuth2AuthorizationCode code = mock(OAuth2AuthorizationCode.class);
+
+        when(code.getCode()).thenReturn(RAW_AUTHORIZATION_CODE);
+        when(code.getClientId()).thenReturn(CLIENT_ID);
+        when(code.getUsername()).thenReturn(USERNAME);
+        when(code.getApprovedScopes()).thenReturn(APPROVED_SCOPES);
+
+        return code;
+    }
+
+    static OAuth2AuthorizationCodeConsumer makeCodeConsumer(String codeId, OAuth2AuthorizationCode code) {
+        OAuth2AuthorizationCodeConsumer consumer = mock(OAuth2AuthorizationCodeConsumer.class);
+
+        when(consumer.consume(codeId)).thenReturn(Optional.of(code));
+
+        return consumer;
+    }
+
+    static OAuth2ClientDetails makeClientDetails() {
+        OAuth2ClientDetails clientDetails = mock(OAuth2ClientDetails.class);
+
+        when(clientDetails.getClientId()).thenReturn(RAW_CLIENT_ID);
+        when(clientDetails.getScopes()).thenReturn(RAW_CLIENT_SCOPES);
+        when(clientDetails.getAccessTokenValiditySeconds()).thenReturn(ACCESS_TOKEN_VALIDITY_SECONDS);
+        when(clientDetails.getRefreshTokenValiditySeconds()).thenReturn(REFRESH_TOKEN_VALIDITY_SECONDS);
+
+        return clientDetails;
+    }
+
+    static OAuth2TokenRequest makeTokenRequest() {
+        OAuth2TokenRequest request = mock(OAuth2TokenRequest.class);
+
+        when(request.getCode()).thenReturn(RAW_AUTHORIZATION_CODE);
+        when(request.getUsername()).thenReturn(RAW_USERNAME);
+        when(request.getPassword()).thenReturn(PASSWORD);
+        when(request.getScopes()).thenReturn(RAW_SCOPES);
+        when(request.getRedirectUri()).thenReturn(REDIRECT_URI);
+        when(request.getRefreshToken()).thenReturn(RAW_REFRESH_TOKEN_ID);
+        when(request.getState()).thenReturn(STATE);
+
+        return request;
+    }
+
+    static OAuth2RequestValidator makeErrorValidator(OAuth2ClientDetails clientDetails, Set<String> approvalScopes) {
+        OAuth2RequestValidator validator = mock(OAuth2RequestValidator.class);
+
+        when(validator.validateScopes(clientDetails, approvalScopes)).thenReturn(false);
+
+        return validator;
+    }
+
+    static OAuth2RequestValidator makeErrorValidator(Set<String> scopes, Set<String> approvalScopes) {
+        OAuth2RequestValidator validator = mock(OAuth2RequestValidator.class);
+
+        when(validator.validateScopes(scopes, approvalScopes)).thenReturn(false);
+
+        return validator;
+    }
+
+    static OAuth2RequestValidator makePassValidator(OAuth2ClientDetails clientDetails, Set<String> approvalScopes) {
+        OAuth2RequestValidator validator = mock(OAuth2RequestValidator.class);
+
+        when(validator.validateScopes(clientDetails, approvalScopes)).thenReturn(true);
+
+        return validator;
+    }
+
+    static OAuth2RequestValidator makePassValidator(Set<String> scopes, Set<String> approvalScopes) {
+        OAuth2RequestValidator validator = mock(OAuth2RequestValidator.class);
+
+        when(validator.validateScopes(scopes, approvalScopes)).thenReturn(true);
+
+        return validator;
+    }
+
+    static OAuth2AuthorizedAccessToken makeAccessToken() {
+        OAuth2AuthorizedAccessToken token = mock(OAuth2AuthorizedAccessToken.class);
+
+        when(token.getTokenId()).thenReturn(ACCESS_TOKEN_ID);
+        when(token.getClient()).thenReturn(CLIENT_ID);
+        when(token.getUsername()).thenReturn(USERNAME);
+        when(token.getScopes()).thenReturn(SCOPES);
+        when(token.getExpiration()).thenReturn(EXPIRATION_DATETIME);
+        when(token.getTokenGrantType()).thenReturn(GRANT_TYPE);
+        when(token.expiresIn()).thenReturn(EXPIRATION_IN);
+        when(token.getAdditionalInformation()).thenReturn(ADDITIONAL_INFO);
+        when(token.isExpired()).thenReturn(false);
+
+        return token;
+    }
+
+    static OAuth2AuthorizedAccessToken makeAccessToken(Set<AuthorityCode> scopes) {
+        OAuth2AuthorizedAccessToken accessToken = makeAccessToken();
+
+        when(accessToken.getScopes()).thenReturn(scopes);
+
+        return accessToken;
+    }
+
+    static OAuth2AuthorizedRefreshToken makeRefreshToken(OAuth2AuthorizedAccessToken accessToken) {
+        OAuth2AuthorizedRefreshToken refreshToken = mock(OAuth2AuthorizedRefreshToken.class);
+
+        when(refreshToken.getTokenId()).thenReturn(REFRESH_TOKEN_ID);
+        when(refreshToken.getExpiration()).thenReturn(EXPIRATION_DATETIME);
+        when(refreshToken.expiresIn()).thenReturn(EXPIRATION_IN);
+        when(refreshToken.isExpired()).thenReturn(false);
+        when(refreshToken.getAccessToken()).thenReturn(accessToken);
+
+        return refreshToken;
+    }
+
+    static OAuth2TokenEnhancer makeTokenEnhancer() {
         return mock(OAuth2TokenEnhancer.class);
     }
 
-    static MockClientDetails mockClientDetails() {
-        return new MockClientDetails();
-    }
-
-    static MockTokenRequest mockTokenRequest() {
-        return new MockTokenRequest();
-    }
-
-    static MockAuthorizationCode mockAuthorizationCode() {
-        return new MockAuthorizationCode();
-    }
-
-    static MockAuthorizationConsumer mockAuthorizationConsumer() {
-        return new MockAuthorizationConsumer();
-    }
-
-    static OAuth2TokenIdGenerator mockTokenIdGenerator(OAuth2TokenId tokenId) {
+    static OAuth2TokenIdGenerator makeTokenIdGenerator(OAuth2TokenId tokenId) {
         OAuth2TokenIdGenerator generator = mock(OAuth2TokenIdGenerator.class);
         when(generator.generateTokenValue()).thenReturn(tokenId);
         return generator;
     }
 
-    static AuthorizationCodeGenerator mockCodeGenerator(String code) {
+    static AuthorizationCodeGenerator makeCodeGenerator(String code) {
         AuthorizationCodeGenerator generator = mock(AuthorizationCodeGenerator.class);
         when(generator.generate()).thenReturn(code);
         return generator;
     }
 
-    static MockTokenRequestValidator mockTokenRequestValidator() {
-        return new MockTokenRequestValidator();
+    static AuthenticationManager makeAuthenticationManager(UsernamePasswordAuthenticationToken usernameAndPassword, Authentication authentication) {
+        AuthenticationManager manager = mock(AuthenticationManager.class);
+
+        when(manager.authenticate(usernameAndPassword)).thenReturn(authentication);
+
+        return manager;
     }
 
-    static MockAuthenticationManager mockAuthenticationManager() {
-        return new MockAuthenticationManager();
+    static AuthenticationManager makeBadCredentials(UsernamePasswordAuthenticationToken usernameAndPassword) {
+        AuthenticationManager manager = mock(AuthenticationManager.class);
+
+        when(manager.authenticate(usernameAndPassword)).thenThrow(new BadCredentialsException("bad credentials"));
+
+        return manager;
     }
 
-    static Authentication mockAuthentication() {
+    static AuthenticationManager makeBadStatus(UsernamePasswordAuthenticationToken usernameAndPassword) {
+        AuthenticationManager manager = mock(AuthenticationManager.class);
+
+        when(manager.authenticate(usernameAndPassword)).thenThrow(new TestAccountStatusException("account not allowed"));
+
+        return manager;
+    }
+
+    static AuthenticationManager makeAuthenticationManager() {
+        return mock(AuthenticationManager.class);
+    }
+
+    static Authentication makeAuthentication() {
         Authentication authentication = mock(Authentication.class);
         when(authentication.getName()).thenReturn(RAW_AUTHENTICATION_USERNAME);
         return authentication;
     }
 
-    static Authentication mockAuthentication(String principalName) {
+    static Authentication makeAuthentication(String principalName) {
         Authentication authentication = mock(Authentication.class);
         when(authentication.getName()).thenReturn(principalName);
         return authentication;
     }
 
-    static MockAuthorizationRequest mockAuthorizationRequest() {
-        return new MockAuthorizationRequest();
+    static AuthorizationRequest makeAuthorizationRequest() {
+        AuthorizationRequest request = mock(AuthorizationRequest.class);
+
+        when(request.getRequestScopes()).thenReturn(RAW_SCOPES);
+        when(request.getClientId()).thenReturn(RAW_CLIENT_ID);
+        when(request.getRedirectUri()).thenReturn(REDIRECT_URI);
+        when(request.getUsername()).thenReturn(RAW_USERNAME);
+        when(request.getState()).thenReturn(STATE);
+
+        return request;
     }
 
-    static MockOAuth2AccessTokenReadRepository mockOAuth2AccessTokenReadRepository() {
-        return new MockOAuth2AccessTokenReadRepository();
+    static UserDetailsService makeEmptyUserDetailsService() {
+        return mock(UserDetailsService.class);
     }
 
-    static MockAuthorizationCodeRepository mockAuthorizationCodeRepository() {
-        return new MockAuthorizationCodeRepository();
+    static UserDetailsService makeUserDetailsService(String username, UserDetails userDetails) {
+        UserDetailsService service = makeEmptyUserDetailsService();
+
+        when(service.loadUserByUsername(username)).thenReturn(userDetails);
+
+        return service;
     }
 
-    static User mockUser() {
+    static User makeUserDetails() {
         return mock(User.class);
-    }
-
-    static MockUserDetailsService mockUserDetailsService() {
-        return new MockUserDetailsService();
-    }
-
-    static class MockAccessToken {
-        private OAuth2AuthorizedAccessToken accessToken;
-
-        private MockAccessToken() {
-            this.accessToken = mock(OAuth2AuthorizedAccessToken.class);
-        }
-
-        MockAccessToken configDefault() {
-            when(accessToken.getTokenId()).thenReturn(ACCESS_TOKEN_ID);
-            when(accessToken.getClient()).thenReturn(CLIENT_ID);
-            when(accessToken.getUsername()).thenReturn(USERNAME);
-            when(accessToken.getScopes()).thenReturn(SCOPES);
-            when(accessToken.getExpiration()).thenReturn(EXPIRATION_DATETIME);
-            when(accessToken.getTokenGrantType()).thenReturn(GRANT_TYPE);
-            when(accessToken.expiresIn()).thenReturn(EXPIRATION_IN);
-            when(accessToken.getAdditionalInformation()).thenReturn(ADDITIONAL_INFO);
-            configNotExpired();
-            return this;
-        }
-
-        MockAccessToken configScopes(Set<AuthorityCode> scopeIds) {
-            when(accessToken.getScopes()).thenReturn(scopeIds);
-            return this;
-        }
-
-        MockAccessToken configNotExpired() {
-            when(accessToken.isExpired()).thenReturn(false);
-            return this;
-        }
-
-        MockAccessToken configExpired() {
-            when(accessToken.isExpired()).thenReturn(true);
-            return this;
-        }
-
-        MockAccessToken configRefreshToken(OAuth2AuthorizedRefreshToken refreshToken) {
-            when(accessToken.getRefreshToken()).thenReturn(refreshToken);
-            return this;
-        }
-
-        MockAccessToken configEmptyRefreshToken() {
-            when(accessToken.getRefreshToken()).thenReturn(null);
-            return this;
-        }
-
-        MockAccessToken configMismatchesClientId() {
-            when(accessToken.getClient()).thenReturn(new OAuth2ClientId("DIFFERENT CLIENT"));
-            return this;
-        }
-
-        MockAccessToken configNullAdditionalInfo() {
-            when(accessToken.getAdditionalInformation()).thenReturn(null);
-            return this;
-        }
-
-        OAuth2AuthorizedAccessToken build() {
-            return accessToken;
-        }
-    }
-
-    static class MockRefreshToken {
-        private OAuth2AuthorizedRefreshToken refreshToken;
-
-        private MockRefreshToken() {
-            this.refreshToken = mock(OAuth2AuthorizedRefreshToken.class);
-        }
-
-        MockRefreshToken configDefault() {
-            when(refreshToken.getTokenId()).thenReturn(REFRESH_TOKEN_ID);
-            when(refreshToken.getExpiration()).thenReturn(EXPIRATION_DATETIME);
-            when(refreshToken.expiresIn()).thenReturn(EXPIRATION_IN);
-            configNotExpired();
-            return this;
-        }
-
-        MockRefreshToken configNotExpired() {
-            when(refreshToken.isExpired()).thenReturn(false);
-            return this;
-        }
-
-        MockRefreshToken configExpired() {
-            when(refreshToken.isExpired()).thenReturn(true);
-            return this;
-        }
-
-        MockRefreshToken configAccessToken(OAuth2AuthorizedAccessToken accessToken) {
-            when(refreshToken.getAccessToken()).thenReturn(accessToken);
-            return this;
-        }
-
-        OAuth2AuthorizedRefreshToken build() {
-            return refreshToken;
-        }
-    }
-
-    static class MockAccessTokenRepository {
-        private OAuth2AccessTokenRepository repository;
-
-        private MockAccessTokenRepository() {
-            this.repository = mock(OAuth2AccessTokenRepository.class);
-        }
-
-        MockAccessTokenRepository registerAccessToken(OAuth2AuthorizedAccessToken accessToken) {
-            when(repository.findById(ACCESS_TOKEN_ID)).thenReturn(Optional.of(accessToken));
-            return this;
-        }
-
-        MockAccessTokenRepository emptyAccessToken() {
-            when(repository.findById(ACCESS_TOKEN_ID)).thenReturn(Optional.empty());
-            return this;
-        }
-
-        MockAccessTokenRepository registerAuthentication(OAuth2AuthorizedAccessToken accessToken) {
-            when(repository.findByClientAndUsername(CLIENT_ID, USERNAME)).thenReturn(Optional.of(accessToken));
-            return this;
-        }
-
-        MockAccessTokenRepository emptyAuthentication() {
-            when(repository.findByClientAndUsername(CLIENT_ID, USERNAME)).thenReturn(Optional.empty());
-            return this;
-        }
-
-        OAuth2AccessTokenRepository build() {
-            return repository;
-        }
-    }
-
-    static class MockRefreshTokenRepository {
-        private OAuth2RefreshTokenRepository repository;
-
-        private MockRefreshTokenRepository() {
-            this.repository = mock(OAuth2RefreshTokenRepository.class);
-        }
-
-        MockRefreshTokenRepository emptyRefreshToken() {
-            when(repository.findById(REFRESH_TOKEN_ID)).thenReturn(Optional.empty());
-            return this;
-        }
-
-        MockRefreshTokenRepository registerRefreshToken(OAuth2AuthorizedRefreshToken refreshToken) {
-            when(repository.findById(REFRESH_TOKEN_ID)).thenReturn(Optional.of(refreshToken));
-            return this;
-        }
-
-        OAuth2RefreshTokenRepository build() {
-            return repository;
-        }
-    }
-
-    static class MockClientDetails {
-        private OAuth2ClientDetails clientDetails;
-
-        private MockClientDetails() {
-            this.clientDetails = mock(OAuth2ClientDetails.class);
-        }
-
-        MockClientDetails configDefault() {
-            when(clientDetails.getClientId()).thenReturn(RAW_CLIENT_ID);
-            when(clientDetails.getScopes()).thenReturn(RAW_CLIENT_SCOPES);
-            when(clientDetails.getAccessTokenValiditySeconds()).thenReturn(ACCESS_TOKEN_VALIDITY_SECONDS);
-            when(clientDetails.getRefreshTokenValiditySeconds()).thenReturn(REFRESH_TOKEN_VALIDITY_SECONDS);
-            return this;
-        }
-
-        OAuth2ClientDetails build() {
-            return clientDetails;
-        }
-    }
-
-    static class MockTokenRequest {
-        private OAuth2TokenRequest tokenRequest;
-
-        private MockTokenRequest() {
-            this.tokenRequest = mock(OAuth2TokenRequest.class);
-        }
-
-        MockTokenRequest configDefaultClientId() {
-            when(tokenRequest.getClientId()).thenReturn(RAW_CLIENT_ID);
-            return this;
-        }
-
-        MockTokenRequest configDefaultCode() {
-            when(tokenRequest.getCode()).thenReturn(RAW_AUTHORIZATION_CODE);
-            return this;
-        }
-
-        MockTokenRequest configDefaultUsername() {
-            when(tokenRequest.getUsername()).thenReturn(RAW_USERNAME);
-            return this;
-        }
-
-        MockTokenRequest configNullUsername() {
-            when(tokenRequest.getUsername()).thenReturn(null);
-            return this;
-        }
-
-        MockTokenRequest configDefaultPassword() {
-            when(tokenRequest.getPassword()).thenReturn(PASSWORD);
-            return this;
-        }
-
-        MockTokenRequest configNullPassword() {
-            when(tokenRequest.getPassword()).thenReturn(null);
-            return this;
-        }
-
-        MockTokenRequest configDefaultScopes() {
-            when(tokenRequest.getScopes()).thenReturn(RAW_SCOPES);
-            return this;
-        }
-
-        MockTokenRequest configNullScopes() {
-            when(tokenRequest.getScopes()).thenReturn(null);
-            return this;
-        }
-
-        MockTokenRequest configEmptyScopes() {
-            when(tokenRequest.getScopes()).thenReturn(Collections.emptySet());
-            return this;
-        }
-
-        MockTokenRequest configDefaultState() {
-            when(tokenRequest.getState()).thenReturn(STATE);
-            return this;
-        }
-
-        MockTokenRequest configNullState() {
-            when(tokenRequest.getState()).thenReturn(null);
-            return this;
-        }
-
-        MockTokenRequest configDefaultRedirectUri() {
-            when(tokenRequest.getRedirectUri()).thenReturn(REDIRECT_URI);
-            return this;
-        }
-
-        MockTokenRequest configNullRedirectUri() {
-            when(tokenRequest.getRedirectUri()).thenReturn(null);
-            return this;
-        }
-
-        MockTokenRequest configDefaultRefreshToken() {
-            when(tokenRequest.getRefreshToken()).thenReturn(RAW_REFRESH_TOKEN_ID);
-            return this;
-        }
-
-        OAuth2TokenRequest build() {
-            return tokenRequest;
-        }
-    }
-
-    static class MockAuthorizationCode {
-        private OAuth2AuthorizationCode code;
-
-        private MockAuthorizationCode() {
-            this.code = mock(OAuth2AuthorizationCode.class);
-        }
-
-        MockAuthorizationCode configDefault() {
-            when(code.getCode()).thenReturn(RAW_AUTHORIZATION_CODE);
-            when(code.getClientId()).thenReturn(CLIENT_ID);
-            when(code.getUsername()).thenReturn(USERNAME);
-            when(code.getApprovedScopes()).thenReturn(APPROVED_SCOPES);
-            return this;
-        }
-
-        MockAuthorizationCode configDefaultApprovalScopesNull() {
-            when(code.getApprovedScopes()).thenReturn(null);
-            return this;
-        }
-
-        MockAuthorizationCode configDefaultApprovalScopesEmpty() {
-            when(code.getApprovedScopes()).thenReturn(Collections.emptySet());
-            return this;
-        }
-
-        OAuth2AuthorizationCode build() {
-            return code;
-        }
-    }
-
-    static final class MockAuthorizationConsumer {
-        private OAuth2AuthorizationCodeConsumer consumer;
-
-        private MockAuthorizationConsumer() {
-            this.consumer = mock(OAuth2AuthorizationCodeConsumer.class);
-        }
-
-        MockAuthorizationConsumer consume(OAuth2AuthorizationCode code) {
-            when(consumer.consume(RAW_AUTHORIZATION_CODE)).thenReturn(Optional.of(code));
-            return this;
-        }
-
-        MockAuthorizationConsumer empty() {
-            when(consumer.consume(RAW_AUTHORIZATION_CODE)).thenReturn(Optional.empty());
-            return this;
-        }
-
-        OAuth2AuthorizationCodeConsumer build() {
-            return consumer;
-        }
-    }
-
-    static final class MockTokenRequestValidator {
-        private OAuth2RequestValidator validator;
-
-        private MockTokenRequestValidator() {
-            this.validator = mock(OAuth2RequestValidator.class);
-        }
-
-        MockTokenRequestValidator configValidationTrue(OAuth2ClientDetails clientDetails, Set<String> scopes) {
-            when(validator.validateScopes(clientDetails, scopes)).thenReturn(true);
-            return this;
-        }
-
-        MockTokenRequestValidator configValidationFalse(OAuth2ClientDetails clientDetails, Set<String> scopes) {
-            when(validator.validateScopes(clientDetails, scopes)).thenReturn(false);
-            return this;
-        }
-
-        MockTokenRequestValidator configValidationTrue(Set<String> clientScopes, Set<String> scopes) {
-            when(validator.validateScopes(clientScopes, scopes)).thenReturn(true);
-            return this;
-        }
-
-        MockTokenRequestValidator configValidationFalse(Set<String> clientScopes, Set<String> scopes) {
-            when(validator.validateScopes(clientScopes, scopes)).thenReturn(false);
-            return this;
-        }
-
-        OAuth2RequestValidator build() {
-            return validator;
-        }
-    }
-
-    static final class MockAuthenticationManager {
-        private AuthenticationManager manager;
-
-        private MockAuthenticationManager() {
-            this.manager = mock(AuthenticationManager.class);
-        }
-
-        MockAuthenticationManager authentication(Authentication token, Authentication authentication) {
-            when(manager.authenticate(token)).thenReturn(authentication);
-            return this;
-        }
-
-        MockAuthenticationManager badCredentials(Authentication token) {
-            when(manager.authenticate(token)).thenThrow(new BadCredentialsException("bad credentials"));
-            return this;
-        }
-
-        MockAuthenticationManager badAccountStatus(Authentication token) {
-            when(manager.authenticate(token)).thenThrow(new TestAccountStatusException("account not allowed"));
-            return this;
-        }
-
-        AuthenticationManager build() {
-            return manager;
-        }
-    }
-
-    static class MockAuthorizationRequest {
-        private AuthorizationRequest request;
-
-        private MockAuthorizationRequest() {
-            this.request = mock(AuthorizationRequest.class);
-        }
-
-        MockAuthorizationRequest configDefault() {
-            when(request.getRequestScopes()).thenReturn(RAW_SCOPES);
-            when(request.getClientId()).thenReturn(RAW_CLIENT_ID);
-            when(request.getRedirectUri()).thenReturn(REDIRECT_URI);
-            when(request.getUsername()).thenReturn(RAW_USERNAME);
-            when(request.getState()).thenReturn(STATE);
-            return this;
-        }
-
-        AuthorizationRequest build() {
-            return request;
-        }
-    }
-
-    static class MockAuthorizationCodeRepository {
-        private AuthorizationCodeRepository repository;
-
-        private MockAuthorizationCodeRepository() {
-            this.repository = mock(AuthorizationCodeRepository.class);
-        }
-
-        MockAuthorizationCodeRepository registerCode(OAuth2AuthorizationCode code) {
-            when(repository.findById(RAW_AUTHORIZATION_CODE)).thenReturn(Optional.of(code));
-            return this;
-        }
-
-        MockAuthorizationCodeRepository emptyCode() {
-            when(repository.findById(RAW_AUTHORIZATION_CODE)).thenReturn(Optional.empty());
-            return this;
-        }
-
-        AuthorizationCodeRepository build() {
-            return repository;
-        }
-    }
-
-    static class MockUserDetailsService {
-        private UserDetailsService service;
-
-        private MockUserDetailsService() {
-            this.service = mock(UserDetailsService.class);
-        }
-
-        MockUserDetailsService registerUser(UserDetails userDetails) {
-            when(service.loadUserByUsername(RAW_USERNAME)).thenReturn(userDetails);
-            return this;
-        }
-
-        UserDetailsService build() {
-            return service;
-        }
-    }
-
-    static final class MockOAuth2AccessTokenReadRepository {
-        private Oauth2AccessTokenReadRepository repository;
-
-        private MockOAuth2AccessTokenReadRepository() {
-            this.repository = mock(Oauth2AccessTokenReadRepository.class);
-        }
-
-        MockOAuth2AccessTokenReadRepository readAccessTokenWithClientByUsername(String username, List<AccessTokenDetailsWithClient> tokens) {
-            when(repository.readAccessTokenWithClientByUsername(username)).thenReturn(tokens);
-            return this;
-        }
-
-        Oauth2AccessTokenReadRepository build() {
-            return repository;
-        }
     }
 
     private static final class TestAccountStatusException extends AccountStatusException {

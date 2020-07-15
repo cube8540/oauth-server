@@ -1,20 +1,17 @@
 package cube8540.oauth.authentication.credentials.oauth.token.application;
 
 import cube8540.oauth.authentication.AuthenticationApplication;
-import cube8540.oauth.authentication.credentials.oauth.security.AuthorizationRequest;
-import cube8540.oauth.authentication.credentials.oauth.security.OAuth2RequestValidator;
-import cube8540.oauth.authentication.credentials.oauth.security.OAuth2TokenRequest;
-import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidGrantException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidRequestException;
+import cube8540.oauth.authentication.credentials.oauth.security.AuthorizationRequest;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetails;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2RequestValidator;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2TokenRequest;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenRepository;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizationCode;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedAccessToken;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2TokenIdGenerator;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
@@ -24,323 +21,172 @@ import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 import java.time.Clock;
 import java.util.Collections;
 
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.ACCESS_TOKEN_ID;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.ACCESS_TOKEN_VALIDITY_SECONDS;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.APPROVED_SCOPES;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.CLIENT_ID;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.RAW_APPROVED_SCOPES;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.RAW_AUTHORIZATION_CODE;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.RAW_CLIENT_ID;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.REDIRECT_URI;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.REFRESH_TOKEN_ID;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.REFRESH_TOKEN_VALIDITY_SECONDS;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.STATE;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.TOKEN_CREATED_DATETIME;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.USERNAME;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeAuthorizationCode;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeClientDetails;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeCodeConsumer;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeEmptyAccessTokenRepository;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeEmptyCodeConsumer;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeErrorValidator;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makePassValidator;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeTokenIdGenerator;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeTokenRequest;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @DisplayName("인증 코드를 통한 토큰 부여 테스트")
 class AuthorizationCodeGranterTest {
 
-    @Nested
-    @DisplayName("액세스 토큰 생성")
-    class CreateAccessToken {
+    @Test
+    @DisplayName("인가 코드를 찾을 수 없을떄 엑세스 토큰 생성")
+    void generateAccessTokenWhenAuthorizationCodeNotFound() {
+        OAuth2ClientDetails clientDetails = makeClientDetails();
+        OAuth2TokenRequest request = makeTokenRequest();
+        OAuth2TokenIdGenerator generator = makeTokenIdGenerator(ACCESS_TOKEN_ID);
+        OAuth2AccessTokenRepository repository = makeEmptyAccessTokenRepository();
+        OAuth2AuthorizationCodeConsumer consumer = makeEmptyCodeConsumer();
+        AuthorizationCodeTokenGranter granter = new AuthorizationCodeTokenGranter(generator, repository, consumer);
 
-        @Nested
-        @DisplayName("코드를 찾을 수 없을시")
-        class WhenNotFoundAuthorizationCode extends AuthorizationCodeNotFoundSetup {
-            private OAuth2ClientDetails clientDetails;
-            private OAuth2TokenRequest tokenRequest;
-
-            @BeforeEach
-            void setupParameter() {
-                this.clientDetails = OAuth2TokenApplicationTestHelper.mockClientDetails().build();
-                this.tokenRequest = OAuth2TokenApplicationTestHelper.mockTokenRequest().build();
-            }
-
-            @Test
-            @DisplayName("InvalidRequestException 이 발생해야 하며 에러 코드는 INVALID_REQUEST 이어야 한다.")
-            void shouldThrowsInvalidRequestExceptionAndErrorCodeIsInvalidRequest() {
-                OAuth2Error error = assertThrows(InvalidRequestException.class, () -> granter.createAccessToken(clientDetails, tokenRequest))
-                        .getError();
-
-                assertEquals(OAuth2ErrorCodes.INVALID_REQUEST, error.getErrorCode());
-            }
-        }
-
-        @Nested
-        @DisplayName("코드를 찾을 수 있을시")
-        class WhenFoundAuthorizationCode {
-
-            @Nested
-            @DisplayName("인증 코드에 저장된 스코프가 유효하지 않을시")
-            class WhenAuthorizationCodeScopeIsNotAllowed extends AuthorizationCodeGranterSetup {
-
-                @Override
-                protected void configAuthorizationCode(OAuth2TokenApplicationTestHelper.MockAuthorizationCode mockAuthorizationCode) {
-                    mockAuthorizationCode.configDefault();
-                }
-
-                @Override
-                protected void configTokenRequest(OAuth2TokenApplicationTestHelper.MockTokenRequest mockTokenRequest) {
-                    mockTokenRequest.configDefaultCode().configDefaultScopes().configDefaultRedirectUri().configDefaultState();
-                }
-
-                @Override
-                protected void configGranter(AuthorizationCodeTokenGranter granter) {
-                    OAuth2RequestValidator validator = OAuth2TokenApplicationTestHelper.mockTokenRequestValidator().configValidationFalse(clientDetails, OAuth2TokenApplicationTestHelper.RAW_APPROVED_SCOPES).build();
-                    granter.setTokenRequestValidator(validator);
-                }
-
-                @Test
-                @DisplayName("InvalidGrantException 이 발생해야 하며 에러 코드는 INVALID_SCOPE 이어야 한다.")
-                void shouldThrowsInvalidGrantExceptionAndErrorCodeIsInvalidScope() {
-                    OAuth2Error error = assertThrows(InvalidGrantException.class, () -> granter.createAccessToken(clientDetails, tokenRequest))
-                            .getError();
-
-                    assertEquals(OAuth2ErrorCodes.INVALID_SCOPE, error.getErrorCode());
-                }
-            }
-
-            @Nested
-            @DisplayName("인증 코드에 저장된 스코프가 유효할시")
-            class WhenAuthorizationCodeScopeIsAllowed {
-
-                @Nested
-                @DisplayName("인증 코드에 스코프가 null 일시")
-                class WhenAuthorizationCodeScopeIsNull extends AuthorizationCodeGranterSetup {
-
-                    @Override
-                    protected void configAuthorizationCode(OAuth2TokenApplicationTestHelper.MockAuthorizationCode mockAuthorizationCode) {
-                        mockAuthorizationCode.configDefault().configDefaultApprovalScopesNull();
-                    }
-
-                    @Override
-                    protected void configTokenRequest(OAuth2TokenApplicationTestHelper.MockTokenRequest mockTokenRequest) {
-                        mockTokenRequest.configDefaultCode().configDefaultScopes().configDefaultRedirectUri().configDefaultState();
-                    }
-
-                    @Override
-                    protected void configGranter(AuthorizationCodeTokenGranter granter) {
-                        OAuth2RequestValidator validator = OAuth2TokenApplicationTestHelper.mockTokenRequestValidator().configValidationTrue(clientDetails, null).build();
-                        granter.setTokenRequestValidator(validator);
-                    }
-
-                    @Test
-                    @DisplayName("InvalidGrantException 이 발생해야 하며 에러 코드는 INVALID_SCOPE 이어야 한다.")
-                    void shouldThrowsInvalidGrantExceptionAndErrorCodeIsInvalidScope() {
-                        OAuth2Error error = assertThrows(InvalidGrantException.class, () -> granter.createAccessToken(clientDetails, tokenRequest))
-                                .getError();
-
-                        assertEquals(OAuth2ErrorCodes.INVALID_SCOPE, error.getErrorCode());
-                    }
-                }
-
-                @Nested
-                @DisplayName("인증 코드에 스코프가 비어있을시")
-                class WhenAuthorizationCodeScopeIsEmpty extends AuthorizationCodeGranterSetup {
-
-                    @Override
-                    protected void configAuthorizationCode(OAuth2TokenApplicationTestHelper.MockAuthorizationCode mockAuthorizationCode) {
-                        mockAuthorizationCode.configDefault().configDefaultApprovalScopesEmpty();
-                    }
-
-                    @Override
-                    protected void configTokenRequest(OAuth2TokenApplicationTestHelper.MockTokenRequest mockTokenRequest) {
-                        mockTokenRequest.configDefaultCode().configDefaultScopes().configDefaultRedirectUri().configDefaultState();
-                    }
-
-                    @Override
-                    protected void configGranter(AuthorizationCodeTokenGranter granter) {
-                        OAuth2RequestValidator validator = OAuth2TokenApplicationTestHelper.mockTokenRequestValidator().configValidationTrue(clientDetails, Collections.emptySet()).build();
-                        granter.setTokenRequestValidator(validator);
-                    }
-
-                    @Test
-                    @DisplayName("InvalidGrantException 이 발생해야 하며 에러 코드는 INVALID_SCOPE 이어야 한다.")
-                    void shouldThrowsInvalidGrantExceptionAndErrorCodeIsInvalidScope() {
-                        OAuth2Error error = assertThrows(InvalidGrantException.class, () -> granter.createAccessToken(clientDetails, tokenRequest))
-                                .getError();
-
-                        assertEquals(OAuth2ErrorCodes.INVALID_SCOPE, error.getErrorCode());
-                    }
-                }
-
-                @Nested
-                @DisplayName("리플래시 토큰 아이디 생성자가 설정되어 있지 않을시")
-                class WhenNotSetRefreshTokenIdGenerator extends AuthorizationCodeAssertSetup {
-                    @Override
-                    protected void configGranter(AuthorizationCodeTokenGranter granter) {
-                        super.configGranter(granter);
-                        granter.setRefreshTokenIdGenerator(null);
-                    }
-
-                    @Test
-                    @DisplayName("리플래스 토큰의 아이디는 토큰 아이디 생성자가 생성한 아이디어야 한다.")
-                    void shouldRefreshTokenIdIsCreatedByTokenIdGenerator() {
-                        OAuth2AuthorizedAccessToken accessToken = granter.createAccessToken(clientDetails, tokenRequest);
-
-                        Assertions.assertEquals(OAuth2TokenApplicationTestHelper.ACCESS_TOKEN_ID, accessToken.getRefreshToken().getTokenId());
-                    }
-                }
-
-                @Nested
-                @DisplayName("리플래시 토큰 아이디 생성자가 설정되어 있을시")
-                class WhenSetRefreshTokenIdGenerator extends AuthorizationCodeAssertSetup {
-
-                    @Override
-                    protected void configGranter(AuthorizationCodeTokenGranter granter) {
-                        super.configGranter(granter);
-                        granter.setRefreshTokenIdGenerator(OAuth2TokenApplicationTestHelper.mockTokenIdGenerator(OAuth2TokenApplicationTestHelper.REFRESH_TOKEN_ID));
-                    }
-
-                    @Test
-                    @DisplayName("리플래스 토큰의 아이디는 리플래시 토큰 아이디 생성자가 생성한 아이디어야 한다.")
-                    void shouldRefreshTokenIdIsCreatedByRefreshTokenIdGenerator() {
-                        OAuth2AuthorizedAccessToken accessToken = granter.createAccessToken(clientDetails, tokenRequest);
-
-                        Assertions.assertEquals(OAuth2TokenApplicationTestHelper.REFRESH_TOKEN_ID, accessToken.getRefreshToken().getTokenId());
-                    }
-                }
-            }
-        }
+        OAuth2Error error = assertThrows(InvalidRequestException.class, () -> granter.createAccessToken(clientDetails, request)).getError();
+        assertEquals(OAuth2ErrorCodes.INVALID_REQUEST, error.getErrorCode());
     }
 
-    private static abstract class AuthorizationCodeNotFoundSetup {
-        protected AuthorizationCodeTokenGranter granter;
+    @Test
+    @DisplayName("인가 코드에 저장된 스코프가 유효 하지 않을때 엑세스 토큰 생성")
+    void generateAccessTokenWhenScopeOfAuthorizationCodeIsNotAllowed() {
+        OAuth2ClientDetails clientDetails = makeClientDetails();
+        OAuth2TokenRequest request = makeTokenRequest();
+        OAuth2TokenIdGenerator generator = makeTokenIdGenerator(ACCESS_TOKEN_ID);
+        OAuth2AccessTokenRepository repository = makeEmptyAccessTokenRepository();
+        OAuth2AuthorizationCode authorizationCode = makeAuthorizationCode();
+        OAuth2AuthorizationCodeConsumer consumer = makeCodeConsumer(RAW_AUTHORIZATION_CODE, authorizationCode);
+        AuthorizationCodeTokenGranter granter = new AuthorizationCodeTokenGranter(generator, repository, consumer);
 
-        @BeforeEach
-        void setup() {
-            OAuth2TokenIdGenerator generator = OAuth2TokenApplicationTestHelper.mockTokenIdGenerator(OAuth2TokenApplicationTestHelper.ACCESS_TOKEN_ID);
-            OAuth2AccessTokenRepository repository = OAuth2TokenApplicationTestHelper.mockAccessTokenRepository().emptyAccessToken().build();
-            OAuth2AuthorizationCodeConsumer consumer = OAuth2TokenApplicationTestHelper.mockAuthorizationConsumer().empty().build();
+        OAuth2RequestValidator validator = makeErrorValidator(clientDetails, RAW_APPROVED_SCOPES);
+        granter.setTokenRequestValidator(validator);
 
-            this.granter = new AuthorizationCodeTokenGranter(generator, repository, consumer);
-        }
+        OAuth2Error error = assertThrows(InvalidGrantException.class, () -> granter.createAccessToken(clientDetails, request)).getError();
+        assertEquals(OAuth2ErrorCodes.INVALID_SCOPE, error.getErrorCode());
     }
 
-    private static abstract class AuthorizationCodeGranterSetup {
-        protected OAuth2ClientDetails clientDetails;
-        protected OAuth2TokenRequest tokenRequest;
-        protected OAuth2AuthorizationCode authorizationCode;
-        protected AuthorizationCodeTokenGranter granter;
+    @Test
+    @DisplayName("인가 코드에 저장된 스코프가 null 일떄 엑세스 토큰 생성")
+    void generateAccessTokenWhenScopeOfAuthorizationCodeIsNull() {
+        OAuth2ClientDetails clientDetails = makeClientDetails();
+        OAuth2TokenRequest request = makeTokenRequest();
+        OAuth2TokenIdGenerator generator = makeTokenIdGenerator(ACCESS_TOKEN_ID);
+        OAuth2AccessTokenRepository repository = makeEmptyAccessTokenRepository();
+        OAuth2AuthorizationCode authorizationCode = makeAuthorizationCode();
+        OAuth2AuthorizationCodeConsumer consumer = makeCodeConsumer(RAW_AUTHORIZATION_CODE, authorizationCode);
+        AuthorizationCodeTokenGranter granter = new AuthorizationCodeTokenGranter(generator, repository, consumer);
 
-        @BeforeEach
-        void setup() {
-            OAuth2TokenApplicationTestHelper.MockClientDetails mockClientDetails = OAuth2TokenApplicationTestHelper.mockClientDetails().configDefault();
-            OAuth2TokenApplicationTestHelper.MockTokenRequest mockTokenRequest = OAuth2TokenApplicationTestHelper.mockTokenRequest();
-            OAuth2TokenApplicationTestHelper.MockAuthorizationCode mockAuthorizationCode = OAuth2TokenApplicationTestHelper.mockAuthorizationCode();
-            OAuth2AccessTokenRepository repository = OAuth2TokenApplicationTestHelper.mockAccessTokenRepository().build();
+        OAuth2RequestValidator validator = makePassValidator(clientDetails, null);
+        granter.setTokenRequestValidator(validator);
+        when(authorizationCode.getApprovedScopes()).thenReturn(null);
 
-            configClientDetails(mockClientDetails);
-            configTokenRequest(mockTokenRequest);
-            configAuthorizationCode(mockAuthorizationCode);
-
-            this.clientDetails = mockClientDetails.build();
-            this.tokenRequest = mockTokenRequest.build();
-            this.authorizationCode = mockAuthorizationCode.build();
-            this.granter = new AuthorizationCodeTokenGranter(OAuth2TokenApplicationTestHelper.mockTokenIdGenerator(OAuth2TokenApplicationTestHelper.ACCESS_TOKEN_ID),
-                    repository, OAuth2TokenApplicationTestHelper.mockAuthorizationConsumer().consume(authorizationCode).build());
-
-            configGranter(this.granter);
-            Clock clock = Clock.fixed(OAuth2TokenApplicationTestHelper.TOKEN_CREATED_DATETIME.toInstant(AuthenticationApplication.DEFAULT_ZONE_OFFSET), AuthenticationApplication.DEFAULT_TIME_ZONE.toZoneId());
-            AbstractOAuth2TokenGranter.setClock(clock);
-        }
-
-        protected void configClientDetails(OAuth2TokenApplicationTestHelper.MockClientDetails mockClientDetails) {}
-        protected void configTokenRequest(OAuth2TokenApplicationTestHelper.MockTokenRequest mockTokenRequest) {}
-        protected void configAuthorizationCode(OAuth2TokenApplicationTestHelper.MockAuthorizationCode mockAuthorizationCode) {}
-        protected void configGranter(AuthorizationCodeTokenGranter granter) {}
+        OAuth2Error error = assertThrows(InvalidGrantException.class, () -> granter.createAccessToken(clientDetails, request)).getError();
+        assertEquals(OAuth2ErrorCodes.INVALID_SCOPE, error.getErrorCode());
     }
 
-    private static abstract class AuthorizationCodeAssertSetup extends AuthorizationCodeGranterSetup {
+    @Test
+    @DisplayName("인가 코드에 저장된 스코프가 비어 있을떄 엑세스 토큰 생성")
+    void generateAccessTokenWhenScopeOfAuthorizationCodeIsEmpty() {
+        OAuth2ClientDetails clientDetails = makeClientDetails();
+        OAuth2TokenRequest request = makeTokenRequest();
+        OAuth2TokenIdGenerator generator = makeTokenIdGenerator(ACCESS_TOKEN_ID);
+        OAuth2AccessTokenRepository repository = makeEmptyAccessTokenRepository();
+        OAuth2AuthorizationCode authorizationCode = makeAuthorizationCode();
+        OAuth2AuthorizationCodeConsumer consumer = makeCodeConsumer(RAW_AUTHORIZATION_CODE, authorizationCode);
+        AuthorizationCodeTokenGranter granter = new AuthorizationCodeTokenGranter(generator, repository, consumer);
 
-        @Override
-        protected void configClientDetails(OAuth2TokenApplicationTestHelper.MockClientDetails mockClientDetails) {
-            mockClientDetails.configDefault();
-        }
+        OAuth2RequestValidator validator = makePassValidator(clientDetails, Collections.emptySet());
+        granter.setTokenRequestValidator(validator);
+        when(authorizationCode.getApprovedScopes()).thenReturn(Collections.emptySet());
 
-        @Override
-        protected void configTokenRequest(OAuth2TokenApplicationTestHelper.MockTokenRequest mockTokenRequest) {
-            mockTokenRequest.configDefaultCode().configDefaultState().configDefaultRedirectUri();
-        }
+        OAuth2Error error = assertThrows(InvalidGrantException.class, () -> granter.createAccessToken(clientDetails, request)).getError();
+        assertEquals(OAuth2ErrorCodes.INVALID_SCOPE, error.getErrorCode());
+    }
 
-        @Override
-        protected void configAuthorizationCode(OAuth2TokenApplicationTestHelper.MockAuthorizationCode mockAuthorizationCode) {
-            mockAuthorizationCode.configDefault();
-        }
+    @Test
+    @DisplayName("리플래시 토큰 아이디 생성자가 설정 되어 있지 않을때 엑세스 토큰 생성")
+    void generateAccessTokenWhenRefreshTokenIdGeneratorNotSet() {
+        ArgumentCaptor<AuthorizationRequest> requestCaptor = ArgumentCaptor.forClass(AuthorizationRequest.class);
+        OAuth2ClientDetails clientDetails = makeClientDetails();
+        OAuth2TokenRequest request = makeTokenRequest();
+        OAuth2TokenIdGenerator generator = makeTokenIdGenerator(ACCESS_TOKEN_ID);
+        OAuth2AccessTokenRepository repository = makeEmptyAccessTokenRepository();
+        OAuth2AuthorizationCode authorizationCode = makeAuthorizationCode();
+        OAuth2AuthorizationCodeConsumer consumer = makeCodeConsumer(RAW_AUTHORIZATION_CODE, authorizationCode);
+        AuthorizationCodeTokenGranter granter = new AuthorizationCodeTokenGranter(generator, repository, consumer);
 
-        @Override
-        protected void configGranter(AuthorizationCodeTokenGranter granter) {
-            OAuth2RequestValidator validator = OAuth2TokenApplicationTestHelper.mockTokenRequestValidator().configValidationTrue(clientDetails, OAuth2TokenApplicationTestHelper.RAW_APPROVED_SCOPES).build();
-            granter.setTokenRequestValidator(validator);
-        }
+        configNotExpirationClock();
+        OAuth2RequestValidator validator = makePassValidator(clientDetails, RAW_APPROVED_SCOPES);
+        granter.setTokenRequestValidator(validator);
 
-        @Test
-        @DisplayName("인증 코드를 통해 요청 정보에 대한 유효성 검사를 해야 한다.")
-        void shouldValidationTestViaAuthorizationCode() {
-            ArgumentCaptor<AuthorizationRequest> requestCaptor = ArgumentCaptor.forClass(AuthorizationRequest.class);
+        OAuth2AuthorizedAccessToken accessToken = granter.createAccessToken(clientDetails, request);
+        verify(authorizationCode, times(1)).validateWithAuthorizationRequest(requestCaptor.capture());
+        assertEquals(REDIRECT_URI, requestCaptor.getValue().getRedirectUri());
+        assertEquals(RAW_CLIENT_ID, requestCaptor.getValue().getClientId());
+        assertEquals(STATE, requestCaptor.getValue().getState());
+        assertEquals(ACCESS_TOKEN_ID, accessToken.getRefreshToken().getTokenId());
+        assertAccessToken(accessToken);
+    }
 
-            granter.createAccessToken(clientDetails, tokenRequest);
-            verify(authorizationCode, times(1)).validateWithAuthorizationRequest(requestCaptor.capture());
-            Assertions.assertEquals(OAuth2TokenApplicationTestHelper.REDIRECT_URI, requestCaptor.getValue().getRedirectUri());
-            Assertions.assertEquals(OAuth2TokenApplicationTestHelper.RAW_CLIENT_ID, requestCaptor.getValue().getClientId());
-            Assertions.assertEquals(OAuth2TokenApplicationTestHelper.STATE, requestCaptor.getValue().getState());
-        }
+    @Test
+    @DisplayName("리플래시 토큰 아이디 생성자가 설정 되어 있을떄 엑세스 토큰 생성")
+    void generateAccessTokenWhenRefreshTokenIdGeneratorSet() {
+        ArgumentCaptor<AuthorizationRequest> requestCaptor = ArgumentCaptor.forClass(AuthorizationRequest.class);
+        OAuth2ClientDetails clientDetails = makeClientDetails();
+        OAuth2TokenRequest request = makeTokenRequest();
+        OAuth2TokenIdGenerator generator = makeTokenIdGenerator(ACCESS_TOKEN_ID);
+        OAuth2AccessTokenRepository repository = makeEmptyAccessTokenRepository();
+        OAuth2AuthorizationCode authorizationCode = makeAuthorizationCode();
+        OAuth2AuthorizationCodeConsumer consumer = makeCodeConsumer(RAW_AUTHORIZATION_CODE, authorizationCode);
+        AuthorizationCodeTokenGranter granter = new AuthorizationCodeTokenGranter(generator, repository, consumer);
 
-        @Test
-        @DisplayName("토큰의 아이디는 토큰 아이디 생성기에서 생성된 토큰 아이디어야 한다.")
-        void shouldTokenIdIsCreatedByTokenGenerator() {
-            OAuth2AuthorizedAccessToken accessToken = granter.createAccessToken(clientDetails, tokenRequest);
+        configNotExpirationClock();
+        OAuth2RequestValidator validator = makePassValidator(clientDetails, RAW_APPROVED_SCOPES);
+        granter.setTokenRequestValidator(validator);
+        granter.setRefreshTokenIdGenerator(makeTokenIdGenerator(REFRESH_TOKEN_ID));
 
-            Assertions.assertEquals(OAuth2TokenApplicationTestHelper.ACCESS_TOKEN_ID, accessToken.getTokenId());
-        }
+        OAuth2AuthorizedAccessToken accessToken = granter.createAccessToken(clientDetails, request);
+        verify(authorizationCode, times(1)).validateWithAuthorizationRequest(requestCaptor.capture());
+        assertEquals(REDIRECT_URI, requestCaptor.getValue().getRedirectUri());
+        assertEquals(RAW_CLIENT_ID, requestCaptor.getValue().getClientId());
+        assertEquals(STATE, requestCaptor.getValue().getState());
+        assertEquals(REFRESH_TOKEN_ID, accessToken.getRefreshToken().getTokenId());
+        assertAccessToken(accessToken);
 
-        @Test
-        @DisplayName("토큰의 클라이언트 아이디는 인증 코드에 저장된 클라이언트 아이디어야 한다.")
-        void shouldClientIdIsSavedClientIdInAuthorizationCode() {
-            OAuth2AuthorizedAccessToken accessToken = granter.createAccessToken(clientDetails, tokenRequest);
+    }
 
-            Assertions.assertEquals(OAuth2TokenApplicationTestHelper.CLIENT_ID, accessToken.getClient());
-        }
+    private static void configNotExpirationClock() {
+        Clock clock = Clock.fixed(OAuth2TokenApplicationTestHelper.TOKEN_CREATED_DATETIME.toInstant(AuthenticationApplication.DEFAULT_ZONE_OFFSET), AuthenticationApplication.DEFAULT_TIME_ZONE.toZoneId());
+        AbstractOAuth2TokenGranter.setClock(clock);
+    }
 
-        @Test
-        @DisplayName("토큰에 저장된 유저 아이디는 인증 코드에 저장된 유저어야 한다.")
-        void shouldUserEmailIsSavedUserEmailInAuthorizationCode() {
-            OAuth2AuthorizedAccessToken accessToken = granter.createAccessToken(clientDetails, tokenRequest);
-
-            Assertions.assertEquals(OAuth2TokenApplicationTestHelper.USERNAME, accessToken.getUsername());
-        }
-
-        @Test
-        @DisplayName("토큰에 저장된 스코프는 인증 코드에 저장된 스코프어야 한다.")
-        void shouldScopeIsSavedScopeInAuthorizationCode() {
-            OAuth2AuthorizedAccessToken accessToken = granter.createAccessToken(clientDetails, tokenRequest);
-
-            Assertions.assertEquals(OAuth2TokenApplicationTestHelper.APPROVED_SCOPES, accessToken.getScopes());
-        }
-
-        @Test
-        @DisplayName("토큰의 인증 타입은 AuthorizationCode 타입이어야 한다.")
-        void shouldTokenGrantTypeIsAuthorizationCode() {
-            OAuth2AuthorizedAccessToken accessToken = granter.createAccessToken(clientDetails, tokenRequest);
-
-            assertEquals(AuthorizationGrantType.AUTHORIZATION_CODE, accessToken.getTokenGrantType());
-        }
-
-        @Test
-        @DisplayName("토큰의 유효시간이 설정되어 있어야 한다.")
-        void shouldSetTokenValidity() {
-            OAuth2AuthorizedAccessToken accessToken = granter.createAccessToken(clientDetails, tokenRequest);
-
-            Assertions.assertEquals(OAuth2TokenApplicationTestHelper.TOKEN_CREATED_DATETIME.plusSeconds(OAuth2TokenApplicationTestHelper.ACCESS_TOKEN_VALIDITY_SECONDS), accessToken.getExpiration());
-        }
-
-        @Test
-        @DisplayName("토큰 발급 시간이 저장되어 있어야 한다.")
-        void shouldSetTokenIssuedAt() {
-            OAuth2AuthorizedAccessToken accessToken = granter.createAccessToken(clientDetails, tokenRequest);
-
-            assertEquals(TOKEN_CREATED_DATETIME, accessToken.getIssuedAt());
-        }
-
-        @Test
-        @DisplayName("리플래시 토큰의 유효시간은 현재 시간에 클라이언트에 저장된 리플래시 토큰 유효시간을 더한 시간이어야 한다.")
-        void shouldRefreshTokenExpirationIsCurrentTimePlusStoredInClientRefreshTokenValidity() {
-            OAuth2AuthorizedAccessToken accessToken = granter.createAccessToken(clientDetails, tokenRequest);
-
-            Assertions.assertEquals(OAuth2TokenApplicationTestHelper.TOKEN_CREATED_DATETIME.plusSeconds(OAuth2TokenApplicationTestHelper.REFRESH_TOKEN_VALIDITY_SECONDS), accessToken.getRefreshToken().getExpiration());
-        }
+    private void assertAccessToken(OAuth2AuthorizedAccessToken accessToken) {
+        assertEquals(ACCESS_TOKEN_ID, accessToken.getTokenId());
+        assertEquals(CLIENT_ID, accessToken.getClient());
+        assertEquals(USERNAME, accessToken.getUsername());
+        assertEquals(APPROVED_SCOPES, accessToken.getScopes());
+        assertEquals(AuthorizationGrantType.AUTHORIZATION_CODE, accessToken.getTokenGrantType());
+        assertEquals(TOKEN_CREATED_DATETIME.plusSeconds(ACCESS_TOKEN_VALIDITY_SECONDS), accessToken.getExpiration());
+        assertEquals(TOKEN_CREATED_DATETIME.plusSeconds(REFRESH_TOKEN_VALIDITY_SECONDS), accessToken.getRefreshToken().getExpiration());
+        assertEquals(TOKEN_CREATED_DATETIME, accessToken.getIssuedAt());
     }
 }
