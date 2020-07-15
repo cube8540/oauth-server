@@ -3,7 +3,7 @@ package cube8540.oauth.authentication.credentials.oauth.security.endpoint;
 import cube8540.oauth.authentication.credentials.AuthorityDetails;
 import cube8540.oauth.authentication.credentials.AuthorityDetailsService;
 import cube8540.oauth.authentication.credentials.oauth.OAuth2Utils;
-import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ClientRegistrationException;
+import cube8540.oauth.authentication.credentials.oauth.client.domain.exception.ClientNotFoundException;
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTranslator;
 import cube8540.oauth.authentication.credentials.oauth.error.RedirectMismatchException;
 import cube8540.oauth.authentication.credentials.oauth.security.AuthorizationCode;
@@ -21,10 +21,13 @@ import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationResponseType;
 import org.springframework.web.bind.support.SessionAttributeStore;
+import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.context.request.ServletWebRequest;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.net.URI;
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
@@ -88,385 +91,217 @@ public class AuthorizationEndpointTestHelper {
 
     static final Map<String, String> ADDITIONAL_INFO = new HashMap<>();
 
-    static Authentication mockAuthorizedAuthentication() {
+    static Map<String, Object> makeEmptyModel() {
+        Map<String, Object> model = new HashMap<>();
+
+        model.put(AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE, null);
+        model.put(AuthorizationEndpoint.ORIGINAL_AUTHORIZATION_REQUEST_ATTRIBUTE, null);
+
+        return model;
+    }
+
+    static Map<String, Object> makeModel(Map<?, ?> originalRequest, AuthorizationRequest request) {
+        Map<String, Object> model = makeEmptyModel();
+
+        model.put(AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE, request);
+        model.put(AuthorizationEndpoint.ORIGINAL_AUTHORIZATION_REQUEST_ATTRIBUTE, originalRequest);
+
+        return model;
+    }
+
+    static AuthorizationRequest makeAuthorizationRequest() {
+        AuthorizationRequest request = mock(AuthorizationRequest.class);
+
+        when(request.getClientId()).thenReturn(RAW_CLIENT_ID);
+        when(request.getUsername()).thenReturn(RAW_USERNAME);
+        when(request.getState()).thenReturn(STATE);
+        when(request.getRedirectUri()).thenReturn(RESOLVED_REDIRECT_URI);
+        when(request.getRequestScopes()).thenReturn(SCOPE);
+        when(request.getResponseType()).thenReturn(OAuth2AuthorizationResponseType.CODE);
+
+        return request;
+    }
+
+    static Map<String, String> makeEmptyApprovalParameter() {
+        return new HashMap<>();
+    }
+
+    static Map<String, String> makeRequestParameter() {
+        Map<String, String> parameter = new HashMap<>();
+        parameter.put(OAuth2Utils.AuthorizationRequestKey.STATE, STATE);
+        parameter.put(OAuth2Utils.AuthorizationRequestKey.REDIRECT_URI, RAW_REDIRECT_URI);
+        parameter.put(OAuth2Utils.AuthorizationRequestKey.CLIENT_ID, RAW_CLIENT_ID);
+        parameter.put(OAuth2Utils.AuthorizationRequestKey.SCOPE, RAW_SCOPE);
+        parameter.put(OAuth2Utils.AuthorizationRequestKey.RESPONSE_TYPE, RESPONSE_TYPE);
+        return parameter;
+    }
+
+    static HttpServletRequest makeHttpServletRequest() {
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        when(request.getParameter(OAuth2Utils.AuthorizationRequestKey.CLIENT_ID)).thenReturn(RAW_CLIENT_ID);
+        when(request.getParameter(OAuth2Utils.AuthorizationRequestKey.REDIRECT_URI)).thenReturn(RAW_REDIRECT_URI);
+        return request;
+    }
+
+    static Principal makeAuthenticationTypeNotAuthentication() {
+        return mock(Principal.class);
+    }
+
+    static Authentication makeAuthorizedAuthentication() {
         Authentication authentication = mock(Authentication.class);
         when(authentication.getName()).thenReturn(RAW_USERNAME);
         when(authentication.isAuthenticated()).thenReturn(true);
         return authentication;
     }
 
-    static Authentication mockNotAuthorizedAuthentication() {
+    static Authentication makeNotAuthorizedAuthentication() {
         Authentication authentication = mock(Authentication.class);
         when(authentication.getName()).thenReturn(RAW_USERNAME);
         when(authentication.isAuthenticated()).thenReturn(false);
         return authentication;
     }
 
-    static AuthorizationResponseEnhancer mockResponseEnhancer() {
+    static AuthorizationResponseEnhancer makeResponseEnhancer() {
         AuthorizationResponseEnhancer enhancer = mock(AuthorizationResponseEnhancer.class);
 
         doAnswer(returnsFirstArg()).when(enhancer).enhance(any(), any());
         return enhancer;
     }
 
-    static MockAuthorizationRequestMap mockAuthorizationRequestMap() {
-        return new MockAuthorizationRequestMap();
+    static AuthorityDetailsService makeAuthorityDetailsService() {
+        AuthorityDetailsService service = mock(AuthorityDetailsService.class);
+
+        when(service.loadAuthorityByAuthorityCodes(SCOPE)).thenReturn(SCOPE_DETAILS);
+        when(service.loadAuthorityByAuthorityCodes(CLIENT_SCOPE)).thenReturn(CLIENT_SCOPE_DETAILS);
+
+        return service;
     }
 
-    static MockRequestValidator mockRequestValidator() {
-        return new MockRequestValidator();
+    static OAuth2ClientDetails makeClientDetails() {
+        OAuth2ClientDetails clientDetails = mock(OAuth2ClientDetails.class);
+
+        when(clientDetails.getClientId()).thenReturn(RAW_CLIENT_ID);
+        when(clientDetails.getClientName()).thenReturn(CLIENT_NAME);
+        when(clientDetails.getScopes()).thenReturn(CLIENT_SCOPE);
+
+        return clientDetails;
     }
 
-    static MockRedirectResolver mockRedirectResolver() {
-        return new MockRedirectResolver();
+    static OAuth2ClientDetailsService makeClientDetailsService(OAuth2ClientDetails client) {
+        OAuth2ClientDetailsService service = mock(OAuth2ClientDetailsService.class);
+
+        when(service.loadClientDetailsByClientId(any())).thenReturn(client);
+
+        return service;
     }
 
-    static MockScopeDetailsService mockScopeDetailsService() {
-        return new MockScopeDetailsService();
+    static OAuth2ClientDetailsService makeEmptyClientDetailsService() {
+        OAuth2ClientDetailsService service = mock(OAuth2ClientDetailsService.class);
+
+        when(service.loadClientDetailsByClientId(any())).thenThrow(ClientNotFoundException.instance("TEST"));
+
+        return service;
     }
 
-    static MockCodeGenerator mockCodeGenerator() {
-        return new MockCodeGenerator();
+    static OAuth2RequestValidator makeErrorRequestValidator(OAuth2ClientDetails clientDetails, Set<String> scopes) {
+        OAuth2RequestValidator validator = mock(OAuth2RequestValidator.class);
+
+        when(validator.validateScopes(clientDetails, scopes)).thenReturn(false);
+
+        return validator;
     }
 
-    static MockClientDetails mockClientDetails() {
-        return new MockClientDetails();
+    static OAuth2RequestValidator makePassRequestValidator(OAuth2ClientDetails clientDetails, Set<String> scopes) {
+        OAuth2RequestValidator validator = mock(OAuth2RequestValidator.class);
+
+        when(validator.validateScopes(clientDetails, scopes)).thenReturn(true);
+
+        return validator;
     }
 
-    static MockClientDetailsService mockClientDetailsService() {
-        return new MockClientDetailsService();
+    static RedirectResolver makeRedirectResolver(OAuth2ClientDetails clientDetails, String target, URI result) {
+        RedirectResolver resolver = mock(RedirectResolver.class);
+
+        when(resolver.resolveRedirectURI(target, clientDetails)).thenReturn(result);
+
+        return resolver;
     }
 
-    static MockAuthorizationRequest mockAuthorizationRequest() {
-        return new MockAuthorizationRequest();
+    static RedirectResolver makeMismatchRedirectResolver(OAuth2ClientDetails clientDetails, String target) {
+        RedirectResolver resolver = mock(RedirectResolver.class);
+
+        when(resolver.resolveRedirectURI(target, clientDetails)).thenThrow(new RedirectMismatchException(target + " is not registered"));
+
+        return resolver;
     }
 
-    static MockScopeApprovalResolver mockScopeApprovalResolver() {
-        return new MockScopeApprovalResolver();
+    static ScopeApprovalResolver makeScopeApprovalResolver(AuthorizationRequest authorizationRequest, Map<String, String> approvalRequest, Set<String> results) {
+        ScopeApprovalResolver resolver = mock(ScopeApprovalResolver.class);
+
+        when(resolver.resolveApprovalScopes(authorizationRequest, approvalRequest)).thenReturn(results);
+
+        return resolver;
     }
 
-    static MockExceptionTranslator mockExceptionTranslator() {
-        return new MockExceptionTranslator();
+    static SessionStatus makeSessionStatus() {
+        return mock(SessionStatus.class);
     }
 
-    static MockHttpServletRequest mockHttpServletRequest() {
-        return new MockHttpServletRequest();
+    static SessionAttributeStore makeSessionAttributeStore(ServletWebRequest webRequest, String key, Object results) {
+        SessionAttributeStore attributeStore = mock(SessionAttributeStore.class);
+
+        when(attributeStore.retrieveAttribute(webRequest, key)).thenReturn(results);
+
+        return attributeStore;
     }
 
-    static MockSessionAttributeStore mockSessionAttributeStore() {
-        return new MockSessionAttributeStore();
+    static OAuth2ExceptionTranslator makeExceptionTranslator(Exception exception, ResponseEntity<OAuth2Error> response) {
+        OAuth2ExceptionTranslator translator = mock(OAuth2ExceptionTranslator.class);
+
+        when(translator.translate(exception)).thenReturn(response);
+
+        return translator;
     }
 
-    static MockOAuth2AccessTokenGranter mockAccessTokenGranter() {
-        return new MockOAuth2AccessTokenGranter();
+    static ServletWebRequest makeServletWebRequest() {
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
+
+        return new ServletWebRequest(request, response);
     }
 
-    static MockAccessToken mockAccessToken() {
-        return new MockAccessToken();
+    static ServletWebRequest makeServletWebRequest(HttpServletRequest request) {
+        HttpServletResponse response = mock(HttpServletResponse.class);
+
+        return new ServletWebRequest(request, response);
     }
 
-    static class MockAuthorizationRequestMap {
-        private Map<String, String> requestMap;
+    static OAuth2AuthorizationCodeGenerator makeAuthorizationCodeGenerator(AuthorizationCode code) {
+        OAuth2AuthorizationCodeGenerator generator = mock(OAuth2AuthorizationCodeGenerator.class);
 
-        private MockAuthorizationRequestMap() {
-            this.requestMap = new HashMap<>();
-        }
+        when(generator.generateNewAuthorizationCode(any())).thenReturn(code);
 
-        MockAuthorizationRequestMap configDefault() {
-            this.requestMap.put(OAuth2Utils.AuthorizationRequestKey.STATE, STATE);
-            this.requestMap.put(OAuth2Utils.AuthorizationRequestKey.REDIRECT_URI, RAW_REDIRECT_URI);
-            this.requestMap.put(OAuth2Utils.AuthorizationRequestKey.CLIENT_ID, RAW_CLIENT_ID);
-            this.requestMap.put(OAuth2Utils.AuthorizationRequestKey.SCOPE, RAW_SCOPE);
-            this.requestMap.put(OAuth2Utils.AuthorizationRequestKey.RESPONSE_TYPE, RESPONSE_TYPE);
-            return this;
-        }
-
-        MockAuthorizationRequestMap configResponseType(String responseType) {
-            this.requestMap.put(OAuth2Utils.AuthorizationRequestKey.RESPONSE_TYPE, responseType);
-            return this;
-        }
-
-        MockAuthorizationRequestMap configScopeNull() {
-            this.requestMap.put(OAuth2Utils.AuthorizationRequestKey.SCOPE, null);
-            return this;
-        }
-
-        Map<String, String> build() {
-            return requestMap;
-        }
+        return generator;
     }
 
-    static class MockClientDetails {
-        private OAuth2ClientDetails client;
-
-        private MockClientDetails() {
-            this.client = mock(OAuth2ClientDetails.class);
-        }
-
-        MockClientDetails configDefault() {
-            when(client.getClientId()).thenReturn(RAW_CLIENT_ID);
-            when(client.getClientName()).thenReturn(CLIENT_NAME);
-            when(client.getScopes()).thenReturn(CLIENT_SCOPE);
-            return this;
-        }
-
-        OAuth2ClientDetails build() {
-            return client;
-        }
+    static OAuth2AccessTokenDetails makeAccessToken() {
+        OAuth2AccessTokenDetails accessToken = mock(OAuth2AccessTokenDetails.class);
+        when(accessToken.getTokenValue()).thenReturn(RAW_ACCESS_TOKEN_ID);
+        when(accessToken.getTokenType()).thenReturn(TOKEN_TYPE);
+        when(accessToken.getClientId()).thenReturn(RAW_CLIENT_ID);
+        when(accessToken.getUsername()).thenReturn(RAW_USERNAME);
+        when(accessToken.getScopes()).thenReturn(RAW_RESOLVED_SCOPES);
+        when(accessToken.getExpiration()).thenReturn(EXPIRATION_DATETIME);
+        when(accessToken.getExpiresIn()).thenReturn(EXPIRATION_IN);
+        when(accessToken.getAdditionalInformation()).thenReturn(ADDITIONAL_INFO);
+        return accessToken;
     }
 
-    static class MockClientDetailsService {
-        private OAuth2ClientDetailsService service;
+    static OAuth2AccessTokenGranter makeTokenGranter(OAuth2AccessTokenDetails accessToken) {
+        OAuth2AccessTokenGranter granter = mock(OAuth2AccessTokenGranter.class);
 
-        private MockClientDetailsService() {
-            this.service = mock(OAuth2ClientDetailsService.class);
-        }
+        when(granter.grant(any(), any())).thenReturn(accessToken);
 
-        MockClientDetailsService registerClient(OAuth2ClientDetails clientDetails) {
-            when(service.loadClientDetailsByClientId(RAW_CLIENT_ID)).thenReturn(clientDetails);
-            return this;
-        }
-
-        MockClientDetailsService emptyClient() {
-            when(service.loadClientDetailsByClientId(RAW_CLIENT_ID)).thenThrow(new OAuth2ClientRegistrationException("NOT FOUND"));
-            return this;
-        }
-
-        OAuth2ClientDetailsService build() {
-            return service;
-        }
-    }
-
-    static class MockRequestValidator {
-        private OAuth2RequestValidator validator;
-
-        private MockRequestValidator() {
-            this.validator = mock(OAuth2RequestValidator.class);
-        }
-
-        MockRequestValidator configAllowedScopes(OAuth2ClientDetails clientDetails, Set<String> scopes) {
-            when(validator.validateScopes(clientDetails, scopes)).thenReturn(true);
-            return this;
-        }
-
-        MockRequestValidator configNotAllowedScopes(OAuth2ClientDetails clientDetails, Set<String> scopes) {
-            when(validator.validateScopes(clientDetails, scopes)).thenReturn(false);
-            return this;
-        }
-
-        OAuth2RequestValidator build() {
-            return validator;
-        }
-    }
-
-    static class MockRedirectResolver {
-        private RedirectResolver redirectResolver;
-
-        private MockRedirectResolver() {
-            this.redirectResolver = mock(RedirectResolver.class);
-        }
-
-        MockRedirectResolver configResolve(OAuth2ClientDetails clientDetails, String resolveTarget, URI result) {
-            when(redirectResolver.resolveRedirectURI(resolveTarget, clientDetails)).thenReturn(result);
-            return this;
-        }
-
-        MockRedirectResolver configMismatched(OAuth2ClientDetails clientDetails, String resolveTarget) {
-            when(redirectResolver.resolveRedirectURI(resolveTarget, clientDetails)).thenThrow(new RedirectMismatchException("TEST"));
-            return this;
-        }
-
-        RedirectResolver build() {
-            return redirectResolver;
-        }
-    }
-
-    static class MockScopeDetailsService {
-        private AuthorityDetailsService service;
-
-        private MockScopeDetailsService() {
-            this.service = mock(AuthorityDetailsService.class);
-        }
-
-        MockScopeDetailsService registerScopes(Collection<String> where, Collection<AuthorityDetails> result) {
-            when(service.loadAuthorityByAuthorityCodes(where)).thenReturn(result);
-            return this;
-        }
-
-        AuthorityDetailsService build() {
-            return service;
-        }
-    }
-
-    static class MockCodeGenerator {
-        private OAuth2AuthorizationCodeGenerator generator;
-
-        private MockCodeGenerator() {
-            this.generator = mock(OAuth2AuthorizationCodeGenerator.class);
-        }
-
-        MockCodeGenerator configGenerated() {
-            when(generator.generateNewAuthorizationCode(any())).thenReturn(AUTHORIZATION_CODE);
-            return this;
-        }
-
-        OAuth2AuthorizationCodeGenerator build() {
-            return generator;
-        }
-    }
-
-    static class MockAuthorizationRequest {
-        private AuthorizationRequest authorizationRequest;
-
-        private MockAuthorizationRequest() {
-            this.authorizationRequest = mock(AuthorizationRequest.class);
-        }
-
-        MockAuthorizationRequest configDefault() {
-            when(authorizationRequest.getClientId()).thenReturn(RAW_CLIENT_ID);
-            when(authorizationRequest.getUsername()).thenReturn(RAW_USERNAME);
-            when(authorizationRequest.getRedirectUri()).thenReturn(RESOLVED_REDIRECT_URI);
-            when(authorizationRequest.getRequestScopes()).thenReturn(SCOPE);
-            return this;
-        }
-
-        MockAuthorizationRequest configNullState() {
-            when(authorizationRequest.getState()).thenReturn(null);
-            return this;
-        }
-
-        MockAuthorizationRequest configState() {
-            when(authorizationRequest.getState()).thenReturn(STATE);
-            return this;
-        }
-
-        MockAuthorizationRequest configResponseType(OAuth2AuthorizationResponseType responseType) {
-            when(authorizationRequest.getResponseType()).thenReturn(responseType);
-            return this;
-        }
-
-        AuthorizationRequest build() {
-            return authorizationRequest;
-        }
-    }
-
-    static class MockScopeApprovalResolver {
-        private ScopeApprovalResolver resolver;
-
-        private MockScopeApprovalResolver() {
-            this.resolver = mock(ScopeApprovalResolver.class);
-        }
-
-        MockScopeApprovalResolver configResolve(AuthorizationRequest request, Map<String, String> approvalRequest, Set<String> result) {
-            when(resolver.resolveApprovalScopes(request, approvalRequest)).thenReturn(result);
-            return this;
-        }
-
-        ScopeApprovalResolver build() {
-            return resolver;
-        }
-    }
-
-    static class MockExceptionTranslator {
-        private OAuth2ExceptionTranslator translator;
-
-        private MockExceptionTranslator() {
-            this.translator = mock(OAuth2ExceptionTranslator.class);
-        }
-
-        MockExceptionTranslator configTranslate(Exception e, ResponseEntity<OAuth2Error> result) {
-            when(translator.translate(e)).thenReturn(result);
-            return this;
-        }
-
-        OAuth2ExceptionTranslator build() {
-            return translator;
-        }
-    }
-
-    static class MockHttpServletRequest {
-        private HttpServletRequest request;
-
-        private MockHttpServletRequest() {
-            this.request = mock(HttpServletRequest.class);
-        }
-
-        MockHttpServletRequest configDefault() {
-            when(request.getParameter(OAuth2Utils.AuthorizationRequestKey.CLIENT_ID)).thenReturn(RAW_CLIENT_ID);
-            when(request.getParameter(OAuth2Utils.AuthorizationRequestKey.REDIRECT_URI)).thenReturn(RAW_REDIRECT_URI);
-            return this;
-        }
-
-        MockHttpServletRequest configState() {
-            when(request.getParameter(OAuth2Utils.AuthorizationRequestKey.STATE)).thenReturn(STATE);
-            return this;
-        }
-
-        MockHttpServletRequest configNullState() {
-            when(request.getParameter(OAuth2Utils.AuthorizationRequestKey.STATE)).thenReturn(null);
-            return this;
-        }
-
-        HttpServletRequest build() {
-            return request;
-        }
-    }
-
-    static class MockSessionAttributeStore {
-        private SessionAttributeStore store;
-
-        private MockSessionAttributeStore() {
-            this.store = mock(SessionAttributeStore.class);
-        }
-
-        MockSessionAttributeStore configRetrieveAttribute(ServletWebRequest webRequest, String key, Object result) {
-            when(store.retrieveAttribute(webRequest, key)).thenReturn(result);
-            return this;
-        }
-
-        SessionAttributeStore build() {
-            return store;
-        }
-    }
-
-    static class MockOAuth2AccessTokenGranter {
-        private OAuth2AccessTokenGranter granter;
-
-        private MockOAuth2AccessTokenGranter() {
-            this.granter = mock(OAuth2AccessTokenGranter.class);
-        }
-
-        MockOAuth2AccessTokenGranter configToken(OAuth2AccessTokenDetails accessToken) {
-            when(granter.grant(any(), any())).thenReturn(accessToken);
-            return this;
-        }
-
-        OAuth2AccessTokenGranter build() {
-            return granter;
-        }
-    }
-
-    static class MockAccessToken {
-        private OAuth2AccessTokenDetails accessToken;
-
-        private MockAccessToken() {
-            this.accessToken = mock(OAuth2AccessTokenDetails.class);
-        }
-
-        MockAccessToken configDefault() {
-            when(accessToken.getTokenValue()).thenReturn(RAW_ACCESS_TOKEN_ID);
-            when(accessToken.getTokenType()).thenReturn(TOKEN_TYPE);
-            when(accessToken.getClientId()).thenReturn(RAW_CLIENT_ID);
-            when(accessToken.getUsername()).thenReturn(RAW_USERNAME);
-            when(accessToken.getScopes()).thenReturn(RAW_RESOLVED_SCOPES);
-            when(accessToken.getExpiration()).thenReturn(EXPIRATION_DATETIME);
-            when(accessToken.getExpiresIn()).thenReturn(EXPIRATION_IN);
-            when(accessToken.getAdditionalInformation()).thenReturn(ADDITIONAL_INFO);
-            return this;
-        }
-
-        OAuth2AccessTokenDetails build() {
-            return accessToken;
-        }
+        return granter;
     }
 }

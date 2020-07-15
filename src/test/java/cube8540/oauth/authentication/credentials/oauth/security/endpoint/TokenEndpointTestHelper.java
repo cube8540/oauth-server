@@ -42,171 +42,104 @@ class TokenEndpointTestHelper {
 
     static final URI REDIRECT_URI = URI.create("http://localhost:8080");
 
-    static MockAccessToken mockAccessToken() {
-        return new MockAccessToken();
+    static OAuth2AccessTokenDetailsService makeEmptyAccessTokenDetailsService() {
+        return mock(OAuth2AccessTokenDetailsService.class);
     }
 
-    static MockAccessTokenReadService mockAccessTokenReadService() {
-        return new MockAccessTokenReadService();
+    static OAuth2AccessTokenDetailsService makeAccessTokenDetailsService(String token, OAuth2AccessTokenDetails tokenDetails) {
+        OAuth2AccessTokenDetailsService service = makeEmptyAccessTokenDetailsService();
+
+        when(service.readAccessToken(token)).thenReturn(tokenDetails);
+
+        return service;
     }
 
-    static MockClientDetails mockClientDetails() {
-        return new MockClientDetails();
+    static OAuth2AccessTokenIntrospectionConverter makeIntrospectionConverter(OAuth2AccessTokenDetails accessToken, Map<String, Object> map) {
+        OAuth2AccessTokenIntrospectionConverter converter = mock(OAuth2AccessTokenIntrospectionConverter.class);
+
+        when(converter.convertAccessToken(accessToken)).thenReturn(map);
+
+        return converter;
     }
 
-    static MockIntrospectionConverter mockIntrospectionConverter() {
-        return new MockIntrospectionConverter();
+    static OAuth2ClientDetails makeClientDetails() {
+        OAuth2ClientDetails clientDetails = mock(OAuth2ClientDetails.class);
+
+        when(clientDetails.getClientId()).thenReturn(RAW_CLIENT_ID);
+        when(clientDetails.getScopes()).thenReturn(RAW_SCOPES);
+
+        return clientDetails;
     }
 
-    static Principal mockPrincipal(OAuth2ClientDetails clientDetails) {
+    static OAuth2AccessTokenDetails makeAccessTokenDetails() {
+        OAuth2AccessTokenDetails token = mock(OAuth2AccessTokenDetails.class);
+
+        when(token.getTokenValue()).thenReturn(RAW_TOKEN_ID);
+        when(token.getClientId()).thenReturn(RAW_CLIENT_ID);
+        when(token.getUsername()).thenReturn(RAW_USERNAME);
+        when(token.getExpiration()).thenReturn(EXPIRATION);
+        when(token.getScopes()).thenReturn(RAW_SCOPES);
+        when(token.isExpired()).thenReturn(false);
+
+        return token;
+    }
+
+    static Map<String, Object> makeAccessTokenMap() {
+        return new HashMap<>();
+    }
+
+    static ClientCredentialsToken makeClientCredentialsToken(Object clientDetails) {
         ClientCredentialsToken principal = mock(ClientCredentialsToken.class);
 
         when(principal.getPrincipal()).thenReturn(clientDetails);
         return principal;
     }
 
-    static Principal mockDetailsNotOAuth2ClientDetailsPrincipal() {
-        ClientCredentialsToken principal = mock(ClientCredentialsToken.class);
-
-        when(principal.getPrincipal()).thenReturn(new Object());
-        return principal;
-    }
-
-    static Principal mockNotClientCredentialsTokenPrincipal() {
+    static Principal makeNotClientCredentialsTokenPrincipal() {
         return mock(Principal.class);
     }
 
-    static MockTokenRequestMap mockTokenRequestMap() {
-        return new MockTokenRequestMap();
+    static Map<String, String> makeRequestMap() {
+        Map<String, String> map = new HashMap<>();
+
+        map.put(OAuth2Utils.TokenRequestKey.GRANT_TYPE, GRANT_TYPE);
+        map.put(OAuth2Utils.TokenRequestKey.USERNAME, RAW_USERNAME);
+        map.put(OAuth2Utils.TokenRequestKey.PASSWORD, RAW_PASSWORD);
+        map.put(OAuth2Utils.TokenRequestKey.CLIENT_ID, RAW_CLIENT_ID);
+        map.put(OAuth2Utils.TokenRequestKey.CODE, RAW_CODE);
+        map.put(OAuth2Utils.TokenRequestKey.REDIRECT_URI, REDIRECT_URI.toString());
+        map.put(OAuth2Utils.TokenRequestKey.SCOPE, String.join(" ", RAW_SCOPES));
+
+        return map;
     }
 
-    static OAuth2AccessTokenGranter mockTokenGrantService(OAuth2AccessTokenDetails token) {
+    static Map<String, String> makeRequestMapGrantTypeNull() {
+        Map<String, String> map = makeRequestMap();
+
+        map.put(OAuth2Utils.TokenRequestKey.GRANT_TYPE, null);
+
+        return map;
+    }
+
+    static Map<String, String> makeRequestMapGrantTypeImplicit() {
+        Map<String, String> map = makeRequestMap();
+
+        map.put(OAuth2Utils.TokenRequestKey.GRANT_TYPE, AuthorizationGrantType.IMPLICIT.getValue());
+
+        return map;
+    }
+
+    static OAuth2AccessTokenGranter makeTokenGrantService(OAuth2AccessTokenDetails token) {
         OAuth2AccessTokenGranter service = mock(OAuth2AccessTokenGranter.class);
 
         when(service.grant(any(), any())).thenReturn(token);
         return service;
     }
 
-    static OAuth2TokenRevoker mockRevokeService(OAuth2AccessTokenDetails accessToken) {
+    static OAuth2TokenRevoker makeRevokeService(OAuth2AccessTokenDetails accessToken) {
         OAuth2TokenRevoker service = mock(OAuth2TokenRevoker.class);
 
         when(service.revoke(any())).thenReturn(accessToken);
         return service;
-    }
-
-    static class MockAccessToken {
-        private OAuth2AccessTokenDetails token;
-
-        private MockAccessToken() {
-            this.token = mock(OAuth2AccessTokenDetails.class);
-        }
-
-        MockAccessToken configDefault() {
-            when(token.getTokenValue()).thenReturn(RAW_TOKEN_ID);
-            when(token.getClientId()).thenReturn(RAW_CLIENT_ID);
-            when(token.getUsername()).thenReturn(RAW_USERNAME);
-            when(token.getExpiration()).thenReturn(EXPIRATION);
-            when(token.getScopes()).thenReturn(RAW_SCOPES);
-            when(token.isExpired()).thenReturn(false);
-            return this;
-        }
-
-        MockAccessToken configExpired() {
-            when(token.isExpired()).thenReturn(true);
-            return this;
-        }
-
-        MockAccessToken configClientAuthentication() {
-            when(token.getUsername()).thenReturn(null);
-            return this;
-        }
-
-        MockAccessToken configDifferentClientId() {
-            when(token.getClientId()).thenReturn(RAW_DIFFERENT_CLIENT_ID);
-            return this;
-        }
-
-        OAuth2AccessTokenDetails build() {
-            return token;
-        }
-    }
-
-    static class MockAccessTokenReadService {
-        private OAuth2AccessTokenDetailsService service;
-
-        private MockAccessTokenReadService() {
-            this.service = mock(OAuth2AccessTokenDetailsService.class);
-        }
-
-        MockAccessTokenReadService registerToken(OAuth2AccessTokenDetails token) {
-            when(service.readAccessToken(RAW_TOKEN_ID)).thenReturn(token);
-            return this;
-        }
-
-        OAuth2AccessTokenDetailsService build() {
-            return service;
-        }
-    }
-
-    static class MockClientDetails {
-        private OAuth2ClientDetails client;
-
-        private MockClientDetails() {
-            this.client = mock(OAuth2ClientDetails.class);
-        }
-
-        MockClientDetails configDefault() {
-            when(client.getClientId()).thenReturn(RAW_CLIENT_ID);
-            return this;
-        }
-
-        OAuth2ClientDetails build() {
-            return client;
-        }
-    }
-
-    static class MockIntrospectionConverter {
-        private OAuth2AccessTokenIntrospectionConverter converter;
-
-        private MockIntrospectionConverter() {
-            this.converter = mock(OAuth2AccessTokenIntrospectionConverter.class);
-        }
-
-        MockIntrospectionConverter configConverting(OAuth2AccessTokenDetails token, Map<String, Object> map) {
-            when(converter.convertAccessToken(token)).thenReturn(map);
-            return this;
-        }
-
-        OAuth2AccessTokenIntrospectionConverter build() {
-            return converter;
-        }
-    }
-
-    static class MockTokenRequestMap {
-        private Map<String, String> requestMap;
-
-        private MockTokenRequestMap() {
-            this.requestMap = new HashMap<>();
-        }
-
-        MockTokenRequestMap configDefault() {
-            this.requestMap.put(OAuth2Utils.TokenRequestKey.GRANT_TYPE, GRANT_TYPE);
-            this.requestMap.put(OAuth2Utils.TokenRequestKey.USERNAME, RAW_USERNAME);
-            this.requestMap.put(OAuth2Utils.TokenRequestKey.PASSWORD, RAW_PASSWORD);
-            this.requestMap.put(OAuth2Utils.TokenRequestKey.CLIENT_ID, RAW_CLIENT_ID);
-            this.requestMap.put(OAuth2Utils.TokenRequestKey.CODE, RAW_CODE);
-            this.requestMap.put(OAuth2Utils.TokenRequestKey.REDIRECT_URI, REDIRECT_URI.toString());
-            this.requestMap.put(OAuth2Utils.TokenRequestKey.SCOPE, String.join(" ", RAW_SCOPES));
-            return this;
-        }
-
-        MockTokenRequestMap configGrantType(String grantType) {
-            this.requestMap.put(OAuth2Utils.TokenRequestKey.GRANT_TYPE, grantType);
-            return this;
-        }
-
-        Map<String, String> build() {
-            return requestMap;
-        }
     }
 }

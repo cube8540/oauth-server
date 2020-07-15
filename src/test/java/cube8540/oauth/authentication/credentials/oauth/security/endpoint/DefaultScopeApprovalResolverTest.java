@@ -4,7 +4,6 @@ import cube8540.oauth.authentication.credentials.oauth.error.UserDeniedAuthoriza
 import cube8540.oauth.authentication.credentials.oauth.security.AuthorizationRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -30,55 +29,35 @@ class DefaultScopeApprovalResolverTest {
         this.resolver = new DefaultScopeApprovalResolver();
     }
 
-    @Nested
-    @DisplayName("허용되는 스코프 추출")
-    class ExtractApprovalScope {
+    @Test
+    @DisplayName("허용 되는 스코프가 없을 때")
+    void notHasApprovalScope() {
+        AuthorizationRequest authorizationRequest = mock(AuthorizationRequest.class);
+        Map<String, String> approvalScopes = new HashMap<>();
 
-        private AuthorizationRequest authorizationRequest;
-        private Map<String, String> approvalScopes;
+        approvalScopes.put("SCOPE-1", "false"); // 소문자
+        approvalScopes.put("SCOPE-2", "FALSE"); // 대문자
+        approvalScopes.put("SCOPE-3", "false"); // 비허용
+        approvalScopes.put("ANY", "ANY"); // 스코프가 아닌 다른값
+        when(authorizationRequest.getRequestScopes()).thenReturn(STORED_SCOPE);
 
-        @BeforeEach
-        void setup() {
-            this.authorizationRequest = mock(AuthorizationRequest.class);
-            this.approvalScopes = new HashMap<>();
-
-            this.approvalScopes.put("SCOPE-1", "true"); // 소문자
-            this.approvalScopes.put("SCOPE-2", "TRUE"); // 대문자
-            this.approvalScopes.put("SCOPE-3", "false"); // 비허용
-            this.approvalScopes.put("ANY", "ANY"); // 스코프가 아닌 다른값
-
-            when(authorizationRequest.getRequestScopes()).thenReturn(STORED_SCOPE);
-        }
-
-        @Nested
-        @DisplayName("허용한 스코프가 없을시")
-        class WhenNoScopeAllowed {
-            private Map<String, String> approvalScopes;
-
-            @BeforeEach
-            void setup() {
-                this.approvalScopes = new HashMap<>();
-                this.approvalScopes.put("SCOPE-1", "false"); // 소문자
-                this.approvalScopes.put("SCOPE-2", "FALSE"); // 대문자
-                this.approvalScopes.put("SCOPE-3", "false"); // 비허용
-                this.approvalScopes.put("ANY", "ANY"); // 스코프가 아닌 다른값
-            }
-
-            @Test
-            @DisplayName("UserDeniedAuthorizationException을 발생시켜야 한다.")
-            void shouldThrowsUserDeniedAuthorizationException() {
-                assertThrows(UserDeniedAuthorizationException.class, () -> resolver.resolveApprovalScopes(authorizationRequest, approvalScopes));
-            }
-        }
-
-        @Test
-        @DisplayName("허용된 스코프만 반환해야 한다.")
-        void shouldReturnsOnlyApprovalScope() {
-            Set<String> resolvedApprovalScopes = resolver.resolveApprovalScopes(authorizationRequest, approvalScopes);
-
-            Set<String> exceptedApprovalScopes = new HashSet<>(Arrays.asList("SCOPE-1", "SCOPE-2"));
-            assertEquals(exceptedApprovalScopes, resolvedApprovalScopes);
-        }
+        assertThrows(UserDeniedAuthorizationException.class, () -> resolver.resolveApprovalScopes(authorizationRequest, approvalScopes));
     }
 
+    @Test
+    @DisplayName("허용 되는 스코프 추출")
+    void extractApprovalScope() {
+        AuthorizationRequest authorizationRequest = mock(AuthorizationRequest.class);
+        Map<String, String> approvalScopes = new HashMap<>();
+
+        approvalScopes.put("SCOPE-1", "true"); // 소문자
+        approvalScopes.put("SCOPE-2", "TRUE"); // 대문자
+        approvalScopes.put("SCOPE-3", "false"); // 비허용
+        approvalScopes.put("ANY", "ANY"); // 스코프가 아닌 다른값
+        when(authorizationRequest.getRequestScopes()).thenReturn(STORED_SCOPE);
+
+        Set<String> resolvedApprovalScopes = resolver.resolveApprovalScopes(authorizationRequest, approvalScopes);
+        Set<String> exceptedApprovalScopes = new HashSet<>(Arrays.asList("SCOPE-1", "SCOPE-2"));
+        assertEquals(exceptedApprovalScopes, resolvedApprovalScopes);
+    }
 }
