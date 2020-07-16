@@ -70,8 +70,10 @@ public class UserManagementAPIEndpoint {
 
     @PostMapping(value = "/api/accounts")
     @ApiOperation(value = "계정 등록", notes = "새 계정을 등록 합니다.")
+    @ApiImplicitParam(value = "OAuth2 엑세스 토큰", name = "Authorization", required = true, paramType = "header", example = "Bearer xxxxxxxxxx")
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "요청하신 아이디가 중복 되었거나, 매개 변수의 형식이 옳바르지 않습니다."),
+            @ApiResponse(code = 403, message = "로그인이 되어 있지 않습니다."),
             @ApiResponse(code = 500, message = "서버에서 알 수 없는 에러가 발생 했습니다.")
     })
     public UserProfile registerUserAccounts(@RequestBody UserRegisterRequest registerRequest) {
@@ -80,7 +82,11 @@ public class UserManagementAPIEndpoint {
 
     @GetMapping(value = "/api/accounts/attributes/username")
     @ApiOperation(value = "등록된 아이디 갯수 검색", notes = "매개 변수로 받은 아이디의 갯수를 검색 합니다. 주로 아이디 중복 검사에서 사용 합니다.")
-    @ApiResponse(code = 500, message = "서버에서 알 수 없는 에러가 발생 했습니다.")
+    @ApiImplicitParam(value = "OAuth2 엑세스 토큰", name = "Authorization", required = true, paramType = "header", example = "Bearer xxxxxxxxxx")
+    @ApiResponses(value = {
+            @ApiResponse(code = 403, message = "로그인이 되어 있지 않습니다."),
+            @ApiResponse(code = 500, message = "서버에서 알 수 없는 에러가 발생 했습니다.")
+    })
     public Map<String, Long> countAccountUsername(@ApiParam(value = "검색할 아이디", required = true, example = "username1234") @RequestParam("username") String username) {
         long count = service.countUser(username);
         return Collections.singletonMap("count", count);

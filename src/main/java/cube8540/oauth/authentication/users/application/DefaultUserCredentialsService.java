@@ -1,9 +1,6 @@
 package cube8540.oauth.authentication.users.application;
 
-import cube8540.oauth.authentication.credentials.AuthorityDetails;
-import cube8540.oauth.authentication.credentials.BasicAuthorityDetailsService;
 import cube8540.oauth.authentication.users.domain.User;
-import cube8540.oauth.authentication.users.domain.UserAuthority;
 import cube8540.oauth.authentication.users.domain.UserCredentialsKeyGenerator;
 import cube8540.oauth.authentication.users.domain.UserRepository;
 import cube8540.oauth.authentication.users.domain.Username;
@@ -18,14 +15,11 @@ public class DefaultUserCredentialsService implements UserCredentialsService {
 
     private final UserRepository repository;
 
-    private final BasicAuthorityDetailsService basicAuthorityDetailsService;
-
     @Setter
     private UserCredentialsKeyGenerator keyGenerator = new DefaultUserCredentialsKeyGenerator();
 
-    public DefaultUserCredentialsService(UserRepository repository, BasicAuthorityDetailsService basicAuthorityDetailsService) {
+    public DefaultUserCredentialsService(UserRepository repository) {
         this.repository = repository;
-        this.basicAuthorityDetailsService = basicAuthorityDetailsService;
     }
 
     @Override
@@ -43,10 +37,6 @@ public class DefaultUserCredentialsService implements UserCredentialsService {
         User user = getUser(username);
 
         user.credentials(credentialsKey);
-
-        basicAuthorityDetailsService.loadBasicAuthorities().stream()
-                .map(AuthorityDetails::getCode).map(UserAuthority::new)
-                .forEach(user::grantAuthority);
         return UserProfile.of(repository.save(user));
     }
 

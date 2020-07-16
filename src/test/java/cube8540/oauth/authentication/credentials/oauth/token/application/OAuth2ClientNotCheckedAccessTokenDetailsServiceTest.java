@@ -1,6 +1,5 @@
 package cube8540.oauth.authentication.credentials.oauth.token.application;
 
-import cube8540.oauth.authentication.credentials.oauth.error.InvalidClientException;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenNotFoundException;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenRepository;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedAccessToken;
@@ -10,12 +9,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.ACCESS_TOKEN_ID;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.RAW_ACCESS_TOKEN_ID;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.RAW_CLIENT_ID;
-import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.RAW_DIFFERENT_CLIENT;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.RAW_USERNAME;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeAccessToken;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeAccessTokenRepository;
@@ -24,13 +21,12 @@ import static cube8540.oauth.authentication.credentials.oauth.token.application.
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeEmptyUserDetailsService;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeUserDetails;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeUserDetailsService;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-@DisplayName("기본 토큰 검색 테스트")
-class DefaultOAuth2AccessTokenDetailsServiceTest {
+@DisplayName("요청한 클라이언트와 실제 토큰의 클라이언트를 확인 하지 않는 토큰 검색 서비스")
+class OAuth2ClientNotCheckedAccessTokenDetailsServiceTest {
 
     @Test
     @DisplayName("저장소에 등록 되지 않은 액세스 토큰 검색")
@@ -43,21 +39,6 @@ class DefaultOAuth2AccessTokenDetailsServiceTest {
     }
 
     @Test
-    @DisplayName("요청한 클라이언트와 액세스 토큰의 클라이언트가 일치 하지 않을때 액세스 토큰 검색")
-    void getAccessTokenWhenRequestedClientAndClientOfAccessTokenDoNotMatch() {
-        OAuth2AuthorizedAccessToken accessToken = makeAccessToken();
-        OAuth2AccessTokenRepository repository = makeAccessTokenRepository(ACCESS_TOKEN_ID, accessToken);
-        UserDetailsService userDetailsService = makeEmptyUserDetailsService();
-        Authentication authentication = makeAuthentication(RAW_DIFFERENT_CLIENT);
-        DefaultOAuth2AccessTokenDetailsService service = new DefaultOAuth2AccessTokenDetailsService(repository, userDetailsService);
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        String errorCode = assertThrows(InvalidClientException.class, () -> service.readAccessToken(RAW_ACCESS_TOKEN_ID)).getError().getErrorCode();
-        assertEquals(OAuth2ErrorCodes.INVALID_CLIENT, errorCode);
-    }
-
-    @Test
     @DisplayName("저장소에 등록 되지 않은 액세스 토큰 소유자 검색")
     void getNotRegisteredOwnerOfAccessTokenInRepository() {
         OAuth2AccessTokenRepository repository = makeEmptyAccessTokenRepository();
@@ -65,21 +46,6 @@ class DefaultOAuth2AccessTokenDetailsServiceTest {
         DefaultOAuth2AccessTokenDetailsService service = new DefaultOAuth2AccessTokenDetailsService(repository, userDetailsService);
 
         assertThrows(OAuth2AccessTokenNotFoundException.class, () -> service.readAccessTokenUser(RAW_ACCESS_TOKEN_ID));
-    }
-
-    @Test
-    @DisplayName("요청한 클라이언트와 액세스 토큰의 클라이언트가 일치 하지 않을때 액세스 토큰 소유자 검색")
-    void getAccessTokenOwnerWhenRequestedClientAndClientOfAccessTokenDoNotMatch() {
-        OAuth2AuthorizedAccessToken accessToken = makeAccessToken();
-        OAuth2AccessTokenRepository repository = makeAccessTokenRepository(ACCESS_TOKEN_ID, accessToken);
-        UserDetailsService userDetailsService = makeEmptyUserDetailsService();
-        Authentication authentication = makeAuthentication(RAW_DIFFERENT_CLIENT);
-        DefaultOAuth2AccessTokenDetailsService service = new DefaultOAuth2AccessTokenDetailsService(repository, userDetailsService);
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        String errorCode = assertThrows(InvalidClientException.class, () -> service.readAccessTokenUser(RAW_ACCESS_TOKEN_ID)).getError().getErrorCode();
-        assertEquals(OAuth2ErrorCodes.INVALID_CLIENT, errorCode);
     }
 
     @Test

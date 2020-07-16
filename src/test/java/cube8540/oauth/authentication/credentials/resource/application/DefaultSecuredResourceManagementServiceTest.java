@@ -66,7 +66,6 @@ class DefaultSecuredResourceManagementServiceTest {
         verifySaveAfterValidation(policy.resourceRule(), resourceCaptor, repository);
         verifySaveAfterValidation(policy.methodRule(), resourceCaptor, repository);
         verifySaveAfterValidation(policy.scopeAuthoritiesRule(), resourceCaptor, repository);
-        verifySaveAfterValidation(policy.roleAuthoritiesRule(), resourceCaptor, repository);
         assertEquals(RESOURCE_ID, resourceCaptor.getValue().getResourceId());
         assertEquals(RESOURCE_URI, resourceCaptor.getValue().getResource());
         assertEquals(ResourceMethod.POST, resourceCaptor.getValue().getMethod());
@@ -98,8 +97,8 @@ class DefaultSecuredResourceManagementServiceTest {
         service.modifyResource(RAW_RESOURCE_ID, request);
         InOrder inOrder = inOrder(resource, repository);
         inOrder.verify(resource, times(1)).changeResourceInfo(MODIFY_RESOURCE_URI, ResourceMethod.PUT);
-        REMOVE_AUTHORITIES.forEach(auth -> inOrder.verify(resource, times(1)).removeAuthority(auth.getAuthority(), auth.getAuthorityType()));
-        ADD_AUTHORITIES.forEach(auth -> inOrder.verify(resource, times(1)).addAuthority(auth.getAuthority(), auth.getAuthorityType()));
+        REMOVE_AUTHORITIES.forEach(auth -> inOrder.verify(resource, times(1)).removeAuthority(auth.getAuthority()));
+        ADD_AUTHORITIES.forEach(auth -> inOrder.verify(resource, times(1)).addAuthority(auth.getAuthority()));
         inOrder.verify(resource, times(1)).validation(policy);
         inOrder.verify(repository, times(1)).save(resource);
     }

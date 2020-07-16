@@ -4,11 +4,10 @@ import cube8540.oauth.authentication.users.domain.User;
 import cube8540.oauth.authentication.users.domain.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
-import java.util.Set;
+import java.util.Collections;
 
 import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.RAW_USERNAME;
 import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.USERNAME;
@@ -55,9 +54,7 @@ class DefaultUserServiceTest {
         DefaultUserService service = new DefaultUserService(repository);
 
         UserDetails result = service.loadUserByUsername(RAW_USERNAME);
-        Set<GrantedAuthority> expectedAuthorities = UserApplicationTestHelper.convertGrantAuthority(UserApplicationTestHelper.AUTHORITIES);
+        assertEquals(Collections.unmodifiableSet(Collections.emptySet()), result.getAuthorities());
         assertTrue(result.isAccountNonLocked());
-        assertEquals(expectedAuthorities, result.getAuthorities());
     }
-
 }

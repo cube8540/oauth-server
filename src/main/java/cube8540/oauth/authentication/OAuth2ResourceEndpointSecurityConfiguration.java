@@ -1,7 +1,8 @@
 package cube8540.oauth.authentication;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import cube8540.oauth.authentication.credentials.oauth.security.introspector.DefaultOpaqueTokenIntrospector;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AccessTokenDetailsService;
+import cube8540.oauth.authentication.credentials.oauth.security.introspector.DefaultAccessTokenIntrospector;
 import cube8540.oauth.authentication.credentials.security.RoleSecurityConfig;
 import cube8540.oauth.authentication.credentials.security.ScopeSecurityConfig;
 import cube8540.oauth.authentication.credentials.security.TypeBasedAuthorityVoter;
@@ -23,9 +24,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.oauth2.server.resource.introspection.NimbusOpaqueTokenIntrospector;
-import org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.access.intercept.FilterInvocationSecurityMetadataSource;
 import org.springframework.security.web.access.intercept.FilterSecurityInterceptor;
@@ -35,7 +33,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Order(3)
 @EnableWebSecurity
@@ -47,11 +44,11 @@ public class OAuth2ResourceEndpointSecurityConfiguration extends WebSecurityConf
     @Setter(onMethod_ = @Autowired)
     private FilterInvocationSecurityMetadataSource securityMetadataLoadService;
 
-    @Setter(onMethod_ = {@Autowired, @Qualifier("defaultUserService")})
-    private UserDetailsService userDetailsService;
-
     @Setter(onMethod_ = {@Autowired, @Qualifier("escapeObjectMapper")})
     private ObjectMapper objectMapper;
+
+    @Setter(onMethod_ = {@Autowired, @Qualifier("oAuth2ClientNotCheckedAccessTokenDetailsService")})
+    private OAuth2AccessTokenDetailsService accessTokenService;
 
     private AuthenticationEntryPoint entryPoint;
 
@@ -64,7 +61,7 @@ public class OAuth2ResourceEndpointSecurityConfiguration extends WebSecurityConf
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.oauth2ResourceServer()
-                .opaqueToken(introsptor -> introsptor.introspector(tokenIntrospector()))
+                .opaqueToken(introsptor -> introsptor.introspector(new DefaultAccessTokenIntrospector(accessTokenService)))
                 .and()
             .cors().configurationSource(request -> new CorsConfiguration().applyPermitDefaultValues())
                 .and()
@@ -75,16 +72,6 @@ public class OAuth2ResourceEndpointSecurityConfiguration extends WebSecurityConf
             .csrf().disable()
             .exceptionHandling()
                 .defaultAuthenticationEntryPointFor(entryPoint, new AntPathRequestMatcher("/**"));
-    }
-
-    @Bean
-    public OpaqueTokenIntrospector tokenIntrospector() {
-        String introspectUrl = Optional.ofNullable(environment.getProperty("oauth-resource-server.introspection-endpoint")).orElse("");
-        String clientId = Optional.ofNullable(environment.getProperty("oauth-resource-server.client-id")).orElse("");
-        String clientSecret = Optional.ofNullable(environment.getProperty("oauth-resource-server.client-secret")).orElse("");
-        OpaqueTokenIntrospector delegate = new NimbusOpaqueTokenIntrospector(introspectUrl, clientId, clientSecret);
-
-        return new DefaultOpaqueTokenIntrospector(delegate, userDetailsService);
     }
 
     @Bean

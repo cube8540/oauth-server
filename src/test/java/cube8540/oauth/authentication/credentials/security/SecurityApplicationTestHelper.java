@@ -36,11 +36,11 @@ class SecurityApplicationTestHelper {
     static final ResourceMethod RESOURCE_3_METHOD = ResourceMethod.ALL;
 
     static final Set<AccessibleAuthority> AUTHORITIES_1 = new HashSet<>(Arrays.asList(
-            new AccessibleAuthority("AUTHORITY-1", AccessibleAuthority.AuthorityType.OAUTH2_SCOPE), new AccessibleAuthority("AUTHORITY-2", AccessibleAuthority.AuthorityType.AUTHORITY), new AccessibleAuthority("AUTHORITY-3", AccessibleAuthority.AuthorityType.OAUTH2_SCOPE)));
+            new AccessibleAuthority("AUTHORITY-1"), new AccessibleAuthority("AUTHORITY-2"), new AccessibleAuthority("AUTHORITY-3")));
     static final Set<AccessibleAuthority> AUTHORITIES_2 = new HashSet<>(Arrays.asList(
-            new AccessibleAuthority("AUTHORITY-1", AccessibleAuthority.AuthorityType.OAUTH2_SCOPE), new AccessibleAuthority("AUTHORITY-4", AccessibleAuthority.AuthorityType.AUTHORITY), new AccessibleAuthority("AUTHORITY-5", AccessibleAuthority.AuthorityType.OAUTH2_SCOPE)));
+            new AccessibleAuthority("AUTHORITY-1"), new AccessibleAuthority("AUTHORITY-4"), new AccessibleAuthority("AUTHORITY-5")));
     static final Set<AccessibleAuthority> AUTHORITIES_3 = new HashSet<>(Arrays.asList(
-            new AccessibleAuthority("AUTHORITY-5", AccessibleAuthority.AuthorityType.OAUTH2_SCOPE), new AccessibleAuthority("AUTHORITY-6", AccessibleAuthority.AuthorityType.AUTHORITY), new AccessibleAuthority("AUTHORITY-7", AccessibleAuthority.AuthorityType.OAUTH2_SCOPE)));
+            new AccessibleAuthority("AUTHORITY-5"), new AccessibleAuthority("AUTHORITY-6"), new AccessibleAuthority("AUTHORITY-7")));
 
     static final String RAW_RESOURCE_ID = "RESOURCE-ID";
     static final SecuredResourceId RESOURCE_ID = new SecuredResourceId(RAW_RESOURCE_ID);

@@ -16,11 +16,8 @@ public class AccessibleAuthorityValue {
     @ApiModelProperty(value = "접근 권한 코드", required = true, example = "ROEL_USER")
     String authority;
 
-    @ApiModelProperty(value = "접근 권한 타입", required = true, example = "AUTHORITY")
-    AccessibleAuthority.AuthorityType authorityType;
-
     public static AccessibleAuthorityValue of(AccessibleAuthority authority) {
-        return new AccessibleAuthorityValue(authority.getAuthority(), authority.getAuthorityType());
+        return new AccessibleAuthorityValue(authority.getAuthority());
     }
 
 }

@@ -1,114 +1,89 @@
 package cube8540.oauth.authentication.credentials.oauth.security.introspector;
 
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import cube8540.oauth.authentication.credentials.AuthorityCode;
+import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AccessTokenDetails;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AccessTokenDetailsService;
+import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenNotFoundException;
+import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2TokenId;
+import cube8540.oauth.authentication.credentials.oauth.token.domain.PrincipalUsername;
 import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal;
-import org.springframework.security.oauth2.server.resource.introspection.OAuth2IntrospectionClaimNames;
+import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class OpaqueTokenIntrospectorTestSupport {
 
-    static final String RAW_TOKEN = "TOKEN";
+    static final String TOKEN_TYPE = "Bearer";
 
-    static final String RAW_PRINCIPAL_NAME = "principal";
-    static final List<String> RAW_SCOPE_AUTHORITY = Arrays.asList("SCOPE-1", "SCOPE-2", "SCOPE-3");
-    static final List<String> RAW_ROLE_AUTHORITY = Arrays.asList("AUTH-1", "AUTH-2", "AUTH-3");
+    static final String RAW_ACCESS_TOKEN_ID = "ACCESS-TOKEN-ID";
+    static final OAuth2TokenId ACCESS_TOKEN_ID = new OAuth2TokenId(RAW_ACCESS_TOKEN_ID);
 
-    static final Collection<GrantedAuthority> ROLE_AUTHORITIES = RAW_ROLE_AUTHORITY.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toSet());
+    static final String RAW_REFRESH_TOKEN_ID = "REFRESH-TOKEN-ID";
+    static final OAuth2TokenId REFRESH_TOKEN_ID = new OAuth2TokenId(RAW_REFRESH_TOKEN_ID);
 
-    static MockOAuthAuthenticatedPrincipal mockOAuthAuthenticatedPrincipal() {
-        return new MockOAuthAuthenticatedPrincipal();
+    static final String RAW_USERNAME = "email@email.com";
+    static final PrincipalUsername USERNAME = new PrincipalUsername(RAW_USERNAME);
+
+    static final String RAW_CLIENT_ID = "CLIENT-ID";
+    static final OAuth2ClientId CLIENT_ID = new OAuth2ClientId(RAW_CLIENT_ID);
+
+    static final Set<String> RAW_SCOPES = new HashSet<>(Arrays.asList("SCOPE-1", "SCOPE-2", "SCOPE-3"));
+    static final Set<AuthorityCode> SCOPES = RAW_SCOPES.stream().map(AuthorityCode::new).collect(Collectors.toSet());
+
+    static final LocalDateTime EXPIRATION_DATETIME = LocalDateTime.of(2020, 1, 24, 21, 24, 0);
+
+    static final Map<String, String> ADDITIONAL_INFO = new HashMap<>();
+
+    static {
+        ADDITIONAL_INFO.put("TEST-1", "TEST-1-VALUE");
+        ADDITIONAL_INFO.put("TEST-2", "TEST-2-VALUE");
+        ADDITIONAL_INFO.put("TEST-3", "TEST-3-VALUE");
     }
 
-    static MockUserDetailsService mockUserDetailsService() {
-        return new MockUserDetailsService();
+    static OAuth2AccessTokenDetails makeAccessToken() {
+        OAuth2AccessTokenDetails token = mock(OAuth2AccessTokenDetails.class);
+
+        when(token.getTokenValue()).thenReturn(RAW_ACCESS_TOKEN_ID);
+        when(token.getClientId()).thenReturn(RAW_CLIENT_ID);
+        when(token.getUsername()).thenReturn(RAW_USERNAME);
+        when(token.getScopes()).thenReturn(RAW_SCOPES);
+        when(token.getExpiration()).thenReturn(EXPIRATION_DATETIME);
+        when(token.getAdditionalInformation()).thenReturn(ADDITIONAL_INFO);
+        when(token.isExpired()).thenReturn(false);
+
+        return token;
     }
 
-    static MockUser mockUser() {
-        return new MockUser();
+    static User makeUserDetails() {
+        return mock(User.class);
     }
 
-    static class MockOAuthAuthenticatedPrincipal {
-        private OAuth2AuthenticatedPrincipal principal;
+    static OAuth2AccessTokenDetailsService makeEmptyAccessTokenDetailsService() {
+        OAuth2AccessTokenDetailsService service = mock(OAuth2AccessTokenDetailsService.class);
 
-        private MockOAuthAuthenticatedPrincipal() {
-            this.principal = mock(OAuth2AuthenticatedPrincipal.class);
-        }
+        when(service.readAccessToken(any())).thenThrow(new OAuth2AccessTokenNotFoundException("TEST"));
+        when(service.readAccessTokenUser(any())).thenThrow(new OAuth2AccessTokenNotFoundException("TEST"));
 
-        public MockOAuthAuthenticatedPrincipal configDefault() {
-            when(principal.getAttributes()).thenReturn(Collections.emptyMap());
-            return this;
-        }
-
-        public MockOAuthAuthenticatedPrincipal configClientCredentials() {
-            when(principal.getAttribute(OAuth2IntrospectionClaimNames.USERNAME)).thenReturn(null);
-            when(principal.getName()).thenReturn(null);
-            return this;
-        }
-
-        public MockOAuthAuthenticatedPrincipal configUsernameInAttribute(String username) {
-            when(principal.getAttribute(OAuth2IntrospectionClaimNames.USERNAME)).thenReturn(username);
-            return this;
-        }
-
-        public MockOAuthAuthenticatedPrincipal configAuthoritiesInAttribute(List<String> authorities) {
-            when(principal.getAttribute(OAuth2IntrospectionClaimNames.SCOPE)).thenReturn(authorities);
-            return this;
-        }
-
-        public MockOAuthAuthenticatedPrincipal configAttributes(Map<String, Object> attributes) {
-            when(principal.getAttributes()).thenReturn(attributes);
-            return this;
-        }
-
-        public OAuth2AuthenticatedPrincipal build() {
-            return principal;
-        }
+        return service;
     }
 
-    static class MockUserDetailsService {
-        private UserDetailsService service;
+    static OAuth2AccessTokenDetailsService makeAccessTokenDetailsService(OAuth2AccessTokenDetails accessToken, UserDetails user) {
+        OAuth2AccessTokenDetailsService service = mock(OAuth2AccessTokenDetailsService.class);
 
-        private MockUserDetailsService() {
-            this.service = mock(UserDetailsService.class);
-        }
+        when(service.readAccessToken(RAW_ACCESS_TOKEN_ID)).thenReturn(accessToken);
+        when(service.readAccessTokenUser(RAW_ACCESS_TOKEN_ID)).thenReturn(user);
 
-        MockUserDetailsService registerUser(User user) {
-            when(service.loadUserByUsername(RAW_PRINCIPAL_NAME)).thenReturn(user);
-            return this;
-        }
-
-        UserDetailsService build() {
-            return service;
-        }
+        return service;
     }
-
-    static class MockUser {
-        private User user;
-
-        private MockUser() {
-            this.user = mock(User.class);
-        }
-
-        MockUser configAuthorities(Collection<GrantedAuthority> authorities) {
-            when(user.getAuthorities()).thenReturn(authorities);
-            return this;
-        }
-
-        User build() {
-            return user;
-        }
-    }
-
 }

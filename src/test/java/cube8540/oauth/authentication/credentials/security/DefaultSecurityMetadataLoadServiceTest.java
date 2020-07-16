@@ -68,9 +68,7 @@ class DefaultSecurityMetadataLoadServiceTest {
 
     private Collection<ConfigAttribute> securityConfig(Set<AccessibleAuthority> authorityCodes) {
         Collection<ConfigAttribute> attributes = new HashSet<>();
-        authorityCodes.stream().filter(auth -> auth.getAuthorityType().equals(AccessibleAuthority.AuthorityType.OAUTH2_SCOPE)).forEach(auth -> attributes.add(new ScopeSecurityConfig(auth.getAuthority())));
-        authorityCodes.stream().filter(auth -> auth.getAuthorityType().equals(AccessibleAuthority.AuthorityType.AUTHORITY)).forEach(auth -> attributes.add(new RoleSecurityConfig(auth.getAuthority())));
-
+        authorityCodes.forEach(auth -> attributes.add(new ScopeSecurityConfig(auth.getAuthority())));
         return attributes;
     }
 

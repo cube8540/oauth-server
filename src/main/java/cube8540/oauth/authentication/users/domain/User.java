@@ -17,18 +17,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.persistence.AttributeOverride;
 import javax.persistence.AttributeOverrides;
-import javax.persistence.CollectionTable;
 import javax.persistence.Column;
-import javax.persistence.ElementCollection;
 import javax.persistence.Embedded;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
 import javax.persistence.Table;
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.Optional;
-import java.util.Set;
 
 @Getter
 @ToString
@@ -75,11 +70,6 @@ public class User extends AbstractAggregateRoot<User> {
     @UpdateTimestamp
     @Column(name = "last_updated_at", nullable = false)
     private LocalDateTime lastUpdatedAt;
-
-    @ElementCollection
-    @CollectionTable(name = "user_authority", joinColumns = @JoinColumn(name = "username", nullable = false))
-    @AttributeOverride(name = "value", column = @Column(name = "authority_code", length = 32, nullable = false))
-    private Set<UserAuthority> authorities;
 
     public User(String username, String email, String password) {
         this.username = new Username(username);
@@ -136,13 +126,6 @@ public class User extends AbstractAggregateRoot<User> {
 
     public void encrypted(PasswordEncoder encoder) {
         this.password = encoder.encode(this.password);
-    }
-
-    public void grantAuthority(UserAuthority authority) {
-        if (this.authorities == null) {
-            this.authorities = new HashSet<>();
-        }
-        this.authorities.add(authority);
     }
 
     private void assertMatchedResult(UserKeyMatchedResult matchedResult) {

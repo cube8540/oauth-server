@@ -9,7 +9,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import static cube8540.oauth.authentication.users.domain.UserTestHelper.AUTHORITY;
 import static cube8540.oauth.authentication.users.domain.UserTestHelper.CHANGE_PASSWORD;
 import static cube8540.oauth.authentication.users.domain.UserTestHelper.EMAIL_ERROR_MESSAGE;
 import static cube8540.oauth.authentication.users.domain.UserTestHelper.EMAIL_ERROR_PROPERTY;
@@ -245,15 +244,5 @@ class UserTest {
 
         user.encrypted(encoder);
         assertEquals(ENCRYPTED_PASSWORD, user.getPassword());
-    }
-
-    @Test
-    @DisplayName("새 권한 할당")
-    void grantNewAuthority() {
-        User user = new User(RAW_USERNAME, RAW_EMAIL, PASSWORD);
-
-        user.grantAuthority(AUTHORITY);
-
-        assertTrue(user.getAuthorities().contains(AUTHORITY));
     }
 }
