@@ -2,12 +2,6 @@ create table if not exists initialize (
 	initialize_datetime datetime(6) default current_timestamp() not null
 );
 
-create table if not exists role (
-    code varchar(32) not null primary key,
-    description varchar(32),
-    basic boolean not null default false
-);
-
 create table if not exists `user` (
     username varchar(32) not null primary key,
 	email varchar(128) not null,
@@ -21,14 +15,6 @@ create table if not exists `user` (
 	registered_at datetime(6) not null,
 
 	unique key uk_user_email (email)
-);
-
-create table if not exists user_authority (
-    username varchar(32) not null,
-    authority_code varchar(32) not null,
-
-    constraint fk_user_authority_username foreign key (username) references user(username) on delete cascade,
-    constraint fk_user_authority_role foreign key (authority_code) references role(code) on delete cascade
 );
 
 create table if not exists oauth2_clients (
@@ -142,7 +128,6 @@ create table if not exists secured_resource (
 create table if not exists authority_accessible_resources (
 	authority varchar(32) not null,
 	resource_id varchar(128) not null,
-	authority_type varchar(16) not null,
 	constraint fk_accessible_resource_resource foreign key (resource_id) references secured_resource (resource_id) on delete cascade
 );
 

@@ -48,7 +48,7 @@ public class DefaultSecuredResourceManagementService implements SecuredResourceM
         SecuredResource resource = new SecuredResource(new SecuredResourceId(registerRequest.getResourceId()),
                 URI.create(registerRequest.getResource()), ResourceMethod.of(registerRequest.getMethod()));
         Optional.ofNullable(registerRequest.getAuthorities()).orElse(Collections.emptyList())
-                .forEach(auth -> resource.addAuthority(auth.getAuthority(), auth.getAuthorityType()));
+                .forEach(auth -> resource.addAuthority(auth.getAuthority()));
         resource.validation(validationPolicy);
         return DefaultSecuredResourceDetails.of(repository.save(resource));
     }
@@ -58,9 +58,9 @@ public class DefaultSecuredResourceManagementService implements SecuredResourceM
         SecuredResource resource = getResource(resourceId);
         resource.changeResourceInfo(URI.create(modifyRequest.getResource()), ResourceMethod.of(modifyRequest.getMethod()));
         Optional.ofNullable(modifyRequest.getRemoveAuthorities()).orElse(Collections.emptyList())
-                .forEach(auth -> resource.removeAuthority(auth.getAuthority(), auth.getAuthorityType()));
+                .forEach(auth -> resource.removeAuthority(auth.getAuthority()));
         Optional.ofNullable(modifyRequest.getNewAuthorities()).orElse(Collections.emptyList())
-                .forEach(auth -> resource.addAuthority(auth.getAuthority(), auth.getAuthorityType()));
+                .forEach(auth -> resource.addAuthority(auth.getAuthority()));
         resource.validation(validationPolicy);
         return DefaultSecuredResourceDetails.of(repository.save(resource));
     }

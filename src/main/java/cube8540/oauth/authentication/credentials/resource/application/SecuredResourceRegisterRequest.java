@@ -22,7 +22,7 @@ public class SecuredResourceRegisterRequest {
     @ApiModelProperty(value = "등록할 자원 메소드", required = true, example = "GET")
     String method;
 
-    @ApiModelProperty(value = "접근 가능한 스코프", required = true, example = "[{\"authority\": \"ROLE_USER\", \"authorityType\": \"AUTHORITY\"}, {\"authority\": \"access.test\", \"authorityType\": \"SCOPE\"}]")
+    @ApiModelProperty(value = "접근 가능한 스코프", required = true, example = "[{\"authority\": \"ROLE_USER\"}, {\"authority\": \"access.test\"}]")
     List<AccessibleAuthorityValue> authorities;
 
 }

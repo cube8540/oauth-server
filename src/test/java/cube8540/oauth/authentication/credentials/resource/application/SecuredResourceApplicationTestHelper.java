@@ -33,14 +33,14 @@ class SecuredResourceApplicationTestHelper {
     static final URI MODIFY_RESOURCE_URI = URI.create(RAW_MODIFY_RESOURCE_URI);
 
     static final List<String> RAW_AUTHORITIES = Arrays.asList("AUTHORITY-1", "AUTHORITY-2", "AUTHORITY-3");
-    static final List<AccessibleAuthorityValue> REQUEST_AUTHORITIES = RAW_AUTHORITIES.stream().map(auth -> new AccessibleAuthorityValue(auth, AccessibleAuthority.AuthorityType.OAUTH2_SCOPE)).collect(Collectors.toList());
-    static final Set<AccessibleAuthority> AUTHORITIES = RAW_AUTHORITIES.stream().map(auth -> new AccessibleAuthority(auth, AccessibleAuthority.AuthorityType.OAUTH2_SCOPE)).collect(Collectors.toSet());
+    static final List<AccessibleAuthorityValue> REQUEST_AUTHORITIES = RAW_AUTHORITIES.stream().map(AccessibleAuthorityValue::new).collect(Collectors.toList());
+    static final Set<AccessibleAuthority> AUTHORITIES = RAW_AUTHORITIES.stream().map(AccessibleAuthority::new).collect(Collectors.toSet());
     static final List<String> RAW_REMOVE_AUTHORITIES = Arrays.asList("REMOVE-AUTHORITY-1", "REMOVE-AUTHORITY-2", "REMOVE-AUTHORITY-3");
     static final List<String> RAW_ADD_AUTHORITIES = Arrays.asList("ADD-AUTHORITY-1", "ADD-AUTHORITY-2", "ADD-AUTHORITY-3");
-    static final List<AccessibleAuthorityValue> REMOVE_REQUEST_AUTHORITIES = RAW_REMOVE_AUTHORITIES.stream().map(auth -> new AccessibleAuthorityValue(auth, AccessibleAuthority.AuthorityType.OAUTH2_SCOPE)).collect(Collectors.toList());
-    static final List<AccessibleAuthority> REMOVE_AUTHORITIES = RAW_REMOVE_AUTHORITIES.stream().map(auth -> new AccessibleAuthority(auth, AccessibleAuthority.AuthorityType.OAUTH2_SCOPE)).collect(Collectors.toList());
-    static final List<AccessibleAuthorityValue> ADD_REQUEST_AUTHORITIES = RAW_ADD_AUTHORITIES.stream().map(auth -> new AccessibleAuthorityValue(auth, AccessibleAuthority.AuthorityType.OAUTH2_SCOPE)).collect(Collectors.toList());
-    static final List<AccessibleAuthority> ADD_AUTHORITIES = RAW_ADD_AUTHORITIES.stream().map(auth -> new AccessibleAuthority(auth, AccessibleAuthority.AuthorityType.OAUTH2_SCOPE)).collect(Collectors.toList());
+    static final List<AccessibleAuthorityValue> REMOVE_REQUEST_AUTHORITIES = RAW_REMOVE_AUTHORITIES.stream().map(AccessibleAuthorityValue::new).collect(Collectors.toList());
+    static final List<AccessibleAuthority> REMOVE_AUTHORITIES = RAW_REMOVE_AUTHORITIES.stream().map(AccessibleAuthority::new).collect(Collectors.toList());
+    static final List<AccessibleAuthorityValue> ADD_REQUEST_AUTHORITIES = RAW_ADD_AUTHORITIES.stream().map(AccessibleAuthorityValue::new).collect(Collectors.toList());
+    static final List<AccessibleAuthority> ADD_AUTHORITIES = RAW_ADD_AUTHORITIES.stream().map(AccessibleAuthority::new).collect(Collectors.toList());
 
     static SecuredResourceRepository makeEmptyResourceRepository() {
         SecuredResourceRepository repository = mock(SecuredResourceRepository.class);
@@ -88,7 +88,6 @@ class SecuredResourceApplicationTestHelper {
        when(policy.resourceRule()).thenReturn(resourceRule);
        when(policy.methodRule()).thenReturn(methodRule);
        when(policy.scopeAuthoritiesRule()).thenReturn(scopeRule);
-       when(policy.roleAuthoritiesRule()).thenReturn(roleRule);
 
        return policy;
     }

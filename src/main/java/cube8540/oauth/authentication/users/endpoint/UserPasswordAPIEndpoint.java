@@ -46,6 +46,7 @@ public class UserPasswordAPIEndpoint {
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "변경하려는 패스워드가 유효하지 않습니다."),
             @ApiResponse(code = 401, message = "OAuth2 토큰이 잘못 되었거나, 변경 전 사용하던 패스워드가 일치하지 않습니다."),
+            @ApiResponse(code = 403, message = "로그인이 되어 있지 않습니다."),
             @ApiResponse(code = 404, message = "요청 하신 유저는 등록 되지 않은 유저 입니다."),
             @ApiResponse(code = 500, message = "서버에서 알 수 없는 에러가 발생 했습니다.")
     })
@@ -55,7 +56,9 @@ public class UserPasswordAPIEndpoint {
 
     @DeleteMapping(value = "/api/accounts/attributes/password")
     @ApiOperation(value = "패스워드를 분실", notes = "패스워드를 분실한 계정에 패스워드 초기화 키를 할당합니다. 해당 요청 이후에도 로그인은 가능 합니다.")
+    @ApiImplicitParam(value = "OAuth2 엑세스 토큰", name = "Authorization", required = true, paramType = "header", example = "Bearer xxxxxxxxxx")
     @ApiResponses(value = {
+            @ApiResponse(code = 403, message = "로그인이 되어 있지 않습니다."),
             @ApiResponse(code = 404, message = "요청 하신 유저는 등록 되지 않은 유저 입니다."),
             @ApiResponse(code = 500, message = "서버에서 알 수 없는 에러가 발생 했습니다.")
     })
@@ -65,8 +68,10 @@ public class UserPasswordAPIEndpoint {
 
     @PostMapping(value = "/api/accounts/attributes/password")
     @ApiOperation(value = "패스워드 초기화", notes = "패스워드 초기화 키를 사용하여 계정의 패스워드를 초기화 합니다.")
+    @ApiImplicitParam(value = "OAuth2 엑세스 토큰", name = "Authorization", required = true, paramType = "header", example = "Bearer xxxxxxxxxx")
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "변경하려는 패스워드가 유효하지 않습니다."),
+            @ApiResponse(code = 403, message = "로그인이 되어 있지 않습니다."),
             @ApiResponse(code = 401, message = "패스워드 초기화 키가 일치 하지 않거나 만료 되었습니다."),
             @ApiResponse(code = 404, message = "요청 하신 유저는 등록 되지 않은 유저 입니다."),
             @ApiResponse(code = 500, message = "서버에서 알 수 없는 에러가 발생 했습니다.")

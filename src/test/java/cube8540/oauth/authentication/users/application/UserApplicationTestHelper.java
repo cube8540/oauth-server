@@ -19,7 +19,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.security.Principal;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -151,7 +150,6 @@ class UserApplicationTestHelper {
         User user = makeDefaultUser();
 
         when(user.isCredentials()).thenReturn(false);
-        when(user.getAuthorities()).thenReturn(Collections.emptySet());
 
         return user;
     }
@@ -160,7 +158,6 @@ class UserApplicationTestHelper {
         User user = makeDefaultUser();
 
         when(user.isCredentials()).thenReturn(true);
-        when(user.getAuthorities()).thenReturn(new HashSet<>(AUTHORITIES));
 
         return user;
     }

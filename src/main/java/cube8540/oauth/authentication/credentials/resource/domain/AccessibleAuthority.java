@@ -9,8 +9,6 @@ import lombok.ToString;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import java.io.Serializable;
 
 @Getter
@@ -23,12 +21,4 @@ public class AccessibleAuthority implements Serializable {
 
     @Column(name = "authority", length = 32, nullable = false)
     private String authority;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "authority_type", length = 16, nullable = false)
-    private AuthorityType authorityType;
-
-    public enum AuthorityType {
-        AUTHORITY, OAUTH2_SCOPE
-    }
 }
