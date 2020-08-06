@@ -41,7 +41,7 @@ public class DefaultUserCredentialsService implements UserCredentialsService {
     }
 
     private User getUser(String username) {
-        return repository.findByUsername(new Username(username))
+        return repository.findById(new Username(username))
                 .orElseThrow(() -> UserNotFoundException.instance(username + " is not found"));
     }
 }

@@ -23,7 +23,7 @@ public class DefaultUserService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = repository.findByUsername(new Username(username))
+        User user = repository.findById(new Username(username))
                 .orElseThrow(() -> new UsernameNotFoundException(username + " is not found"));
 
         return org.springframework.security.core.userdetails.User.builder()
