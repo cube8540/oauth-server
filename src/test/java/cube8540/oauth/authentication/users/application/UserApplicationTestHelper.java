@@ -58,7 +58,7 @@ class UserApplicationTestHelper {
     static UserRepository makeUserRepository(Username username, User user) {
         UserRepository repository = mock(UserRepository.class);
 
-        when(repository.findByUsername(username)).thenReturn(Optional.ofNullable(user));
+        when(repository.findById(username)).thenReturn(Optional.ofNullable(user));
         when(repository.countByUsername(username)).thenReturn(1L);
         doAnswer(returnsFirstArg()).when(repository).save(isA(User.class));
 
