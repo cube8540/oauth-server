@@ -2,8 +2,8 @@ package cube8540.oauth.authentication.credentials.resource;
 
 import cube8540.oauth.authentication.credentials.AuthorityDetailsService;
 import cube8540.oauth.authentication.credentials.resource.application.DefaultSecuredResourceManagementService;
-import cube8540.oauth.authentication.credentials.resource.domain.SecuredResourceValidationPolicy;
-import cube8540.oauth.authentication.credentials.resource.infra.DefaultSecuredResourceValidationPolicy;
+import cube8540.oauth.authentication.credentials.resource.domain.SecuredResourceValidatorFactory;
+import cube8540.oauth.authentication.credentials.resource.infra.DefaultSecuredResourceValidatorFactory;
 import cube8540.oauth.authentication.credentials.resource.infra.SecuredResourceExceptionTranslator;
 import cube8540.oauth.authentication.error.ExceptionTranslator;
 import cube8540.oauth.authentication.error.message.ErrorMessage;
@@ -25,14 +25,14 @@ public class SecuredResourceConfiguration {
     private AuthorityDetailsService scopeDetailsService;
 
     @PostConstruct
-    public void setManagementServicePolicy() {
-        securedResourceManagementService.setValidationPolicy(createSecuredResourceValidationPolicy());
+    public void setManagementServiceValidatorFactory() {
+        securedResourceManagementService.setValidatorFactory(createSecuredResourceValidatorFactory());
     }
 
-    private SecuredResourceValidationPolicy createSecuredResourceValidationPolicy() {
-        DefaultSecuredResourceValidationPolicy policy = new DefaultSecuredResourceValidationPolicy();
-        policy.setScopeAuthorityDetailsService(scopeDetailsService);
-        return policy;
+    private SecuredResourceValidatorFactory createSecuredResourceValidatorFactory() {
+        DefaultSecuredResourceValidatorFactory factory = new DefaultSecuredResourceValidatorFactory();
+        factory.setScopeAuthorityDetailsService(scopeDetailsService);
+        return factory;
     }
 
     @Bean

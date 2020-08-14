@@ -4,10 +4,10 @@ import cube8540.oauth.authentication.credentials.oauth.client.application.Defaul
 import cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientManagementService;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientRepository;
 import cube8540.oauth.authentication.credentials.oauth.client.infra.ClientAPIExceptionTranslator;
-import cube8540.oauth.authentication.credentials.oauth.client.infra.DefaultOAuth2ClientValidatePolicy;
+import cube8540.oauth.authentication.credentials.oauth.client.infra.DefaultOAuth2ClientValidatorFactory;
 import cube8540.oauth.authentication.credentials.oauth.scope.application.OAuth2AccessibleScopeDetailsService;
-import cube8540.oauth.authentication.error.message.ErrorMessage;
 import cube8540.oauth.authentication.error.ExceptionTranslator;
+import cube8540.oauth.authentication.error.message.ErrorMessage;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -29,11 +29,11 @@ public class ClientConfigure {
     @Bean
     public OAuth2ClientManagementService clientManagementService() {
         DefaultOAuth2ClientManagementService service = new DefaultOAuth2ClientManagementService(repository);
-        DefaultOAuth2ClientValidatePolicy policy = new DefaultOAuth2ClientValidatePolicy();
+        DefaultOAuth2ClientValidatorFactory factory = new DefaultOAuth2ClientValidatorFactory();
 
-        policy.setScopeDetailsService(scopeDetailsService);
+        factory.setScopeDetailsService(scopeDetailsService);
         service.setPasswordEncoder(passwordEncoder);
-        service.setValidatePolicy(policy);
+        service.setValidateFactory(factory);
         return service;
     }
 

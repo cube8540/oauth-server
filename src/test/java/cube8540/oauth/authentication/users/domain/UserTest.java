@@ -3,34 +3,27 @@ package cube8540.oauth.authentication.users.domain;
 import cube8540.oauth.authentication.users.domain.exception.UserAuthorizationException;
 import cube8540.oauth.authentication.users.domain.exception.UserErrorCodes;
 import cube8540.oauth.authentication.users.domain.exception.UserInvalidException;
-import cube8540.validator.core.ValidationError;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static cube8540.oauth.authentication.users.domain.UserTestHelper.CHANGE_PASSWORD;
-import static cube8540.oauth.authentication.users.domain.UserTestHelper.EMAIL_ERROR_MESSAGE;
-import static cube8540.oauth.authentication.users.domain.UserTestHelper.EMAIL_ERROR_PROPERTY;
 import static cube8540.oauth.authentication.users.domain.UserTestHelper.ENCRYPTED_PASSWORD;
 import static cube8540.oauth.authentication.users.domain.UserTestHelper.PASSWORD;
-import static cube8540.oauth.authentication.users.domain.UserTestHelper.PASSWORD_ERROR_MESSAGE;
-import static cube8540.oauth.authentication.users.domain.UserTestHelper.PASSWORD_ERROR_PROPERTY;
 import static cube8540.oauth.authentication.users.domain.UserTestHelper.RAW_CREDENTIALS_KEY;
 import static cube8540.oauth.authentication.users.domain.UserTestHelper.RAW_EMAIL;
 import static cube8540.oauth.authentication.users.domain.UserTestHelper.RAW_PASSWORD_CREDENTIALS_KEY;
 import static cube8540.oauth.authentication.users.domain.UserTestHelper.RAW_USERNAME;
-import static cube8540.oauth.authentication.users.domain.UserTestHelper.USERNAME_ERROR_MESSAGE;
-import static cube8540.oauth.authentication.users.domain.UserTestHelper.USERNAME_ERROR_PROPERTY;
 import static cube8540.oauth.authentication.users.domain.UserTestHelper.makeCredentialsKey;
-import static cube8540.oauth.authentication.users.domain.UserTestHelper.makeErrorValidationRule;
+import static cube8540.oauth.authentication.users.domain.UserTestHelper.makeErrorValidatorFactory;
 import static cube8540.oauth.authentication.users.domain.UserTestHelper.makeExpiredKey;
 import static cube8540.oauth.authentication.users.domain.UserTestHelper.makeKeyGenerator;
 import static cube8540.oauth.authentication.users.domain.UserTestHelper.makeMismatchedKey;
 import static cube8540.oauth.authentication.users.domain.UserTestHelper.makeMismatchesEncoder;
-import static cube8540.oauth.authentication.users.domain.UserTestHelper.makePassValidationRule;
+import static cube8540.oauth.authentication.users.domain.UserTestHelper.makePassValidatorFactory;
 import static cube8540.oauth.authentication.users.domain.UserTestHelper.makePasswordEncoder;
-import static cube8540.oauth.authentication.users.domain.UserTestHelper.makeValidationPolicy;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -40,45 +33,23 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class UserTest {
 
     @Test
-    @DisplayName("허용 되는 아이디가 아닐시")
-    void usernameNotAllowed() {
+    @DisplayName("유효 하지 않은 정보가 저장 되어 있을시")
+    void userDataInvalid() {
         User user = new User(RAW_USERNAME, RAW_EMAIL, PASSWORD);
-        ValidationError error = new ValidationError(USERNAME_ERROR_PROPERTY, USERNAME_ERROR_MESSAGE);
 
-        UserValidationPolicy policy = makeValidationPolicy().usernameRule(makeErrorValidationRule(user, error))
-                .passwordRule(makePassValidationRule(user))
-                .emailRule(makePassValidationRule(user)).build();
+        UserValidatorFactory factory = makeErrorValidatorFactory(user);
 
-        UserInvalidException e = assertThrows(UserInvalidException.class, () -> user.validation(policy));
-        assertTrue(e.getErrors().contains(error));
+        assertThrows(UserInvalidException.class, () -> user.validation(factory));
     }
 
     @Test
-    @DisplayName("허용 되는 이메일이 아닐시")
-    void userEmailNotAllowed() {
+    @DisplayName("모든 데이터가 유효할시")
+    void userDataAllowed() {
         User user = new User(RAW_USERNAME, RAW_EMAIL, PASSWORD);
-        ValidationError error = new ValidationError(EMAIL_ERROR_PROPERTY, EMAIL_ERROR_MESSAGE);
 
-        UserValidationPolicy policy = makeValidationPolicy().usernameRule(makePassValidationRule(user))
-                .passwordRule(makePassValidationRule(user))
-                .emailRule(makeErrorValidationRule(user, error)).build();
+        UserValidatorFactory factory = makePassValidatorFactory(user);
 
-        UserInvalidException e = assertThrows(UserInvalidException.class, () -> user.validation(policy));
-        assertTrue(e.getErrors().contains(error));
-    }
-
-    @Test
-    @DisplayName("허용 되는 패스워드가 아닐시")
-    void userPasswordAllowed() {
-        User user = new User(RAW_USERNAME, RAW_EMAIL, PASSWORD);
-        ValidationError error = new ValidationError(PASSWORD_ERROR_PROPERTY, PASSWORD_ERROR_MESSAGE);
-
-        UserValidationPolicy policy = makeValidationPolicy().usernameRule(makePassValidationRule(user))
-                .passwordRule(makeErrorValidationRule(user, error))
-                .emailRule(makePassValidationRule(user)).build();
-
-        UserInvalidException e = assertThrows(UserInvalidException.class, () -> user.validation(policy));
-        assertTrue(e.getErrors().contains(error));
+        assertDoesNotThrow(() -> user.validation(factory));
     }
 
     @Test

@@ -3,7 +3,6 @@ package cube8540.oauth.authentication.credentials.oauth.scope.domain;
 import cube8540.oauth.authentication.credentials.AbstractAuthority;
 import cube8540.oauth.authentication.credentials.AuthorityCode;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.exception.ScopeInvalidException;
-import cube8540.validator.core.Validator;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -62,9 +61,7 @@ public class OAuth2Scope extends AbstractAuthority {
                 .anyMatch(authority -> accessibleAuthority.contains(authority));
     }
 
-    public void validate(OAuth2ScopeValidationPolicy policy) {
-        Validator.of(this).registerRule(policy.scopeIdRule())
-                .registerRule(policy.accessibleRule())
-                .getResult().hasErrorThrows(ScopeInvalidException::instance);
+    public void validate(OAuth2ScopeValidatorFactory factory) {
+        factory.createValidator(this).getResult().hasErrorThrows(ScopeInvalidException::instance);
     }
 }

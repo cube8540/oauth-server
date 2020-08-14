@@ -5,8 +5,9 @@ import cube8540.oauth.authentication.credentials.oauth.client.domain.ClientOwner
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2Client;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientRepository;
-import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientValidatePolicy;
-import cube8540.validator.core.ValidationRule;
+import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientValidatorFactory;
+import cube8540.validator.core.ValidationResult;
+import cube8540.validator.core.Validator;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
@@ -104,30 +105,28 @@ public class OAuth2ClientApplicationTestHelper {
     }
 
     @SuppressWarnings("unchecked")
-    static OAuth2ClientValidatePolicy makeValidatePolicy() {
-        OAuth2ClientValidatePolicy policy = mock(OAuth2ClientValidatePolicy.class);
-        ValidationRule<OAuth2Client> clientIdRule = mock(ValidationRule.class);
-        ValidationRule<OAuth2Client> secretRule = mock(ValidationRule.class);
-        ValidationRule<OAuth2Client> ownerRule = mock(ValidationRule.class);
-        ValidationRule<OAuth2Client> clientNameRule = mock(ValidationRule.class);
-        ValidationRule<OAuth2Client> grantTypeRule = mock(ValidationRule.class);
-        ValidationRule<OAuth2Client> scopeRule = mock(ValidationRule.class);
+    static OAuth2ClientValidatorFactory makeValidatorFactory() {
+        OAuth2ClientValidatorFactory factory = mock(OAuth2ClientValidatorFactory.class);
+        ValidationResult result = mock(ValidationResult.class);
+        Validator<OAuth2Client> validator = mock(Validator.class);
 
-        when(clientIdRule.isValid(any())).thenReturn(true);
-        when(secretRule.isValid(any())).thenReturn(true);
-        when(ownerRule.isValid(any())).thenReturn(true);
-        when(clientNameRule.isValid(any())).thenReturn(true);
-        when(grantTypeRule.isValid(any())).thenReturn(true);
-        when(scopeRule.isValid(any())).thenReturn(true);
+        when(validator.getResult()).thenReturn(result);
+        when(factory.createValidator(any())).thenReturn(validator);
 
-        when(policy.clientIdRule()).thenReturn(clientIdRule);
-        when(policy.secretRule()).thenReturn(secretRule);
-        when(policy.ownerRule()).thenReturn(ownerRule);
-        when(policy.clientNameRule()).thenReturn(clientNameRule);
-        when(policy.grantTypeRule()).thenReturn(grantTypeRule);
-        when(policy.scopeRule()).thenReturn(scopeRule);
+        return factory;
+    }
 
-        return policy;
+    @SuppressWarnings("unchecked")
+    static OAuth2ClientValidatorFactory makeErrorValidatorFactory(Exception exception) {
+        OAuth2ClientValidatorFactory factory = mock(OAuth2ClientValidatorFactory.class);
+        ValidationResult result = mock(ValidationResult.class);
+        Validator<OAuth2Client> validator = mock(Validator.class);
+
+        when(validator.getResult()).thenReturn(result);
+        doAnswer(invocation -> {throw exception;}).when(result).hasErrorThrows(any());
+        when(factory.createValidator(any())).thenReturn(validator);
+
+        return factory;
     }
 
     static Authentication makeAuthentication() {

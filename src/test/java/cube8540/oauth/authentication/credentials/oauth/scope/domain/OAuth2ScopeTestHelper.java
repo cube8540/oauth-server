@@ -3,6 +3,7 @@ package cube8540.oauth.authentication.credentials.oauth.scope.domain;
 import cube8540.oauth.authentication.credentials.AuthorityCode;
 import cube8540.validator.core.ValidationError;
 import cube8540.validator.core.ValidationRule;
+import cube8540.validator.core.Validator;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -28,6 +29,9 @@ class OAuth2ScopeTestHelper {
     static final Set<String> RAW_ACCESSIBLE_AUTHORITY = new HashSet<>(Arrays.asList("AUTHORITY-CODE-1", "AUTHORITY-CODE-2", "AUTHORITY-CODE-3"));
     static final Set<AuthorityCode> ACCESSIBLE_AUTHORITY = RAW_ACCESSIBLE_AUTHORITY.stream().map(AuthorityCode::new).collect(Collectors.toSet());
 
+    static final String ERROR_PROPERTY = "property";
+    static final String ERROR_MESSAGE = "message";
+
     static final Collection<? extends GrantedAuthority> GRANTED_AUTHORITIES = RAW_ACCESSIBLE_AUTHORITY.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toSet());
     static final Collection<? extends GrantedAuthority> NOT_ACCESSIBLE_AUTHORITIES = new HashSet<>(Arrays.asList(
             new SimpleGrantedAuthority("AUTHORITY-CODE-4"), new SimpleGrantedAuthority("AUTHORITY-CODE-5"), new SimpleGrantedAuthority("AUTHORITY-CODE-6")));
@@ -39,47 +43,31 @@ class OAuth2ScopeTestHelper {
     }
 
     @SuppressWarnings("unchecked")
-    static ValidationRule<OAuth2Scope> makePassValidationRule(OAuth2Scope scope) {
+    static OAuth2ScopeValidatorFactory makeErrorValidatorFactory(OAuth2Scope scope) {
         ValidationRule<OAuth2Scope> validationRule = mock(ValidationRule.class);
+        OAuth2ScopeValidatorFactory factory = mock(OAuth2ScopeValidatorFactory.class);
 
-        when(validationRule.isValid(scope)).thenReturn(true);
+        when(validationRule.isValid(scope)).thenReturn(false);
+        when(validationRule.error()).thenReturn(new ValidationError(ERROR_PROPERTY, ERROR_MESSAGE));
 
-        return validationRule;
+        Validator<OAuth2Scope> validator = Validator.of(scope)
+                .registerRule(validationRule);
+        when(factory.createValidator(scope)).thenReturn(validator);
+
+        return factory;
     }
 
     @SuppressWarnings("unchecked")
-    static ValidationRule<OAuth2Scope> makeErrorValidationRule(OAuth2Scope scope, ValidationError error) {
+    static OAuth2ScopeValidatorFactory makePassValidatorFactory(OAuth2Scope scope) {
         ValidationRule<OAuth2Scope> validationRule = mock(ValidationRule.class);
+        OAuth2ScopeValidatorFactory factory = mock(OAuth2ScopeValidatorFactory.class);
 
-        when(validationRule.isValid(scope)).thenReturn(false);
-        when(validationRule.error()).thenReturn(error);
+        when(validationRule.isValid(scope)).thenReturn(true);
 
-        return validationRule;
-    }
+        Validator<OAuth2Scope> validator = Validator.of(scope)
+                .registerRule(validationRule);
+        when(factory.createValidator(scope)).thenReturn(validator);
 
-    static MockValidationPolicy makeValidationPolicy() {
-        return new MockValidationPolicy();
-    }
-
-    static class MockValidationPolicy {
-        private OAuth2ScopeValidationPolicy policy;
-
-        private MockValidationPolicy() {
-            this.policy = mock(OAuth2ScopeValidationPolicy.class);
-        }
-
-        MockValidationPolicy scopeIdRule(ValidationRule<OAuth2Scope> scopeIdRule) {
-            when(policy.scopeIdRule()).thenReturn(scopeIdRule);
-            return this;
-        }
-
-        MockValidationPolicy accessibleAuthorityRule(ValidationRule<OAuth2Scope> accessibleAuthorityRule) {
-            when(policy.accessibleRule()).thenReturn(accessibleAuthorityRule);
-            return this;
-        }
-
-        OAuth2ScopeValidationPolicy build() {
-            return policy;
-        }
+        return factory;
     }
 }

@@ -2,6 +2,7 @@ package cube8540.oauth.authentication.credentials.resource.domain;
 
 import cube8540.validator.core.ValidationError;
 import cube8540.validator.core.ValidationRule;
+import cube8540.validator.core.Validator;
 
 import java.net.URI;
 
@@ -28,57 +29,31 @@ class SecuredResourceTestHelper {
     static final ResourceMethod CHANGE_RESOURCE_METHOD = ResourceMethod.POST;
 
     @SuppressWarnings("unchecked")
-    static ValidationRule<SecuredResource> makePassValidation(SecuredResource resource) {
-        ValidationRule<SecuredResource> validation = mock(ValidationRule.class);
+    static SecuredResourceValidatorFactory makeErrorValidatorFactory(SecuredResource resource) {
+        ValidationRule<SecuredResource> validationRule = mock(ValidationRule.class);
+        SecuredResourceValidatorFactory factory = mock(SecuredResourceValidatorFactory.class);
 
-        when(validation.isValid(resource)).thenReturn(true);
+        when(validationRule.isValid(resource)).thenReturn(false);
+        when(validationRule.error()).thenReturn(new ValidationError(ERROR_PROPERTY, ERROR_MESSAGE));
 
-        return validation;
+        Validator<SecuredResource> validator = Validator.of(resource)
+                .registerRule(validationRule);
+        when(factory.createValidator(resource)).thenReturn(validator);
+
+        return factory;
     }
 
     @SuppressWarnings("unchecked")
-    static ValidationRule<SecuredResource> makeErrorValidation(SecuredResource resource, ValidationError error) {
-        ValidationRule<SecuredResource> validation = mock(ValidationRule.class);
+    static SecuredResourceValidatorFactory makePassValidatorFactory(SecuredResource resource) {
+        ValidationRule<SecuredResource> validationRule = mock(ValidationRule.class);
+        SecuredResourceValidatorFactory factory = mock(SecuredResourceValidatorFactory.class);
 
-        when(validation.isValid(resource)).thenReturn(false);
-        when(validation.error()).thenReturn(error);
+        when(validationRule.isValid(resource)).thenReturn(true);
 
-        return validation;
-    }
+        Validator<SecuredResource> validator = Validator.of(resource)
+                .registerRule(validationRule);
+        when(factory.createValidator(resource)).thenReturn(validator);
 
-    static MockResourceValidationPolicy makeResourceValidationPolicy() {
-        return new MockResourceValidationPolicy();
-    }
-
-    static final class MockResourceValidationPolicy {
-        private SecuredResourceValidationPolicy policy;
-
-        private MockResourceValidationPolicy() {
-            this.policy = mock(SecuredResourceValidationPolicy.class);
-        }
-
-        MockResourceValidationPolicy resourceIdRule(ValidationRule<SecuredResource> validationRule) {
-            when(this.policy.resourceIdRule()).thenReturn(validationRule);
-            return this;
-        }
-
-        MockResourceValidationPolicy resourceRule(ValidationRule<SecuredResource> validationRule) {
-            when(this.policy.resourceRule()).thenReturn(validationRule);
-            return this;
-        }
-
-        MockResourceValidationPolicy methodRule(ValidationRule<SecuredResource> validationRule) {
-            when(this.policy.methodRule()).thenReturn(validationRule);
-            return this;
-        }
-
-        MockResourceValidationPolicy scopeAuthoritiesRule(ValidationRule<SecuredResource> validationRule) {
-            when(this.policy.scopeAuthoritiesRule()).thenReturn(validationRule);
-            return this;
-        }
-
-        SecuredResourceValidationPolicy build() {
-            return policy;
-        }
+        return factory;
     }
 }

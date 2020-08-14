@@ -3,6 +3,7 @@ package cube8540.oauth.authentication.credentials.oauth.client.domain;
 import cube8540.oauth.authentication.credentials.AuthorityCode;
 import cube8540.validator.core.ValidationError;
 import cube8540.validator.core.ValidationRule;
+import cube8540.validator.core.Validator;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.net.URI;
@@ -23,6 +24,9 @@ class OAuth2ClientTestsHelper {
 
     static final URI REDIRECT_URI = URI.create("http://localhost:8080");
 
+    static final String ERROR_PROPERTY = "property";
+    static final String ERROR_MESSAGE = "message";
+
     static PasswordEncoder makePasswordEncoder(String secret, String encodingSecret) {
         PasswordEncoder encoder = mock(PasswordEncoder.class);
 
@@ -33,67 +37,31 @@ class OAuth2ClientTestsHelper {
     }
 
     @SuppressWarnings("unchecked")
-    static ValidationRule<OAuth2Client> makePassValidationRule(OAuth2Client client) {
-        ValidationRule<OAuth2Client> rule = mock(ValidationRule.class);
+    static OAuth2ClientValidatorFactory makeErrorValidatorFactory(OAuth2Client client) {
+        ValidationRule<OAuth2Client> validationRule = mock(ValidationRule.class);
+        OAuth2ClientValidatorFactory factory = mock(OAuth2ClientValidatorFactory.class);
 
-        when(rule.isValid(client)).thenReturn(true);
+        when(validationRule.isValid(client)).thenReturn(false);
+        when(validationRule.error()).thenReturn(new ValidationError(ERROR_PROPERTY, ERROR_MESSAGE));
 
-        return rule;
+        Validator<OAuth2Client> validator = Validator.of(client)
+                .registerRule(validationRule);
+        when(factory.createValidator(client)).thenReturn(validator);
+
+        return factory;
     }
 
     @SuppressWarnings("unchecked")
-    static ValidationRule<OAuth2Client> makeErrorValidationRule(OAuth2Client client, ValidationError error) {
-        ValidationRule<OAuth2Client> rule = mock(ValidationRule.class);
+    static OAuth2ClientValidatorFactory makePassValidatorFactory(OAuth2Client client) {
+        ValidationRule<OAuth2Client> validationRule = mock(ValidationRule.class);
+        OAuth2ClientValidatorFactory factory = mock(OAuth2ClientValidatorFactory.class);
 
-        when(rule.isValid(client)).thenReturn(false);
-        when(rule.error()).thenReturn(error);
+        when(validationRule.isValid(client)).thenReturn(true);
 
-        return rule;
-    }
+        Validator<OAuth2Client> validator = Validator.of(client)
+                .registerRule(validationRule);
+        when(factory.createValidator(client)).thenReturn(validator);
 
-    static MockValidationPolicy makeValidationPolicy() {
-        return new MockValidationPolicy();
-    }
-
-    static class MockValidationPolicy {
-        private OAuth2ClientValidatePolicy policy;
-
-        private MockValidationPolicy() {
-            this.policy = mock(OAuth2ClientValidatePolicy.class);
-        }
-
-        MockValidationPolicy clientIdRule(ValidationRule<OAuth2Client> clientIdRule) {
-            when(policy.clientIdRule()).thenReturn(clientIdRule);
-            return this;
-        }
-
-        MockValidationPolicy secretRule(ValidationRule<OAuth2Client> secretRule) {
-            when(policy.secretRule()).thenReturn(secretRule);
-            return this;
-        }
-
-        MockValidationPolicy clientNameRule(ValidationRule<OAuth2Client> clientNameRule) {
-            when(policy.clientNameRule()).thenReturn(clientNameRule);
-            return this;
-        }
-
-        MockValidationPolicy grantTypeRule(ValidationRule<OAuth2Client> grantTypeRule) {
-            when(policy.grantTypeRule()).thenReturn(grantTypeRule);
-            return this;
-        }
-
-        MockValidationPolicy scopeRule(ValidationRule<OAuth2Client> scopeRule) {
-            when(policy.scopeRule()).thenReturn(scopeRule);
-            return this;
-        }
-
-        MockValidationPolicy ownerRule(ValidationRule<OAuth2Client> ownerRule) {
-            when(policy.ownerRule()).thenReturn(ownerRule);
-            return this;
-        }
-
-        OAuth2ClientValidatePolicy build() {
-            return policy;
-        }
+        return factory;
     }
 }

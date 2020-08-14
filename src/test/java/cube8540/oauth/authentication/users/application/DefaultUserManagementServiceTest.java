@@ -2,15 +2,13 @@ package cube8540.oauth.authentication.users.application;
 
 import cube8540.oauth.authentication.users.domain.User;
 import cube8540.oauth.authentication.users.domain.UserRepository;
-import cube8540.oauth.authentication.users.domain.UserValidationPolicy;
+import cube8540.oauth.authentication.users.domain.UserValidatorFactory;
 import cube8540.oauth.authentication.users.domain.exception.UserErrorCodes;
 import cube8540.oauth.authentication.users.domain.exception.UserNotFoundException;
 import cube8540.oauth.authentication.users.domain.exception.UserRegisterException;
-import cube8540.validator.core.ValidationRule;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InOrder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.EMAIL;
@@ -21,13 +19,13 @@ import static cube8540.oauth.authentication.users.application.UserApplicationTes
 import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.makeCountingUserRepository;
 import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.makeDefaultUser;
 import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.makeEmptyUserRepository;
+import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.makeErrorValidatorFactory;
 import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.makePasswordEncoder;
 import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.makeUserRegisterRequest;
 import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.makeUserRepository;
-import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.makeValidationPolicy;
+import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.makeValidatorFactory;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -72,21 +70,33 @@ class DefaultUserManagementServiceTest {
     }
 
     @Test
+    @DisplayName("유효 하지 않은 데이터 유저 등록")
+    void persistUserWithNotAllowedData() {
+        UserRepository repository = makeEmptyUserRepository();
+        UserValidatorFactory factory = makeErrorValidatorFactory(new TestUserException());
+        PasswordEncoder encoder = makePasswordEncoder(PASSWORD, ENCODED_PASSWORD);
+        UserRegisterRequest registerRequest = makeUserRegisterRequest();
+
+        DefaultUserManagementService service = new DefaultUserManagementService(repository, encoder);
+        service.setValidatorFactory(factory);
+
+        assertThrows(TestUserException.class, () -> service.registerUser(registerRequest));
+    }
+
+    @Test
     @DisplayName("저장소에 유저 등록")
     void persistUserInRepository() {
         UserRepository repository = makeEmptyUserRepository();
-        UserValidationPolicy policy = makeValidationPolicy();
+        UserValidatorFactory factory = makeValidatorFactory();
         PasswordEncoder encoder = makePasswordEncoder(PASSWORD, ENCODED_PASSWORD);
         UserRegisterRequest registerRequest = makeUserRegisterRequest();
 
         DefaultUserManagementService service = new DefaultUserManagementService(repository, encoder);
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
-        service.setValidationPolicy(policy);
+        service.setValidatorFactory(factory);
 
         service.registerUser(registerRequest);
-        verifySaveAfterValidation(policy.usernameRule(), userCaptor, repository);
-        verifySaveAfterValidation(policy.passwordRule(), userCaptor, repository);
-        verifySaveAfterValidation(policy.emailRule(), userCaptor, repository);
+        verify(repository, times(1)).save(userCaptor.capture());
         assertEquals(USERNAME, userCaptor.getValue().getUsername());
         assertEquals(ENCODED_PASSWORD, userCaptor.getValue().getPassword());
         assertEquals(EMAIL, userCaptor.getValue().getEmail());
@@ -117,13 +127,5 @@ class DefaultUserManagementServiceTest {
         assertEquals(user, userCaptor.getValue());
     }
 
-    private void verifySaveAfterValidation(ValidationRule<User> rule, ArgumentCaptor<User> argumentCaptor, UserRepository repository) {
-        InOrder inOrder = inOrder(rule, repository);
-        inOrder.verify(rule, times(1)).isValid(argumentCaptor.capture());
-        inOrder.verify(repository, times(1)).save(argumentCaptor.capture());
-
-        for (User user : argumentCaptor.getAllValues()) {
-            assertEquals(argumentCaptor.getAllValues().get(0), user);
-        }
-    }
+    private static class TestUserException extends RuntimeException {}
 }
