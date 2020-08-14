@@ -6,7 +6,7 @@ import cube8540.oauth.authentication.credentials.oauth.client.domain.ClientOwner
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2Client;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientRepository;
-import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientValidatePolicy;
+import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientValidatorFactory;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.exception.ClientAuthorizationException;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.exception.ClientNotFoundException;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.exception.ClientRegisterException;
@@ -24,7 +24,7 @@ import java.util.Optional;
 public class DefaultOAuth2ClientManagementService extends DefaultOAuth2ClientDetailsService implements OAuth2ClientManagementService {
 
     @Setter
-    private OAuth2ClientValidatePolicy validatePolicy;
+    private OAuth2ClientValidatorFactory validateFactory;
 
     @Setter
     private PasswordEncoder passwordEncoder;
@@ -61,7 +61,7 @@ public class DefaultOAuth2ClientManagementService extends DefaultOAuth2ClientDet
         Optional.ofNullable(registerRequest.getRedirectUris())
                 .ifPresent(redirectUri -> redirectUri.forEach(uri -> client.addRedirectUri(URI.create(uri))));
 
-        client.validate(validatePolicy);
+        client.validate(validateFactory);
         client.encrypted(passwordEncoder);
         return DefaultOAuth2ClientDetails.of(getRepository().save(client));
     }
@@ -86,7 +86,7 @@ public class DefaultOAuth2ClientManagementService extends DefaultOAuth2ClientDet
         Optional.ofNullable(modifyRequest.getNewScopes())
                 .ifPresent(scope -> scope.forEach(s -> client.addScope(new AuthorityCode(s))));
 
-        client.validate(validatePolicy);
+        client.validate(validateFactory);
         return DefaultOAuth2ClientDetails.of(getRepository().save(client));
     }
 
@@ -99,7 +99,7 @@ public class DefaultOAuth2ClientManagementService extends DefaultOAuth2ClientDet
         assertClientOwner(client, authenticated);
 
         client.changeSecret(changeRequest.getExistsSecret(), changeRequest.getNewSecret(), passwordEncoder);
-        client.validate(validatePolicy);
+        client.validate(validateFactory);
         client.encrypted(passwordEncoder);
 
         return DefaultOAuth2ClientDetails.of(getRepository().save(client));

@@ -3,8 +3,9 @@ package cube8540.oauth.authentication.credentials.oauth.scope.application;
 import cube8540.oauth.authentication.credentials.AuthorityCode;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2Scope;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeRepository;
-import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeValidationPolicy;
-import cube8540.validator.core.ValidationRule;
+import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeValidatorFactory;
+import cube8540.validator.core.ValidationResult;
+import cube8540.validator.core.Validator;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -14,6 +15,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -65,16 +67,27 @@ class ScopeApplicationTestHelper {
     }
 
     @SuppressWarnings("unchecked")
-    static OAuth2ScopeValidationPolicy makeValidationPolicy() {
-        ValidationRule<OAuth2Scope> scopeIdRule = mock(ValidationRule.class);
-        ValidationRule<OAuth2Scope> accessibleRule = mock(ValidationRule.class);
-        OAuth2ScopeValidationPolicy policy = mock(OAuth2ScopeValidationPolicy.class);
+    static OAuth2ScopeValidatorFactory makeValidatorFactory() {
+        OAuth2ScopeValidatorFactory factory = mock(OAuth2ScopeValidatorFactory.class);
+        ValidationResult result = mock(ValidationResult.class);
+        Validator<OAuth2Scope> validator = mock(Validator.class);
 
-        when(scopeIdRule.isValid(isA(OAuth2Scope.class))).thenReturn(true);
-        when(accessibleRule.isValid(isA(OAuth2Scope.class))).thenReturn(true);
-        when(policy.scopeIdRule()).thenReturn(scopeIdRule);
-        when(policy.accessibleRule()).thenReturn(accessibleRule);
+        when(validator.getResult()).thenReturn(result);
+        when(factory.createValidator(any())).thenReturn(validator);
 
-        return policy;
+        return factory;
+    }
+
+    @SuppressWarnings("unchecked")
+    static OAuth2ScopeValidatorFactory makeErrorValidatorFactory(Exception exception) {
+        OAuth2ScopeValidatorFactory factory = mock(OAuth2ScopeValidatorFactory.class);
+        ValidationResult result = mock(ValidationResult.class);
+        Validator<OAuth2Scope> validator = mock(Validator.class);
+
+        when(validator.getResult()).thenReturn(result);
+        doAnswer(invocation -> {throw exception;}).when(result).hasErrorThrows(any());
+        when(factory.createValidator(any())).thenReturn(validator);
+
+        return factory;
     }
 }

@@ -1,22 +1,19 @@
 package cube8540.oauth.authentication.credentials.resource.domain;
 
 import cube8540.oauth.authentication.credentials.resource.domain.exception.ResourceInvalidException;
-import cube8540.validator.core.ValidationError;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static cube8540.oauth.authentication.credentials.resource.domain.SecuredResourceTestHelper.ACCESSIBLE_AUTHORITY;
 import static cube8540.oauth.authentication.credentials.resource.domain.SecuredResourceTestHelper.CHANGE_RESOURCE;
 import static cube8540.oauth.authentication.credentials.resource.domain.SecuredResourceTestHelper.CHANGE_RESOURCE_METHOD;
-import static cube8540.oauth.authentication.credentials.resource.domain.SecuredResourceTestHelper.ERROR_MESSAGE;
-import static cube8540.oauth.authentication.credentials.resource.domain.SecuredResourceTestHelper.ERROR_PROPERTY;
 import static cube8540.oauth.authentication.credentials.resource.domain.SecuredResourceTestHelper.RAW_AUTHORITY_CODE;
 import static cube8540.oauth.authentication.credentials.resource.domain.SecuredResourceTestHelper.RESOURCE;
 import static cube8540.oauth.authentication.credentials.resource.domain.SecuredResourceTestHelper.RESOURCE_ID;
 import static cube8540.oauth.authentication.credentials.resource.domain.SecuredResourceTestHelper.RESOURCE_METHOD;
-import static cube8540.oauth.authentication.credentials.resource.domain.SecuredResourceTestHelper.makeErrorValidation;
-import static cube8540.oauth.authentication.credentials.resource.domain.SecuredResourceTestHelper.makePassValidation;
-import static cube8540.oauth.authentication.credentials.resource.domain.SecuredResourceTestHelper.makeResourceValidationPolicy;
+import static cube8540.oauth.authentication.credentials.resource.domain.SecuredResourceTestHelper.makeErrorValidatorFactory;
+import static cube8540.oauth.authentication.credentials.resource.domain.SecuredResourceTestHelper.makePassValidatorFactory;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -55,58 +52,22 @@ class SecuredResourceTest {
     }
 
     @Test
-    @DisplayName("허용 되지 않는 리소스 아이디 일때 유효성 검사")
-    void validationWhenNotAllowedResourceId() {
+    @DisplayName("유효 하지 않은 정보가 저장 되어 있을시")
+    void resourceDataInvalid() {
         SecuredResource resource = new SecuredResource(RESOURCE_ID, RESOURCE, RESOURCE_METHOD);
-        ValidationError error = new ValidationError(ERROR_PROPERTY, ERROR_MESSAGE);
-        SecuredResourceValidationPolicy policy = makeResourceValidationPolicy().resourceIdRule(makeErrorValidation(resource, error))
-                .resourceRule(makePassValidation(resource))
-                .methodRule(makePassValidation(resource))
-                .scopeAuthoritiesRule(makePassValidation(resource)).build();
 
-        ResourceInvalidException exception = assertThrows(ResourceInvalidException.class, () -> resource.validation(policy));
-        assertTrue(exception.getErrors().contains(error));
+        SecuredResourceValidatorFactory factory = makeErrorValidatorFactory(resource);
+
+        assertThrows(ResourceInvalidException.class, () -> resource.validation(factory));
     }
 
     @Test
-    @DisplayName("허용 되지 않은 리소스 일때 유효성 검사")
-    void validationWhenNotAllowedResource() {
+    @DisplayName("모든 데이터가 유효할시")
+    void resourceDataAllowed() {
         SecuredResource resource = new SecuredResource(RESOURCE_ID, RESOURCE, RESOURCE_METHOD);
-        ValidationError error = new ValidationError(ERROR_PROPERTY, ERROR_MESSAGE);
-        SecuredResourceValidationPolicy policy = makeResourceValidationPolicy().resourceIdRule(makePassValidation(resource))
-                .resourceRule(makeErrorValidation(resource, error))
-                .methodRule(makePassValidation(resource))
-                .scopeAuthoritiesRule(makePassValidation(resource)).build();
 
-        ResourceInvalidException exception = assertThrows(ResourceInvalidException.class, () -> resource.validation(policy));
-        assertTrue(exception.getErrors().contains(error));
-    }
+        SecuredResourceValidatorFactory factory = makePassValidatorFactory(resource);
 
-    @Test
-    @DisplayName("허용 되지 않은 메소드 일떄 유효성 검사")
-    void validationWhenNotAllowedMethod() {
-        SecuredResource resource = new SecuredResource(RESOURCE_ID, RESOURCE, RESOURCE_METHOD);
-        ValidationError error = new ValidationError(ERROR_PROPERTY, ERROR_MESSAGE);
-        SecuredResourceValidationPolicy policy = makeResourceValidationPolicy().resourceIdRule(makePassValidation(resource))
-                .resourceRule(makePassValidation(resource))
-                .methodRule(makeErrorValidation(resource, error))
-                .scopeAuthoritiesRule(makePassValidation(resource)).build();
-
-        ResourceInvalidException exception = assertThrows(ResourceInvalidException.class, () -> resource.validation(policy));
-        assertTrue(exception.getErrors().contains(error));
-    }
-
-    @Test
-    @DisplayName("허용 되지 않은 접근 스코프 일때 유효성 검사")
-    void validationWhenNotAllowedScopes() {
-        SecuredResource resource = new SecuredResource(RESOURCE_ID, RESOURCE, RESOURCE_METHOD);
-        ValidationError error = new ValidationError(ERROR_PROPERTY, ERROR_MESSAGE);
-        SecuredResourceValidationPolicy policy = makeResourceValidationPolicy().resourceIdRule(makePassValidation(resource))
-                .resourceRule(makePassValidation(resource))
-                .methodRule(makePassValidation(resource))
-                .scopeAuthoritiesRule(makeErrorValidation(resource, error)).build();
-
-        ResourceInvalidException exception = assertThrows(ResourceInvalidException.class, () -> resource.validation(policy));
-        assertTrue(exception.getErrors().contains(error));
+        assertDoesNotThrow(() -> resource.validation(factory));
     }
 }

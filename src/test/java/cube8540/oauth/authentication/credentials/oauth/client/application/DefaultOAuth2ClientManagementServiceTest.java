@@ -2,12 +2,11 @@ package cube8540.oauth.authentication.credentials.oauth.client.application;
 
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2Client;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientRepository;
-import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientValidatePolicy;
+import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientValidatorFactory;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.exception.ClientAuthorizationException;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.exception.ClientErrorCodes;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.exception.ClientNotFoundException;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.exception.ClientRegisterException;
-import cube8540.validator.core.ValidationRule;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -50,7 +49,8 @@ import static cube8540.oauth.authentication.credentials.oauth.client.application
 import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.makeDifferentAuthentication;
 import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.makeEmptyClientRepository;
 import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.makeEncoder;
-import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.makeValidatePolicy;
+import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.makeErrorValidatorFactory;
+import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.makeValidatorFactory;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.inOrder;
@@ -74,6 +74,23 @@ class DefaultOAuth2ClientManagementServiceTest {
     }
 
     @Test
+    @DisplayName("허용 되지 않는 클라이언트 등록")
+    void registerNewClientWithInvalidData() {
+        OAuth2ClientRegisterRequest request = new OAuth2ClientRegisterRequest(RAW_CLIENT_ID, SECRET, CLIENT_NAME,
+                RAW_REDIRECT_URIS, RAW_SCOPES, RAW_GRANT_TYPES);
+        PasswordEncoder encoder = makeEncoder(SECRET, ENCODING_SECRET);
+        OAuth2ClientRepository repository = makeEmptyClientRepository();
+        OAuth2ClientValidatorFactory factory = makeErrorValidatorFactory(new TestOauth2ClientException());
+        DefaultOAuth2ClientManagementService service = new DefaultOAuth2ClientManagementService(repository);
+
+        service.setValidateFactory(factory);
+        service.setPasswordEncoder(encoder);
+        SecurityContextHolder.getContext().setAuthentication(OAuth2ClientApplicationTestHelper.makeAuthentication());
+
+        assertThrows(TestOauth2ClientException.class, () -> service.registerNewClient(request));
+    }
+
+    @Test
     @DisplayName("새 클라이언트 등록")
     void registerNewClient() {
         ArgumentCaptor<OAuth2Client> clientCaptor = ArgumentCaptor.forClass(OAuth2Client.class);
@@ -81,20 +98,15 @@ class DefaultOAuth2ClientManagementServiceTest {
                 RAW_REDIRECT_URIS, RAW_SCOPES, RAW_GRANT_TYPES);
         PasswordEncoder encoder = makeEncoder(SECRET, ENCODING_SECRET);
         OAuth2ClientRepository repository = makeEmptyClientRepository();
-        OAuth2ClientValidatePolicy validatePolicy = makeValidatePolicy();
+        OAuth2ClientValidatorFactory factory = makeValidatorFactory();
         DefaultOAuth2ClientManagementService service = new DefaultOAuth2ClientManagementService(repository);
 
-        service.setValidatePolicy(validatePolicy);
+        service.setValidateFactory(factory);
         service.setPasswordEncoder(encoder);
         SecurityContextHolder.getContext().setAuthentication(OAuth2ClientApplicationTestHelper.makeAuthentication());
 
         service.registerNewClient(request);
-        verifySaveAfterValidation(validatePolicy.clientIdRule(), clientCaptor, repository);
-        verifySaveAfterValidation(validatePolicy.secretRule(), clientCaptor, repository);
-        verifySaveAfterValidation(validatePolicy.clientNameRule(), clientCaptor, repository);
-        verifySaveAfterValidation(validatePolicy.ownerRule(), clientCaptor, repository);
-        verifySaveAfterValidation(validatePolicy.scopeRule(), clientCaptor, repository);
-        verifySaveAfterValidation(validatePolicy.grantTypeRule(), clientCaptor, repository);
+        verify(repository, times(1)).save(clientCaptor.capture());
         assertEquals(CLIENT_ID, clientCaptor.getValue().getClientId());
         assertEquals(ENCODING_SECRET, clientCaptor.getValue().getSecret());
         assertEquals(OWNER, clientCaptor.getValue().getOwner());
@@ -138,11 +150,11 @@ class DefaultOAuth2ClientManagementServiceTest {
                 RAW_REMOVE_REDIRECT_URIS, RAW_NEW_GRANT_TYPES, RAW_REMOVE_GRANT_TYPES, RAW_NEW_SCOPES, RAW_REMOVE_SCOPES);
         OAuth2ClientRepository repository = makeClientRepository(CLIENT_ID, client);
         Authentication authentication = makeAuthentication();
-        OAuth2ClientValidatePolicy validatePolicy = makeValidatePolicy();
+        OAuth2ClientValidatorFactory factory = makeValidatorFactory();
         DefaultOAuth2ClientManagementService service = new DefaultOAuth2ClientManagementService(repository);
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        service.setValidatePolicy(validatePolicy);
+        service.setValidateFactory(factory);
 
         InOrder inOrder = inOrder(client, repository);
         service.modifyClient(OAuth2ClientApplicationTestHelper.RAW_CLIENT_ID, request);
@@ -153,7 +165,7 @@ class DefaultOAuth2ClientManagementServiceTest {
         NEW_GRANT_TYPES.forEach(grant -> inOrder.verify(client, times(1)).addGrantType(grant));
         REMOVE_SCOPES.forEach(scope -> inOrder.verify(client, times(1)).removeScope(scope));
         NEW_SCOPES.forEach(scope -> inOrder.verify(client, times(1)).addScope(scope));
-        inOrder.verify(client, times(1)).validate(validatePolicy);
+        inOrder.verify(client, times(1)).validate(factory);
         inOrder.verify(repository, times(1)).save(client);
     }
 
@@ -190,17 +202,17 @@ class DefaultOAuth2ClientManagementServiceTest {
         OAuth2ClientRepository repository = makeClientRepository(CLIENT_ID, client);
         Authentication authentication = makeAuthentication();
         PasswordEncoder encoder = makeEncoder(MODIFY_SECRET, ENCODING_SECRET);
-        OAuth2ClientValidatePolicy validatePolicy = makeValidatePolicy();
+        OAuth2ClientValidatorFactory factory = makeValidatorFactory();
         DefaultOAuth2ClientManagementService service = new DefaultOAuth2ClientManagementService(repository);
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        service.setValidatePolicy(validatePolicy);
+        service.setValidateFactory(factory);
         service.setPasswordEncoder(encoder);
 
         InOrder inOrder = inOrder(client, repository);
         service.changeSecret(RAW_CLIENT_ID, request);
         inOrder.verify(client, times(1)).changeSecret(SECRET, MODIFY_SECRET, encoder);
-        inOrder.verify(client, times(1)).validate(validatePolicy);
+        inOrder.verify(client, times(1)).validate(factory);
         inOrder.verify(client, times(1)).encrypted(encoder);
         inOrder.verify(repository, times(1)).save(client);
     }
@@ -247,13 +259,5 @@ class DefaultOAuth2ClientManagementServiceTest {
         SecurityContextHolder.clearContext();
     }
 
-    private void verifySaveAfterValidation(ValidationRule<OAuth2Client> rule, ArgumentCaptor<OAuth2Client> argumentCaptor, OAuth2ClientRepository repository) {
-        InOrder inOrder = inOrder(rule, repository);
-        inOrder.verify(rule, times(1)).isValid(argumentCaptor.capture());
-        inOrder.verify(repository, times(1)).save(argumentCaptor.capture());
-
-        for (OAuth2Client client : argumentCaptor.getAllValues()) {
-            assertEquals(argumentCaptor.getAllValues().get(0), client);
-        }
-    }
+    private static class TestOauth2ClientException extends RuntimeException {}
 }

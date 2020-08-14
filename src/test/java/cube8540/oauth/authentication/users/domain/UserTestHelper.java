@@ -3,6 +3,7 @@ package cube8540.oauth.authentication.users.domain;
 import cube8540.oauth.authentication.AuthenticationApplication;
 import cube8540.validator.core.ValidationError;
 import cube8540.validator.core.ValidationRule;
+import cube8540.validator.core.Validator;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.Clock;
@@ -25,21 +26,12 @@ class UserTestHelper {
     static final String RAW_CREDENTIALS_KEY = "CREDENTIALS-KEY";
     static final String RAW_PASSWORD_CREDENTIALS_KEY = "PASSWORD-CREDENTIALS-KEY";
 
-    static final String USERNAME_ERROR_PROPERTY = "username";
-    static final String USERNAME_ERROR_MESSAGE = "message";
-
-    static final String EMAIL_ERROR_PROPERTY = "email";
-    static final String EMAIL_ERROR_MESSAGE = "message";
-
-    static final String PASSWORD_ERROR_PROPERTY = "password";
-    static final String PASSWORD_ERROR_MESSAGE = "message";
+    static final String ERROR_PROPERTY = "property";
+    static final String ERROR_MESSAGE = "message";
 
     static final LocalDateTime NOW = LocalDateTime.of(2020, 2, 8, 23, 5);
     static final LocalDateTime EXPIRATION_DATETIME = NOW.plusMinutes(5);
     static final LocalDateTime NOT_EXPIRATION_DATETIME = EXPIRATION_DATETIME.plusMinutes(1);
-
-    static final String RAW_AUTHORITY = "AUTHORITY";
-    static final UserAuthority AUTHORITY = new UserAuthority(RAW_AUTHORITY);
 
     static Clock makeDefaultClock() {
         return Clock.fixed(NOW.toInstant(AuthenticationApplication.DEFAULT_ZONE_OFFSET), AuthenticationApplication.DEFAULT_TIME_ZONE.toZoneId());
@@ -50,22 +42,32 @@ class UserTestHelper {
     }
 
     @SuppressWarnings("unchecked")
-    static ValidationRule<User> makePassValidationRule(User user) {
+    static UserValidatorFactory makeErrorValidatorFactory(User user) {
         ValidationRule<User> validationRule = mock(ValidationRule.class);
+        UserValidatorFactory factory = mock(UserValidatorFactory.class);
 
-        when(validationRule.isValid(user)).thenReturn(true);
+        when(validationRule.isValid(user)).thenReturn(false);
+        when(validationRule.error()).thenReturn(new ValidationError(ERROR_PROPERTY, ERROR_MESSAGE));
 
-        return validationRule;
+        Validator<User> validator = Validator.of(user)
+                .registerRule(validationRule);
+        when(factory.createValidator(user)).thenReturn(validator);
+
+        return factory;
     }
 
     @SuppressWarnings("unchecked")
-    static ValidationRule<User> makeErrorValidationRule(User user, ValidationError error) {
+    static UserValidatorFactory makePassValidatorFactory(User user) {
         ValidationRule<User> validationRule = mock(ValidationRule.class);
+        UserValidatorFactory factory = mock(UserValidatorFactory.class);
 
-        when(validationRule.isValid(user)).thenReturn(false);
-        when(validationRule.error()).thenReturn(error);
+        when(validationRule.isValid(user)).thenReturn(true);
 
-        return validationRule;
+        Validator<User> validator = Validator.of(user)
+                .registerRule(validationRule);
+        when(factory.createValidator(user)).thenReturn(validator);
+
+        return factory;
     }
 
     static PasswordEncoder makePasswordEncoder(String rawPassword, String encodedPassword) {
@@ -111,37 +113,6 @@ class UserTestHelper {
 
         when(keyGenerator.generateKey()).thenReturn(credentialsKey);
         return keyGenerator;
-    }
-
-    static MockValidationPolicy makeValidationPolicy() {
-        return new MockValidationPolicy();
-    }
-
-    static final class MockValidationPolicy {
-        private UserValidationPolicy policy;
-
-        private MockValidationPolicy() {
-            this.policy = mock(UserValidationPolicy.class);
-        }
-
-        MockValidationPolicy usernameRule(ValidationRule<User> validationRule) {
-            when(this.policy.usernameRule()).thenReturn(validationRule);
-            return this;
-        }
-
-        MockValidationPolicy emailRule(ValidationRule<User> validationRule) {
-            when(this.policy.emailRule()).thenReturn(validationRule);
-            return this;
-        }
-
-        MockValidationPolicy passwordRule(ValidationRule<User> validationRule) {
-            when(this.policy.passwordRule()).thenReturn(validationRule);
-            return this;
-        }
-
-        UserValidationPolicy build() {
-            return policy;
-        }
     }
 
 }

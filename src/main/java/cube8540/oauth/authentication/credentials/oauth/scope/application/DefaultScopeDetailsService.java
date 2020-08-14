@@ -1,10 +1,10 @@
 package cube8540.oauth.authentication.credentials.oauth.scope.application;
 
-import cube8540.oauth.authentication.credentials.AuthorityDetails;
 import cube8540.oauth.authentication.credentials.AuthorityCode;
+import cube8540.oauth.authentication.credentials.AuthorityDetails;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2Scope;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeRepository;
-import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeValidationPolicy;
+import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeValidatorFactory;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.exception.ScopeNotFoundException;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.exception.ScopeRegisterException;
 import lombok.Setter;
@@ -21,7 +21,7 @@ public class DefaultScopeDetailsService implements OAuth2ScopeManagementService,
     private final OAuth2ScopeRepository repository;
 
     @Setter
-    private OAuth2ScopeValidationPolicy validationPolicy;
+    private OAuth2ScopeValidatorFactory validatorFactory;
 
     public DefaultScopeDetailsService(OAuth2ScopeRepository repository) {
         this.repository = repository;
@@ -57,7 +57,7 @@ public class DefaultScopeDetailsService implements OAuth2ScopeManagementService,
         Optional.ofNullable(registerRequest.getAccessibleAuthority())
                 .ifPresent(authorities -> authorities.forEach(authority -> scope.addAccessibleAuthority(new AuthorityCode(authority))));
 
-        scope.validate(validationPolicy);
+        scope.validate(validatorFactory);
         return DefaultOAuth2ScopeDetails.of(repository.save(scope));
     }
 
@@ -72,7 +72,7 @@ public class DefaultScopeDetailsService implements OAuth2ScopeManagementService,
         Optional.ofNullable(modifyRequest.getNewAccessibleAuthority())
                 .ifPresent(authorities -> authorities.forEach(auth -> scope.addAccessibleAuthority(new AuthorityCode(auth))));
 
-        scope.validate(validationPolicy);
+        scope.validate(validatorFactory);
         return DefaultOAuth2ScopeDetails.of(repository.save(scope));
     }
 

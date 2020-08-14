@@ -1,7 +1,6 @@
 package cube8540.oauth.authentication.credentials.oauth.scope.domain;
 
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.exception.ScopeInvalidException;
-import cube8540.validator.core.ValidationError;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.Authentication;
@@ -13,15 +12,35 @@ import static cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth
 import static cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeTestHelper.NOT_ACCESSIBLE_AUTHORITIES;
 import static cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeTestHelper.RAW_SCOPE_ID;
 import static cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeTestHelper.makeAuthentication;
-import static cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeTestHelper.makeErrorValidationRule;
-import static cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeTestHelper.makePassValidationRule;
-import static cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeTestHelper.makeValidationPolicy;
+import static cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeTestHelper.makeErrorValidatorFactory;
+import static cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeTestHelper.makePassValidatorFactory;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("OAuth2 스코프 테스트")
 class OAuth2ScopeTest {
+
+    @Test
+    @DisplayName("유효 하지 않은 정보가 저장 되어 있을시")
+    void scopeDataInvalid() {
+        OAuth2Scope scope = new OAuth2Scope(RAW_SCOPE_ID, DESCRIPTION);
+
+        OAuth2ScopeValidatorFactory factory = makeErrorValidatorFactory(scope);
+
+        assertThrows(ScopeInvalidException.class, () -> scope.validate(factory));
+    }
+
+    @Test
+    @DisplayName("모든 데이터가 유효할시")
+    void scopeDataAllowed() {
+        OAuth2Scope scope = new OAuth2Scope(RAW_SCOPE_ID, DESCRIPTION);
+
+        OAuth2ScopeValidatorFactory factory = makePassValidatorFactory(scope);
+
+        assertDoesNotThrow(() -> scope.validate(factory));
+    }
 
     @Test
     @DisplayName("접근 가능한 권한 추가")
@@ -72,31 +91,5 @@ class OAuth2ScopeTest {
         ACCESSIBLE_AUTHORITY.forEach(scope::addAccessibleAuthority);
 
         assertTrue(scope.isAccessible(authentication));
-    }
-
-    @Test
-    @DisplayName("허용 되는 아이디가 아닐시")
-    void scopeIdNotAllowed() {
-        OAuth2Scope scope = new OAuth2Scope(RAW_SCOPE_ID, DESCRIPTION);
-        ValidationError error = new ValidationError("id", "invalid scope id");
-
-        OAuth2ScopeValidationPolicy policy = makeValidationPolicy().scopeIdRule(makeErrorValidationRule(scope, error))
-                .accessibleAuthorityRule(makePassValidationRule(scope)).build();
-
-        ScopeInvalidException exception = assertThrows(ScopeInvalidException.class, () -> scope.validate(policy));
-        assertTrue(exception.getErrors().contains(error));
-    }
-
-    @Test
-    @DisplayName("허용 되는 접근 권한이 아닐시")
-    void accessibleAuthorityNotAllowed() {
-        OAuth2Scope scope = new OAuth2Scope(RAW_SCOPE_ID, DESCRIPTION);
-        ValidationError error = new ValidationError("accessibleAuthority", "invalid authority");
-
-        OAuth2ScopeValidationPolicy policy = makeValidationPolicy().scopeIdRule(makePassValidationRule(scope))
-                .accessibleAuthorityRule(makeErrorValidationRule(scope, error)).build();
-
-        ScopeInvalidException exception = assertThrows(ScopeInvalidException.class, () -> scope.validate(policy));
-        assertTrue(exception.getErrors().contains(error));
     }
 }

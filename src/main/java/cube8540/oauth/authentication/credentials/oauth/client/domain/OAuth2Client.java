@@ -5,7 +5,6 @@ import cube8540.oauth.authentication.credentials.oauth.client.domain.exception.C
 import cube8540.oauth.authentication.credentials.oauth.client.domain.exception.ClientInvalidException;
 import cube8540.oauth.authentication.credentials.oauth.converter.AuthorizationGrantTypeConverter;
 import cube8540.oauth.authentication.credentials.oauth.converter.RedirectUriConverter;
-import cube8540.validator.core.Validator;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -134,14 +133,8 @@ public class OAuth2Client extends AbstractAggregateRoot<OAuth2Client> {
                 .ifPresent(s -> s.remove(scope));
     }
 
-    public void validate(OAuth2ClientValidatePolicy policy) {
-        Validator.of(this).registerRule(policy.clientIdRule())
-                .registerRule(policy.secretRule())
-                .registerRule(policy.ownerRule())
-                .registerRule(policy.clientNameRule())
-                .registerRule(policy.grantTypeRule())
-                .registerRule(policy.scopeRule())
-                .getResult().hasErrorThrows(ClientInvalidException::instance);
+    public void validate(OAuth2ClientValidatorFactory factory) {
+        factory.createValidator(this).getResult().hasErrorThrows(ClientInvalidException::instance);
     }
 
     public void changeSecret(String existsSecret, String changeSecret, PasswordEncoder encoder) {

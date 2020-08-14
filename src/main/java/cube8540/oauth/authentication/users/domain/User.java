@@ -2,7 +2,6 @@ package cube8540.oauth.authentication.users.domain;
 
 import cube8540.oauth.authentication.users.domain.exception.UserAuthorizationException;
 import cube8540.oauth.authentication.users.domain.exception.UserInvalidException;
-import cube8540.validator.core.Validator;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -79,11 +78,8 @@ public class User extends AbstractAggregateRoot<User> {
         registerEvent(new UserRegisterEvent(this.username));
     }
 
-    public void validation(UserValidationPolicy policy) {
-        Validator.of(this).registerRule(policy.usernameRule())
-                .registerRule(policy.emailRule())
-                .registerRule(policy.passwordRule())
-                .getResult().hasErrorThrows(UserInvalidException::instance);
+    public void validation(UserValidatorFactory factory) {
+        factory.createValidator(this).getResult().hasErrorThrows(UserInvalidException::instance);
     }
 
     public void generateCredentialsKey(UserCredentialsKeyGenerator keyGenerator) {

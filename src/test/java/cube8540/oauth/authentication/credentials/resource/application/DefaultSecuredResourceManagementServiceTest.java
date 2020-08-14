@@ -3,11 +3,10 @@ package cube8540.oauth.authentication.credentials.resource.application;
 import cube8540.oauth.authentication.credentials.resource.domain.ResourceMethod;
 import cube8540.oauth.authentication.credentials.resource.domain.SecuredResource;
 import cube8540.oauth.authentication.credentials.resource.domain.SecuredResourceRepository;
-import cube8540.oauth.authentication.credentials.resource.domain.SecuredResourceValidationPolicy;
+import cube8540.oauth.authentication.credentials.resource.domain.SecuredResourceValidatorFactory;
 import cube8540.oauth.authentication.credentials.resource.domain.exception.ResourceNotFoundException;
 import cube8540.oauth.authentication.credentials.resource.domain.exception.ResourceRegisterException;
 import cube8540.oauth.authentication.error.message.ErrorCodes;
-import cube8540.validator.core.ValidationRule;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -27,8 +26,9 @@ import static cube8540.oauth.authentication.credentials.resource.application.Sec
 import static cube8540.oauth.authentication.credentials.resource.application.SecuredResourceApplicationTestHelper.RESOURCE_URI;
 import static cube8540.oauth.authentication.credentials.resource.application.SecuredResourceApplicationTestHelper.makeDefaultSecuredResource;
 import static cube8540.oauth.authentication.credentials.resource.application.SecuredResourceApplicationTestHelper.makeEmptyResourceRepository;
+import static cube8540.oauth.authentication.credentials.resource.application.SecuredResourceApplicationTestHelper.makeErrorValidatorFactory;
 import static cube8540.oauth.authentication.credentials.resource.application.SecuredResourceApplicationTestHelper.makeResourceRepository;
-import static cube8540.oauth.authentication.credentials.resource.application.SecuredResourceApplicationTestHelper.makeValidationPolicy;
+import static cube8540.oauth.authentication.credentials.resource.application.SecuredResourceApplicationTestHelper.makeValidatorFactory;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.inOrder;
@@ -51,21 +51,31 @@ class DefaultSecuredResourceManagementServiceTest {
     }
 
     @Test
+    @DisplayName("유효 하지 않은 리소스 데이터 등록")
+    void registerInvalidResource() {
+        SecuredResourceRegisterRequest request = new SecuredResourceRegisterRequest(RAW_RESOURCE_ID, RAW_RESOURCE_URI, "POST", REQUEST_AUTHORITIES);
+        SecuredResourceRepository repository = makeEmptyResourceRepository();
+        SecuredResourceValidatorFactory factory = makeErrorValidatorFactory(new TestSecuredResourceException());
+        DefaultSecuredResourceManagementService service = new DefaultSecuredResourceManagementService(repository);
+
+        service.setValidatorFactory(factory);
+
+        assertThrows(TestSecuredResourceException.class, () -> service.registerNewResource(request));
+    }
+
+    @Test
     @DisplayName("새 리소스 등록")
     void registerNewResource() {
         ArgumentCaptor<SecuredResource> resourceCaptor = ArgumentCaptor.forClass(SecuredResource.class);
         SecuredResourceRegisterRequest request = new SecuredResourceRegisterRequest(RAW_RESOURCE_ID, RAW_RESOURCE_URI, "POST", REQUEST_AUTHORITIES);
         SecuredResourceRepository repository = makeEmptyResourceRepository();
-        SecuredResourceValidationPolicy policy = makeValidationPolicy();
+        SecuredResourceValidatorFactory factory = makeValidatorFactory();
         DefaultSecuredResourceManagementService service = new DefaultSecuredResourceManagementService(repository);
 
-        service.setValidationPolicy(policy);
-
+        service.setValidatorFactory(factory);
         service.registerNewResource(request);
-        verifySaveAfterValidation(policy.resourceIdRule(), resourceCaptor, repository);
-        verifySaveAfterValidation(policy.resourceRule(), resourceCaptor, repository);
-        verifySaveAfterValidation(policy.methodRule(), resourceCaptor, repository);
-        verifySaveAfterValidation(policy.scopeAuthoritiesRule(), resourceCaptor, repository);
+
+        verify(repository, times(1)).save(resourceCaptor.capture());
         assertEquals(RESOURCE_ID, resourceCaptor.getValue().getResourceId());
         assertEquals(RESOURCE_URI, resourceCaptor.getValue().getResource());
         assertEquals(ResourceMethod.POST, resourceCaptor.getValue().getMethod());
@@ -84,22 +94,38 @@ class DefaultSecuredResourceManagementServiceTest {
     }
 
     @Test
+    @DisplayName("유효 하지 않은 데이터로 리소스 수정")
+    void modifyResourceWithInvalidData() {
+        SecuredResourceModifyRequest request = new SecuredResourceModifyRequest(RAW_MODIFY_RESOURCE_URI, "PUT", ADD_REQUEST_AUTHORITIES, REMOVE_REQUEST_AUTHORITIES);
+        SecuredResource resource = makeDefaultSecuredResource();
+        SecuredResourceRepository repository = makeResourceRepository(RESOURCE_ID, resource);
+        SecuredResourceValidatorFactory factory = makeErrorValidatorFactory(new TestSecuredResourceException());
+        DefaultSecuredResourceManagementService service = new DefaultSecuredResourceManagementService(repository);
+
+        service.setValidatorFactory(factory);
+        service.modifyResource(RAW_RESOURCE_ID, request);
+
+        InOrder inOrder = inOrder(resource, repository);
+        inOrder.verify(resource, times(1)).validation(factory);
+        inOrder.verify(repository, times(1)).save(resource);
+    }
+
+    @Test
     @DisplayName("리소스 수정")
     void modifyResource() {
         SecuredResourceModifyRequest request = new SecuredResourceModifyRequest(RAW_MODIFY_RESOURCE_URI, "PUT", ADD_REQUEST_AUTHORITIES, REMOVE_REQUEST_AUTHORITIES);
         SecuredResource resource = makeDefaultSecuredResource();
         SecuredResourceRepository repository = makeResourceRepository(RESOURCE_ID, resource);
-        SecuredResourceValidationPolicy policy = makeValidationPolicy();
+        SecuredResourceValidatorFactory factory = makeValidatorFactory();
         DefaultSecuredResourceManagementService service = new DefaultSecuredResourceManagementService(repository);
 
-        service.setValidationPolicy(policy);
+        service.setValidatorFactory(factory);
 
         service.modifyResource(RAW_RESOURCE_ID, request);
         InOrder inOrder = inOrder(resource, repository);
         inOrder.verify(resource, times(1)).changeResourceInfo(MODIFY_RESOURCE_URI, ResourceMethod.PUT);
         REMOVE_AUTHORITIES.forEach(auth -> inOrder.verify(resource, times(1)).removeAuthority(auth.getAuthority()));
         ADD_AUTHORITIES.forEach(auth -> inOrder.verify(resource, times(1)).addAuthority(auth.getAuthority()));
-        inOrder.verify(resource, times(1)).validation(policy);
         inOrder.verify(repository, times(1)).save(resource);
     }
 
@@ -124,13 +150,5 @@ class DefaultSecuredResourceManagementServiceTest {
         verify(repository, times(1)).delete(resource);
     }
 
-    private void verifySaveAfterValidation(ValidationRule<SecuredResource> rule, ArgumentCaptor<SecuredResource> argumentCaptor, SecuredResourceRepository repository) {
-        InOrder inOrder = inOrder(rule, repository);
-        inOrder.verify(rule, times(1)).isValid(argumentCaptor.capture());
-        inOrder.verify(repository, times(1)).save(argumentCaptor.capture());
-
-        for (SecuredResource resource : argumentCaptor.getAllValues()) {
-            assertEquals(argumentCaptor.getAllValues().get(0), resource);
-        }
-    }
+    private static class TestSecuredResourceException extends RuntimeException {}
 }
