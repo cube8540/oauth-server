@@ -20,6 +20,7 @@ import org.springframework.security.access.AccessDecisionManager;
 import org.springframework.security.access.AccessDecisionVoter;
 import org.springframework.security.access.vote.RoleVoter;
 import org.springframework.security.access.vote.UnanimousBased;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -50,6 +51,9 @@ public class OAuth2ResourceEndpointSecurityConfiguration extends WebSecurityConf
     @Setter(onMethod_ = {@Autowired, @Qualifier("oAuth2ClientNotCheckedAccessTokenDetailsService")})
     private OAuth2AccessTokenDetailsService accessTokenService;
 
+    @Setter(onMethod_ = {@Autowired, @Qualifier("clientCredentialsAuthenticationProvider")})
+    private AuthenticationProvider authenticationProvider;
+
     private AuthenticationEntryPoint entryPoint;
 
     @PostConstruct
@@ -61,7 +65,7 @@ public class OAuth2ResourceEndpointSecurityConfiguration extends WebSecurityConf
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.oauth2ResourceServer()
-                .opaqueToken(introsptor -> introsptor.introspector(new DefaultAccessTokenIntrospector(accessTokenService)))
+                .opaqueToken(introsptor -> introsptor.introspector(accessTokenIntrospector()))
                 .and()
             .cors().configurationSource(request -> new CorsConfiguration().applyPermitDefaultValues())
                 .and()
@@ -104,5 +108,12 @@ public class OAuth2ResourceEndpointSecurityConfiguration extends WebSecurityConf
         TypeBasedAuthorityVoter roleVoter = new TypeBasedAuthorityVoter(ScopeSecurityConfig.class);
         roleVoter.setRolePrefix("");
         return roleVoter;
+    }
+
+    private DefaultAccessTokenIntrospector accessTokenIntrospector() {
+        DefaultAccessTokenIntrospector introspector = new DefaultAccessTokenIntrospector(accessTokenService, authenticationProvider);
+        introspector.setClientId(environment.getProperty("oauth-resource-server.client-id"));
+        introspector.setClientSecret(environment.getProperty("oauth-resource-server.client-secret"));
+        return introspector;
     }
 }
