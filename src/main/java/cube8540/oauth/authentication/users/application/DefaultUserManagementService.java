@@ -2,11 +2,11 @@ package cube8540.oauth.authentication.users.application;
 
 import cube8540.oauth.authentication.users.domain.User;
 import cube8540.oauth.authentication.users.domain.UserRepository;
-import cube8540.oauth.authentication.users.domain.UserValidationPolicy;
+import cube8540.oauth.authentication.users.domain.UserValidatorFactory;
 import cube8540.oauth.authentication.users.domain.Username;
 import cube8540.oauth.authentication.users.domain.exception.UserNotFoundException;
 import cube8540.oauth.authentication.users.domain.exception.UserRegisterException;
-import cube8540.oauth.authentication.users.infra.DefaultUserValidationPolicy;
+import cube8540.oauth.authentication.users.infra.DefaultUserValidatorFactory;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,7 +20,7 @@ public class DefaultUserManagementService implements UserManagementService {
     private final PasswordEncoder encoder;
 
     @Setter
-    private UserValidationPolicy validationPolicy = new DefaultUserValidationPolicy();
+    private UserValidatorFactory validatorFactory = new DefaultUserValidatorFactory();
 
     @Autowired
     public DefaultUserManagementService(UserRepository repository, PasswordEncoder encoder) {
@@ -45,7 +45,7 @@ public class DefaultUserManagementService implements UserManagementService {
             throw UserRegisterException.existsIdentifier(registerRequest.getUsername() + " is exists");
         }
         User registerUser = new User(registerRequest.getUsername(), registerRequest.getEmail(), registerRequest.getPassword());
-        registerUser.validation(validationPolicy);
+        registerUser.validation(validatorFactory);
         registerUser.encrypted(encoder);
         return UserProfile.of(repository.save(registerUser));
     }

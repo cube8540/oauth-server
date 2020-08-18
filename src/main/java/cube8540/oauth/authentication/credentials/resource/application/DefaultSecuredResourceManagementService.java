@@ -4,7 +4,7 @@ import cube8540.oauth.authentication.credentials.resource.domain.ResourceMethod;
 import cube8540.oauth.authentication.credentials.resource.domain.SecuredResource;
 import cube8540.oauth.authentication.credentials.resource.domain.SecuredResourceId;
 import cube8540.oauth.authentication.credentials.resource.domain.SecuredResourceRepository;
-import cube8540.oauth.authentication.credentials.resource.domain.SecuredResourceValidationPolicy;
+import cube8540.oauth.authentication.credentials.resource.domain.SecuredResourceValidatorFactory;
 import cube8540.oauth.authentication.credentials.resource.domain.exception.ResourceNotFoundException;
 import cube8540.oauth.authentication.credentials.resource.domain.exception.ResourceRegisterException;
 import lombok.Setter;
@@ -23,7 +23,7 @@ public class DefaultSecuredResourceManagementService implements SecuredResourceM
     private final SecuredResourceRepository repository;
 
     @Setter
-    private SecuredResourceValidationPolicy validationPolicy;
+    private SecuredResourceValidatorFactory validatorFactory;
 
     @Autowired
     public DefaultSecuredResourceManagementService(SecuredResourceRepository repository) {
@@ -49,7 +49,7 @@ public class DefaultSecuredResourceManagementService implements SecuredResourceM
                 URI.create(registerRequest.getResource()), ResourceMethod.of(registerRequest.getMethod()));
         Optional.ofNullable(registerRequest.getAuthorities()).orElse(Collections.emptyList())
                 .forEach(auth -> resource.addAuthority(auth.getAuthority()));
-        resource.validation(validationPolicy);
+        resource.validation(validatorFactory);
         return DefaultSecuredResourceDetails.of(repository.save(resource));
     }
 
@@ -61,7 +61,7 @@ public class DefaultSecuredResourceManagementService implements SecuredResourceM
                 .forEach(auth -> resource.removeAuthority(auth.getAuthority()));
         Optional.ofNullable(modifyRequest.getNewAuthorities()).orElse(Collections.emptyList())
                 .forEach(auth -> resource.addAuthority(auth.getAuthority()));
-        resource.validation(validationPolicy);
+        resource.validation(validatorFactory);
         return DefaultSecuredResourceDetails.of(repository.save(resource));
     }
 

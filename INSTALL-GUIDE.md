@@ -59,6 +59,9 @@ front:
   endpoint:
     register-page: http://localhost:8080/front/register
     forgot-password-page: http://localhost:8080/front/forgot-password
+oauth-resource-server:
+  client-id: #your client id
+  client-secret: #your client secret
 ```
 - spring.datasource
 
@@ -78,6 +81,10 @@ spring.mail 옵션은 지워주시면 됩니다. 이메일의 템플릿은 아�
 
 front.endpoint는 새 계정 생성과 패스워드 분실에 대한 페이지의 엔드 포인트를 설정합니다. 현재 개발된 프론트 페이지는 로그인 화면과
 OAuth2 인증 코드 방식의 인가 페이지 두 화면을 뿐임으로 새 계정 생성과 패스워드 분실에 대한 페이지는 따로 개발해야 합니다.
+
+- oauth-resource-server
+
+자원 서버에서 토큰 인증때 사용할 설정 입니다.
 
 ## Build and start
 아래의 명령어로 서버를 시작할 수 있습니다.

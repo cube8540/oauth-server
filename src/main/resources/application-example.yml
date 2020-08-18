@@ -41,3 +41,6 @@ front:
     logout-success-page: #your logout success endpoint
     register-page: #your register page endpoint
     forgot-password-page: #your forgot password page endpoint
+oauth-resource-server:
+  client-id: #your client id
+  client-secret: #your client secret

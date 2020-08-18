@@ -2,7 +2,6 @@ package cube8540.oauth.authentication.credentials.resource.domain;
 
 import cube8540.oauth.authentication.credentials.resource.domain.converter.ResourceConverter;
 import cube8540.oauth.authentication.credentials.resource.domain.exception.ResourceInvalidException;
-import cube8540.validator.core.Validator;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -78,12 +77,8 @@ public class SecuredResource extends AbstractAggregateRoot<SecuredResource> {
         registerSecuredResourceChangedEvent();
     }
 
-    public void validation(SecuredResourceValidationPolicy policy) {
-        Validator.of(this).registerRule(policy.resourceIdRule())
-                .registerRule(policy.resourceRule())
-                .registerRule(policy.methodRule())
-                .registerRule(policy.scopeAuthoritiesRule())
-                .getResult().hasErrorThrows(ResourceInvalidException::instance);
+    public void validation(SecuredResourceValidatorFactory factory) {
+        factory.createValidator(this).getResult().hasErrorThrows(ResourceInvalidException::instance);
     }
 
     private void registerSecuredResourceChangedEvent() {

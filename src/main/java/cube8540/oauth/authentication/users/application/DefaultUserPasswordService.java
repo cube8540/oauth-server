@@ -4,11 +4,11 @@ import cube8540.oauth.authentication.users.domain.User;
 import cube8540.oauth.authentication.users.domain.UserCredentialsKeyGenerator;
 import cube8540.oauth.authentication.users.domain.UserKeyMatchedResult;
 import cube8540.oauth.authentication.users.domain.UserRepository;
-import cube8540.oauth.authentication.users.domain.UserValidationPolicy;
+import cube8540.oauth.authentication.users.domain.UserValidatorFactory;
 import cube8540.oauth.authentication.users.domain.Username;
 import cube8540.oauth.authentication.users.domain.exception.UserNotFoundException;
 import cube8540.oauth.authentication.users.infra.DefaultUserCredentialsKeyGenerator;
-import cube8540.oauth.authentication.users.infra.DefaultUserValidationPolicy;
+import cube8540.oauth.authentication.users.infra.DefaultUserValidatorFactory;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,7 +28,7 @@ public class DefaultUserPasswordService implements UserPasswordService {
     private UserCredentialsKeyGenerator keyGenerator = new DefaultUserCredentialsKeyGenerator();
 
     @Setter
-    private UserValidationPolicy validationPolicy = new DefaultUserValidationPolicy();
+    private UserValidatorFactory validatorFactory = new DefaultUserValidatorFactory();
 
     @Autowired
     public DefaultUserPasswordService(UserRepository repository, PasswordEncoder encoder) {
@@ -42,7 +42,7 @@ public class DefaultUserPasswordService implements UserPasswordService {
         User user = getUser(principal.getName());
 
         user.changePassword(changeRequest.getExistingPassword(), changeRequest.getNewPassword(), encoder);
-        user.validation(validationPolicy);
+        user.validation(validatorFactory);
         user.encrypted(encoder);
 
         return UserProfile.of(repository.save(user));
@@ -69,7 +69,7 @@ public class DefaultUserPasswordService implements UserPasswordService {
         User user = getUser(resetRequest.getUsername());
 
         user.resetPassword(resetRequest.getCredentialsKey(), resetRequest.getNewPassword());
-        user.validation(validationPolicy);
+        user.validation(validatorFactory);
         user.encrypted(encoder);
 
         return UserProfile.of(repository.save(user));

@@ -3,7 +3,7 @@ package cube8540.oauth.authentication.users.application;
 import cube8540.oauth.authentication.users.domain.User;
 import cube8540.oauth.authentication.users.domain.UserCredentialsKeyGenerator;
 import cube8540.oauth.authentication.users.domain.UserRepository;
-import cube8540.oauth.authentication.users.domain.UserValidationPolicy;
+import cube8540.oauth.authentication.users.domain.UserValidatorFactory;
 import cube8540.oauth.authentication.users.domain.exception.UserNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -29,7 +29,7 @@ import static cube8540.oauth.authentication.users.application.UserApplicationTes
 import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.makePrincipal;
 import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.makeResetPasswordRequest;
 import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.makeUserRepository;
-import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.makeValidationPolicy;
+import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.makeValidatorFactory;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -60,15 +60,15 @@ class DefaultUserPasswordServiceTest {
         ChangePasswordRequest request = makeChangePasswordRequest();
         UserRepository repository = makeUserRepository(USERNAME, user);
         PasswordEncoder encoder = makePasswordEncoder(PASSWORD, ENCODED_PASSWORD);
-        UserValidationPolicy policy = makeValidationPolicy();
+        UserValidatorFactory factory = makeValidatorFactory();
 
         DefaultUserPasswordService service = new DefaultUserPasswordService(repository, encoder);
         InOrder inOrder = inOrder(user, repository);
-        service.setValidationPolicy(policy);
+        service.setValidatorFactory(factory);
 
         service.changePassword(principal, request);
         inOrder.verify(user, times(1)).changePassword(PASSWORD, NEW_PASSWORD, encoder);
-        inOrder.verify(user, times(1)).validation(policy);
+        inOrder.verify(user, times(1)).validation(factory);
         inOrder.verify(user, times(1)).encrypted(encoder);
         inOrder.verify(repository, times(1)).save(user);
     }
@@ -169,16 +169,16 @@ class DefaultUserPasswordServiceTest {
         ResetPasswordRequest request = makeResetPasswordRequest();
         User user = makeDefaultUser();
         UserRepository repository = makeUserRepository(USERNAME, user);
-        UserValidationPolicy policy = makeValidationPolicy();
+        UserValidatorFactory factory = makeValidatorFactory();
         PasswordEncoder encoder = makePasswordEncoder(PASSWORD, ENCODED_PASSWORD);
 
         DefaultUserPasswordService service = new DefaultUserPasswordService(repository, encoder);
-        service.setValidationPolicy(policy);
+        service.setValidatorFactory(factory);
 
         service.resetPassword(request);
         InOrder inOrder = inOrder(user, repository);
         inOrder.verify(user, times(1)).resetPassword(RAW_PASSWORD_CREDENTIALS_KEY, NEW_PASSWORD);
-        inOrder.verify(user, times(1)).validation(policy);
+        inOrder.verify(user, times(1)).validation(factory);
         inOrder.verify(user, times(1)).encrypted(encoder);
         inOrder.verify(repository, times(1)).save(user);
     }

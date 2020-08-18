@@ -1,30 +1,22 @@
 package cube8540.oauth.authentication.users.application;
 
-import cube8540.oauth.authentication.credentials.AuthorityDetails;
-import cube8540.oauth.authentication.credentials.BasicAuthorityDetailsService;
 import cube8540.oauth.authentication.users.domain.User;
-import cube8540.oauth.authentication.users.domain.UserAuthority;
 import cube8540.oauth.authentication.users.domain.UserCredentialsKey;
 import cube8540.oauth.authentication.users.domain.UserCredentialsKeyGenerator;
 import cube8540.oauth.authentication.users.domain.UserEmail;
 import cube8540.oauth.authentication.users.domain.UserKeyMatchedResult;
 import cube8540.oauth.authentication.users.domain.UserRepository;
-import cube8540.oauth.authentication.users.domain.UserValidationPolicy;
+import cube8540.oauth.authentication.users.domain.UserValidatorFactory;
 import cube8540.oauth.authentication.users.domain.Username;
-import cube8540.validator.core.ValidationRule;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import cube8540.validator.core.ValidationResult;
+import cube8540.validator.core.Validator;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.security.Principal;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -44,16 +36,6 @@ class UserApplicationTestHelper {
 
     static final String RAW_CREDENTIALS_KEY = "CREDENTIALS-KEY";
     static final String RAW_PASSWORD_CREDENTIALS_KEY = "PASSWORD-CREDENTIALS-KEY";
-
-    static final Set<String> RAW_AUTHORITIES = new HashSet<>(Arrays.asList("CODE-1", "CODE-2", "CODE-3"));
-    static final Collection<AuthorityDetails> BASIC_AUTHORITIES = RAW_AUTHORITIES.stream().map(UserApplicationTestHelper::mockAuthority).collect(Collectors.toList());
-    static final Collection<UserAuthority> AUTHORITIES = RAW_AUTHORITIES.stream().map(UserAuthority::new).collect(Collectors.toList());
-
-    private static AuthorityDetails mockAuthority(String code) {
-        AuthorityDetails authorityDetails = mock(AuthorityDetails.class);
-        when(authorityDetails.getCode()).thenReturn(code);
-        return authorityDetails;
-    }
 
     static UserRepository makeUserRepository(Username username, User user) {
         UserRepository repository = mock(UserRepository.class);
@@ -81,10 +63,6 @@ class UserApplicationTestHelper {
         return repository;
     }
 
-    static BasicAuthorityDetailsService makeEmptyAuthorityDetailsService() {
-        return mock(BasicAuthorityDetailsService.class);
-    }
-
     static User makeDefaultUser() {
         User user = mock(User.class);
 
@@ -97,14 +75,6 @@ class UserApplicationTestHelper {
 
     static UserCredentialsKeyGenerator makeKeyGenerator() {
         return mock(UserCredentialsKeyGenerator.class);
-    }
-
-    static BasicAuthorityDetailsService makeBasicAuthorityDetailsService(Collection<AuthorityDetails> authorities) {
-        BasicAuthorityDetailsService service = mock(BasicAuthorityDetailsService.class);
-
-        when(service.loadBasicAuthorities()).thenReturn(authorities);
-
-        return service;
     }
 
     static PasswordEncoder makePasswordEncoder(String rawPassword, String encodedPassword) {
@@ -129,21 +99,28 @@ class UserApplicationTestHelper {
     }
 
     @SuppressWarnings("unchecked")
-    static UserValidationPolicy makeValidationPolicy() {
-        ValidationRule<User> usernameRule = mock(ValidationRule.class);
-        ValidationRule<User> passwordRule = mock(ValidationRule.class);
-        ValidationRule<User> emailRule = mock(ValidationRule.class);
+    static UserValidatorFactory makeValidatorFactory() {
+        UserValidatorFactory factory = mock(UserValidatorFactory.class);
+        ValidationResult result = mock(ValidationResult.class);
+        Validator<User> validator = mock(Validator.class);
 
-        UserValidationPolicy policy = mock(UserValidationPolicy.class);
+        when(validator.getResult()).thenReturn(result);
+        when(factory.createValidator(any())).thenReturn(validator);
 
-        when(usernameRule.isValid(isA(User.class))).thenReturn(true);
-        when(passwordRule.isValid(isA(User.class))).thenReturn(true);
-        when(emailRule.isValid(isA(User.class))).thenReturn(true);
-        when(policy.usernameRule()).thenReturn(usernameRule);
-        when(policy.passwordRule()).thenReturn(passwordRule);
-        when(policy.emailRule()).thenReturn(emailRule);
+        return factory;
+    }
 
-        return policy;
+    @SuppressWarnings("unchecked")
+    static UserValidatorFactory makeErrorValidatorFactory(Exception exception) {
+        UserValidatorFactory factory = mock(UserValidatorFactory.class);
+        ValidationResult result = mock(ValidationResult.class);
+        Validator<User> validator = mock(Validator.class);
+
+        when(validator.getResult()).thenReturn(result);
+        doAnswer(invocation -> {throw exception;}).when(result).hasErrorThrows(any());
+        when(factory.createValidator(any())).thenReturn(validator);
+
+        return factory;
     }
 
     static User makeNotCertifiedUser() {
@@ -197,12 +174,5 @@ class UserApplicationTestHelper {
 
         when(principal.getName()).thenReturn(username);
         return principal;
-    }
-
-    static Set<GrantedAuthority> convertGrantAuthority(Collection<UserAuthority> authorities) {
-        return authorities.stream()
-                .map(UserAuthority::getValue)
-                .map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toSet());
     }
 }

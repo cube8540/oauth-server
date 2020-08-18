@@ -3,7 +3,6 @@ package cube8540.oauth.authentication.credentials.oauth.client.domain;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.exception.ClientAuthorizationException;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.exception.ClientErrorCodes;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.exception.ClientInvalidException;
-import cube8540.validator.core.ValidationError;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,10 +15,10 @@ import static cube8540.oauth.authentication.credentials.oauth.client.domain.OAut
 import static cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientTestsHelper.RAW_ENCODING_SECRET;
 import static cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientTestsHelper.RAW_SECRET;
 import static cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientTestsHelper.REDIRECT_URI;
-import static cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientTestsHelper.makeErrorValidationRule;
-import static cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientTestsHelper.makePassValidationRule;
+import static cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientTestsHelper.makeErrorValidatorFactory;
+import static cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientTestsHelper.makePassValidatorFactory;
 import static cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientTestsHelper.makePasswordEncoder;
-import static cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientTestsHelper.makeValidationPolicy;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -98,93 +97,19 @@ class OAuth2ClientTest {
     }
 
     @Test
-    @DisplayName("클라이언트 아이디가 유효 하지 않을때 유효성 체크")
-    void validationWhenClientIdNotAllowed() {
-        ValidationError error = new ValidationError("clientId", "invalid client id");
-        OAuth2ClientValidatePolicy policy = makeValidationPolicy().clientIdRule(makeErrorValidationRule(this.client, error))
-                .secretRule(makePassValidationRule(this.client))
-                .clientNameRule(makePassValidationRule(this.client))
-                .grantTypeRule(makePassValidationRule(this.client))
-                .scopeRule(makePassValidationRule(this.client))
-                .ownerRule(makePassValidationRule(this.client)).build();
+    @DisplayName("유효 하지 않은 정보가 저장 되어 있을시")
+    void clientDataInvalid() {
+        OAuth2ClientValidatorFactory factory = makeErrorValidatorFactory(client);
 
-        ClientInvalidException e = assertThrows(ClientInvalidException.class, () -> client.validate(policy));
-        assertTrue(e.getErrors().contains(error));
+        assertThrows(ClientInvalidException.class, () -> client.validate(factory));
     }
 
     @Test
-    @DisplayName("클라이언트 패스워드가 유효 하지 않을떄 유효성 체크")
-    void validationWhenClientSecretNotAllowed() {
-        ValidationError error = new ValidationError("secret", "invalid secret");
-        OAuth2ClientValidatePolicy policy = makeValidationPolicy().clientIdRule(makePassValidationRule(this.client))
-                .secretRule(makeErrorValidationRule(this.client, error))
-                .clientNameRule(makePassValidationRule(this.client))
-                .grantTypeRule(makePassValidationRule(this.client))
-                .scopeRule(makePassValidationRule(this.client))
-                .ownerRule(makePassValidationRule(this.client)).build();
+    @DisplayName("모든 데이터가 유효할시")
+    void clientDataAllowed() {
+        OAuth2ClientValidatorFactory factory = makePassValidatorFactory(client);
 
-        ClientInvalidException e = assertThrows(ClientInvalidException.class, () -> client.validate(policy));
-        assertTrue(e.getErrors().contains(error));
-    }
-
-    @Test
-    @DisplayName("클라이언트명이 유효 하지 않을떄 유효성 체크")
-    void validationWhenClientNameNotAllowed() {
-        ValidationError error = new ValidationError("clientName", "invalid client name");
-        OAuth2ClientValidatePolicy policy = makeValidationPolicy().clientIdRule(makePassValidationRule(this.client))
-                .secretRule(makePassValidationRule(this.client))
-                .clientNameRule(makeErrorValidationRule(this.client, error))
-                .grantTypeRule(makePassValidationRule(this.client))
-                .scopeRule(makePassValidationRule(this.client))
-                .ownerRule(makePassValidationRule(this.client)).build();
-
-        ClientInvalidException e = assertThrows(ClientInvalidException.class, () -> client.validate(policy));
-        assertTrue(e.getErrors().contains(error));
-    }
-
-    @Test
-    @DisplayName("클라이언트 인가 방식이 유효 하지 않을떄 유효성 체크")
-    void validationWhenClientGrantTypeNotAllowed() {
-        ValidationError error = new ValidationError("grantType", "invalid grant type");
-        OAuth2ClientValidatePolicy policy = makeValidationPolicy().clientIdRule(makePassValidationRule(this.client))
-                .secretRule(makePassValidationRule(this.client))
-                .clientNameRule(makePassValidationRule(this.client))
-                .grantTypeRule(makeErrorValidationRule(this.client, error))
-                .scopeRule(makePassValidationRule(this.client))
-                .ownerRule(makePassValidationRule(this.client)).build();
-
-        ClientInvalidException e = assertThrows(ClientInvalidException.class, () -> client.validate(policy));
-        assertTrue(e.getErrors().contains(error));
-    }
-
-    @Test
-    @DisplayName("클라이언트 스코프가 유효 하지 않을떄 유효성 체크")
-    void validationWhenClientScopeNotAllowed() {
-        ValidationError error = new ValidationError("scope", "invalid scope");
-        OAuth2ClientValidatePolicy policy = makeValidationPolicy().clientIdRule(makePassValidationRule(this.client))
-                .secretRule(makePassValidationRule(this.client))
-                .clientNameRule(makePassValidationRule(this.client))
-                .grantTypeRule(makePassValidationRule(this.client))
-                .scopeRule(makeErrorValidationRule(this.client, error))
-                .ownerRule(makePassValidationRule(this.client)).build();
-
-        ClientInvalidException e = assertThrows(ClientInvalidException.class, () -> client.validate(policy));
-        assertTrue(e.getErrors().contains(error));
-    }
-
-    @Test
-    @DisplayName("클라이언트 소유자가 유효 하지 않을떄 유효성 체크")
-    void validationWhenClientOwnerNotAllowed() {
-        ValidationError error = new ValidationError("owner", "invalid owner");
-        OAuth2ClientValidatePolicy policy = makeValidationPolicy().clientIdRule(makePassValidationRule(this.client))
-                .secretRule(makePassValidationRule(this.client))
-                .clientNameRule(makePassValidationRule(this.client))
-                .grantTypeRule(makePassValidationRule(this.client))
-                .scopeRule(makePassValidationRule(this.client))
-                .ownerRule(makeErrorValidationRule(this.client, error)).build();
-
-        ClientInvalidException e = assertThrows(ClientInvalidException.class, () -> client.validate(policy));
-        assertTrue(e.getErrors().contains(error));
+        assertDoesNotThrow(() -> client.validate(factory));
     }
 
     @Test

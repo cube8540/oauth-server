@@ -61,7 +61,7 @@ public class OAuth2EndpointSecurityConfiguration extends WebSecurityConfigurerAd
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder).and()
-                .authenticationProvider(new ClientCredentialsAuthenticationProvider(clientDetailsService, passwordEncoder));
+                .authenticationProvider(clientCredentialsAuthenticationProvider());
     }
 
     @Override
@@ -103,5 +103,10 @@ public class OAuth2EndpointSecurityConfiguration extends WebSecurityConfigurerAd
         enhancer.setNext(new AuthorizationImplicitResponseEnhancer(accessTokenGranter, clientDetailsService));
 
         return enhancer;
+    }
+
+    @Bean
+    public ClientCredentialsAuthenticationProvider clientCredentialsAuthenticationProvider() {
+        return new ClientCredentialsAuthenticationProvider(clientDetailsService, passwordEncoder);
     }
 }

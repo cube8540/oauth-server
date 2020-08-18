@@ -5,8 +5,9 @@ import cube8540.oauth.authentication.credentials.resource.domain.ResourceMethod;
 import cube8540.oauth.authentication.credentials.resource.domain.SecuredResource;
 import cube8540.oauth.authentication.credentials.resource.domain.SecuredResourceId;
 import cube8540.oauth.authentication.credentials.resource.domain.SecuredResourceRepository;
-import cube8540.oauth.authentication.credentials.resource.domain.SecuredResourceValidationPolicy;
-import cube8540.validator.core.ValidationRule;
+import cube8540.oauth.authentication.credentials.resource.domain.SecuredResourceValidatorFactory;
+import cube8540.validator.core.ValidationResult;
+import cube8540.validator.core.Validator;
 
 import java.net.URI;
 import java.util.Arrays;
@@ -71,24 +72,27 @@ class SecuredResourceApplicationTestHelper {
     }
 
     @SuppressWarnings("unchecked")
-    static SecuredResourceValidationPolicy makeValidationPolicy() {
-       SecuredResourceValidationPolicy policy = mock(SecuredResourceValidationPolicy.class);
-       ValidationRule<SecuredResource> idRule = mock(ValidationRule.class);
-       ValidationRule<SecuredResource> resourceRule = mock(ValidationRule.class);
-       ValidationRule<SecuredResource> methodRule = mock(ValidationRule.class);
-       ValidationRule<SecuredResource> scopeRule = mock(ValidationRule.class);
-       ValidationRule<SecuredResource> roleRule = mock(ValidationRule.class);
+    static SecuredResourceValidatorFactory makeValidatorFactory() {
+        SecuredResourceValidatorFactory factory = mock(SecuredResourceValidatorFactory.class);
+        ValidationResult result = mock(ValidationResult.class);
+        Validator<SecuredResource> validator = mock(Validator.class);
 
-       when(idRule.isValid(any())).thenReturn(true);
-       when(resourceRule.isValid(any())).thenReturn(true);
-       when(methodRule.isValid(any())).thenReturn(true);
-       when(scopeRule.isValid(any())).thenReturn(true);
-       when(roleRule.isValid(any())).thenReturn(true);
-       when(policy.resourceIdRule()).thenReturn(idRule);
-       when(policy.resourceRule()).thenReturn(resourceRule);
-       when(policy.methodRule()).thenReturn(methodRule);
-       when(policy.scopeAuthoritiesRule()).thenReturn(scopeRule);
+        when(validator.getResult()).thenReturn(result);
+        when(factory.createValidator(any())).thenReturn(validator);
 
-       return policy;
+        return factory;
+    }
+
+    @SuppressWarnings("unchecked")
+    static SecuredResourceValidatorFactory makeErrorValidatorFactory(Exception exception) {
+        SecuredResourceValidatorFactory factory = mock(SecuredResourceValidatorFactory.class);
+        ValidationResult result = mock(ValidationResult.class);
+        Validator<SecuredResource> validator = mock(Validator.class);
+
+        when(validator.getResult()).thenReturn(result);
+        doAnswer(invocation -> {throw exception;}).when(result).hasErrorThrows(any());
+        when(factory.createValidator(any())).thenReturn(validator);
+
+        return factory;
     }
 }
