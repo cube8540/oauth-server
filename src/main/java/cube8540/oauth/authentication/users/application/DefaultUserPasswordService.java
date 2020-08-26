@@ -8,9 +8,9 @@ import cube8540.oauth.authentication.users.domain.UserValidatorFactory;
 import cube8540.oauth.authentication.users.domain.Username;
 import cube8540.oauth.authentication.users.domain.exception.UserNotFoundException;
 import cube8540.oauth.authentication.users.infra.DefaultUserCredentialsKeyGenerator;
-import cube8540.oauth.authentication.users.infra.DefaultUserValidatorFactory;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,8 +27,8 @@ public class DefaultUserPasswordService implements UserPasswordService {
     @Setter
     private UserCredentialsKeyGenerator keyGenerator = new DefaultUserCredentialsKeyGenerator();
 
-    @Setter
-    private UserValidatorFactory validatorFactory = new DefaultUserValidatorFactory();
+    @Setter(onMethod_ = {@Autowired, @Qualifier("defaultUserValidatorFactory")})
+    private UserValidatorFactory validatorFactory;
 
     @Autowired
     public DefaultUserPasswordService(UserRepository repository, PasswordEncoder encoder) {

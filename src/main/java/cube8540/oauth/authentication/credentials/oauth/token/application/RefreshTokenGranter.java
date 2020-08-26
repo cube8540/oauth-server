@@ -12,17 +12,21 @@ import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2Author
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2RefreshTokenRepository;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2TokenId;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2TokenIdGenerator;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Service
 public class RefreshTokenGranter extends AbstractOAuth2TokenGranter {
 
     private final OAuth2RefreshTokenRepository refreshTokenRepository;
 
-    public RefreshTokenGranter(OAuth2AccessTokenRepository tokenRepository, OAuth2RefreshTokenRepository refreshTokenRepository,
-                               OAuth2TokenIdGenerator tokenIdGenerator) {
+    public RefreshTokenGranter(OAuth2AccessTokenRepository tokenRepository,
+                               OAuth2RefreshTokenRepository refreshTokenRepository,
+                               @Qualifier("defaultTokenIdGenerator") OAuth2TokenIdGenerator tokenIdGenerator) {
         super(tokenIdGenerator, tokenRepository);
         this.refreshTokenRepository = refreshTokenRepository;
     }

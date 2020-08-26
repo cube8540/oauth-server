@@ -40,7 +40,7 @@ public class ScopeManagementAPIEndpoint {
     private final OAuth2ScopeManagementService managementService;
     private final OAuth2AccessibleScopeDetailsService accessibleScopeDetailsService;
 
-    @Setter(onMethod_ = {@Autowired, @Qualifier("scopeExceptionTranslator")})
+    @Setter(onMethod_ = {@Autowired, @Qualifier("scopeAPIExceptionTranslator")})
     private ExceptionTranslator<ErrorMessage<Object>> translator;
 
     @Autowired

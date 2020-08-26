@@ -41,14 +41,14 @@ public class ClientManagementAPIEndpoint {
 
     private final OAuth2ClientManagementService service;
 
-    @Setter(onMethod_ = {@Autowired, @Qualifier("clientExceptionTranslator")})
+    @Setter(onMethod_ = {@Autowired, @Qualifier("clientAPIExceptionTranslator")})
     private ExceptionTranslator<ErrorMessage<Object>> translator;
 
     @Setter
     private int clientPageSize;
 
     @Autowired
-    public ClientManagementAPIEndpoint(@Qualifier("clientManagementService") OAuth2ClientManagementService service) {
+    public ClientManagementAPIEndpoint(@Qualifier("defaultOAuth2ClientManagementService") OAuth2ClientManagementService service) {
         this.service = service;
         this.clientPageSize = DEFAULT_CLIENT_PAGE_SIZE;
     }

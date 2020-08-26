@@ -9,10 +9,14 @@ import cube8540.oauth.authentication.credentials.resource.infra.rule.SecuredReso
 import cube8540.oauth.authentication.credentials.resource.infra.rule.SecuredResourceRule;
 import cube8540.validator.core.Validator;
 import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
 
+@Component
 public class DefaultSecuredResourceValidatorFactory implements SecuredResourceValidatorFactory {
 
-    @Setter
+    @Setter(onMethod_ = {@Autowired, @Qualifier("defaultScopeDetailsService")})
     private AuthorityDetailsService scopeAuthorityDetailsService;
 
     @Override

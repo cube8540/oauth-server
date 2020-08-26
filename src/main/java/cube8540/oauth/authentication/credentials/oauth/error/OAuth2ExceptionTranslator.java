@@ -7,8 +7,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
+import org.springframework.stereotype.Component;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 
+@Component
 public class OAuth2ExceptionTranslator implements ExceptionTranslator<OAuth2Error> {
     @Override
     public ResponseEntity<OAuth2Error> translate(Exception exception) {

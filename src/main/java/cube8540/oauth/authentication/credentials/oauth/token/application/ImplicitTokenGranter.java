@@ -8,9 +8,11 @@ import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2Author
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2TokenIdGenerator;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.PrincipalUsername;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
+@Service
 public class ImplicitTokenGranter extends AbstractOAuth2TokenGranter {
 
     public ImplicitTokenGranter(OAuth2TokenIdGenerator tokenIdGenerator, OAuth2AccessTokenRepository tokenRepository) {
