@@ -7,10 +7,14 @@ import cube8540.oauth.authentication.credentials.oauth.scope.infra.rule.DefaultS
 import cube8540.oauth.authentication.credentials.oauth.scope.infra.rule.DefaultScopeIdValidationRule;
 import cube8540.validator.core.Validator;
 import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
 
+@Component
 public class DefaultOAuth2ScopeValidatorFactory implements OAuth2ScopeValidatorFactory {
 
-    @Setter
+    @Setter(onMethod_ = {@Autowired, @Qualifier("defaultScopeDetailsService")})
     private AuthorityDetailsService authorityService;
 
     @Override

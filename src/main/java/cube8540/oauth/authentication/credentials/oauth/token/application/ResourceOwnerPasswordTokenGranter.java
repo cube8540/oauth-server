@@ -10,21 +10,25 @@ import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2Access
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedAccessToken;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2TokenIdGenerator;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.PrincipalUsername;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.AccountStatusException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
+@Service
 public class ResourceOwnerPasswordTokenGranter extends AbstractOAuth2TokenGranter {
 
     private final AuthenticationManager authenticationManager;
 
-    public ResourceOwnerPasswordTokenGranter(OAuth2TokenIdGenerator tokenIdGenerator, OAuth2AccessTokenRepository tokenRepository,
-                                             AuthenticationManager authenticationManager) {
+    public ResourceOwnerPasswordTokenGranter(@Qualifier("defaultTokenIdGenerator") OAuth2TokenIdGenerator tokenIdGenerator,
+                                             OAuth2AccessTokenRepository tokenRepository,
+                                             @Qualifier("oauthAuthenticationBean") AuthenticationManager authenticationManager) {
         super(tokenIdGenerator, tokenRepository);
         this.authenticationManager = authenticationManager;
     }

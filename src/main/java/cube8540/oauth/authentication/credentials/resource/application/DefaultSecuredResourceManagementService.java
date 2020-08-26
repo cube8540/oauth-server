@@ -9,7 +9,9 @@ import cube8540.oauth.authentication.credentials.resource.domain.exception.Resou
 import cube8540.oauth.authentication.credentials.resource.domain.exception.ResourceRegisterException;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.net.URI;
 import java.util.Collections;
@@ -22,7 +24,7 @@ public class DefaultSecuredResourceManagementService implements SecuredResourceM
 
     private final SecuredResourceRepository repository;
 
-    @Setter
+    @Setter(onMethod_ = {@Autowired, @Qualifier("defaultSecuredResourceValidatorFactory")})
     private SecuredResourceValidatorFactory validatorFactory;
 
     @Autowired
@@ -41,6 +43,7 @@ public class DefaultSecuredResourceManagementService implements SecuredResourceM
     }
 
     @Override
+    @Transactional
     public SecuredResourceDetails registerNewResource(SecuredResourceRegisterRequest registerRequest) {
         if (repository.countByResourceId(new SecuredResourceId(registerRequest.getResourceId())) > 0) {
             throw ResourceRegisterException.existsIdentifier(registerRequest.getResourceId() + " is already exists");
@@ -54,6 +57,7 @@ public class DefaultSecuredResourceManagementService implements SecuredResourceM
     }
 
     @Override
+    @Transactional
     public SecuredResourceDetails modifyResource(String resourceId, SecuredResourceModifyRequest modifyRequest) {
         SecuredResource resource = getResource(resourceId);
         resource.changeResourceInfo(URI.create(modifyRequest.getResource()), ResourceMethod.of(modifyRequest.getMethod()));
@@ -66,6 +70,7 @@ public class DefaultSecuredResourceManagementService implements SecuredResourceM
     }
 
     @Override
+    @Transactional
     public SecuredResourceDetails removeResource(String resourceId) {
         SecuredResource resource = getResource(resourceId);
 

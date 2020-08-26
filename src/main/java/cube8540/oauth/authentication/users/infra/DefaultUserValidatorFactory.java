@@ -6,7 +6,9 @@ import cube8540.oauth.authentication.users.infra.rule.DefaultUserEmailValidation
 import cube8540.oauth.authentication.users.infra.rule.DefaultUserPasswordValidationRule;
 import cube8540.oauth.authentication.users.infra.rule.DefaultUsernameValidationRule;
 import cube8540.validator.core.Validator;
+import org.springframework.stereotype.Component;
 
+@Component
 public class DefaultUserValidatorFactory implements UserValidatorFactory {
     @Override
     public Validator<User> createValidator(User user) {

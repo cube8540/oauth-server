@@ -55,6 +55,8 @@ spring:
     hibernate:
       ddl-auto: validate
     show-sql: true
+logging:
+  config: #your logback config file location
 front:
   endpoint:
     register-page: http://localhost:8080/front/register
@@ -85,6 +87,10 @@ OAuth2 인증 코드 방식의 인가 페이지 두 화면을 뿐임으로 새 �
 - oauth-resource-server
 
 자원 서버에서 토큰 인증때 사용할 설정 입니다.
+
+- logging
+
+logback 설정 정보 입니다.
 
 ## Build and start
 아래의 명령어로 서버를 시작할 수 있습니다.

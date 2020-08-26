@@ -11,6 +11,12 @@ import cube8540.oauth.authentication.credentials.oauth.security.endpoint.Authori
 import cube8540.oauth.authentication.credentials.oauth.security.endpoint.AuthorizationResponseEnhancer;
 import cube8540.oauth.authentication.credentials.oauth.security.provider.ClientCredentialsAuthenticationProvider;
 import cube8540.oauth.authentication.credentials.oauth.security.provider.ClientCredentialsEndpointFilter;
+import cube8540.oauth.authentication.credentials.oauth.token.application.AuthorizationCodeTokenGranter;
+import cube8540.oauth.authentication.credentials.oauth.token.application.ClientCredentialsTokenGranter;
+import cube8540.oauth.authentication.credentials.oauth.token.application.CompositeOAuth2AccessTokenGranter;
+import cube8540.oauth.authentication.credentials.oauth.token.application.ImplicitTokenGranter;
+import cube8540.oauth.authentication.credentials.oauth.token.application.RefreshTokenGranter;
+import cube8540.oauth.authentication.credentials.oauth.token.application.ResourceOwnerPasswordTokenGranter;
 import cube8540.oauth.authentication.error.DefaultAuthenticationExceptionEntryPoint;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +32,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.context.NullSecurityContextRepository;
@@ -108,5 +115,21 @@ public class OAuth2EndpointSecurityConfiguration extends WebSecurityConfigurerAd
     @Bean
     public ClientCredentialsAuthenticationProvider clientCredentialsAuthenticationProvider() {
         return new ClientCredentialsAuthenticationProvider(clientDetailsService, passwordEncoder);
+    }
+
+    @Bean
+    public OAuth2AccessTokenGranter accessTokenGranter(AuthorizationCodeTokenGranter authorizationCodeTokenGranter,
+                                                       RefreshTokenGranter refreshTokenGranter,
+                                                       ClientCredentialsTokenGranter clientCredentialsTokenGranter,
+                                                       ImplicitTokenGranter implicitTokenGranter,
+                                                       ResourceOwnerPasswordTokenGranter resourceOwnerPasswordTokenGranter) {
+        CompositeOAuth2AccessTokenGranter tokenGranter = new CompositeOAuth2AccessTokenGranter();
+
+        tokenGranter.putTokenGranterMap(AuthorizationGrantType.AUTHORIZATION_CODE, authorizationCodeTokenGranter);
+        tokenGranter.putTokenGranterMap(AuthorizationGrantType.REFRESH_TOKEN, refreshTokenGranter);
+        tokenGranter.putTokenGranterMap(AuthorizationGrantType.CLIENT_CREDENTIALS, clientCredentialsTokenGranter);
+        tokenGranter.putTokenGranterMap(AuthorizationGrantType.IMPLICIT, implicitTokenGranter);
+        tokenGranter.putTokenGranterMap(AuthorizationGrantType.PASSWORD, resourceOwnerPasswordTokenGranter);
+        return tokenGranter;
     }
 }

@@ -10,8 +10,10 @@ import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2Access
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizationCode;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedAccessToken;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2TokenIdGenerator;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationResponseType;
+import org.springframework.stereotype.Service;
 
 import java.net.URI;
 import java.time.LocalDateTime;
@@ -20,12 +22,14 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Service
 public class AuthorizationCodeTokenGranter extends AbstractOAuth2TokenGranter {
 
     private final OAuth2AuthorizationCodeConsumer authorizationCodeConsumer;
 
-    public AuthorizationCodeTokenGranter(OAuth2TokenIdGenerator tokenIdGenerator, OAuth2AccessTokenRepository tokenRepository,
-                                         OAuth2AuthorizationCodeConsumer authorizationCodeConsumer) {
+    public AuthorizationCodeTokenGranter(@Qualifier("defaultTokenIdGenerator") OAuth2TokenIdGenerator tokenIdGenerator,
+                                         OAuth2AccessTokenRepository tokenRepository,
+                                         @Qualifier("compositionAuthorizationCodeService") OAuth2AuthorizationCodeConsumer authorizationCodeConsumer) {
         super(tokenIdGenerator, tokenRepository);
         this.authorizationCodeConsumer = authorizationCodeConsumer;
     }

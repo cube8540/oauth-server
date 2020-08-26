@@ -8,7 +8,10 @@ import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeV
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.exception.ScopeNotFoundException;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.exception.ScopeRegisterException;
 import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
@@ -16,11 +19,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Service
 public class DefaultScopeDetailsService implements OAuth2ScopeManagementService, OAuth2AccessibleScopeDetailsService {
 
     private final OAuth2ScopeRepository repository;
 
-    @Setter
+    @Setter(onMethod_ = {@Autowired, @Qualifier("defaultOAuth2ScopeValidatorFactory")})
     private OAuth2ScopeValidatorFactory validatorFactory;
 
     public DefaultScopeDetailsService(OAuth2ScopeRepository repository) {

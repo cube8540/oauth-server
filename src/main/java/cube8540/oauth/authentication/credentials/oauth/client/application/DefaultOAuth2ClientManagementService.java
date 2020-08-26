@@ -12,21 +12,25 @@ import cube8540.oauth.authentication.credentials.oauth.client.domain.exception.C
 import cube8540.oauth.authentication.credentials.oauth.client.domain.exception.ClientRegisterException;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetails;
 import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.net.URI;
 import java.util.Optional;
 
+@Service
 public class DefaultOAuth2ClientManagementService extends DefaultOAuth2ClientDetailsService implements OAuth2ClientManagementService {
 
-    @Setter
+    @Setter(onMethod_ = {@Autowired, @Qualifier("defaultOAuth2ClientValidatorFactory")})
     private OAuth2ClientValidatorFactory validateFactory;
 
-    @Setter
+    @Setter(onMethod_ = @Autowired)
     private PasswordEncoder passwordEncoder;
 
     public DefaultOAuth2ClientManagementService(OAuth2ClientRepository repository) {

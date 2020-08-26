@@ -40,11 +40,11 @@ public class OAuth2TokenEndpoint {
     private final OAuth2AccessTokenGranter tokenGrantService;
     private final OAuth2TokenRevoker tokenRevokeService;
 
-    @Setter
-    private OAuth2ExceptionTranslator exceptionTranslator = new OAuth2ExceptionTranslator();
+    @Setter(onMethod_ = {@Autowired, @Qualifier("OAuth2ExceptionTranslator")})
+    private OAuth2ExceptionTranslator exceptionTranslator;
 
     @Autowired
-    public OAuth2TokenEndpoint(OAuth2AccessTokenGranter tokenGrantService, @Qualifier("clientAuthenticationBaseTokenRevoker") OAuth2TokenRevoker tokenRevokeService) {
+    public OAuth2TokenEndpoint(@Qualifier("accessTokenGranter") OAuth2AccessTokenGranter tokenGrantService, @Qualifier("clientAuthenticationBaseTokenRevoker") OAuth2TokenRevoker tokenRevokeService) {
         this.tokenGrantService = tokenGrantService;
         this.tokenRevokeService = tokenRevokeService;
     }
