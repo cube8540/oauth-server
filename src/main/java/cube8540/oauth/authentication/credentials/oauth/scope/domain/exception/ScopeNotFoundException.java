@@ -1,16 +1,13 @@
 package cube8540.oauth.authentication.credentials.oauth.scope.domain.exception;
 
+import cube8540.oauth.authentication.error.ServiceException;
 import cube8540.oauth.authentication.error.message.ErrorCodes;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 
-@Getter
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class ScopeNotFoundException extends RuntimeException {
+public class ScopeNotFoundException extends ServiceException {
 
-    private final String code;
-    private final String description;
+    public ScopeNotFoundException(String code, String description) {
+        super(code, description);
+    }
 
     public static ScopeNotFoundException instance(String description) {
         return new ScopeNotFoundException(ErrorCodes.NOT_FOUND, description);

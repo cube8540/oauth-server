@@ -21,10 +21,10 @@ public class ScopeAPIExceptionTranslator implements ExceptionTranslator<ErrorMes
             return response(HttpStatus.BAD_REQUEST, ErrorMessage.instance(e.getCode(), e.getErrors().toArray()));
         } else if (exception instanceof ScopeRegisterException) {
             ScopeRegisterException e = ((ScopeRegisterException) exception);
-            return response(HttpStatus.BAD_REQUEST, ErrorMessage.instance(e.getCode(), e.getDescription()));
+            return response(HttpStatus.BAD_REQUEST, ErrorMessage.instance(e.getCode(), e.getMessage()));
         } else if (exception instanceof ScopeNotFoundException) {
             ScopeNotFoundException e = ((ScopeNotFoundException) exception);
-            return response(HttpStatus.NOT_FOUND, ErrorMessage.instance(e.getCode(), e.getDescription()));
+            return response(HttpStatus.NOT_FOUND, ErrorMessage.instance(e.getCode(), e.getMessage()));
         } else {
             log.error("Handle exception {}, {}", exception.getClass(), exception.getMessage());
             return response(HttpStatus.INTERNAL_SERVER_ERROR, ErrorMessage.UNKNOWN_SERVER_ERROR);

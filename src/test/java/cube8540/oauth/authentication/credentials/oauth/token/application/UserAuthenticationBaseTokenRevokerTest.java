@@ -1,9 +1,9 @@
 package cube8540.oauth.authentication.credentials.oauth.token.application;
 
-import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenNotFoundException;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenRepository;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedAccessToken;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.exception.TokenAccessDeniedException;
+import cube8540.oauth.authentication.credentials.oauth.token.domain.exception.TokenNotFoundException;
 import cube8540.oauth.authentication.error.message.ErrorCodes;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,7 +32,7 @@ class UserAuthenticationBaseTokenRevokerTest {
         OAuth2AccessTokenRepository repository = makeEmptyAccessTokenRepository();
         UserAuthenticationBaseTokenRevoker revoker = new UserAuthenticationBaseTokenRevoker(repository);
 
-        assertThrows(OAuth2AccessTokenNotFoundException.class, () -> revoker.revoke(RAW_ACCESS_TOKEN_ID));
+        assertThrows(TokenNotFoundException.class, () -> revoker.revoke(RAW_ACCESS_TOKEN_ID));
     }
 
     @Test

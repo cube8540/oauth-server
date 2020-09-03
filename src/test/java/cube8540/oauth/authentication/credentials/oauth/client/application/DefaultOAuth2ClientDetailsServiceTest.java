@@ -1,7 +1,7 @@
 package cube8540.oauth.authentication.credentials.oauth.client.application;
 
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientRepository;
-import cube8540.oauth.authentication.credentials.oauth.client.domain.exception.ClientNotFoundException;
+import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ClientRegistrationException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -18,7 +18,7 @@ class DefaultOAuth2ClientDetailsServiceTest {
         OAuth2ClientRepository repository = makeEmptyClientRepository();
         DefaultOAuth2ClientDetailsService service = new DefaultOAuth2ClientDetailsService(repository);
 
-        assertThrows(ClientNotFoundException.class, () -> service.loadClientDetailsByClientId(RAW_CLIENT_ID));
+        assertThrows(OAuth2ClientRegistrationException.class, () -> service.loadClientDetailsByClientId(RAW_CLIENT_ID));
     }
 
 }
