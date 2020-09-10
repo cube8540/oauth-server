@@ -15,11 +15,10 @@ import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -42,8 +41,8 @@ public class UserManagementAPIEndpoint {
         this.service = service;
     }
 
-    @GetMapping(value = "/api/accounts/me")
-    @ApiOperation(value = "계정 정보 검색", notes = "현재 로그인된 계정의 정보를 검색 합니다.")
+    @GetMapping(value = "/api/accounts/{username}")
+    @ApiOperation(value = "계정 정보 검색", notes = "요청 받은 계정의 정보를 반환 합니다.")
     @ApiImplicitParam(value = "OAuth2 엑세스 토큰", name = "Authorization", required = true, paramType = "header", example = "Bearer xxxxxxxxxx")
     @ApiResponses(value = {
             @ApiResponse(code = 401, message = "잘못된 OAuth2 엑세스 토큰 입니다."),
@@ -51,12 +50,12 @@ public class UserManagementAPIEndpoint {
             @ApiResponse(code = 404, message = "요청 하신 유저는 등록 되지 않은 유저 입니다."),
             @ApiResponse(code = 500, message = "서버에서 알 수 없는 에러가 발생 했습니다.")
     })
-    public UserProfile getProfile(@AuthenticationPrincipal Authentication authentication) {
-        return service.loadUserProfile(authentication.getName());
+    public UserProfile getProfile(@ApiParam(name = "username", required = true, example = "username1234") @PathVariable("username") String username) {
+        return service.loadUserProfile(username);
     }
 
-    @DeleteMapping(value = "/api/accounts/me")
-    @ApiOperation(value = "계정 삭제", notes = "현재 로그인된 계정을 삭제 합니다.")
+    @DeleteMapping(value = "/api/accounts/{username}")
+    @ApiOperation(value = "계정 삭제", notes = "요청한 계정을 삭제 합니다.")
     @ApiImplicitParam(value = "OAuth2 엑세스 토큰", name = "Authorization", required = true, paramType = "header", example = "Bearer xxxxxxxxxx")
     @ApiResponses(value = {
             @ApiResponse(code = 401, message = "잘못된 OAuth2 엑세스 토큰 입니다."),
@@ -64,8 +63,8 @@ public class UserManagementAPIEndpoint {
             @ApiResponse(code = 404, message = "요청 하신 유저는 등록 되지 않은 유저 입니다."),
             @ApiResponse(code = 500, message = "서버에서 알 수 없는 에러가 발생 했습니다.")
     })
-    public UserProfile removeProfile(@AuthenticationPrincipal Authentication authentication) {
-        return service.removeUser(authentication.getName());
+    public UserProfile removeProfile(@ApiParam(name = "username", required = true, example = "username1234") @PathVariable("username") String username) {
+        return service.removeUser(username);
     }
 
     @PostMapping(value = "/api/accounts")

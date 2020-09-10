@@ -1,19 +1,14 @@
 package cube8540.oauth.authentication.users.domain.exception;
 
+import cube8540.oauth.authentication.error.ServiceInvalidException;
 import cube8540.validator.core.ValidationError;
-import cube8540.validator.core.exception.ValidateException;
-import lombok.Getter;
 
 import java.util.List;
 
-@Getter
-public class UserInvalidException extends ValidateException {
-
-    private final String code;
+public class UserInvalidException extends ServiceInvalidException {
 
     private UserInvalidException(String code, List<ValidationError> errors) {
-        super(errors);
-        this.code = code;
+        super(code, errors);
     }
 
     public static UserInvalidException instance(List<ValidationError> errors) {

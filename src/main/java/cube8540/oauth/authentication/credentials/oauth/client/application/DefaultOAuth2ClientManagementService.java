@@ -25,7 +25,9 @@ import java.net.URI;
 import java.util.Optional;
 
 @Service
-public class DefaultOAuth2ClientManagementService extends DefaultOAuth2ClientDetailsService implements OAuth2ClientManagementService {
+public class DefaultOAuth2ClientManagementService implements OAuth2ClientManagementService {
+
+    private final OAuth2ClientRepository repository;
 
     @Setter(onMethod_ = {@Autowired, @Qualifier("defaultOAuth2ClientValidatorFactory")})
     private OAuth2ClientValidatorFactory validateFactory;
@@ -34,24 +36,24 @@ public class DefaultOAuth2ClientManagementService extends DefaultOAuth2ClientDet
     private PasswordEncoder passwordEncoder;
 
     public DefaultOAuth2ClientManagementService(OAuth2ClientRepository repository) {
-        super(repository);
+        this.repository = repository;
     }
 
     @Override
     public Long countClient(String clientId) {
-        return getRepository().countByClientId(new OAuth2ClientId(clientId));
+        return repository.countByClientId(new OAuth2ClientId(clientId));
     }
 
     @Override
     public Page<OAuth2ClientDetails> loadClientDetails(Pageable pageable) {
         ClientOwner owner = new ClientOwner(SecurityContextHolder.getContext().getAuthentication().getName());
-        return getRepository().findByOwner(owner, pageable).map(DefaultOAuth2ClientDetails::of);
+        return repository.findByOwner(owner, pageable).map(DefaultOAuth2ClientDetails::of);
     }
 
     @Override
     @Transactional
     public OAuth2ClientDetails registerNewClient(OAuth2ClientRegisterRequest registerRequest) {
-        if (getRepository().countByClientId(new OAuth2ClientId(registerRequest.getClientId())) > 0) {
+        if (repository.countByClientId(new OAuth2ClientId(registerRequest.getClientId())) > 0) {
             throw ClientRegisterException.existsIdentifier(registerRequest.getClientId() + " is exists");
         }
         OAuth2Client client = new OAuth2Client(registerRequest.getClientId(), registerRequest.getSecret());
@@ -67,7 +69,7 @@ public class DefaultOAuth2ClientManagementService extends DefaultOAuth2ClientDet
 
         client.validate(validateFactory);
         client.encrypted(passwordEncoder);
-        return DefaultOAuth2ClientDetails.of(getRepository().save(client));
+        return DefaultOAuth2ClientDetails.of(repository.save(client));
     }
 
     @Override
@@ -91,7 +93,7 @@ public class DefaultOAuth2ClientManagementService extends DefaultOAuth2ClientDet
                 .ifPresent(scope -> scope.forEach(s -> client.addScope(new AuthorityCode(s))));
 
         client.validate(validateFactory);
-        return DefaultOAuth2ClientDetails.of(getRepository().save(client));
+        return DefaultOAuth2ClientDetails.of(repository.save(client));
     }
 
     @Override
@@ -106,7 +108,7 @@ public class DefaultOAuth2ClientManagementService extends DefaultOAuth2ClientDet
         client.validate(validateFactory);
         client.encrypted(passwordEncoder);
 
-        return DefaultOAuth2ClientDetails.of(getRepository().save(client));
+        return DefaultOAuth2ClientDetails.of(repository.save(client));
     }
 
     @Override
@@ -117,12 +119,12 @@ public class DefaultOAuth2ClientManagementService extends DefaultOAuth2ClientDet
         ClientOwner authenticated = new ClientOwner(SecurityContextHolder.getContext().getAuthentication().getName());
         assertClientOwner(client, authenticated);
 
-        getRepository().delete(client);
+        repository.delete(client);
         return DefaultOAuth2ClientDetails.of(client);
     }
 
     private OAuth2Client getClient(String clientId) {
-        return getRepository().findByClientId(new OAuth2ClientId(clientId))
+        return repository.findByClientId(new OAuth2ClientId(clientId))
                 .orElseThrow(() -> ClientNotFoundException.instance(clientId + " is not found"));
     }
 

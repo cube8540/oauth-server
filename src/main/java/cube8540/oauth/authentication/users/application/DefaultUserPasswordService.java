@@ -15,8 +15,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.security.Principal;
-
 @Service
 public class DefaultUserPasswordService implements UserPasswordService {
 
@@ -27,7 +25,7 @@ public class DefaultUserPasswordService implements UserPasswordService {
     @Setter
     private UserCredentialsKeyGenerator keyGenerator = new DefaultUserCredentialsKeyGenerator();
 
-    @Setter(onMethod_ = {@Autowired, @Qualifier("defaultUserValidatorFactory")})
+    @Setter(onMethod_ = {@Autowired, @Qualifier("userPasswordChangeValidatorFactory")})
     private UserValidatorFactory validatorFactory;
 
     @Autowired
@@ -38,8 +36,8 @@ public class DefaultUserPasswordService implements UserPasswordService {
 
     @Override
     @Transactional
-    public UserProfile changePassword(Principal principal, ChangePasswordRequest changeRequest) {
-        User user = getUser(principal.getName());
+    public UserProfile changePassword(String username, ChangePasswordRequest changeRequest) {
+        User user = getUser(username);
 
         user.changePassword(changeRequest.getExistingPassword(), changeRequest.getNewPassword(), encoder);
         user.validation(validatorFactory);

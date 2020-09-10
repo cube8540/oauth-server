@@ -1,15 +1,12 @@
 package cube8540.oauth.authentication.users.domain.exception;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import cube8540.oauth.authentication.error.ServiceException;
 
-@Getter
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class UserRegisterException extends RuntimeException {
+public class UserRegisterException extends ServiceException {
 
-    private final String code;
-    private final String description;
+    public UserRegisterException(String code, String description) {
+        super(code, description);
+    }
 
     public static UserRegisterException existsIdentifier(String description) {
         return new UserRegisterException(UserErrorCodes.EXISTS_IDENTIFIER, description);

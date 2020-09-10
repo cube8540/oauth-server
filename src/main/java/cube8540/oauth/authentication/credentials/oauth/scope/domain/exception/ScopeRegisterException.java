@@ -1,16 +1,13 @@
 package cube8540.oauth.authentication.credentials.oauth.scope.domain.exception;
 
+import cube8540.oauth.authentication.error.ServiceException;
 import cube8540.oauth.authentication.error.message.ErrorCodes;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 
-@Getter
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class ScopeRegisterException extends RuntimeException {
+public class ScopeRegisterException extends ServiceException {
 
-    private final String code;
-    private final String description;
+    public ScopeRegisterException(String code, String description) {
+        super(code, description);
+    }
 
     public static ScopeRegisterException existsIdentifier(String description) {
         return new ScopeRegisterException(ErrorCodes.EXISTS_IDENTIFIER, description);

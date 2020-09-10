@@ -1,10 +1,10 @@
 package cube8540.oauth.authentication.credentials.oauth.client.application;
 
-import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetails;
-import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetailsService;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientRepository;
-import cube8540.oauth.authentication.credentials.oauth.client.domain.exception.ClientNotFoundException;
+import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ClientRegistrationException;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetails;
+import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetailsService;
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +25,6 @@ public class DefaultOAuth2ClientDetailsService implements OAuth2ClientDetailsSer
     public OAuth2ClientDetails loadClientDetailsByClientId(String clientId) {
         return repository.findByClientId(new OAuth2ClientId(clientId))
                 .map(DefaultOAuth2ClientDetails::of)
-                .orElseThrow(() -> ClientNotFoundException.instance(clientId + " is not found"));
+                .orElseThrow(() -> new OAuth2ClientRegistrationException(clientId + " is not found"));
     }
 }

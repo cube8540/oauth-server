@@ -1,20 +1,16 @@
 package cube8540.oauth.authentication.credentials.oauth.scope.domain.exception;
 
+import cube8540.oauth.authentication.error.ServiceInvalidException;
 import cube8540.oauth.authentication.error.message.ErrorCodes;
 import cube8540.validator.core.ValidationError;
-import cube8540.validator.core.exception.ValidateException;
-import lombok.Getter;
 
+import java.util.Collection;
 import java.util.List;
 
-@Getter
-public class ScopeInvalidException extends ValidateException {
+public class ScopeInvalidException extends ServiceInvalidException {
 
-    private final String code;
-
-    public ScopeInvalidException(String code, List<ValidationError> errors) {
-        super(errors);
-        this.code = code;
+    public ScopeInvalidException(String code, Collection<ValidationError> errors) {
+        super(code, errors);
     }
 
     public static ScopeInvalidException instance(List<ValidationError> errors) {
