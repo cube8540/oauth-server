@@ -16,12 +16,11 @@ import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collections;
@@ -39,20 +38,20 @@ public class AccessTokenAPIEndpoint {
     private ExceptionTranslator<ErrorMessage<Object>> translator;
 
     @Autowired
-    public AccessTokenAPIEndpoint(AccessTokenReadService service, @Qualifier("userAuthenticationBaseTokenRevoker") OAuth2TokenRevoker revoker) {
+    public AccessTokenAPIEndpoint(AccessTokenReadService service, @Qualifier("defaultTokenRevoker") OAuth2TokenRevoker revoker) {
         this.service = service;
         this.revoker = revoker;
     }
 
     @GetMapping(value = "/api/tokens")
-    @ApiOperation(value = "OAuth2 토큰 검색", notes = "현재 로그인된 계정의 OAuth 토큰을 검색 합니다.")
+    @ApiOperation(value = "OAuth2 토큰 검색", notes = "요청 받은 유저의 엑세스 토큰을 검색 합니다.")
     @ApiImplicitParam(value = "OAuth2 엑세스 토큰", name = "Authorization", required = true, paramType = "header", example = "Bearer xxxxxxxxxx")
     @ApiResponses(value = {
             @ApiResponse(code = 401, message = "잘못된 OAuth2 엑세스 토큰 입니다."),
             @ApiResponse(code = 403, message = "로그인이 되어 있지 않습니다.")
     })
-    public Map<String, List<AccessTokenDetailsWithClient>> getUserAccessToken(@AuthenticationPrincipal Authentication authentication) {
-        List<AccessTokenDetailsWithClient> tokens = service.getAuthorizeAccessTokens(authentication);
+    public Map<String, List<AccessTokenDetailsWithClient>> getUserAccessToken(@ApiParam(name = "username", required = true, example = "username1234") @RequestParam(name = "username") String username) {
+        List<AccessTokenDetailsWithClient> tokens = service.getAuthorizeAccessTokens(username);
 
         return Collections.singletonMap("tokens", tokens);
     }
