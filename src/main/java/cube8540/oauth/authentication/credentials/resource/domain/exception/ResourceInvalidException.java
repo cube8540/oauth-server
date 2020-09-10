@@ -1,20 +1,16 @@
 package cube8540.oauth.authentication.credentials.resource.domain.exception;
 
+import cube8540.oauth.authentication.error.ServiceInvalidException;
 import cube8540.oauth.authentication.error.message.ErrorCodes;
 import cube8540.validator.core.ValidationError;
-import cube8540.validator.core.exception.ValidateException;
-import lombok.Getter;
 
+import java.util.Collection;
 import java.util.List;
 
-@Getter
-public class ResourceInvalidException extends ValidateException {
+public class ResourceInvalidException extends ServiceInvalidException {
 
-    private final String code;
-
-    private ResourceInvalidException(String code, List<ValidationError> errors) {
-        super(errors);
-        this.code = code;
+    public ResourceInvalidException(String code, Collection<ValidationError> errors) {
+        super(code, errors);
     }
 
     public static ResourceInvalidException instance(List<ValidationError> errors) {

@@ -1,15 +1,12 @@
 package cube8540.oauth.authentication.credentials.oauth.client.domain.exception;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import cube8540.oauth.authentication.error.ServiceException;
 
-@Getter
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class ClientAuthorizationException extends RuntimeException {
+public class ClientAuthorizationException extends ServiceException {
 
-    private final String code;
-    private final String description;
+    public ClientAuthorizationException(String code, String description) {
+        super(code, description);
+    }
 
     public static ClientAuthorizationException invalidOwner(String description) {
         return new ClientAuthorizationException(ClientErrorCodes.INVALID_OWNER, description);

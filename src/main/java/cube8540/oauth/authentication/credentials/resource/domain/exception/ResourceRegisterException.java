@@ -1,16 +1,13 @@
 package cube8540.oauth.authentication.credentials.resource.domain.exception;
 
+import cube8540.oauth.authentication.error.ServiceException;
 import cube8540.oauth.authentication.error.message.ErrorCodes;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 
-@Getter
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class ResourceRegisterException extends RuntimeException {
+public class ResourceRegisterException extends ServiceException {
 
-    private final String code;
-    private final String description;
+    public ResourceRegisterException(String code, String description) {
+        super(code, description);
+    }
 
     public static ResourceRegisterException existsIdentifier(String description) {
         return new ResourceRegisterException(ErrorCodes.EXISTS_IDENTIFIER, description);

@@ -1,16 +1,13 @@
 package cube8540.oauth.authentication.credentials.oauth.token.domain.exception;
 
+import cube8540.oauth.authentication.error.ServiceException;
 import cube8540.oauth.authentication.error.message.ErrorCodes;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
-@Getter
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public class TokenAccessDeniedException extends RuntimeException {
+public class TokenAccessDeniedException extends ServiceException {
 
-    private final String code;
-    private final String description;
+    public TokenAccessDeniedException(String code, String description) {
+        super(code, description);
+    }
 
     public static TokenAccessDeniedException denied(String description) {
         return new TokenAccessDeniedException(ErrorCodes.ACCESS_DENIED, description);

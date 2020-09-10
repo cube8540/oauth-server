@@ -1,19 +1,12 @@
 package cube8540.oauth.authentication.credentials.oauth.client.domain.exception;
 
-import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ClientRegistrationException;
+import cube8540.oauth.authentication.error.ServiceException;
 import cube8540.oauth.authentication.error.message.ErrorCodes;
-import lombok.Getter;
 
-@Getter
-public class ClientNotFoundException extends OAuth2ClientRegistrationException {
+public class ClientNotFoundException extends ServiceException {
 
-    private final String code;
-    private final String description;
-
-    private ClientNotFoundException(String code, String description) {
-        super(description);
-        this.code = code;
-        this.description = description;
+    public ClientNotFoundException(String code, String description) {
+        super(code, description);
     }
 
     public static ClientNotFoundException instance(String description) {

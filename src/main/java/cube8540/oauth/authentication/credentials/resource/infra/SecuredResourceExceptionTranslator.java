@@ -17,10 +17,10 @@ public class SecuredResourceExceptionTranslator implements ExceptionTranslator<E
     public ResponseEntity<ErrorMessage<Object>> translate(Exception exception) {
         if (exception instanceof ResourceNotFoundException) {
             ResourceNotFoundException e = ((ResourceNotFoundException) exception);
-            return new ResponseEntity<>(ErrorMessage.instance(e.getCode(), e.getDescription()), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(ErrorMessage.instance(e.getCode(), e.getMessage()), HttpStatus.NOT_FOUND);
         } else if (exception instanceof ResourceRegisterException) {
             ResourceRegisterException e = ((ResourceRegisterException) exception);
-            return new ResponseEntity<>(ErrorMessage.instance(e.getCode(), e.getDescription()), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(ErrorMessage.instance(e.getCode(), e.getMessage()), HttpStatus.BAD_REQUEST);
         } else if (exception instanceof ResourceInvalidException) {
             ResourceInvalidException e = ((ResourceInvalidException) exception);
             return new ResponseEntity<>(ErrorMessage.instance(e.getCode(), e.getErrors().toArray()), HttpStatus.BAD_REQUEST);

@@ -19,16 +19,16 @@ public class UserExceptionTranslator implements ExceptionTranslator<ErrorMessage
     public ResponseEntity<ErrorMessage<Object>> translate(Exception exception) {
         if (exception instanceof UserNotFoundException) {
             UserNotFoundException e = ((UserNotFoundException) exception);
-            return response(HttpStatus.NOT_FOUND, ErrorMessage.instance(e.getCode(), e.getDescription()));
+            return response(HttpStatus.NOT_FOUND, ErrorMessage.instance(e.getCode(), e.getMessage()));
         } else if (exception instanceof UserRegisterException) {
             UserRegisterException e = ((UserRegisterException) exception);
-            return response(HttpStatus.BAD_REQUEST, ErrorMessage.instance(e.getCode(), e.getDescription()));
+            return response(HttpStatus.BAD_REQUEST, ErrorMessage.instance(e.getCode(), e.getMessage()));
         } else if (exception instanceof UserInvalidException) {
             UserInvalidException e = ((UserInvalidException) exception);
             return response(HttpStatus.BAD_REQUEST, ErrorMessage.instance(e.getCode(), e.getErrors().toArray()));
         } else if (exception instanceof UserAuthorizationException) {
             UserAuthorizationException e = ((UserAuthorizationException) exception);
-            return response(HttpStatus.UNAUTHORIZED, ErrorMessage.instance(e.getCode(), e.getDescription()));
+            return response(HttpStatus.UNAUTHORIZED, ErrorMessage.instance(e.getCode(), e.getMessage()));
         } else {
             log.error("Handle exception {} {}", exception.getClass(), exception.getMessage());
             return response(HttpStatus.INTERNAL_SERVER_ERROR, ErrorMessage.UNKNOWN_SERVER_ERROR);

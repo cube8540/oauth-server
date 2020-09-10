@@ -1,16 +1,13 @@
 package cube8540.oauth.authentication.credentials.resource.domain.exception;
 
+import cube8540.oauth.authentication.error.ServiceException;
 import cube8540.oauth.authentication.error.message.ErrorCodes;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 
-@Getter
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class ResourceNotFoundException extends RuntimeException {
+public class ResourceNotFoundException extends ServiceException {
 
-    private final String code;
-    private final String description;
+    public ResourceNotFoundException(String code, String description) {
+        super(code, description);
+    }
 
     public static ResourceNotFoundException instance(String description) {
         return new ResourceNotFoundException(ErrorCodes.NOT_FOUND, description);

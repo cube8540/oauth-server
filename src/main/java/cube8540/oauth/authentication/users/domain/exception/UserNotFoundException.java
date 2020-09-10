@@ -1,15 +1,12 @@
 package cube8540.oauth.authentication.users.domain.exception;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import cube8540.oauth.authentication.error.ServiceException;
 
-@Getter
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class UserNotFoundException extends RuntimeException {
+public class UserNotFoundException extends ServiceException {
 
-    private final String code;
-    private final String description;
+    public UserNotFoundException(String code, String description) {
+        super(code, description);
+    }
 
     public static UserNotFoundException instance(String description) {
         return new UserNotFoundException(UserErrorCodes.NOT_FOUND, description);
