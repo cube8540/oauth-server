@@ -27,7 +27,7 @@ public class DefaultUserPasswordService implements UserPasswordService {
     @Setter
     private UserCredentialsKeyGenerator keyGenerator = new DefaultUserCredentialsKeyGenerator();
 
-    @Setter(onMethod_ = {@Autowired, @Qualifier("defaultUserValidatorFactory")})
+    @Setter(onMethod_ = {@Autowired, @Qualifier("userPasswordChangeValidatorFactory")})
     private UserValidatorFactory validatorFactory;
 
     @Autowired
