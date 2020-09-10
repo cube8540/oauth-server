@@ -10,8 +10,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.security.Principal;
-
 import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.ENCODED_PASSWORD;
 import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.NEW_PASSWORD;
 import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.PASSWORD;
@@ -26,7 +24,6 @@ import static cube8540.oauth.authentication.users.application.UserApplicationTes
 import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.makeMatchedPasswordCredentialsKeyUser;
 import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.makeNotMatchedPasswordCredentialsKeyUser;
 import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.makePasswordEncoder;
-import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.makePrincipal;
 import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.makeResetPasswordRequest;
 import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.makeUserRepository;
 import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.makeValidatorFactory;
@@ -42,21 +39,19 @@ class DefaultUserPasswordServiceTest {
     @Test
     @DisplayName("저장소에 저장되지 않은 유저의 페스워드 수정")
     void changePasswordToNotRegisteredUserInRepository() {
-        Principal principal = makePrincipal(RAW_USERNAME);
         ChangePasswordRequest request = makeChangePasswordRequest();
         UserRepository repository = makeEmptyUserRepository();
         PasswordEncoder encoder = makePasswordEncoder(PASSWORD, ENCODED_PASSWORD);
 
         DefaultUserPasswordService service = new DefaultUserPasswordService(repository, encoder);
 
-        assertThrows(UserNotFoundException.class, () -> service.changePassword(principal, request));
+        assertThrows(UserNotFoundException.class, () -> service.changePassword(RAW_USERNAME, request));
     }
 
     @Test
     @DisplayName("패스워드 수정")
     void changePassword() {
         User user = makeDefaultUser();
-        Principal principal = makePrincipal(RAW_USERNAME);
         ChangePasswordRequest request = makeChangePasswordRequest();
         UserRepository repository = makeUserRepository(USERNAME, user);
         PasswordEncoder encoder = makePasswordEncoder(PASSWORD, ENCODED_PASSWORD);
@@ -66,7 +61,7 @@ class DefaultUserPasswordServiceTest {
         InOrder inOrder = inOrder(user, repository);
         service.setValidatorFactory(factory);
 
-        service.changePassword(principal, request);
+        service.changePassword(RAW_USERNAME, request);
         inOrder.verify(user, times(1)).changePassword(PASSWORD, NEW_PASSWORD, encoder);
         inOrder.verify(user, times(1)).validation(factory);
         inOrder.verify(user, times(1)).encrypted(encoder);
