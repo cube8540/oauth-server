@@ -17,11 +17,16 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.Duration;
+
+import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.ACCESS_TOKEN_VALIDITY_SECONDS;
 import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.CLIENT_ID;
 import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.CLIENT_NAME;
 import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.ENCODING_SECRET;
 import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.GRANT_TYPES;
+import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.MODIFY_ACCESS_TOKEN_VALIDITY_SECONDS;
 import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.MODIFY_CLIENT_NAME;
+import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.MODIFY_REFRESH_TOKEN_VALIDITY_SECONDS;
 import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.MODIFY_SECRET;
 import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.NEW_GRANT_TYPES;
 import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.NEW_REDIRECT_URIS;
@@ -38,6 +43,7 @@ import static cube8540.oauth.authentication.credentials.oauth.client.application
 import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.RAW_REMOVE_SCOPES;
 import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.RAW_SCOPES;
 import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.REDIRECT_URIS;
+import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.REFRESH_TOKEN_VALIDITY_SECONDS;
 import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.REMOVE_GRANT_TYPES;
 import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.REMOVE_REDIRECT_URIS;
 import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.REMOVE_SCOPES;
@@ -66,7 +72,7 @@ class DefaultOAuth2ClientManagementServiceTest {
         OAuth2Client client = makeDefaultClient();
         OAuth2ClientRepository repository = makeClientRepository(CLIENT_ID, client);
         OAuth2ClientRegisterRequest request = new OAuth2ClientRegisterRequest(RAW_CLIENT_ID, SECRET, CLIENT_NAME,
-                RAW_REMOVE_REDIRECT_URIS, RAW_SCOPES, RAW_GRANT_TYPES);
+                RAW_REMOVE_REDIRECT_URIS, RAW_SCOPES, RAW_GRANT_TYPES, ACCESS_TOKEN_VALIDITY_SECONDS, REFRESH_TOKEN_VALIDITY_SECONDS);
         DefaultOAuth2ClientManagementService service = new DefaultOAuth2ClientManagementService(repository);
 
         ClientRegisterException e = assertThrows(ClientRegisterException.class, () -> service.registerNewClient(request));
@@ -77,7 +83,7 @@ class DefaultOAuth2ClientManagementServiceTest {
     @DisplayName("허용 되지 않는 클라이언트 등록")
     void registerNewClientWithInvalidData() {
         OAuth2ClientRegisterRequest request = new OAuth2ClientRegisterRequest(RAW_CLIENT_ID, SECRET, CLIENT_NAME,
-                RAW_REDIRECT_URIS, RAW_SCOPES, RAW_GRANT_TYPES);
+                RAW_REDIRECT_URIS, RAW_SCOPES, RAW_GRANT_TYPES, ACCESS_TOKEN_VALIDITY_SECONDS, REFRESH_TOKEN_VALIDITY_SECONDS);
         PasswordEncoder encoder = makeEncoder(SECRET, ENCODING_SECRET);
         OAuth2ClientRepository repository = makeEmptyClientRepository();
         OAuth2ClientValidatorFactory factory = makeErrorValidatorFactory(new TestOauth2ClientException());
@@ -95,7 +101,7 @@ class DefaultOAuth2ClientManagementServiceTest {
     void registerNewClient() {
         ArgumentCaptor<OAuth2Client> clientCaptor = ArgumentCaptor.forClass(OAuth2Client.class);
         OAuth2ClientRegisterRequest request = new OAuth2ClientRegisterRequest(RAW_CLIENT_ID, SECRET, CLIENT_NAME,
-                RAW_REDIRECT_URIS, RAW_SCOPES, RAW_GRANT_TYPES);
+                RAW_REDIRECT_URIS, RAW_SCOPES, RAW_GRANT_TYPES, ACCESS_TOKEN_VALIDITY_SECONDS, REFRESH_TOKEN_VALIDITY_SECONDS);
         PasswordEncoder encoder = makeEncoder(SECRET, ENCODING_SECRET);
         OAuth2ClientRepository repository = makeEmptyClientRepository();
         OAuth2ClientValidatorFactory factory = makeValidatorFactory();
@@ -113,13 +119,16 @@ class DefaultOAuth2ClientManagementServiceTest {
         assertEquals(REDIRECT_URIS, clientCaptor.getValue().getRedirectUris());
         assertEquals(SCOPES, clientCaptor.getValue().getScopes());
         assertEquals(GRANT_TYPES, clientCaptor.getValue().getGrantTypes());
+        assertEquals(Duration.ofSeconds(ACCESS_TOKEN_VALIDITY_SECONDS), clientCaptor.getValue().getAccessTokenValidity());
+        assertEquals(Duration.ofSeconds(REFRESH_TOKEN_VALIDITY_SECONDS), clientCaptor.getValue().getRefreshTokenValidity());
     }
 
     @Test
     @DisplayName("저장소에 등록 되어 있지 않은 클라이언트 수정")
     void modifyNotRegisteredClientInRepository() {
         OAuth2ClientModifyRequest request = new OAuth2ClientModifyRequest(MODIFY_CLIENT_NAME, RAW_NEW_REDIRECT_URIS,
-                RAW_REMOVE_REDIRECT_URIS, RAW_NEW_GRANT_TYPES, RAW_REMOVE_GRANT_TYPES, RAW_NEW_SCOPES, RAW_REMOVE_SCOPES);
+                RAW_REMOVE_REDIRECT_URIS, RAW_NEW_GRANT_TYPES, RAW_REMOVE_GRANT_TYPES, RAW_NEW_SCOPES, RAW_REMOVE_SCOPES,
+                MODIFY_ACCESS_TOKEN_VALIDITY_SECONDS, MODIFY_REFRESH_TOKEN_VALIDITY_SECONDS);
         OAuth2ClientRepository repository = makeEmptyClientRepository();
         DefaultOAuth2ClientManagementService service = new DefaultOAuth2ClientManagementService(repository);
 
@@ -131,7 +140,8 @@ class DefaultOAuth2ClientManagementServiceTest {
     void whenNotOwnerOfClientToModify() {
         OAuth2Client client = makeDefaultClient();
         OAuth2ClientModifyRequest request = new OAuth2ClientModifyRequest(MODIFY_CLIENT_NAME, RAW_NEW_REDIRECT_URIS,
-                RAW_REMOVE_REDIRECT_URIS, RAW_NEW_GRANT_TYPES, RAW_REMOVE_GRANT_TYPES, RAW_NEW_SCOPES, RAW_REMOVE_SCOPES);
+                RAW_REMOVE_REDIRECT_URIS, RAW_NEW_GRANT_TYPES, RAW_REMOVE_GRANT_TYPES, RAW_NEW_SCOPES, RAW_REMOVE_SCOPES,
+                MODIFY_ACCESS_TOKEN_VALIDITY_SECONDS, MODIFY_REFRESH_TOKEN_VALIDITY_SECONDS);
         OAuth2ClientRepository repository = makeClientRepository(CLIENT_ID, client);
         Authentication authentication = makeDifferentAuthentication();
         DefaultOAuth2ClientManagementService service = new DefaultOAuth2ClientManagementService(repository);
@@ -147,7 +157,8 @@ class DefaultOAuth2ClientManagementServiceTest {
     void modifyClient() {
         OAuth2Client client = makeDefaultClient();
         OAuth2ClientModifyRequest request = new OAuth2ClientModifyRequest(MODIFY_CLIENT_NAME, RAW_NEW_REDIRECT_URIS,
-                RAW_REMOVE_REDIRECT_URIS, RAW_NEW_GRANT_TYPES, RAW_REMOVE_GRANT_TYPES, RAW_NEW_SCOPES, RAW_REMOVE_SCOPES);
+                RAW_REMOVE_REDIRECT_URIS, RAW_NEW_GRANT_TYPES, RAW_REMOVE_GRANT_TYPES, RAW_NEW_SCOPES, RAW_REMOVE_SCOPES,
+                MODIFY_ACCESS_TOKEN_VALIDITY_SECONDS, MODIFY_REFRESH_TOKEN_VALIDITY_SECONDS);
         OAuth2ClientRepository repository = makeClientRepository(CLIENT_ID, client);
         Authentication authentication = makeAuthentication();
         OAuth2ClientValidatorFactory factory = makeValidatorFactory();
@@ -165,6 +176,8 @@ class DefaultOAuth2ClientManagementServiceTest {
         NEW_GRANT_TYPES.forEach(grant -> inOrder.verify(client, times(1)).addGrantType(grant));
         REMOVE_SCOPES.forEach(scope -> inOrder.verify(client, times(1)).removeScope(scope));
         NEW_SCOPES.forEach(scope -> inOrder.verify(client, times(1)).addScope(scope));
+        inOrder.verify(client, times(1)).setAccessTokenValidity(MODIFY_ACCESS_TOKEN_VALIDITY_SECONDS);
+        inOrder.verify(client, times(1)).setRefreshTokenValidity(MODIFY_REFRESH_TOKEN_VALIDITY_SECONDS);
         inOrder.verify(client, times(1)).validate(factory);
         inOrder.verify(repository, times(1)).save(client);
     }

@@ -133,6 +133,14 @@ public class OAuth2Client extends AbstractAggregateRoot<OAuth2Client> {
                 .ifPresent(s -> s.remove(scope));
     }
 
+    public void setAccessTokenValidity(Integer validitySeconds) {
+        this.accessTokenValidity = Duration.ofSeconds(validitySeconds);
+    }
+
+    public void setRefreshTokenValidity(Integer validitySeconds) {
+        this.refreshTokenValidity = Duration.ofSeconds(validitySeconds);
+    }
+
     public void validate(OAuth2ClientValidatorFactory factory) {
         factory.createValidator(this).getResult().hasErrorThrows(ClientInvalidException::instance);
     }
