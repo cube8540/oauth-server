@@ -66,6 +66,10 @@ public class DefaultOAuth2ClientManagementService implements OAuth2ClientManagem
                 .ifPresent(scope -> scope.forEach(s -> client.addScope(new AuthorityCode(s))));
         Optional.ofNullable(registerRequest.getRedirectUris())
                 .ifPresent(redirectUri -> redirectUri.forEach(uri -> client.addRedirectUri(URI.create(uri))));
+        Optional.ofNullable(registerRequest.getAccessTokenValiditySeconds())
+                .ifPresent(client::setAccessTokenValidity);
+        Optional.ofNullable(registerRequest.getRefreshTokenValiditySeconds())
+                .ifPresent(client::setRefreshTokenValidity);
 
         client.validate(validateFactory);
         client.encrypted(passwordEncoder);
@@ -91,6 +95,10 @@ public class DefaultOAuth2ClientManagementService implements OAuth2ClientManagem
                 .ifPresent(scope -> scope.forEach(s -> client.removeScope(new AuthorityCode(s))));
         Optional.ofNullable(modifyRequest.getNewScopes())
                 .ifPresent(scope -> scope.forEach(s -> client.addScope(new AuthorityCode(s))));
+        Optional.ofNullable(modifyRequest.getAccessTokenValiditySeconds())
+                .ifPresent(client::setAccessTokenValidity);
+        Optional.ofNullable(modifyRequest.getRefreshTokenValiditySeconds())
+                .ifPresent(client::setRefreshTokenValidity);
 
         client.validate(validateFactory);
         return DefaultOAuth2ClientDetails.of(repository.save(client));

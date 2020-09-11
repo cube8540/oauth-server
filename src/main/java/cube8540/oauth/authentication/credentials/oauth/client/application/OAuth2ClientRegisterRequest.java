@@ -31,4 +31,10 @@ public class OAuth2ClientRegisterRequest {
     @ApiModelProperty(value = "클라이언트가 제공하는 인증 방식", required = true, example = "[\"authorization_code\", \"refresh_token\", \"client_credentials\"]")
     List<String> grantTypes;
 
+    @ApiModelProperty(value = "엑세스 토큰 유효 기간 (초)", example = "60")
+    Integer accessTokenValiditySeconds;
+
+    @ApiModelProperty(value = "리플레시 토큰 유효 기간 (초)", example = "600")
+    Integer refreshTokenValiditySeconds;
+
 }

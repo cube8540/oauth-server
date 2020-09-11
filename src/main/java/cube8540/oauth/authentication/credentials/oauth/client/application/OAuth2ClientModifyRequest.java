@@ -36,4 +36,10 @@ public class OAuth2ClientModifyRequest {
     @ApiModelProperty(value = "삭제할 스코프 빈 배열 일시 스코프를 삭제 하지 않습니다.", required = true, example = "[\"TEST-1\", \"TEST-2\"]")
     List<String> removeScopes;
 
+    @ApiModelProperty(value = "엑세스 토큰 유효 기간 (초)", example = "60")
+    Integer accessTokenValiditySeconds;
+
+    @ApiModelProperty(value = "리플레시 토큰 유효 기간 (초)", example = "600")
+    Integer refreshTokenValiditySeconds;
+
 }
