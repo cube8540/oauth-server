@@ -53,6 +53,9 @@ class OAuth2TokenApplicationTestHelper {
     static final String RAW_ACCESS_TOKEN_ID = "ACCESS-TOKEN-ID";
     static final OAuth2TokenId ACCESS_TOKEN_ID = new OAuth2TokenId(RAW_ACCESS_TOKEN_ID);
 
+    static final String RAW_EXISTS_ACCESS_TOKEN_ID = "EXISTS-ACCESS-TOKEN-ID";
+    static final OAuth2TokenId EXISTS_ACCESS_TOKEN_ID = new OAuth2TokenId(RAW_EXISTS_ACCESS_TOKEN_ID);
+
     static final String RAW_NEW_ACCESS_TOKEN_ID = "NEW-ACCESS-TOKEN-ID";
     static final OAuth2TokenId NEW_ACCESS_TOKEN_ID = new OAuth2TokenId(RAW_NEW_ACCESS_TOKEN_ID);
 
@@ -198,6 +201,7 @@ class OAuth2TokenApplicationTestHelper {
         when(request.getRedirectUri()).thenReturn(REDIRECT_URI);
         when(request.getRefreshToken()).thenReturn(RAW_REFRESH_TOKEN_ID);
         when(request.getState()).thenReturn(STATE);
+        when(request.getGrantType()).thenReturn(GRANT_TYPE);
 
         return request;
     }
@@ -246,6 +250,38 @@ class OAuth2TokenApplicationTestHelper {
         when(token.expiresIn()).thenReturn(EXPIRATION_IN);
         when(token.getAdditionalInformation()).thenReturn(ADDITIONAL_INFO);
         when(token.isExpired()).thenReturn(false);
+
+        return token;
+    }
+
+    static OAuth2AuthorizedAccessToken makeExistsAccessToken() {
+        OAuth2AuthorizedAccessToken token = mock(OAuth2AuthorizedAccessToken.class);
+
+        when(token.getTokenId()).thenReturn(EXISTS_ACCESS_TOKEN_ID);
+        when(token.getClient()).thenReturn(CLIENT_ID);
+        when(token.getUsername()).thenReturn(USERNAME);
+        when(token.getScopes()).thenReturn(SCOPES);
+        when(token.getExpiration()).thenReturn(EXPIRATION_DATETIME);
+        when(token.getTokenGrantType()).thenReturn(GRANT_TYPE);
+        when(token.expiresIn()).thenReturn(EXPIRATION_IN);
+        when(token.getAdditionalInformation()).thenReturn(ADDITIONAL_INFO);
+        when(token.isExpired()).thenReturn(false);
+
+        return token;
+    }
+
+    static OAuth2AuthorizedAccessToken makeExistsAccessToken(AuthorizationGrantType grantType) {
+        OAuth2AuthorizedAccessToken token = makeExistsAccessToken();
+
+        when(token.getTokenGrantType()).thenReturn(grantType);
+
+        return token;
+    }
+
+    static OAuth2AuthorizedAccessToken makeExpiredExistsAccessToken() {
+        OAuth2AuthorizedAccessToken token = makeExistsAccessToken();
+
+        when(token.isExpired()).thenReturn(true);
 
         return token;
     }
