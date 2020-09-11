@@ -18,6 +18,7 @@ import lombok.Setter;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -51,9 +52,14 @@ public abstract class AbstractOAuth2TokenGranter implements OAuth2AccessTokenGra
     @Override
     public OAuth2AccessTokenDetails grant(OAuth2ClientDetails clientDetails, OAuth2TokenRequest tokenRequest) {
         OAuth2AuthorizedAccessToken accessToken = createAccessToken(clientDetails, tokenRequest);
-        tokenRepository.findByClientAndUsername(accessToken.getClient(), accessToken.getUsername()).ifPresent(tokenRepository::delete);
+        Optional<OAuth2AuthorizedAccessToken> existsAccessToken = tokenRepository
+                .findByClientAndUsername(accessToken.getClient(), accessToken.getUsername());
+        if (existsAccessToken.isPresent() && isReturnsExistsToken(existsAccessToken.get(), accessToken)) {
+            return DefaultAccessTokenDetails.of(existsAccessToken.get());
+        }
         tokenEnhancer.enhance(accessToken);
         tokenRepository.save(accessToken);
+        existsAccessToken.ifPresent(tokenRepository::delete);
         return DefaultAccessTokenDetails.of(accessToken);
     }
 
@@ -74,6 +80,11 @@ public abstract class AbstractOAuth2TokenGranter implements OAuth2AccessTokenGra
     protected Set<AuthorityCode> extractGrantScope(OAuth2ClientDetails clientDetails, OAuth2TokenRequest tokenRequest) {
         return (tokenRequest.getScopes() == null || tokenRequest.getScopes().isEmpty() ? clientDetails.getScopes() : tokenRequest.getScopes())
                 .stream().map(AuthorityCode::new).collect(Collectors.toSet());
+    }
+
+    private boolean isReturnsExistsToken(OAuth2AuthorizedAccessToken existsAccessToken, OAuth2AuthorizedAccessToken newAccessToken) {
+        return existsAccessToken.getTokenGrantType().equals(newAccessToken.getTokenGrantType()) &&
+                !existsAccessToken.isExpired();
     }
 
     private static final class NullOAuth2TokenEnhancer implements OAuth2TokenEnhancer {
