@@ -7,12 +7,7 @@ import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeV
 import cube8540.validator.core.ValidationResult;
 import cube8540.validator.core.Validator;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
@@ -29,21 +24,15 @@ class ScopeApplicationTestHelper {
     static final String DESCRIPTION = "DESCRIPTION";
     static final String NEW_DESCRIPTION = "NEW-DESCRIPTION";
 
-    static final Set<AuthorityCode> AUTHORITIES = new HashSet<>(Arrays.asList(new AuthorityCode("AUTH-CODE-1"), new AuthorityCode("AUTH-CODE-2"),new AuthorityCode("AUTH-CODE-3")));
-    static final List<String> RAW_AUTHORITIES = AUTHORITIES.stream().map(AuthorityCode::getValue).collect(Collectors.toList());
-
-    static final List<AuthorityCode> NEW_AUTHORITIES = Arrays.asList(new AuthorityCode("NEW-AUTH-1"), new AuthorityCode("NEW-AUTH-2"), new AuthorityCode("NEW-AUTH-3"));
-    static final List<String> RAW_NEW_AUTHORITIES = NEW_AUTHORITIES.stream().map(AuthorityCode::getValue).collect(Collectors.toList());
-
-    static final List<AuthorityCode> REMOVE_AUTHORITIES = Arrays.asList(new AuthorityCode("REMOVE-AUTH-1"), new AuthorityCode("REMOVE-AUTH-2"), new AuthorityCode("REMOVE-AUTH-3"));
-    static final List<String> RAW_REMOVE_AUTHORITIES = REMOVE_AUTHORITIES.stream().map(AuthorityCode::getValue).collect(Collectors.toList());
+    static final Boolean SECURED = false;
+    static final Boolean MODIFY_SECURED = true;
 
     static OAuth2Scope makeScope() {
         OAuth2Scope scope = mock(OAuth2Scope.class);
 
         when(scope.getCode()).thenReturn(SCOPE_ID);
         when(scope.getDescription()).thenReturn(DESCRIPTION);
-        when(scope.getAccessibleAuthority()).thenReturn(AUTHORITIES);
+        when(scope.isSecured()).thenReturn(SECURED);
 
         return scope;
     }

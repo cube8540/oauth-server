@@ -1,13 +1,12 @@
 package cube8540.oauth.authentication.credentials.oauth.client.infra.rule;
 
-import cube8540.oauth.authentication.credentials.AuthorityDetails;
 import cube8540.oauth.authentication.credentials.AuthorityCode;
+import cube8540.oauth.authentication.credentials.AuthorityDetails;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2Client;
-import cube8540.oauth.authentication.credentials.oauth.scope.application.OAuth2AccessibleScopeDetailsService;
+import cube8540.oauth.authentication.credentials.oauth.scope.application.OAuth2ScopeManagementService;
 import cube8540.validator.core.ValidationError;
 import cube8540.validator.core.ValidationRule;
 import lombok.Setter;
-import org.springframework.security.core.context.SecurityContext;
 
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -21,10 +20,7 @@ public class ClientCanGrantedScopeValidationRule implements ValidationRule<OAuth
     private String message;
 
     @Setter
-    private OAuth2AccessibleScopeDetailsService scopeDetailsService;
-
-    @Setter
-    private SecurityContext securityContext;
+    private OAuth2ScopeManagementService scopeDetailsService;
 
     public ClientCanGrantedScopeValidationRule() {
         this(DEFAULT_PROPERTY, DEFAULT_MESSAGE);
@@ -42,13 +38,13 @@ public class ClientCanGrantedScopeValidationRule implements ValidationRule<OAuth
 
     @Override
     public boolean isValid(OAuth2Client target) {
-        if (scopeDetailsService == null || securityContext == null) {
+        if (scopeDetailsService == null) {
             return false;
         }
         if (target.getScopes() == null || target.getScopes().isEmpty()) {
             return false;
         }
-        Set<AuthorityCode> accessibleScopes = scopeDetailsService.readAccessibleScopes(securityContext.getAuthentication())
+        Set<AuthorityCode> accessibleScopes = scopeDetailsService.loadAllScopes()
                 .stream().map(AuthorityDetails::getCode)
                 .map(AuthorityCode::new).collect(Collectors.toSet());
         return accessibleScopes.containsAll(target.getScopes());
