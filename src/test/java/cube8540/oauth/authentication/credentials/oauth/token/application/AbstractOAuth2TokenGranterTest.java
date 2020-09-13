@@ -81,9 +81,9 @@ class AbstractOAuth2TokenGranterTest {
 
         OAuth2AccessTokenDetails token = granter.grant(clientDetails, request);
         InOrder inOrder = Mockito.inOrder(repository, enhancer);
+        inOrder.verify(repository, times(1)).delete(existsAccessToken);
         inOrder.verify(enhancer, times(1)).enhance(accessToken);
         inOrder.verify(repository, times(1)).save(accessToken);
-        verify(repository, times(1)).delete(existsAccessToken);
         assertAccessToken(token);
     }
 
@@ -104,9 +104,9 @@ class AbstractOAuth2TokenGranterTest {
 
         OAuth2AccessTokenDetails token = granter.grant(clientDetails, request);
         InOrder inOrder = Mockito.inOrder(repository, enhancer);
+        inOrder.verify(repository, times(1)).delete(existsAccessToken);
         inOrder.verify(enhancer, times(1)).enhance(accessToken);
         inOrder.verify(repository, times(1)).save(accessToken);
-        verify(repository, times(1)).delete(existsAccessToken);
         assertAccessToken(token);
     }
 
