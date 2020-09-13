@@ -57,9 +57,9 @@ public abstract class AbstractOAuth2TokenGranter implements OAuth2AccessTokenGra
         if (existsAccessToken.isPresent() && isReturnsExistsToken(existsAccessToken.get(), accessToken)) {
             return DefaultAccessTokenDetails.of(existsAccessToken.get());
         }
+        existsAccessToken.ifPresent(tokenRepository::delete);
         tokenEnhancer.enhance(accessToken);
         tokenRepository.save(accessToken);
-        existsAccessToken.ifPresent(tokenRepository::delete);
         return DefaultAccessTokenDetails.of(accessToken);
     }
 
