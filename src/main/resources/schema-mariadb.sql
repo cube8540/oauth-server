@@ -103,14 +103,6 @@ create table if not exists oauth2_refresh_token (
 	constraint fk_refresh_token_access_token foreign key (access_token_token_id) references oauth2_access_token (token_id) on delete cascade
 );
 
-create table if not exists oauth2_scope_accessible_authority (
-	scope_id varchar(32) not null,
-	authority varchar(32) not null,
-	primary key (scope_id, authority),
-	constraint fk_accessible_authority_scope_id foreign key (scope_id) references oauth2_scope (scope_id) on delete cascade,
-	constraint fk_accessible_authority_authority foreign key (authority) references oauth2_scope (scope_id) on delete cascade
-);
-
 create table if not exists oauth2_token_scope (
 	token_id varchar(32) not null,
 	scope_id varchar(32) not null,

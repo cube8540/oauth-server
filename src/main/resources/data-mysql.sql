@@ -28,16 +28,6 @@ insert into oauth2_client_scope(client_id, scope_id) select 'oauth-client', 'man
 -- insert client redirect uri
 insert into oauth2_client_redirect_uri(client_id, redirect_uri) select 'oauth-client', 'http://localhost:8080/callback' where not exists (select initialize_datetime from initialize);
 
--- insert accessible scope authority
-insert into oauth2_scope_accessible_authority(scope_id, authority) select 'access.oauth.scope', 'access.oauth.scope' where not exists (select initialize_datetime from initialize);
-insert into oauth2_scope_accessible_authority(scope_id, authority) select 'access.oauth.client', 'access.oauth.scope' where not exists (select initialize_datetime from initialize);
-insert into oauth2_scope_accessible_authority(scope_id, authority) select 'access.oauth.token', 'access.oauth.scope' where not exists (select initialize_datetime from initialize);
-
--- insert management scope authority
-insert into oauth2_scope_accessible_authority(scope_id, authority) select 'management.server', 'management.server' where not exists (select initialize_datetime from initialize);
-insert into oauth2_scope_accessible_authority(scope_id, authority) select 'management.user', 'management.server' where not exists (select initialize_datetime from initialize);
-insert into oauth2_scope_accessible_authority(scope_id, authority) select 'management.oauth', 'management.server' where not exists (select initialize_datetime from initialize);
-
 -- oauth2 client security resource api
 insert into secured_resource(resource_id, method, resource) select 'TOKEN-READ-API', 'GET', '/api/tokens/**' where not exists (select initialize_datetime from initialize);
 insert into secured_resource(resource_id, method, resource) select 'OAUTH2-CLIENT-READ-API', 'GET', '/api/clients/**' where not exists (select initialize_datetime from initialize);
