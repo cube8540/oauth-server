@@ -7,7 +7,6 @@ import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2Clien
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientRepository;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientValidatorFactory;
-import cube8540.oauth.authentication.credentials.oauth.client.domain.exception.ClientAuthorizationException;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.exception.ClientNotFoundException;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.exception.ClientRegisterException;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetails;
@@ -16,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,9 +43,14 @@ public class DefaultOAuth2ClientManagementService implements OAuth2ClientManagem
     }
 
     @Override
-    public Page<OAuth2ClientDetails> loadClientDetails(Pageable pageable) {
-        ClientOwner owner = new ClientOwner(SecurityContextHolder.getContext().getAuthentication().getName());
-        return repository.findByOwner(owner, pageable).map(DefaultOAuth2ClientDetails::of);
+    public Page<OAuth2ClientDetails> loadClientDetails(String owner, Pageable pageable) {
+        return repository.findByOwner(new ClientOwner(owner), pageable)
+                .map(DefaultOAuth2ClientDetails::of);
+    }
+
+    @Override
+    public OAuth2ClientDetails loadClientDetails(String clientId) {
+        return DefaultOAuth2ClientDetails.of(getClient(clientId));
     }
 
     @Override
@@ -59,7 +62,7 @@ public class DefaultOAuth2ClientManagementService implements OAuth2ClientManagem
         OAuth2Client client = new OAuth2Client(registerRequest.getClientId(), registerRequest.getSecret());
 
         client.setClientName(registerRequest.getClientName());
-        client.setOwner(new ClientOwner(SecurityContextHolder.getContext().getAuthentication().getName()));
+        client.setOwner(new ClientOwner(registerRequest.getClientOwner()));
         Optional.ofNullable(registerRequest.getGrantTypes())
                 .ifPresent(grantType -> grantType.forEach(grant -> client.addGrantType(OAuth2Utils.extractGrantType(grant))));
         Optional.ofNullable(registerRequest.getScopes())
@@ -80,8 +83,6 @@ public class DefaultOAuth2ClientManagementService implements OAuth2ClientManagem
     @Transactional
     public OAuth2ClientDetails modifyClient(String clientId, OAuth2ClientModifyRequest modifyRequest) {
         OAuth2Client client = getClient(clientId);
-        ClientOwner authenticated = new ClientOwner(SecurityContextHolder.getContext().getAuthentication().getName());
-        assertClientOwner(client, authenticated);
         client.setClientName(modifyRequest.getClientName());
         Optional.ofNullable(modifyRequest.getRemoveRedirectUris())
                 .ifPresent(redirectUri -> redirectUri.forEach(uri -> client.removeRedirectUri(URI.create(uri))));
@@ -109,9 +110,6 @@ public class DefaultOAuth2ClientManagementService implements OAuth2ClientManagem
     public OAuth2ClientDetails changeSecret(String clientId, OAuth2ChangeSecretRequest changeRequest) {
         OAuth2Client client = getClient(clientId);
 
-        ClientOwner authenticated = new ClientOwner(SecurityContextHolder.getContext().getAuthentication().getName());
-        assertClientOwner(client, authenticated);
-
         client.changeSecret(changeRequest.getExistsSecret(), changeRequest.getNewSecret(), passwordEncoder);
         client.validate(validateFactory);
         client.encrypted(passwordEncoder);
@@ -124,9 +122,6 @@ public class DefaultOAuth2ClientManagementService implements OAuth2ClientManagem
     public OAuth2ClientDetails removeClient(String clientId) {
         OAuth2Client client = getClient(clientId);
 
-        ClientOwner authenticated = new ClientOwner(SecurityContextHolder.getContext().getAuthentication().getName());
-        assertClientOwner(client, authenticated);
-
         repository.delete(client);
         return DefaultOAuth2ClientDetails.of(client);
     }
@@ -134,11 +129,5 @@ public class DefaultOAuth2ClientManagementService implements OAuth2ClientManagem
     private OAuth2Client getClient(String clientId) {
         return repository.findByClientId(new OAuth2ClientId(clientId))
                 .orElseThrow(() -> ClientNotFoundException.instance(clientId + " is not found"));
-    }
-
-    private void assertClientOwner(OAuth2Client client, ClientOwner authenticated) {
-        if (!client.getOwner().equals(authenticated)) {
-            throw ClientAuthorizationException.invalidOwner("owner and authenticated user not matched");
-        }
     }
 }

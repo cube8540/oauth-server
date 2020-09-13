@@ -8,7 +8,9 @@ public interface OAuth2ClientManagementService {
 
     Long countClient(String clientId);
 
-    Page<OAuth2ClientDetails> loadClientDetails(Pageable pageable);
+    Page<OAuth2ClientDetails> loadClientDetails(String owner, Pageable pageable);
+
+    OAuth2ClientDetails loadClientDetails(String clientId);
 
     OAuth2ClientDetails registerNewClient(OAuth2ClientRegisterRequest registerRequest);
 
