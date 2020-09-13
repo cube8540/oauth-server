@@ -8,7 +8,6 @@ import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2Clien
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientValidatorFactory;
 import cube8540.validator.core.ValidationResult;
 import cube8540.validator.core.Validator;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 
@@ -132,17 +131,5 @@ public class OAuth2ClientApplicationTestHelper {
         when(factory.createValidator(any())).thenReturn(validator);
 
         return factory;
-    }
-
-    static Authentication makeAuthentication() {
-        Authentication authentication = mock(Authentication.class);
-        when(authentication.getName()).thenReturn(RAW_OWNER);
-        return authentication;
-    }
-
-    static Authentication makeDifferentAuthentication() {
-        Authentication authentication = mock(Authentication.class);
-        when(authentication.getName()).thenReturn("DIFFERENT OWNER");
-        return authentication;
     }
 }

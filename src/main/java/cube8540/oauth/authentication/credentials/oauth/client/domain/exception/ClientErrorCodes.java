@@ -7,8 +7,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ClientErrorCodes extends ErrorCodes {
 
-    public static final String INVALID_OWNER = "invalid_owner";
-
     public static final String INVALID_PASSWORD = "invalid_password";
 
 }

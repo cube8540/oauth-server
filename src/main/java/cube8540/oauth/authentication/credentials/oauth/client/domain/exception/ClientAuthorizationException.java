@@ -8,10 +8,6 @@ public class ClientAuthorizationException extends ServiceException {
         super(code, description);
     }
 
-    public static ClientAuthorizationException invalidOwner(String description) {
-        return new ClientAuthorizationException(ClientErrorCodes.INVALID_OWNER, description);
-    }
-
     public static ClientAuthorizationException invalidPassword(String description) {
         return new ClientAuthorizationException(ClientErrorCodes.INVALID_PASSWORD, description);
     }

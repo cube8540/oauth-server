@@ -9,6 +9,7 @@ import cube8540.oauth.authentication.error.ExceptionTranslator;
 import cube8540.oauth.authentication.error.message.ErrorMessage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
@@ -32,6 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @Api(value = "OAuth2 클라이언트 관리 API 엔드 포인트")
@@ -61,18 +63,35 @@ public class ClientManagementAPIEndpoint {
     }
 
     @GetMapping(value = "/api/clients")
-    @ApiOperation(value = "등록된 클라이언트 검색", notes = "로그인된 계정에 등록된 클라이언트를 모두 반환 합니다.")
-    @ApiImplicitParam(value = "OAuth2 엑세스 토큰", name = "Authorization", required = true, paramType = "header", example = "Bearer xxxxxxxxxx")
+    @ApiOperation(value = "등록된 클라이언트 검색", notes = "요청한 소유자에게 등록된 클라이언트를 모두 반환 합니다.")
+    @ApiImplicitParams({
+            @ApiImplicitParam(value = "OAuth2 엑세스 토큰", name = "Authorization", required = true, paramType = "header", example = "Bearer xxxxxxxxxx"),
+            @ApiImplicitParam(value = "검색할 페이지 이며 0부터 시작 합니다. 입력 되지 않을시 0으로 설정 됩니다.", name = "page", example = "0"),
+            @ApiImplicitParam(value = "클라이언트 소유자", name = "owner", required = true, example = "username1234")
+    })
     @ApiResponses(value = {
             @ApiResponse(code = 401, message = "잘못된 OAuth2 엑세스 토큰 입니다."),
             @ApiResponse(code = 403, message = "로그인이 되어 있지 않습니다."),
             @ApiResponse(code = 500, message = "서버에서 알 수 없는 에러가 발생 했습니다.")
     })
-    public Page<OAuth2ClientDetails> clients(
-            @ApiParam(value = "검색할 페이지 이며 0부터 시작 합니다. 입력 되지 않을시 0으로 설정 됩니다.", example = "0") @RequestParam(value = "page", required = false) Integer page) {
-        Pageable pageable = PageRequest.of(page == null ? 0 : page, clientPageSize);
+    public Page<OAuth2ClientDetails> clients(@ApiParam(hidden = true) @RequestParam Map<String, String> requestParameter) {
+        Integer page = Optional.ofNullable(requestParameter.get("page")).map(Integer::parseInt).orElse(0);
+        Pageable pageable = PageRequest.of(page, clientPageSize);
 
-        return service.loadClientDetails(pageable);
+        return service.loadClientDetails(requestParameter.get("owner"), pageable);
+    }
+
+    @GetMapping(value = "/api/clients/{clientId}")
+    @ApiOperation(value = "클라이언트 정보 검색", notes = "요청한 클라이언트의 정보를 검색 합니다.")
+    @ApiImplicitParam(value = "OAuth2 엑세스 토큰", name = "Authorization", required = true, paramType = "header", example = "Bearer xxxxxxxxxx")
+    @ApiResponses(value = {
+            @ApiResponse(code = 401, message = "잘못된 OAuth2 엑세스 토큰 입니다."),
+            @ApiResponse(code = 403, message = "로그인이 되어 있지 않습니다."),
+            @ApiResponse(code = 404, message = "등록 되지 않은 클라이언트 입니다."),
+            @ApiResponse(code = 500, message = "서버에서 알 수 없는 에러가 발생 했습니다.")
+    })
+    public OAuth2ClientDetails client(@ApiParam(value = "검색할 클라이언트 아이디", required = true, example = "oauth-id") @PathVariable("clientId") String clientId) {
+        return service.loadClientDetails(clientId);
     }
 
     @PostMapping(value = "/api/clients")
