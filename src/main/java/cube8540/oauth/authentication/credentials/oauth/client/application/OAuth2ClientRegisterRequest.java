@@ -37,4 +37,7 @@ public class OAuth2ClientRegisterRequest {
     @ApiModelProperty(value = "리플레시 토큰 유효 기간 (초)", example = "600")
     Integer refreshTokenValiditySeconds;
 
+    @ApiModelProperty(value = "클라이언트 소유자", required = true, example = "username1234")
+    String clientOwner;
+
 }

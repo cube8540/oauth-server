@@ -3,7 +3,6 @@ package cube8540.oauth.authentication.credentials.oauth.client.application;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2Client;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientRepository;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientValidatorFactory;
-import cube8540.oauth.authentication.credentials.oauth.client.domain.exception.ClientAuthorizationException;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.exception.ClientErrorCodes;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.exception.ClientNotFoundException;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.exception.ClientRegisterException;
@@ -13,7 +12,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -37,6 +35,7 @@ import static cube8540.oauth.authentication.credentials.oauth.client.application
 import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.RAW_NEW_GRANT_TYPES;
 import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.RAW_NEW_REDIRECT_URIS;
 import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.RAW_NEW_SCOPES;
+import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.RAW_OWNER;
 import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.RAW_REDIRECT_URIS;
 import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.RAW_REMOVE_GRANT_TYPES;
 import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.RAW_REMOVE_REDIRECT_URIS;
@@ -49,10 +48,8 @@ import static cube8540.oauth.authentication.credentials.oauth.client.application
 import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.REMOVE_SCOPES;
 import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.SCOPES;
 import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.SECRET;
-import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.makeAuthentication;
 import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.makeClientRepository;
 import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.makeDefaultClient;
-import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.makeDifferentAuthentication;
 import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.makeEmptyClientRepository;
 import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.makeEncoder;
 import static cube8540.oauth.authentication.credentials.oauth.client.application.OAuth2ClientApplicationTestHelper.makeErrorValidatorFactory;
@@ -72,7 +69,7 @@ class DefaultOAuth2ClientManagementServiceTest {
         OAuth2Client client = makeDefaultClient();
         OAuth2ClientRepository repository = makeClientRepository(CLIENT_ID, client);
         OAuth2ClientRegisterRequest request = new OAuth2ClientRegisterRequest(RAW_CLIENT_ID, SECRET, CLIENT_NAME,
-                RAW_REMOVE_REDIRECT_URIS, RAW_SCOPES, RAW_GRANT_TYPES, ACCESS_TOKEN_VALIDITY_SECONDS, REFRESH_TOKEN_VALIDITY_SECONDS);
+                RAW_REMOVE_REDIRECT_URIS, RAW_SCOPES, RAW_GRANT_TYPES, ACCESS_TOKEN_VALIDITY_SECONDS, REFRESH_TOKEN_VALIDITY_SECONDS, RAW_OWNER);
         DefaultOAuth2ClientManagementService service = new DefaultOAuth2ClientManagementService(repository);
 
         ClientRegisterException e = assertThrows(ClientRegisterException.class, () -> service.registerNewClient(request));
@@ -83,7 +80,7 @@ class DefaultOAuth2ClientManagementServiceTest {
     @DisplayName("허용 되지 않는 클라이언트 등록")
     void registerNewClientWithInvalidData() {
         OAuth2ClientRegisterRequest request = new OAuth2ClientRegisterRequest(RAW_CLIENT_ID, SECRET, CLIENT_NAME,
-                RAW_REDIRECT_URIS, RAW_SCOPES, RAW_GRANT_TYPES, ACCESS_TOKEN_VALIDITY_SECONDS, REFRESH_TOKEN_VALIDITY_SECONDS);
+                RAW_REDIRECT_URIS, RAW_SCOPES, RAW_GRANT_TYPES, ACCESS_TOKEN_VALIDITY_SECONDS, REFRESH_TOKEN_VALIDITY_SECONDS, RAW_OWNER);
         PasswordEncoder encoder = makeEncoder(SECRET, ENCODING_SECRET);
         OAuth2ClientRepository repository = makeEmptyClientRepository();
         OAuth2ClientValidatorFactory factory = makeErrorValidatorFactory(new TestOauth2ClientException());
@@ -91,7 +88,6 @@ class DefaultOAuth2ClientManagementServiceTest {
 
         service.setValidateFactory(factory);
         service.setPasswordEncoder(encoder);
-        SecurityContextHolder.getContext().setAuthentication(OAuth2ClientApplicationTestHelper.makeAuthentication());
 
         assertThrows(TestOauth2ClientException.class, () -> service.registerNewClient(request));
     }
@@ -101,7 +97,7 @@ class DefaultOAuth2ClientManagementServiceTest {
     void registerNewClient() {
         ArgumentCaptor<OAuth2Client> clientCaptor = ArgumentCaptor.forClass(OAuth2Client.class);
         OAuth2ClientRegisterRequest request = new OAuth2ClientRegisterRequest(RAW_CLIENT_ID, SECRET, CLIENT_NAME,
-                RAW_REDIRECT_URIS, RAW_SCOPES, RAW_GRANT_TYPES, ACCESS_TOKEN_VALIDITY_SECONDS, REFRESH_TOKEN_VALIDITY_SECONDS);
+                RAW_REDIRECT_URIS, RAW_SCOPES, RAW_GRANT_TYPES, ACCESS_TOKEN_VALIDITY_SECONDS, REFRESH_TOKEN_VALIDITY_SECONDS, RAW_OWNER);
         PasswordEncoder encoder = makeEncoder(SECRET, ENCODING_SECRET);
         OAuth2ClientRepository repository = makeEmptyClientRepository();
         OAuth2ClientValidatorFactory factory = makeValidatorFactory();
@@ -109,7 +105,6 @@ class DefaultOAuth2ClientManagementServiceTest {
 
         service.setValidateFactory(factory);
         service.setPasswordEncoder(encoder);
-        SecurityContextHolder.getContext().setAuthentication(OAuth2ClientApplicationTestHelper.makeAuthentication());
 
         service.registerNewClient(request);
         verify(repository, times(1)).save(clientCaptor.capture());
@@ -136,23 +131,6 @@ class DefaultOAuth2ClientManagementServiceTest {
     }
 
     @Test
-    @DisplayName("수정하려는 클라이언트의 소유자가 아닐시")
-    void whenNotOwnerOfClientToModify() {
-        OAuth2Client client = makeDefaultClient();
-        OAuth2ClientModifyRequest request = new OAuth2ClientModifyRequest(MODIFY_CLIENT_NAME, RAW_NEW_REDIRECT_URIS,
-                RAW_REMOVE_REDIRECT_URIS, RAW_NEW_GRANT_TYPES, RAW_REMOVE_GRANT_TYPES, RAW_NEW_SCOPES, RAW_REMOVE_SCOPES,
-                MODIFY_ACCESS_TOKEN_VALIDITY_SECONDS, MODIFY_REFRESH_TOKEN_VALIDITY_SECONDS);
-        OAuth2ClientRepository repository = makeClientRepository(CLIENT_ID, client);
-        Authentication authentication = makeDifferentAuthentication();
-        DefaultOAuth2ClientManagementService service = new DefaultOAuth2ClientManagementService(repository);
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        ClientAuthorizationException e = assertThrows(ClientAuthorizationException.class, () -> service.modifyClient(RAW_CLIENT_ID, request));
-        assertEquals(ClientErrorCodes.INVALID_OWNER, e.getCode());
-    }
-
-    @Test
     @DisplayName("클라이언트 수정")
     void modifyClient() {
         OAuth2Client client = makeDefaultClient();
@@ -160,11 +138,9 @@ class DefaultOAuth2ClientManagementServiceTest {
                 RAW_REMOVE_REDIRECT_URIS, RAW_NEW_GRANT_TYPES, RAW_REMOVE_GRANT_TYPES, RAW_NEW_SCOPES, RAW_REMOVE_SCOPES,
                 MODIFY_ACCESS_TOKEN_VALIDITY_SECONDS, MODIFY_REFRESH_TOKEN_VALIDITY_SECONDS);
         OAuth2ClientRepository repository = makeClientRepository(CLIENT_ID, client);
-        Authentication authentication = makeAuthentication();
         OAuth2ClientValidatorFactory factory = makeValidatorFactory();
         DefaultOAuth2ClientManagementService service = new DefaultOAuth2ClientManagementService(repository);
 
-        SecurityContextHolder.getContext().setAuthentication(authentication);
         service.setValidateFactory(factory);
 
         InOrder inOrder = inOrder(client, repository);
@@ -193,32 +169,15 @@ class DefaultOAuth2ClientManagementServiceTest {
     }
 
     @Test
-    @DisplayName("패스워드를 변경 하려는 클라이언트의 소유자가 아닐시")
-    void whenNotOwnerOfClientWantToChangeSecret() {
-        OAuth2ChangeSecretRequest request = new OAuth2ChangeSecretRequest(SECRET, MODIFY_SECRET);
-        OAuth2Client client = makeDefaultClient();
-        OAuth2ClientRepository repository = makeClientRepository(CLIENT_ID, client);
-        Authentication authentication = makeDifferentAuthentication();
-        DefaultOAuth2ClientManagementService service = new DefaultOAuth2ClientManagementService(repository);
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        ClientAuthorizationException e = assertThrows(ClientAuthorizationException.class, () -> service.changeSecret(RAW_CLIENT_ID, request));
-        assertEquals(ClientErrorCodes.INVALID_OWNER, e.getCode());
-    }
-
-    @Test
     @DisplayName("클라이언트 패스워드 변경")
     void changeClientSecret() {
         OAuth2ChangeSecretRequest request = new OAuth2ChangeSecretRequest(SECRET, MODIFY_SECRET);
         OAuth2Client client = makeDefaultClient();
         OAuth2ClientRepository repository = makeClientRepository(CLIENT_ID, client);
-        Authentication authentication = makeAuthentication();
         PasswordEncoder encoder = makeEncoder(MODIFY_SECRET, ENCODING_SECRET);
         OAuth2ClientValidatorFactory factory = makeValidatorFactory();
         DefaultOAuth2ClientManagementService service = new DefaultOAuth2ClientManagementService(repository);
 
-        SecurityContextHolder.getContext().setAuthentication(authentication);
         service.setValidateFactory(factory);
         service.setPasswordEncoder(encoder);
 
@@ -240,28 +199,11 @@ class DefaultOAuth2ClientManagementServiceTest {
     }
 
     @Test
-    @DisplayName("삭제하려는 클라이언트의 소유자가 아닐시")
-    void whenNotOwnerOfClientWantToRemove() {
-        OAuth2Client client = makeDefaultClient();
-        OAuth2ClientRepository repository = makeClientRepository(CLIENT_ID, client);
-        Authentication authentication = makeDifferentAuthentication();
-        DefaultOAuth2ClientManagementService service = new DefaultOAuth2ClientManagementService(repository);
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        ClientAuthorizationException e = assertThrows(ClientAuthorizationException.class, () -> service.removeClient(RAW_CLIENT_ID));
-        assertEquals(ClientErrorCodes.INVALID_OWNER, e.getCode());
-    }
-
-    @Test
     @DisplayName("클라이언트 삭제")
     void removeClient() {
         OAuth2Client client = makeDefaultClient();
         OAuth2ClientRepository repository = makeClientRepository(CLIENT_ID, client);
-        Authentication authentication = makeAuthentication();
         DefaultOAuth2ClientManagementService service = new DefaultOAuth2ClientManagementService(repository);
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
 
         service.removeClient(RAW_CLIENT_ID);
         verify(repository, times(1)).delete(client);
