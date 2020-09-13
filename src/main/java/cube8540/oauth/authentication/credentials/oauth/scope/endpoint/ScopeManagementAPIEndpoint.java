@@ -8,7 +8,6 @@ import cube8540.oauth.authentication.error.ExceptionTranslator;
 import cube8540.oauth.authentication.error.message.ErrorMessage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
@@ -47,19 +46,27 @@ public class ScopeManagementAPIEndpoint {
 
     @GetMapping(value = "/api/scopes")
     @ApiOperation(value = "스코프 검색", notes = "스코프를 반환 합니다.")
-    @ApiImplicitParams({
-            @ApiImplicitParam(value = "OAuth2 엑세스 토큰", name = "Authorization", required = true, paramType = "header", example = "Bearer xxxxxxxxxx"),
-            @ApiImplicitParam(value = "검색 모드", name = "mode", paramType = "query", example = "all")
-    })
+    @ApiImplicitParam(value = "OAuth2 엑세스 토큰", name = "Authorization", required = true, paramType = "header", example = "Bearer xxxxxxxxxx")
     @ApiResponses(value = {
             @ApiResponse(code = 401, message = "잘못된 OAuth2 엑세스 토큰 입니다."),
             @ApiResponse(code = 403, message = "로그인이 되어 있지 않습니다."),
             @ApiResponse(code = 500, message = "서버에서 알 수 없는 에러가 발생 했습니다.")
     })
-    public Map<String, Collection<AuthorityDetails>> scopes(@ApiParam(hidden = true) @RequestParam Map<String, String> queryParameter) {
-        Collection<AuthorityDetails> scopes = queryParameter.get("mode") != null && queryParameter.get("mode").equals("all") ?
-                managementService.loadAllScopes() : managementService.loadPublicScopes();
+    public Map<String, Collection<AuthorityDetails>> scopes() {
+        Collection<AuthorityDetails> scopes = managementService.loadPublicScopes();
+        return Collections.singletonMap("scopes", scopes);
+    }
 
+    @GetMapping(value = "/api/authorized-scopes")
+    @ApiOperation(value = "모든 스코프 검색", notes = "모든 스코프를 반환 합니다.")
+    @ApiImplicitParam(value = "OAuth2 엑세스 토큰", name = "Authorization", required = true, paramType = "header", example = "Bearer xxxxxxxxxx")
+    @ApiResponses(value = {
+            @ApiResponse(code = 401, message = "잘못된 OAuth2 엑세스 토큰 입니다."),
+            @ApiResponse(code = 403, message = "로그인이 되어 있지 않습니다."),
+            @ApiResponse(code = 500, message = "서버에서 알 수 없는 에러가 발생 했습니다.")
+    })
+    public Map<String, Collection<AuthorityDetails>> protectedScopes() {
+        Collection<AuthorityDetails> scopes = managementService.loadAllScopes();
         return Collections.singletonMap("scopes", scopes);
     }
 
