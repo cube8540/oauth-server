@@ -10,7 +10,6 @@ import cube8540.oauth.authentication.credentials.oauth.scope.domain.exception.Sc
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,7 +19,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-public class DefaultScopeDetailsService implements OAuth2ScopeManagementService, OAuth2AccessibleScopeDetailsService {
+public class DefaultScopeDetailsService implements OAuth2ScopeManagementService {
 
     private final OAuth2ScopeRepository repository;
 
@@ -40,14 +39,19 @@ public class DefaultScopeDetailsService implements OAuth2ScopeManagementService,
     }
 
     @Override
-    public Collection<AuthorityDetails> readAccessibleScopes(Authentication authentication) {
-        return repository.findAll().stream().filter(scope -> scope.isAccessible(authentication))
-                .map(DefaultOAuth2ScopeDetails::of).collect(Collectors.toList());
+    public Long countByScopeId(String scopeId) {
+        return repository.countByCode(new AuthorityCode(scopeId));
     }
 
     @Override
-    public Long countByScopeId(String scopeId) {
-        return repository.countByCode(new AuthorityCode(scopeId));
+    public Collection<AuthorityDetails> loadAllScopes() {
+        return repository.findAll().stream().map(DefaultOAuth2ScopeDetails::of).collect(Collectors.toList());
+    }
+
+    @Override
+    public Collection<AuthorityDetails> loadPublicScopes() {
+        return repository.findAll().stream().filter(scope -> !scope.isSecured())
+                .map(DefaultOAuth2ScopeDetails::of).collect(Collectors.toList());
     }
 
     @Override
@@ -58,9 +62,7 @@ public class DefaultScopeDetailsService implements OAuth2ScopeManagementService,
         }
 
         OAuth2Scope scope = new OAuth2Scope(registerRequest.getScopeId(), registerRequest.getDescription());
-        Optional.ofNullable(registerRequest.getAccessibleAuthority())
-                .ifPresent(authorities -> authorities.forEach(authority -> scope.addAccessibleAuthority(new AuthorityCode(authority))));
-
+        scope.setSecured(Optional.ofNullable(registerRequest.getSecured()).orElse(Boolean.TRUE));
         scope.validate(validatorFactory);
         return DefaultOAuth2ScopeDetails.of(repository.save(scope));
     }
@@ -71,11 +73,7 @@ public class DefaultScopeDetailsService implements OAuth2ScopeManagementService,
         OAuth2Scope scope = getScope(scopeId);
 
         scope.setDescription(modifyRequest.getDescription());
-        Optional.ofNullable(modifyRequest.getRemoveAccessibleAuthority())
-                .ifPresent(authorities -> authorities.forEach(auth -> scope.removeAccessibleAuthority(new AuthorityCode(auth))));
-        Optional.ofNullable(modifyRequest.getNewAccessibleAuthority())
-                .ifPresent(authorities -> authorities.forEach(auth -> scope.addAccessibleAuthority(new AuthorityCode(auth))));
-
+        Optional.ofNullable(modifyRequest.getSecured()).ifPresent(scope::setSecured);
         scope.validate(validatorFactory);
         return DefaultOAuth2ScopeDetails.of(repository.save(scope));
     }

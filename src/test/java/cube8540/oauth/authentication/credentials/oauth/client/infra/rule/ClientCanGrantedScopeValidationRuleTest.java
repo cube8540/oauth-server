@@ -3,12 +3,10 @@ package cube8540.oauth.authentication.credentials.oauth.client.infra.rule;
 import cube8540.oauth.authentication.credentials.AuthorityCode;
 import cube8540.oauth.authentication.credentials.AuthorityDetails;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2Client;
-import cube8540.oauth.authentication.credentials.oauth.scope.application.OAuth2AccessibleScopeDetailsService;
+import cube8540.oauth.authentication.credentials.oauth.scope.application.OAuth2ScopeManagementService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -37,19 +35,6 @@ class ClientCanGrantedScopeValidationRuleTest {
         ClientCanGrantedScopeValidationRule rule = new ClientCanGrantedScopeValidationRule();
 
         OAuth2Client client = mock(OAuth2Client.class);
-        rule.setSecurityContext(mock(SecurityContext.class));
-
-        assertFalse(rule.isValid(client));
-    }
-
-    @Test
-    @DisplayName("인증 컨텍스트가 null 일때 유효성 검사")
-    void validationWhenSecurityContextIsNull() {
-        OAuth2Client client = mock(OAuth2Client.class);
-        OAuth2AccessibleScopeDetailsService service = mock(OAuth2AccessibleScopeDetailsService.class);
-        ClientCanGrantedScopeValidationRule rule = new ClientCanGrantedScopeValidationRule();
-
-        rule.setScopeDetailsService(service);
 
         assertFalse(rule.isValid(client));
     }
@@ -58,13 +43,11 @@ class ClientCanGrantedScopeValidationRuleTest {
     @DisplayName("클라이언트의 스코프가 null 일때 유효성 검사")
     void validationWhenClientScopeIsNull() {
         OAuth2Client client = mock(OAuth2Client.class);
-        OAuth2AccessibleScopeDetailsService service = mock(OAuth2AccessibleScopeDetailsService.class);
-        SecurityContext securityContext = mock(SecurityContext.class);
+        OAuth2ScopeManagementService service = mock(OAuth2ScopeManagementService.class);
         ClientCanGrantedScopeValidationRule rule = new ClientCanGrantedScopeValidationRule();
 
         when(client.getScopes()).thenReturn(null);
         rule.setScopeDetailsService(service);
-        rule.setSecurityContext(securityContext);
 
         assertFalse(rule.isValid(client));
     }
@@ -73,51 +56,41 @@ class ClientCanGrantedScopeValidationRuleTest {
     @DisplayName("클라이언트의 스코프가 비어 있을시 유효성 검사")
     void validationWhenClientScopeIsEmpty() {
         OAuth2Client client = mock(OAuth2Client.class);
-        OAuth2AccessibleScopeDetailsService service = mock(OAuth2AccessibleScopeDetailsService.class);
-        SecurityContext securityContext = mock(SecurityContext.class);
+        OAuth2ScopeManagementService service = mock(OAuth2ScopeManagementService.class);
         ClientCanGrantedScopeValidationRule rule = new ClientCanGrantedScopeValidationRule();
 
         when(client.getScopes()).thenReturn(Collections.emptySet());
         rule.setScopeDetailsService(service);
-        rule.setSecurityContext(securityContext);
 
         assertFalse(rule.isValid(client));
     }
 
     @Test
-    @DisplayName("클라이언트의 스코프 중 인증 받은 유저가 접근 훌 수 없는 스코프가 있을시")
-    void WhenScopesOnTheClientAreInaccessibleToTheAuthenticatedUser() {
+    @DisplayName("클라이언트의 스코프 중 검색 되지 않는 스코프가 있을시")
+    void clientScopeCannotBeFound() {
         OAuth2Client client = mock(OAuth2Client.class);
-        Authentication authentication = mock(Authentication.class);
-        OAuth2AccessibleScopeDetailsService service = mock(OAuth2AccessibleScopeDetailsService.class);
-        SecurityContext securityContext = mock(SecurityContext.class);
+        OAuth2ScopeManagementService service = mock(OAuth2ScopeManagementService.class);
         List<AuthorityDetails> scopes = Arrays.asList(makeScope("SCOPE-1"), makeScope("SCOPE-2"), makeScope("SCOPE-3"));
         Set<AuthorityCode> clientScopes = new HashSet<>(Arrays.asList(new AuthorityCode("SCOPE-1"), new AuthorityCode("SCOPE-2"), new AuthorityCode("SCOPE-6")));
 
         when(client.getScopes()).thenReturn(clientScopes);
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        when(service.readAccessibleScopes(authentication)).thenReturn(scopes);
+        when(service.loadAllScopes()).thenReturn(scopes);
         rule.setScopeDetailsService(service);
-        rule.setSecurityContext(securityContext);
 
         assertFalse(rule.isValid(client));
     }
 
     @Test
-    @DisplayName("클라이언트의 스코프가 모두 인증 받은 유저가 접근 할 수 있는 스코프일시")
-    void WhenScopeOnTheClientAreAccessibleToTheAuthenticatedUser() {
+    @DisplayName("클라이언트의 스코프가 모두 검색 되는 스코프일시")
+    void clientScopeCanBeFound() {
         OAuth2Client client = mock(OAuth2Client.class);
-        Authentication authentication = mock(Authentication.class);
-        OAuth2AccessibleScopeDetailsService service = mock(OAuth2AccessibleScopeDetailsService.class);
-        SecurityContext securityContext = mock(SecurityContext.class);
+        OAuth2ScopeManagementService service = mock(OAuth2ScopeManagementService.class);
         List<AuthorityDetails> scopes = Arrays.asList(makeScope("SCOPE-1"), makeScope("SCOPE-2"), makeScope("SCOPE-3"));
         Set<AuthorityCode> clientScopes = new HashSet<>(Arrays.asList(new AuthorityCode("SCOPE-1"), new AuthorityCode("SCOPE-2"), new AuthorityCode("SCOPE-3")));
 
         when(client.getScopes()).thenReturn(clientScopes);
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        when(service.readAccessibleScopes(authentication)).thenReturn(scopes);
+        when(service.loadAllScopes()).thenReturn(scopes);
         rule.setScopeDetailsService(service);
-        rule.setSecurityContext(securityContext);
 
         assertTrue(rule.isValid(client));
     }
