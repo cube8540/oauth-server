@@ -5,6 +5,7 @@ import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2Author
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2ComposeUniqueKey;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2ComposeUniqueKeyGenerator;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
+import org.springframework.stereotype.Component;
 
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
@@ -14,6 +15,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Component
 public class WithScopeComposeUniqueKeyGenerator implements OAuth2ComposeUniqueKeyGenerator {
 
     protected static final String USERNAME_KEY = "username";

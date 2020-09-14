@@ -17,6 +17,7 @@ import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2TokenI
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
@@ -46,7 +47,7 @@ public abstract class AbstractOAuth2TokenGranter implements OAuth2AccessTokenGra
     @Setter
     private OAuth2TokenEnhancer tokenEnhancer = new NullOAuth2TokenEnhancer();
 
-    @Setter
+    @Setter(onMethod_ = @Autowired)
     @Getter(AccessLevel.PROTECTED)
     private OAuth2ComposeUniqueKeyGenerator composeUniqueKeyGenerator = new DefaultOAuth2ComposeUniqueKeyGenerator();
 
