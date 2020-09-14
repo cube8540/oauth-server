@@ -10,6 +10,7 @@ import cube8540.oauth.authentication.credentials.oauth.security.OAuth2TokenReque
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenRepository;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizationCode;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedAccessToken;
+import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2ComposeUniqueKeyGenerator;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2TokenIdGenerator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,6 +26,7 @@ import static cube8540.oauth.authentication.credentials.oauth.token.application.
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.ACCESS_TOKEN_VALIDITY_SECONDS;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.APPROVED_SCOPES;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.CLIENT_ID;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.COMPOSE_UNIQUE_KEY;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.RAW_APPROVED_SCOPES;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.RAW_AUTHORIZATION_CODE;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.RAW_CLIENT_ID;
@@ -37,6 +39,7 @@ import static cube8540.oauth.authentication.credentials.oauth.token.application.
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeAuthorizationCode;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeClientDetails;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeCodeConsumer;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeComposeUniqueKeyGenerator;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeEmptyAccessTokenRepository;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeEmptyCodeConsumer;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeErrorValidator;
@@ -132,11 +135,13 @@ class AuthorizationCodeGranterTest {
         OAuth2AccessTokenRepository repository = makeEmptyAccessTokenRepository();
         OAuth2AuthorizationCode authorizationCode = makeAuthorizationCode();
         OAuth2AuthorizationCodeConsumer consumer = makeCodeConsumer(RAW_AUTHORIZATION_CODE, authorizationCode);
+        OAuth2ComposeUniqueKeyGenerator composeUniqueKeyGenerator = makeComposeUniqueKeyGenerator();
         AuthorizationCodeTokenGranter granter = new AuthorizationCodeTokenGranter(generator, repository, consumer);
 
         configNotExpirationClock();
         OAuth2RequestValidator validator = makePassValidator(clientDetails, RAW_APPROVED_SCOPES);
         granter.setTokenRequestValidator(validator);
+        granter.setComposeUniqueKeyGenerator(composeUniqueKeyGenerator);
 
         OAuth2AuthorizedAccessToken accessToken = granter.createAccessToken(clientDetails, request);
         verify(authorizationCode, times(1)).validateWithAuthorizationRequest(requestCaptor.capture());
@@ -157,12 +162,14 @@ class AuthorizationCodeGranterTest {
         OAuth2AccessTokenRepository repository = makeEmptyAccessTokenRepository();
         OAuth2AuthorizationCode authorizationCode = makeAuthorizationCode();
         OAuth2AuthorizationCodeConsumer consumer = makeCodeConsumer(RAW_AUTHORIZATION_CODE, authorizationCode);
+        OAuth2ComposeUniqueKeyGenerator composeUniqueKeyGenerator = makeComposeUniqueKeyGenerator();
         AuthorizationCodeTokenGranter granter = new AuthorizationCodeTokenGranter(generator, repository, consumer);
 
         configNotExpirationClock();
         OAuth2RequestValidator validator = makePassValidator(clientDetails, RAW_APPROVED_SCOPES);
         granter.setTokenRequestValidator(validator);
         granter.setRefreshTokenIdGenerator(makeTokenIdGenerator(REFRESH_TOKEN_ID));
+        granter.setComposeUniqueKeyGenerator(composeUniqueKeyGenerator);
 
         OAuth2AuthorizedAccessToken accessToken = granter.createAccessToken(clientDetails, request);
         verify(authorizationCode, times(1)).validateWithAuthorizationRequest(requestCaptor.capture());
@@ -188,5 +195,6 @@ class AuthorizationCodeGranterTest {
         assertEquals(TOKEN_CREATED_DATETIME.plusSeconds(ACCESS_TOKEN_VALIDITY_SECONDS), accessToken.getExpiration());
         assertEquals(TOKEN_CREATED_DATETIME.plusSeconds(REFRESH_TOKEN_VALIDITY_SECONDS), accessToken.getRefreshToken().getExpiration());
         assertEquals(TOKEN_CREATED_DATETIME, accessToken.getIssuedAt());
+        assertEquals(COMPOSE_UNIQUE_KEY, accessToken.getComposeUniqueKey());
     }
 }

@@ -29,7 +29,7 @@ public class CompositeOAuth2AccessTokenGranter implements OAuth2AccessTokenGrant
 
     @Override
     @Retryable(value = {LockAcquisitionException.class, DuplicateKeyException.class})
-    @Transactional(isolation = Isolation.SERIALIZABLE)
+    @Transactional(isolation = Isolation.SERIALIZABLE, noRollbackFor = InvalidGrantException.class)
     public OAuth2AccessTokenDetails grant(OAuth2ClientDetails clientDetails, OAuth2TokenRequest tokenRequest) {
         if (tokenGranterMap.get(tokenRequest.getGrantType()) == null) {
             throw InvalidGrantException.unsupportedGrantType("unsupported grant type");

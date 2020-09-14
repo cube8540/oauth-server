@@ -27,6 +27,17 @@ class OAuth2AccessTokenTestHelper {
     static final LocalDateTime EXPIRATION_DATETIME = LocalDateTime.of(2020, 1, 29, 22, 51);
     static final LocalDateTime REFRESH_EXPIRATION_DATETIME = LocalDateTime.of(2020, 1, 29, 11, 9);
 
+    static final String RAW_COMPOSE_UNIQUE_KEY = "COMPOSE_UNIQUE_KEY";
+    static final OAuth2ComposeUniqueKey COMPOSE_UNIQUE_KEY = new OAuth2ComposeUniqueKey(RAW_COMPOSE_UNIQUE_KEY);
+
+    static OAuth2ComposeUniqueKeyGenerator makeComposeUniqueKeyGenerator(OAuth2AuthorizedAccessToken accessToken) {
+        OAuth2ComposeUniqueKeyGenerator generator = mock(OAuth2ComposeUniqueKeyGenerator.class);
+
+        when(generator.generateKey(accessToken)).thenReturn(COMPOSE_UNIQUE_KEY);
+
+        return generator;
+    }
+
     static OAuth2TokenIdGenerator makeAccessTokenIdGenerator() {
         OAuth2TokenIdGenerator generator = mock(OAuth2TokenIdGenerator.class);
         when(generator.generateTokenValue()).thenReturn(ACCESS_TOKEN_ID);

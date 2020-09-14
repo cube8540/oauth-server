@@ -21,7 +21,7 @@ public class ImplicitTokenGranter extends AbstractOAuth2TokenGranter {
 
     @Override
     protected OAuth2AuthorizedAccessToken createAccessToken(OAuth2ClientDetails clientDetails, OAuth2TokenRequest tokenRequest) {
-        return OAuth2AuthorizedAccessToken.builder(getTokenIdGenerator())
+        OAuth2AuthorizedAccessToken accessToken = OAuth2AuthorizedAccessToken.builder(getTokenIdGenerator())
                 .scopes(extractGrantScope(clientDetails, tokenRequest))
                 .username(new PrincipalUsername(tokenRequest.getUsername()))
                 .tokenGrantType(AuthorizationGrantType.IMPLICIT)
@@ -29,5 +29,8 @@ public class ImplicitTokenGranter extends AbstractOAuth2TokenGranter {
                 .client(new OAuth2ClientId(clientDetails.getClientId()))
                 .issuedAt(LocalDateTime.now(clock))
                 .build();
+
+        accessToken.generateComposeUniqueKey(getComposeUniqueKeyGenerator());
+        return accessToken;
     }
 }

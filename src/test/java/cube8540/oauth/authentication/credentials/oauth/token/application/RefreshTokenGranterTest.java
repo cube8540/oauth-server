@@ -9,6 +9,7 @@ import cube8540.oauth.authentication.credentials.oauth.security.OAuth2TokenReque
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenRepository;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedAccessToken;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedRefreshToken;
+import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2ComposeUniqueKeyGenerator;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2RefreshTokenRepository;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2TokenIdGenerator;
 import org.junit.jupiter.api.DisplayName;
@@ -24,6 +25,7 @@ import static cube8540.oauth.authentication.credentials.oauth.token.application.
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.ACCESS_TOKEN_VALIDITY_SECONDS;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.APPROVED_SCOPES;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.CLIENT_ID;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.COMPOSE_UNIQUE_KEY;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.DIFFERENT_CLIENT;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.NEW_ACCESS_TOKEN_ID;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.NEW_REFRESH_TOKEN_ID;
@@ -36,6 +38,7 @@ import static cube8540.oauth.authentication.credentials.oauth.token.application.
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.USERNAME;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeAccessToken;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeClientDetails;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeComposeUniqueKeyGenerator;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeEmptyAccessTokenRepository;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeEmptyRefreshTokenRepository;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeErrorValidator;
@@ -133,12 +136,14 @@ class RefreshTokenGranterTest {
         OAuth2AccessTokenRepository accessTokenRepository = makeEmptyAccessTokenRepository();
         OAuth2RefreshTokenRepository refreshTokenRepository = makeRefreshTokenRepository(REFRESH_TOKEN_ID, refreshToken);
         OAuth2TokenIdGenerator generator = makeTokenIdGenerator(NEW_ACCESS_TOKEN_ID);
+        OAuth2ComposeUniqueKeyGenerator composeUniqueKeyGenerator = makeComposeUniqueKeyGenerator();
         OAuth2RequestValidator validator = makePassValidator(RAW_APPROVED_SCOPES, RAW_SCOPES);
         RefreshTokenGranter granter = new RefreshTokenGranter(accessTokenRepository, refreshTokenRepository, generator);
 
         Clock clock = Clock.fixed(TOKEN_CREATED_DATETIME.toInstant(AuthenticationApplication.DEFAULT_ZONE_OFFSET), AuthenticationApplication.DEFAULT_TIME_ZONE.toZoneId());
         AbstractOAuth2TokenGranter.setClock(clock);
         granter.setTokenRequestValidator(validator);
+        granter.setComposeUniqueKeyGenerator(composeUniqueKeyGenerator);
 
         OAuth2AuthorizedAccessToken newAccessToken = granter.createAccessToken(clientDetails, request);
         assertEquals(NEW_ACCESS_TOKEN_ID, newAccessToken.getRefreshToken().getTokenId());
@@ -155,6 +160,7 @@ class RefreshTokenGranterTest {
         OAuth2AccessTokenRepository accessTokenRepository = makeEmptyAccessTokenRepository();
         OAuth2RefreshTokenRepository refreshTokenRepository = makeRefreshTokenRepository(REFRESH_TOKEN_ID, refreshToken);
         OAuth2TokenIdGenerator generator = makeTokenIdGenerator(NEW_ACCESS_TOKEN_ID);
+        OAuth2ComposeUniqueKeyGenerator composeUniqueKeyGenerator = makeComposeUniqueKeyGenerator();
         OAuth2TokenIdGenerator refreshTokenIdGenerator = makeTokenIdGenerator(NEW_REFRESH_TOKEN_ID);
         OAuth2RequestValidator validator = makePassValidator(RAW_APPROVED_SCOPES, RAW_SCOPES);
         RefreshTokenGranter granter = new RefreshTokenGranter(accessTokenRepository, refreshTokenRepository, generator);
@@ -163,6 +169,7 @@ class RefreshTokenGranterTest {
         AbstractOAuth2TokenGranter.setClock(clock);
         granter.setTokenRequestValidator(validator);
         granter.setRefreshTokenIdGenerator(refreshTokenIdGenerator);
+        granter.setComposeUniqueKeyGenerator(composeUniqueKeyGenerator);
 
         OAuth2AuthorizedAccessToken newAccessToken = granter.createAccessToken(clientDetails, request);
         assertEquals(NEW_REFRESH_TOKEN_ID, newAccessToken.getRefreshToken().getTokenId());
@@ -179,12 +186,14 @@ class RefreshTokenGranterTest {
         OAuth2AccessTokenRepository accessTokenRepository = makeEmptyAccessTokenRepository();
         OAuth2RefreshTokenRepository refreshTokenRepository = makeRefreshTokenRepository(REFRESH_TOKEN_ID, refreshToken);
         OAuth2TokenIdGenerator generator = makeTokenIdGenerator(NEW_ACCESS_TOKEN_ID);
+        OAuth2ComposeUniqueKeyGenerator composeUniqueKeyGenerator = makeComposeUniqueKeyGenerator();
         OAuth2RequestValidator validator = makePassValidator(RAW_APPROVED_SCOPES, null);
         RefreshTokenGranter granter = new RefreshTokenGranter(accessTokenRepository, refreshTokenRepository, generator);
 
         Clock clock = Clock.fixed(TOKEN_CREATED_DATETIME.toInstant(AuthenticationApplication.DEFAULT_ZONE_OFFSET), AuthenticationApplication.DEFAULT_TIME_ZONE.toZoneId());
         AbstractOAuth2TokenGranter.setClock(clock);
         granter.setTokenRequestValidator(validator);
+        granter.setComposeUniqueKeyGenerator(composeUniqueKeyGenerator);
         when(request.getScopes()).thenReturn(null);
 
         OAuth2AuthorizedAccessToken newAccessToken = granter.createAccessToken(clientDetails, request);
@@ -202,12 +211,14 @@ class RefreshTokenGranterTest {
         OAuth2AccessTokenRepository accessTokenRepository = makeEmptyAccessTokenRepository();
         OAuth2RefreshTokenRepository refreshTokenRepository = makeRefreshTokenRepository(REFRESH_TOKEN_ID, refreshToken);
         OAuth2TokenIdGenerator generator = makeTokenIdGenerator(NEW_ACCESS_TOKEN_ID);
+        OAuth2ComposeUniqueKeyGenerator composeUniqueKeyGenerator = makeComposeUniqueKeyGenerator();
         OAuth2RequestValidator validator = makePassValidator(RAW_APPROVED_SCOPES, Collections.emptySet());
         RefreshTokenGranter granter = new RefreshTokenGranter(accessTokenRepository, refreshTokenRepository, generator);
 
         Clock clock = Clock.fixed(TOKEN_CREATED_DATETIME.toInstant(AuthenticationApplication.DEFAULT_ZONE_OFFSET), AuthenticationApplication.DEFAULT_TIME_ZONE.toZoneId());
         AbstractOAuth2TokenGranter.setClock(clock);
         granter.setTokenRequestValidator(validator);
+        granter.setComposeUniqueKeyGenerator(composeUniqueKeyGenerator);
         when(request.getScopes()).thenReturn(Collections.emptySet());
 
         OAuth2AuthorizedAccessToken newAccessToken = granter.createAccessToken(clientDetails, request);
@@ -225,12 +236,14 @@ class RefreshTokenGranterTest {
         OAuth2AccessTokenRepository accessTokenRepository = makeEmptyAccessTokenRepository();
         OAuth2RefreshTokenRepository refreshTokenRepository = makeRefreshTokenRepository(REFRESH_TOKEN_ID, refreshToken);
         OAuth2TokenIdGenerator generator = makeTokenIdGenerator(NEW_ACCESS_TOKEN_ID);
+        OAuth2ComposeUniqueKeyGenerator composeUniqueKeyGenerator = makeComposeUniqueKeyGenerator();
         OAuth2RequestValidator validator = makePassValidator(RAW_APPROVED_SCOPES, RAW_SCOPES);
         RefreshTokenGranter granter = new RefreshTokenGranter(accessTokenRepository, refreshTokenRepository, generator);
 
         Clock clock = Clock.fixed(TOKEN_CREATED_DATETIME.toInstant(AuthenticationApplication.DEFAULT_ZONE_OFFSET), AuthenticationApplication.DEFAULT_TIME_ZONE.toZoneId());
         AbstractOAuth2TokenGranter.setClock(clock);
         granter.setTokenRequestValidator(validator);
+        granter.setComposeUniqueKeyGenerator(composeUniqueKeyGenerator);
 
         OAuth2AuthorizedAccessToken newAccessToken = granter.createAccessToken(clientDetails, request);
         assertAccessToken(refreshToken, refreshTokenRepository, newAccessToken);
@@ -258,6 +271,7 @@ class RefreshTokenGranterTest {
         assertEquals(TOKEN_CREATED_DATETIME, newAccessToken.getIssuedAt());
         assertEquals(TOKEN_CREATED_DATETIME.plusSeconds(ACCESS_TOKEN_VALIDITY_SECONDS), newAccessToken.getExpiration());
         assertEquals(TOKEN_CREATED_DATETIME.plusSeconds(REFRESH_TOKEN_VALIDITY_SECONDS), newAccessToken.getRefreshToken().getExpiration());
+        assertEquals(COMPOSE_UNIQUE_KEY, newAccessToken.getComposeUniqueKey());
         verify(refreshTokenRepository, times(1)).delete(refreshToken);
     }
 }

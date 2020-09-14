@@ -10,6 +10,7 @@ import lombok.ToString;
 import org.springframework.data.domain.AbstractAggregateRoot;
 
 import javax.persistence.AttributeOverride;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
@@ -40,7 +41,7 @@ public class OAuth2AuthorizedRefreshToken extends AbstractAggregateRoot<OAuth2Au
     @Column(name = "expiration", nullable = false)
     private LocalDateTime expiration;
 
-    @OneToOne(fetch = FetchType.EAGER)
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private OAuth2AuthorizedAccessToken accessToken;
 
     public OAuth2AuthorizedRefreshToken(OAuth2TokenIdGenerator tokenIdGenerator, LocalDateTime expiration, OAuth2AuthorizedAccessToken accessToken) {
