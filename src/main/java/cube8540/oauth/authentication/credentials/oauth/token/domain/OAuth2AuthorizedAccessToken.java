@@ -52,7 +52,7 @@ import java.util.Set;
 @Builder
 @Entity
 @Table(name = "oauth2_access_token", uniqueConstraints = {
-        @UniqueConstraint(name = "client_authentication_username", columnNames = {"client_id", "username"})
+        @UniqueConstraint(name = "access_token_unique_key", columnNames = {"compose_unique_key"})
 })
 @DynamicInsert
 @DynamicUpdate
@@ -73,6 +73,10 @@ public class OAuth2AuthorizedAccessToken extends AbstractAggregateRoot<OAuth2Aut
     @Embedded
     @AttributeOverride(name = "value", column = @Column(name = "client_id", length = 32, nullable = false))
     private OAuth2ClientId client;
+
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "compose_unique_key", length = 32, nullable = false))
+    private OAuth2ComposeUniqueKey composeUniqueKey;
 
     @Singular("scope")
     @ElementCollection
@@ -128,5 +132,9 @@ public class OAuth2AuthorizedAccessToken extends AbstractAggregateRoot<OAuth2Aut
 
     public void generateRefreshToken(OAuth2TokenIdGenerator refreshTokenIdGenerator, LocalDateTime expirationDateTime) {
         this.refreshToken = new OAuth2AuthorizedRefreshToken(refreshTokenIdGenerator, expirationDateTime, this);
+    }
+
+    public void generateComposeUniqueKey(OAuth2ComposeUniqueKeyGenerator generator) {
+        this.composeUniqueKey = generator.generateKey(this);
     }
 }

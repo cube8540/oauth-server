@@ -12,6 +12,8 @@ import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2Access
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizationCode;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedAccessToken;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedRefreshToken;
+import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2ComposeUniqueKey;
+import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2ComposeUniqueKeyGenerator;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2RefreshTokenRepository;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2TokenEnhancer;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2TokenId;
@@ -41,6 +43,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -100,6 +103,17 @@ class OAuth2TokenApplicationTestHelper {
     static final Integer REFRESH_TOKEN_VALIDITY_SECONDS = 6000;
 
     static final String STATE = "REQUESTED_STATE";
+
+    static final String RAW_COMPOSE_UNIQUE_KEY = "COMPOSE_UNIQUE_KEY";
+    static final OAuth2ComposeUniqueKey COMPOSE_UNIQUE_KEY = new OAuth2ComposeUniqueKey(RAW_COMPOSE_UNIQUE_KEY);
+
+    static OAuth2ComposeUniqueKeyGenerator makeComposeUniqueKeyGenerator() {
+        OAuth2ComposeUniqueKeyGenerator generator = mock(OAuth2ComposeUniqueKeyGenerator.class);
+
+        when(generator.generateKey(any())).thenReturn(COMPOSE_UNIQUE_KEY);
+
+        return generator;
+    }
 
     static OAuth2AccessTokenRepository makeEmptyAccessTokenRepository() {
         return mock(OAuth2AccessTokenRepository.class);

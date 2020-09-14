@@ -51,6 +51,7 @@ public class ResourceOwnerPasswordTokenGranter extends AbstractOAuth2TokenGrante
                 .issuedAt(LocalDateTime.now(clock))
                 .build();
         accessToken.generateRefreshToken(refreshTokenGenerator(), extractRefreshTokenExpiration(clientDetails));
+        accessToken.generateComposeUniqueKey(getComposeUniqueKeyGenerator());
         return accessToken;
     }
 

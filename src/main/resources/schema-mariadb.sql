@@ -41,7 +41,8 @@ create table if not exists oauth2_access_token (
 	grant_type varchar(32) not null,
 	username varchar(32),
 	issued_at datetime(6) not null,
-	constraint client_authentication_username unique (client_id, username),
+	compose_unique_key varchar(32) not null,
+	constraint access_token_unique_key unique (compose_unique_key),
 	constraint fk_access_token_client_id foreign key (client_id) references oauth2_clients (client_id) on delete cascade,
 	constraint fk_access_token_username foreign key (username) references user (username) on delete cascade
 );
