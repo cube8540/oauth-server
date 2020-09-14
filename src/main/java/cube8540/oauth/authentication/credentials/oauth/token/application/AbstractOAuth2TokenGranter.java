@@ -59,7 +59,7 @@ public abstract class AbstractOAuth2TokenGranter implements OAuth2AccessTokenGra
     public OAuth2AccessTokenDetails grant(OAuth2ClientDetails clientDetails, OAuth2TokenRequest tokenRequest) {
         OAuth2AuthorizedAccessToken accessToken = createAccessToken(clientDetails, tokenRequest);
         Optional<OAuth2AuthorizedAccessToken> existsAccessToken = tokenRepository
-                .findByClientAndUsername(accessToken.getClient(), accessToken.getUsername());
+                .findByComposeUniqueKey(accessToken.getComposeUniqueKey());
         if (existsAccessToken.isPresent() && isReturnsExistsToken(existsAccessToken.get(), accessToken)) {
             return DefaultAccessTokenDetails.of(existsAccessToken.get());
         }

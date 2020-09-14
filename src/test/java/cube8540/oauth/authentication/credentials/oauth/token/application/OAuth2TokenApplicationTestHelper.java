@@ -127,10 +127,10 @@ class OAuth2TokenApplicationTestHelper {
         return repository;
     }
 
-    static OAuth2AccessTokenRepository makeAccessTokenRepository(OAuth2ClientId clientId, PrincipalUsername username, OAuth2AuthorizedAccessToken accessToken) {
+    static OAuth2AccessTokenRepository makeAccessTokenRepository(OAuth2ComposeUniqueKey composeUniqueKey, OAuth2AuthorizedAccessToken accessToken) {
         OAuth2AccessTokenRepository repository = mock(OAuth2AccessTokenRepository.class);
 
-        when(repository.findByClientAndUsername(clientId, username)).thenReturn(Optional.of(accessToken));
+        when(repository.findByComposeUniqueKey(composeUniqueKey)).thenReturn(Optional.of(accessToken));
 
         return repository;
     }
@@ -264,6 +264,7 @@ class OAuth2TokenApplicationTestHelper {
         when(token.expiresIn()).thenReturn(EXPIRATION_IN);
         when(token.getAdditionalInformation()).thenReturn(ADDITIONAL_INFO);
         when(token.isExpired()).thenReturn(false);
+        when(token.getComposeUniqueKey()).thenReturn(COMPOSE_UNIQUE_KEY);
 
         return token;
     }
@@ -280,6 +281,7 @@ class OAuth2TokenApplicationTestHelper {
         when(token.expiresIn()).thenReturn(EXPIRATION_IN);
         when(token.getAdditionalInformation()).thenReturn(ADDITIONAL_INFO);
         when(token.isExpired()).thenReturn(false);
+        when(token.getComposeUniqueKey()).thenReturn(COMPOSE_UNIQUE_KEY);
 
         return token;
     }

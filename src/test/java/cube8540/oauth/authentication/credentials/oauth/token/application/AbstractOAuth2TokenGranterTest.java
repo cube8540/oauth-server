@@ -13,7 +13,7 @@ import org.mockito.Mockito;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.ADDITIONAL_INFO;
-import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.CLIENT_ID;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.COMPOSE_UNIQUE_KEY;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.EXPIRATION_DATETIME;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.EXPIRATION_IN;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.RAW_ACCESS_TOKEN_ID;
@@ -22,7 +22,6 @@ import static cube8540.oauth.authentication.credentials.oauth.token.application.
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.RAW_SCOPES;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.RAW_USERNAME;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.TOKEN_TYPE;
-import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.USERNAME;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeAccessToken;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeAccessTokenRepository;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeClientDetails;
@@ -50,7 +49,7 @@ class AbstractOAuth2TokenGranterTest {
         OAuth2TokenEnhancer enhancer = makeTokenEnhancer();
         OAuth2AuthorizedAccessToken existsAccessToken = makeExistsAccessToken();
         OAuth2AuthorizedAccessToken accessToken = makeAccessToken();
-        OAuth2AccessTokenRepository repository = makeAccessTokenRepository(CLIENT_ID, USERNAME, existsAccessToken);
+        OAuth2AccessTokenRepository repository = makeAccessTokenRepository(COMPOSE_UNIQUE_KEY, existsAccessToken);
         AbstractOAuth2TokenGranter granter = mock(AbstractOAuth2TokenGranter.class, CALLS_REAL_METHODS);
 
         granter.setTokenEnhancer(enhancer);
@@ -72,7 +71,7 @@ class AbstractOAuth2TokenGranterTest {
         OAuth2TokenEnhancer enhancer = makeTokenEnhancer();
         OAuth2AuthorizedAccessToken existsAccessToken = makeExistsAccessToken(AuthorizationGrantType.PASSWORD);
         OAuth2AuthorizedAccessToken accessToken = makeAccessToken();
-        OAuth2AccessTokenRepository repository = makeAccessTokenRepository(CLIENT_ID, USERNAME, existsAccessToken);
+        OAuth2AccessTokenRepository repository = makeAccessTokenRepository(COMPOSE_UNIQUE_KEY, existsAccessToken);
         AbstractOAuth2TokenGranter granter = mock(AbstractOAuth2TokenGranter.class, CALLS_REAL_METHODS);
 
         granter.setTokenEnhancer(enhancer);
@@ -95,7 +94,7 @@ class AbstractOAuth2TokenGranterTest {
         OAuth2TokenEnhancer enhancer = makeTokenEnhancer();
         OAuth2AuthorizedAccessToken existsAccessToken = makeExpiredExistsAccessToken();
         OAuth2AuthorizedAccessToken accessToken = makeAccessToken();
-        OAuth2AccessTokenRepository repository = makeAccessTokenRepository(CLIENT_ID, USERNAME, existsAccessToken);
+        OAuth2AccessTokenRepository repository = makeAccessTokenRepository(COMPOSE_UNIQUE_KEY, existsAccessToken);
         AbstractOAuth2TokenGranter granter = mock(AbstractOAuth2TokenGranter.class, CALLS_REAL_METHODS);
 
         granter.setTokenEnhancer(enhancer);
