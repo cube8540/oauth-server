@@ -5,7 +5,12 @@ import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AccessToke
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AccessTokenGranter;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2TokenRequest;
+import org.hibernate.exception.LockAcquisitionException;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,6 +28,8 @@ public class CompositeOAuth2AccessTokenGranter implements OAuth2AccessTokenGrant
     }
 
     @Override
+    @Retryable(value = {LockAcquisitionException.class, DuplicateKeyException.class})
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public OAuth2AccessTokenDetails grant(OAuth2ClientDetails clientDetails, OAuth2TokenRequest tokenRequest) {
         if (tokenGranterMap.get(tokenRequest.getGrantType()) == null) {
             throw InvalidGrantException.unsupportedGrantType("unsupported grant type");
