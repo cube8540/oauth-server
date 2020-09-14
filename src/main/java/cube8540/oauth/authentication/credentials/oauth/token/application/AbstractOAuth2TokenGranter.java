@@ -82,7 +82,7 @@ public abstract class AbstractOAuth2TokenGranter implements OAuth2AccessTokenGra
                 .stream().map(AuthorityCode::new).collect(Collectors.toSet());
     }
 
-    private boolean isReturnsExistsToken(OAuth2AuthorizedAccessToken existsAccessToken, OAuth2AuthorizedAccessToken newAccessToken) {
+    protected boolean isReturnsExistsToken(OAuth2AuthorizedAccessToken existsAccessToken, OAuth2AuthorizedAccessToken newAccessToken) {
         return existsAccessToken.getTokenGrantType().equals(newAccessToken.getTokenGrantType()) &&
                 !existsAccessToken.isExpired();
     }
