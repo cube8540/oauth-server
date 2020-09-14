@@ -6,6 +6,7 @@ import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDeta
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2TokenRequest;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenRepository;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedAccessToken;
+import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2ComposeUniqueKeyGenerator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
@@ -19,10 +20,12 @@ import static cube8540.oauth.authentication.credentials.oauth.token.application.
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.ACCESS_TOKEN_VALIDITY_SECONDS;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.CLIENT_ID;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.CLIENT_SCOPES;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.COMPOSE_UNIQUE_KEY;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.RAW_SCOPES;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.TOKEN_CREATED_DATETIME;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.USERNAME;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeClientDetails;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeComposeUniqueKeyGenerator;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeEmptyAccessTokenRepository;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeTokenIdGenerator;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeTokenRequest;
@@ -38,11 +41,13 @@ class ImplicitTokenGranterTest {
         OAuth2ClientDetails clientDetails = makeClientDetails();
         OAuth2AccessTokenRepository repository = makeEmptyAccessTokenRepository();
         OAuth2TokenRequest request = makeTokenRequest();
+        OAuth2ComposeUniqueKeyGenerator composeUniqueKeyGenerator = makeComposeUniqueKeyGenerator();
         ImplicitTokenGranter granter = new ImplicitTokenGranter(makeTokenIdGenerator(ACCESS_TOKEN_ID), repository);
 
         Clock clock = Clock.fixed(TOKEN_CREATED_DATETIME.toInstant(AuthenticationApplication.DEFAULT_ZONE_OFFSET), AuthenticationApplication.DEFAULT_TIME_ZONE.toZoneId());
         AbstractOAuth2TokenGranter.setClock(clock);
         when(request.getScopes()).thenReturn(null);
+        granter.setComposeUniqueKeyGenerator(composeUniqueKeyGenerator);
 
         OAuth2AuthorizedAccessToken accessToken = granter.createAccessToken(clientDetails, request);
         assertEquals(CLIENT_SCOPES, accessToken.getScopes());
@@ -55,11 +60,13 @@ class ImplicitTokenGranterTest {
         OAuth2ClientDetails clientDetails = makeClientDetails();
         OAuth2AccessTokenRepository repository = makeEmptyAccessTokenRepository();
         OAuth2TokenRequest request = makeTokenRequest();
+        OAuth2ComposeUniqueKeyGenerator composeUniqueKeyGenerator = makeComposeUniqueKeyGenerator();
         ImplicitTokenGranter granter = new ImplicitTokenGranter(makeTokenIdGenerator(ACCESS_TOKEN_ID), repository);
 
         Clock clock = Clock.fixed(TOKEN_CREATED_DATETIME.toInstant(AuthenticationApplication.DEFAULT_ZONE_OFFSET), AuthenticationApplication.DEFAULT_TIME_ZONE.toZoneId());
         AbstractOAuth2TokenGranter.setClock(clock);
         when(request.getScopes()).thenReturn(Collections.emptySet());
+        granter.setComposeUniqueKeyGenerator(composeUniqueKeyGenerator);
 
         OAuth2AuthorizedAccessToken accessToken = granter.createAccessToken(clientDetails, request);
         assertEquals(CLIENT_SCOPES, accessToken.getScopes());
@@ -72,11 +79,13 @@ class ImplicitTokenGranterTest {
         OAuth2ClientDetails clientDetails = makeClientDetails();
         OAuth2AccessTokenRepository repository = makeEmptyAccessTokenRepository();
         OAuth2TokenRequest request = makeTokenRequest();
+        OAuth2ComposeUniqueKeyGenerator composeUniqueKeyGenerator = makeComposeUniqueKeyGenerator();
         ImplicitTokenGranter granter = new ImplicitTokenGranter(makeTokenIdGenerator(ACCESS_TOKEN_ID), repository);
 
         Clock clock = Clock.fixed(TOKEN_CREATED_DATETIME.toInstant(AuthenticationApplication.DEFAULT_ZONE_OFFSET), AuthenticationApplication.DEFAULT_TIME_ZONE.toZoneId());
         AbstractOAuth2TokenGranter.setClock(clock);
         when(request.getScopes()).thenReturn(RAW_SCOPES);
+        granter.setComposeUniqueKeyGenerator(composeUniqueKeyGenerator);
 
         OAuth2AuthorizedAccessToken accessToken = granter.createAccessToken(clientDetails, request);
         Set<AuthorityCode> exceptedScopes = RAW_SCOPES.stream().map(AuthorityCode::new).collect(Collectors.toSet());
@@ -91,5 +100,6 @@ class ImplicitTokenGranterTest {
         assertEquals(AuthorizationGrantType.IMPLICIT, accessToken.getTokenGrantType());
         assertEquals(TOKEN_CREATED_DATETIME, accessToken.getIssuedAt());
         assertEquals(TOKEN_CREATED_DATETIME.plusSeconds(ACCESS_TOKEN_VALIDITY_SECONDS), accessToken.getExpiration());
+        assertEquals(COMPOSE_UNIQUE_KEY, accessToken.getComposeUniqueKey());
     }
 }

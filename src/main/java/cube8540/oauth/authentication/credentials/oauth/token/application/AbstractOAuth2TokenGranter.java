@@ -10,6 +10,8 @@ import cube8540.oauth.authentication.credentials.oauth.security.OAuth2RequestVal
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2TokenRequest;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenRepository;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedAccessToken;
+import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2ComposeUniqueKey;
+import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2ComposeUniqueKeyGenerator;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2TokenEnhancer;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2TokenIdGenerator;
 import lombok.AccessLevel;
@@ -44,6 +46,10 @@ public abstract class AbstractOAuth2TokenGranter implements OAuth2AccessTokenGra
     @Setter
     private OAuth2TokenEnhancer tokenEnhancer = new NullOAuth2TokenEnhancer();
 
+    @Setter
+    @Getter(AccessLevel.PROTECTED)
+    private OAuth2ComposeUniqueKeyGenerator composeUniqueKeyGenerator = new DefaultOAuth2ComposeUniqueKeyGenerator();
+
     protected AbstractOAuth2TokenGranter(OAuth2TokenIdGenerator tokenIdGenerator, OAuth2AccessTokenRepository tokenRepository) {
         this.tokenIdGenerator = tokenIdGenerator;
         this.tokenRepository = tokenRepository;
@@ -53,7 +59,7 @@ public abstract class AbstractOAuth2TokenGranter implements OAuth2AccessTokenGra
     public OAuth2AccessTokenDetails grant(OAuth2ClientDetails clientDetails, OAuth2TokenRequest tokenRequest) {
         OAuth2AuthorizedAccessToken accessToken = createAccessToken(clientDetails, tokenRequest);
         Optional<OAuth2AuthorizedAccessToken> existsAccessToken = tokenRepository
-                .findByClientAndUsername(accessToken.getClient(), accessToken.getUsername());
+                .findByComposeUniqueKey(accessToken.getComposeUniqueKey());
         if (existsAccessToken.isPresent() && isReturnsExistsToken(existsAccessToken.get(), accessToken)) {
             return DefaultAccessTokenDetails.of(existsAccessToken.get());
         }
@@ -91,6 +97,14 @@ public abstract class AbstractOAuth2TokenGranter implements OAuth2AccessTokenGra
 
         @Override
         public void enhance(OAuth2AuthorizedAccessToken accessToken) {
+        }
+    }
+
+    private static final class DefaultOAuth2ComposeUniqueKeyGenerator implements OAuth2ComposeUniqueKeyGenerator {
+
+        @Override
+        public OAuth2ComposeUniqueKey generateKey(OAuth2AuthorizedAccessToken token) {
+            return new OAuth2ComposeUniqueKey(token.getTokenId().getValue());
         }
     }
 }

@@ -7,12 +7,14 @@ import org.junit.jupiter.api.Test;
 import java.time.Clock;
 
 import static cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenTestHelper.CLIENT_ID;
+import static cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenTestHelper.COMPOSE_UNIQUE_KEY;
 import static cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenTestHelper.EXPIRATION_DATETIME;
 import static cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenTestHelper.GRANT_TYPE;
 import static cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenTestHelper.REFRESH_EXPIRATION_DATETIME;
 import static cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenTestHelper.REFRESH_TOKEN_ID;
 import static cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenTestHelper.USERNAME;
 import static cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenTestHelper.makeAccessTokenIdGenerator;
+import static cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenTestHelper.makeComposeUniqueKeyGenerator;
 import static cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenTestHelper.makeRefreshTokenIdGenerator;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -74,5 +76,16 @@ class OAuth2AuthorizedAccessTokenTest {
         OAuth2AuthorizedRefreshToken refreshToken = token.getRefreshToken();
         assertEquals(REFRESH_TOKEN_ID, refreshToken.getTokenId());
         assertEquals(REFRESH_EXPIRATION_DATETIME, refreshToken.getExpiration());
+    }
+
+    @Test
+    @DisplayName("복합키 생성")
+    void generateComposeUniqueKey() {
+        OAuth2AuthorizedAccessToken token = OAuth2AuthorizedAccessToken.builder(makeAccessTokenIdGenerator())
+                .username(USERNAME).client(CLIENT_ID).tokenGrantType(GRANT_TYPE).expiration(EXPIRATION_DATETIME).build();
+        OAuth2ComposeUniqueKeyGenerator generator = makeComposeUniqueKeyGenerator(token);
+
+        token.generateComposeUniqueKey(generator);
+        assertEquals(COMPOSE_UNIQUE_KEY, token.getComposeUniqueKey());
     }
 }

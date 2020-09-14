@@ -41,6 +41,7 @@ public class ClientCredentialsTokenGranter extends AbstractOAuth2TokenGranter {
         if (allowedRefreshToken) {
             accessToken.generateRefreshToken(refreshTokenGenerator(), extractRefreshTokenExpiration(clientDetails));
         }
+        accessToken.generateComposeUniqueKey(getComposeUniqueKeyGenerator());
         return accessToken;
     }
 }

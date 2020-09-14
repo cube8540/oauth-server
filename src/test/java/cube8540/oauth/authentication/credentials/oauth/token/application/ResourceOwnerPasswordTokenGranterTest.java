@@ -9,6 +9,7 @@ import cube8540.oauth.authentication.credentials.oauth.security.OAuth2RequestVal
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2TokenRequest;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenRepository;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedAccessToken;
+import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2ComposeUniqueKeyGenerator;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2TokenIdGenerator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -27,6 +28,7 @@ import static cube8540.oauth.authentication.credentials.oauth.token.application.
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.AUTHENTICATION_USERNAME;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.CLIENT_ID;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.CLIENT_SCOPES;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.COMPOSE_UNIQUE_KEY;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.PASSWORD;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.RAW_AUTHENTICATION_USERNAME;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.RAW_SCOPES;
@@ -40,6 +42,7 @@ import static cube8540.oauth.authentication.credentials.oauth.token.application.
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeBadCredentials;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeBadStatus;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeClientDetails;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeComposeUniqueKeyGenerator;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeEmptyAccessTokenRepository;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeErrorValidator;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makePassValidator;
@@ -103,6 +106,7 @@ class ResourceOwnerPasswordTokenGranterTest {
         OAuth2ClientDetails clientDetails = makeClientDetails();
         OAuth2TokenRequest request = makeTokenRequest();
         OAuth2RequestValidator validator = makePassValidator(clientDetails, RAW_SCOPES);
+        OAuth2ComposeUniqueKeyGenerator composeUniqueKeyGenerator = makeComposeUniqueKeyGenerator();
         OAuth2TokenIdGenerator generator = makeTokenIdGenerator(ACCESS_TOKEN_ID);
         OAuth2AccessTokenRepository repository = makeEmptyAccessTokenRepository();
         UsernamePasswordAuthenticationToken usernamePasswordToken = new UsernamePasswordAuthenticationToken(RAW_USERNAME, PASSWORD);
@@ -110,6 +114,7 @@ class ResourceOwnerPasswordTokenGranterTest {
         ResourceOwnerPasswordTokenGranter granter = new ResourceOwnerPasswordTokenGranter(generator, repository, manager);
 
         granter.setTokenRequestValidator(validator);
+        granter.setComposeUniqueKeyGenerator(composeUniqueKeyGenerator);
 
         assertThrows(UserDeniedAuthorizationException.class, () -> granter.createAccessToken(clientDetails, request));
     }
@@ -120,6 +125,7 @@ class ResourceOwnerPasswordTokenGranterTest {
         OAuth2ClientDetails clientDetails = makeClientDetails();
         OAuth2TokenRequest request = makeTokenRequest();
         OAuth2RequestValidator validator = makePassValidator(clientDetails, RAW_SCOPES);
+        OAuth2ComposeUniqueKeyGenerator composeUniqueKeyGenerator = makeComposeUniqueKeyGenerator();
         OAuth2TokenIdGenerator generator = makeTokenIdGenerator(ACCESS_TOKEN_ID);
         OAuth2AccessTokenRepository repository = makeEmptyAccessTokenRepository();
         UsernamePasswordAuthenticationToken usernamePasswordToken = new UsernamePasswordAuthenticationToken(RAW_USERNAME, PASSWORD);
@@ -127,6 +133,7 @@ class ResourceOwnerPasswordTokenGranterTest {
         ResourceOwnerPasswordTokenGranter granter = new ResourceOwnerPasswordTokenGranter(generator, repository, manager);
 
         granter.setTokenRequestValidator(validator);
+        granter.setComposeUniqueKeyGenerator(composeUniqueKeyGenerator);
 
         assertThrows(UserDeniedAuthorizationException.class, () -> granter.createAccessToken(clientDetails, request));
     }
@@ -137,6 +144,7 @@ class ResourceOwnerPasswordTokenGranterTest {
         OAuth2ClientDetails clientDetails = makeClientDetails();
         OAuth2TokenRequest request = makeTokenRequest();
         OAuth2RequestValidator validator = makePassValidator(clientDetails, RAW_SCOPES);
+        OAuth2ComposeUniqueKeyGenerator composeUniqueKeyGenerator = makeComposeUniqueKeyGenerator();
         OAuth2TokenIdGenerator generator = makeTokenIdGenerator(ACCESS_TOKEN_ID);
         OAuth2AccessTokenRepository repository = makeEmptyAccessTokenRepository();
         UsernamePasswordAuthenticationToken usernamePasswordToken = new UsernamePasswordAuthenticationToken(RAW_USERNAME, PASSWORD);
@@ -146,6 +154,7 @@ class ResourceOwnerPasswordTokenGranterTest {
 
         configNotExpirationClock();
         granter.setTokenRequestValidator(validator);
+        granter.setComposeUniqueKeyGenerator(composeUniqueKeyGenerator);
 
         OAuth2AuthorizedAccessToken accessToken = granter.createAccessToken(clientDetails, request);
         assertEquals(ACCESS_TOKEN_ID, accessToken.getRefreshToken().getTokenId());
@@ -158,6 +167,7 @@ class ResourceOwnerPasswordTokenGranterTest {
         OAuth2ClientDetails clientDetails = makeClientDetails();
         OAuth2TokenRequest request = makeTokenRequest();
         OAuth2RequestValidator validator = makePassValidator(clientDetails, RAW_SCOPES);
+        OAuth2ComposeUniqueKeyGenerator composeUniqueKeyGenerator = makeComposeUniqueKeyGenerator();
         OAuth2TokenIdGenerator generator = makeTokenIdGenerator(ACCESS_TOKEN_ID);
         OAuth2TokenIdGenerator refreshTokenIdGenerator = makeTokenIdGenerator(REFRESH_TOKEN_ID);
         OAuth2AccessTokenRepository repository = makeEmptyAccessTokenRepository();
@@ -169,6 +179,7 @@ class ResourceOwnerPasswordTokenGranterTest {
         configNotExpirationClock();
         granter.setTokenRequestValidator(validator);
         granter.setRefreshTokenIdGenerator(refreshTokenIdGenerator);
+        granter.setComposeUniqueKeyGenerator(composeUniqueKeyGenerator);
 
         OAuth2AuthorizedAccessToken accessToken = granter.createAccessToken(clientDetails, request);
         assertEquals(REFRESH_TOKEN_ID, accessToken.getRefreshToken().getTokenId());
@@ -181,6 +192,7 @@ class ResourceOwnerPasswordTokenGranterTest {
         OAuth2ClientDetails clientDetails = makeClientDetails();
         OAuth2TokenRequest request = makeTokenRequest();
         OAuth2RequestValidator validator = makePassValidator(clientDetails, null);
+        OAuth2ComposeUniqueKeyGenerator composeUniqueKeyGenerator = makeComposeUniqueKeyGenerator();
         OAuth2TokenIdGenerator generator = makeTokenIdGenerator(ACCESS_TOKEN_ID);
         OAuth2AccessTokenRepository repository = makeEmptyAccessTokenRepository();
         UsernamePasswordAuthenticationToken usernamePasswordToken = new UsernamePasswordAuthenticationToken(RAW_USERNAME, PASSWORD);
@@ -190,6 +202,7 @@ class ResourceOwnerPasswordTokenGranterTest {
 
         configNotExpirationClock();
         granter.setTokenRequestValidator(validator);
+        granter.setComposeUniqueKeyGenerator(composeUniqueKeyGenerator);
         when(request.getScopes()).thenReturn(null);
 
         OAuth2AuthorizedAccessToken accessToken = granter.createAccessToken(clientDetails, request);
@@ -203,6 +216,7 @@ class ResourceOwnerPasswordTokenGranterTest {
         OAuth2ClientDetails clientDetails = makeClientDetails();
         OAuth2TokenRequest request = makeTokenRequest();
         OAuth2RequestValidator validator = makePassValidator(clientDetails, Collections.emptySet());
+        OAuth2ComposeUniqueKeyGenerator composeUniqueKeyGenerator = makeComposeUniqueKeyGenerator();
         OAuth2TokenIdGenerator generator = makeTokenIdGenerator(ACCESS_TOKEN_ID);
         OAuth2AccessTokenRepository repository = makeEmptyAccessTokenRepository();
         UsernamePasswordAuthenticationToken usernamePasswordToken = new UsernamePasswordAuthenticationToken(RAW_USERNAME, PASSWORD);
@@ -212,6 +226,7 @@ class ResourceOwnerPasswordTokenGranterTest {
 
         configNotExpirationClock();
         granter.setTokenRequestValidator(validator);
+        granter.setComposeUniqueKeyGenerator(composeUniqueKeyGenerator);
         when(request.getScopes()).thenReturn(Collections.emptySet());
 
         OAuth2AuthorizedAccessToken accessToken = granter.createAccessToken(clientDetails, request);
@@ -225,6 +240,7 @@ class ResourceOwnerPasswordTokenGranterTest {
         OAuth2ClientDetails clientDetails = makeClientDetails();
         OAuth2TokenRequest request = makeTokenRequest();
         OAuth2RequestValidator validator = makePassValidator(clientDetails, RAW_SCOPES);
+        OAuth2ComposeUniqueKeyGenerator composeUniqueKeyGenerator = makeComposeUniqueKeyGenerator();
         OAuth2TokenIdGenerator generator = makeTokenIdGenerator(ACCESS_TOKEN_ID);
         OAuth2AccessTokenRepository repository = makeEmptyAccessTokenRepository();
         UsernamePasswordAuthenticationToken usernamePasswordToken = new UsernamePasswordAuthenticationToken(RAW_USERNAME, PASSWORD);
@@ -234,6 +250,7 @@ class ResourceOwnerPasswordTokenGranterTest {
 
         configNotExpirationClock();
         granter.setTokenRequestValidator(validator);
+        granter.setComposeUniqueKeyGenerator(composeUniqueKeyGenerator);
 
         OAuth2AuthorizedAccessToken accessToken = granter.createAccessToken(clientDetails, request);
         assertEquals(SCOPES, accessToken.getScopes());
@@ -253,5 +270,6 @@ class ResourceOwnerPasswordTokenGranterTest {
         assertEquals(TOKEN_CREATED_DATETIME, accessToken.getIssuedAt());
         assertEquals(TOKEN_CREATED_DATETIME.plusSeconds(ACCESS_TOKEN_VALIDITY_SECONDS), accessToken.getExpiration());
         assertEquals(TOKEN_CREATED_DATETIME.plusSeconds(REFRESH_TOKEN_VALIDITY_SECONDS), accessToken.getRefreshToken().getExpiration());
+        assertEquals(COMPOSE_UNIQUE_KEY, accessToken.getComposeUniqueKey());
     }
 }

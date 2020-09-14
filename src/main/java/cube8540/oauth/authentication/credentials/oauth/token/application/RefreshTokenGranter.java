@@ -58,7 +58,7 @@ public class RefreshTokenGranter extends AbstractOAuth2TokenGranter {
                 .issuedAt(LocalDateTime.now(clock))
                 .build();
         accessToken.generateRefreshToken(refreshTokenGenerator(), extractRefreshTokenExpiration(clientDetails));
-
+        accessToken.generateComposeUniqueKey(getComposeUniqueKeyGenerator());
         return accessToken;
     }
 
