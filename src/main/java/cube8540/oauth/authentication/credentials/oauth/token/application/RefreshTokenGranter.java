@@ -66,4 +66,9 @@ public class RefreshTokenGranter extends AbstractOAuth2TokenGranter {
         return (tokenRequest.getScopes() == null || tokenRequest.getScopes().isEmpty()) ? accessToken.getScopes() :
                 tokenRequest.getScopes().stream().map(AuthorityCode::new).collect(Collectors.toSet());
     }
+
+    @Override
+    protected boolean isReturnsExistsToken(OAuth2AuthorizedAccessToken existsAccessToken, OAuth2AuthorizedAccessToken newAccessToken) {
+        return false;
+    }
 }

@@ -45,6 +45,7 @@ import static cube8540.oauth.authentication.credentials.oauth.token.application.
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeTokenIdGenerator;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeTokenRequest;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -234,6 +235,19 @@ class RefreshTokenGranterTest {
         OAuth2AuthorizedAccessToken newAccessToken = granter.createAccessToken(clientDetails, request);
         assertAccessToken(refreshToken, refreshTokenRepository, newAccessToken);
         assertEquals(SCOPES, newAccessToken.getScopes());
+    }
+
+    @Test
+    @DisplayName("기존 토큰 반환 여부는 반드시 false 가 반환 되어야 한다.")
+    void isReturnsExistingTokenMethodShouldReturnsFalse() {
+        OAuth2AuthorizedAccessToken accessToken = makeAccessToken(APPROVED_SCOPES);
+        OAuth2AuthorizedRefreshToken refreshToken = makeRefreshToken(accessToken);
+        OAuth2AccessTokenRepository accessTokenRepository = makeEmptyAccessTokenRepository();
+        OAuth2RefreshTokenRepository refreshTokenRepository = makeRefreshTokenRepository(REFRESH_TOKEN_ID, refreshToken);
+        OAuth2TokenIdGenerator generator = makeTokenIdGenerator(NEW_ACCESS_TOKEN_ID);
+        RefreshTokenGranter granter = new RefreshTokenGranter(accessTokenRepository, refreshTokenRepository, generator);
+
+        assertFalse(granter.isReturnsExistsToken(null, null));
     }
 
     private void assertAccessToken(OAuth2AuthorizedRefreshToken refreshToken, OAuth2RefreshTokenRepository refreshTokenRepository, OAuth2AuthorizedAccessToken newAccessToken) {
