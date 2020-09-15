@@ -64,7 +64,7 @@ public abstract class AbstractOAuth2TokenGranter implements OAuth2AccessTokenGra
         if (existsAccessToken.isPresent() && isReturnsExistsToken(existsAccessToken.get(), accessToken)) {
             return DefaultAccessTokenDetails.of(existsAccessToken.get());
         }
-        existsAccessToken.ifPresent(tokenRepository::delete);
+        existsAccessToken.ifPresent(this::deleteExistsAccessToken);
         tokenEnhancer.enhance(accessToken);
         tokenRepository.save(accessToken);
         return DefaultAccessTokenDetails.of(accessToken);
@@ -92,6 +92,11 @@ public abstract class AbstractOAuth2TokenGranter implements OAuth2AccessTokenGra
     protected boolean isReturnsExistsToken(OAuth2AuthorizedAccessToken existsAccessToken, OAuth2AuthorizedAccessToken newAccessToken) {
         return existsAccessToken.getTokenGrantType().equals(newAccessToken.getTokenGrantType()) &&
                 !existsAccessToken.isExpired();
+    }
+
+    private void deleteExistsAccessToken(OAuth2AuthorizedAccessToken existsAccessToken) {
+        tokenRepository.delete(existsAccessToken);
+        tokenRepository.flush();
     }
 
     private static final class NullOAuth2TokenEnhancer implements OAuth2TokenEnhancer {
