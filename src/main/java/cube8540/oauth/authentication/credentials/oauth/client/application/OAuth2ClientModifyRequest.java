@@ -10,7 +10,7 @@ import java.util.List;
 
 @Value
 @RequiredArgsConstructor(onConstructor_ = @ConstructorProperties({
-        "clientName", "newRedirectUris", "removeRedirectUri", "newGrantTypes", "removeGrantTypes", "newScopes", "removeScopes"
+        "clientName", "newRedirectUris", "removeRedirectUri", "newGrantTypes", "removeGrantTypes", "newScopes", "removeScopes", "accessTokenValiditySeconds", "refreshTokenValiditySeconds"
 }))
 @ApiModel(value = "OAuth2 클라이언트 수정 정보")
 public class OAuth2ClientModifyRequest {
