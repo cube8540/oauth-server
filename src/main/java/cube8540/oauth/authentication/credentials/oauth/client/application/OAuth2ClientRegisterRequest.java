@@ -9,7 +9,9 @@ import java.beans.ConstructorProperties;
 import java.util.List;
 
 @Value
-@RequiredArgsConstructor(onConstructor_ = @ConstructorProperties({"clientId", "secret", "clientName", "redirectUris", "scopes", "grantTypes"}))
+@RequiredArgsConstructor(onConstructor_ = @ConstructorProperties({
+        "clientId", "secret", "clientName", "redirectUris", "scopes", "grantTypes", "accessTokenValiditySeconds", "refreshTokenValiditySeconds", "clientOwner"
+}))
 @ApiModel(value = "OAuth2 클라이언트 등록 정보")
 public class OAuth2ClientRegisterRequest {
 
