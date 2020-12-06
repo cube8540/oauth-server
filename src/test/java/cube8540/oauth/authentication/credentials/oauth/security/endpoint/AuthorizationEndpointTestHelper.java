@@ -73,7 +73,7 @@ public class AuthorizationEndpointTestHelper {
 
     static final Set<String> CLIENT_SCOPE = new HashSet<>(Arrays.asList("CLIENT-SCOPE-1", "CLIENT-SCOPE-2", "CLIENT-SCOPE-3"));
 
-    static final String RAW_USERNAME = "email@email.com";
+    static final String RAW_USERNAME = "username";
 
     static final String FORWARD_PAGE = "/forward";
 

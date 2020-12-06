@@ -27,7 +27,7 @@ class DefaultAccessTokenDetailsWithClientTest {
     private static final OAuth2ClientId CLIENT_ID = new OAuth2ClientId(RAW_CLIENT_ID);
     private static final String CLIENT_NAME = "CLIENT-NAME";
 
-    private static final String RAW_USERNAME = "email@email.com";
+    private static final String RAW_USERNAME = "username";
     private static final PrincipalUsername USERNAME = new PrincipalUsername(RAW_USERNAME);
 
     private static final LocalDateTime ISSUED_AT = LocalDateTime.of(2020, 3, 18, 18, 2);

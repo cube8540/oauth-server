@@ -4,7 +4,6 @@ create table if not exists initialize (
 
 create table if not exists `user` (
     username varchar(32) not null primary key,
-	email varchar(128) not null,
 	credentials_key_expiry_datetime datetime(6),
 	credentials_key varchar(32),
 	last_updated_at datetime(6) not null,
@@ -12,9 +11,7 @@ create table if not exists `user` (
 	password_credentials_key_expiry_datetime datetime(6),
 	password_credentials_key varchar(32),
 	is_credentials boolean not null default false,
-	registered_at datetime(6) not null,
-
-	unique key uk_user_email (email)
+	registered_at datetime(6) not null
 );
 
 create table if not exists oauth2_clients (

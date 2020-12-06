@@ -29,7 +29,7 @@ class TokenEndpointTestHelper {
     static final String RAW_CLIENT_ID = "CLIENT-ID";
     static final String RAW_DIFFERENT_CLIENT_ID = "DIFFERENT-CLIENT-ID";
 
-    static final String RAW_USERNAME = "email@email.com";
+    static final String RAW_USERNAME = "username";
     static final String RAW_PASSWORD = "Password1234!@#$";
 
     static final LocalDateTime EXPIRATION = LocalDateTime.of(2020, 2, 1, 22, 52);

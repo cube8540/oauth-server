@@ -1,6 +1,7 @@
 package cube8540.oauth.authentication.users.application;
 
 import cube8540.oauth.authentication.users.domain.User;
+import cube8540.oauth.authentication.users.domain.UserCredentialsKeyGenerator;
 import cube8540.oauth.authentication.users.domain.UserRepository;
 import cube8540.oauth.authentication.users.domain.UserValidatorFactory;
 import cube8540.oauth.authentication.users.domain.exception.UserErrorCodes;
@@ -11,15 +12,16 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.EMAIL;
 import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.ENCODED_PASSWORD;
 import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.PASSWORD;
+import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.RAW_CREDENTIALS_KEY;
 import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.RAW_USERNAME;
 import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.USERNAME;
 import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.makeCountingUserRepository;
 import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.makeDefaultUser;
 import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.makeEmptyUserRepository;
 import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.makeErrorValidatorFactory;
+import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.makeKeyGenerator;
 import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.makePasswordEncoder;
 import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.makeUserRegisterRequest;
 import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.makeUserRepository;
@@ -89,17 +91,19 @@ class DefaultUserManagementServiceTest {
         UserRepository repository = makeEmptyUserRepository();
         UserValidatorFactory factory = makeValidatorFactory();
         PasswordEncoder encoder = makePasswordEncoder(PASSWORD, ENCODED_PASSWORD);
+        UserCredentialsKeyGenerator keyGenerator = makeKeyGenerator(RAW_CREDENTIALS_KEY);
         UserRegisterRequest registerRequest = makeUserRegisterRequest();
 
         DefaultUserManagementService service = new DefaultUserManagementService(repository, encoder);
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         service.setValidatorFactory(factory);
+        service.setKeyGenerator(keyGenerator);
 
         service.registerUser(registerRequest);
         verify(repository, times(1)).save(userCaptor.capture());
         assertEquals(USERNAME, userCaptor.getValue().getUsername());
         assertEquals(ENCODED_PASSWORD, userCaptor.getValue().getPassword());
-        assertEquals(EMAIL, userCaptor.getValue().getEmail());
+        assertEquals(RAW_CREDENTIALS_KEY, userCaptor.getValue().getCredentialsKey().getKeyValue());
     }
 
     @Test

@@ -64,7 +64,7 @@ public class OAuth2ClientApplicationTestHelper {
     static final Integer MODIFY_ACCESS_TOKEN_VALIDITY_SECONDS = 60000;
     static final Integer MODIFY_REFRESH_TOKEN_VALIDITY_SECONDS = 600000;
 
-    static final String RAW_OWNER = "owner@email.com";
+    static final String RAW_OWNER = "owner";
     static final ClientOwner OWNER = new ClientOwner(RAW_OWNER);
 
     static OAuth2ClientRepository makeEmptyClientRepository() {

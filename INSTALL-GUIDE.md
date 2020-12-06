@@ -19,23 +19,6 @@ src/main/resources/application-example.yml의 파일명을 application.yml으로
 src/main/resources/application.yml
 
 spring:
-  mail:
-    default-encoding: UTF-8
-    host: smtp.server.com
-    username: username
-    password: password
-    port: 1111
-    properties:
-      mail:
-        smtp:
-          auth: true
-          connectiontimeout: 5000
-          timeout: 5000
-          writetimeout: 5000
-          starttls:
-            enable: true
-    protocol: smtp
-    test-connection: true
   datasource:
     hikari:
       username: testdb
@@ -70,14 +53,6 @@ oauth-resource-server:
 spring.datasource는 데이터베이스의 연결 정보가 설정되며 spring.datasource.platform은 서버 시작시 실행할 테이블 생성 스크립트와
 기본 설정 데이터 삽입 스크립트를 결정합니다. 현재 [mariadb](./src/main/resources/schema-mariadb.sql),
 [mysql](./src/main/resources/schema-mysql.sql), [h2](./src/main/resources/schema-h2.sql)를 지원 하고 있습니다.
-
-- spring.mail
-
-spring.mail 은 새 계정을 등록했을시 해당 계정에 인증키가 포함된 이메일을 발송하게 됩니다. 만약 이메일을 발송하고 싶지 않을시
-spring.mail 옵션은 지워주시면 됩니다. 이메일의 템플릿은 아래 HTML 파일을 수정하여 변경 하실 수 있습니다.
-
-
-[계정 인증키 발송 이메일 템플릿](src/main/resources/templates/email/user-generated-key-mail-template.html)
 
 - front.endpoint
 

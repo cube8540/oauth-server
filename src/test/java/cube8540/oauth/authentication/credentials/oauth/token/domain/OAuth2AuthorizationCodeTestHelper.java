@@ -24,7 +24,7 @@ class OAuth2AuthorizationCodeTestHelper {
 
     static final String RAW_DIFFERENT_CLIENT_ID = "DIFFERENT-CLIENT-ID";
 
-    static final String RAW_USERNAME = "email@email.com";
+    static final String RAW_USERNAME = "username";
     static final PrincipalUsername USERNAME = new PrincipalUsername(RAW_USERNAME);
 
     static final String STATE = "STATE";
