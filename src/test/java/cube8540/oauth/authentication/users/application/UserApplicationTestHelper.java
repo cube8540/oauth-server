@@ -3,7 +3,6 @@ package cube8540.oauth.authentication.users.application;
 import cube8540.oauth.authentication.users.domain.User;
 import cube8540.oauth.authentication.users.domain.UserCredentialsKey;
 import cube8540.oauth.authentication.users.domain.UserCredentialsKeyGenerator;
-import cube8540.oauth.authentication.users.domain.UserEmail;
 import cube8540.oauth.authentication.users.domain.UserKeyMatchedResult;
 import cube8540.oauth.authentication.users.domain.UserRepository;
 import cube8540.oauth.authentication.users.domain.UserValidatorFactory;
@@ -26,9 +25,6 @@ class UserApplicationTestHelper {
 
     static final String RAW_USERNAME = "username";
     static final Username USERNAME = new Username(RAW_USERNAME);
-
-    static final String RAW_EMAIL = "email@email.com";
-    static final UserEmail EMAIL = new UserEmail(RAW_EMAIL);
 
     static final String PASSWORD = "Password1234!@#$";
     static final String NEW_PASSWORD = "NewPassword1234!@#$";
@@ -67,7 +63,6 @@ class UserApplicationTestHelper {
         User user = mock(User.class);
 
         when(user.getUsername()).thenReturn(USERNAME);
-        when(user.getEmail()).thenReturn(EMAIL);
         when(user.getPassword()).thenReturn(PASSWORD);
 
         return user;
@@ -75,6 +70,14 @@ class UserApplicationTestHelper {
 
     static UserCredentialsKeyGenerator makeKeyGenerator() {
         return mock(UserCredentialsKeyGenerator.class);
+    }
+
+    static UserCredentialsKeyGenerator makeKeyGenerator(String key) {
+        UserCredentialsKeyGenerator generator = makeKeyGenerator();
+
+        when(generator.generateKey()).thenReturn(new UserCredentialsKey(key));
+
+        return generator;
     }
 
     static PasswordEncoder makePasswordEncoder(String rawPassword, String encodedPassword) {
@@ -87,7 +90,7 @@ class UserApplicationTestHelper {
     }
 
     static UserRegisterRequest makeUserRegisterRequest() {
-        return new UserRegisterRequest(RAW_USERNAME, RAW_EMAIL, PASSWORD);
+        return new UserRegisterRequest(RAW_USERNAME, PASSWORD);
     }
 
     static ChangePasswordRequest makeChangePasswordRequest() {

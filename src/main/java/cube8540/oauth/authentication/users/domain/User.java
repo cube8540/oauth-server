@@ -38,10 +38,6 @@ public class User extends AbstractAggregateRoot<User> {
     @AttributeOverride(name = "value", column = @Column(name = "username", length = 32))
     private Username username;
 
-    @Embedded
-    @AttributeOverride(name = "value", column = @Column(name = "email", length = 128, unique = true))
-    private UserEmail email;
-
     @Column(name = "password", length = 64, nullable = false)
     private String password;
 
@@ -70,9 +66,8 @@ public class User extends AbstractAggregateRoot<User> {
     @Column(name = "last_updated_at", nullable = false)
     private LocalDateTime lastUpdatedAt;
 
-    public User(String username, String email, String password) {
+    public User(String username, String password) {
         this.username = new Username(username);
-        this.email = new UserEmail(email);
         this.password = password;
         this.isCredentials = false;
         registerEvent(new UserRegisterEvent(this.username));
@@ -87,7 +82,6 @@ public class User extends AbstractAggregateRoot<User> {
             throw UserAuthorizationException.alreadyCredentials("This account is already certification");
         }
         this.credentialsKey = keyGenerator.generateKey();
-        registerEvent(new UserGeneratedCredentialsKeyEvent(username, email, credentialsKey));
     }
 
     public void credentials(String credentialsKey) {
@@ -108,7 +102,6 @@ public class User extends AbstractAggregateRoot<User> {
 
     public void forgotPassword(UserCredentialsKeyGenerator keyGenerator) {
         this.passwordCredentialsKey = keyGenerator.generateKey();
-        registerEvent(new UserGeneratedPasswordCredentialsKeyEvent(email, passwordCredentialsKey));
     }
 
     public void resetPassword(String passwordCredentialsKey, String changePassword) {

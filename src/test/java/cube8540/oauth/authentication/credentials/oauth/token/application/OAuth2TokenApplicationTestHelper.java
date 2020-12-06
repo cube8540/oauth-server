@@ -68,10 +68,10 @@ class OAuth2TokenApplicationTestHelper {
     static final String RAW_NEW_REFRESH_TOKEN_ID = "NEW-REFRESH-TOKEN-ID";
     static final OAuth2TokenId NEW_REFRESH_TOKEN_ID = new OAuth2TokenId(RAW_NEW_REFRESH_TOKEN_ID);
 
-    static final String RAW_USERNAME = "email@email.com";
+    static final String RAW_USERNAME = "username";
     static final PrincipalUsername USERNAME = new PrincipalUsername(RAW_USERNAME);
-    static final String RAW_DIFFERENT_USERNAME = "different@email.com";
-    static final String RAW_AUTHENTICATION_USERNAME = "auth@email.com";
+    static final String RAW_DIFFERENT_USERNAME = "different";
+    static final String RAW_AUTHENTICATION_USERNAME = "auth";
     static final PrincipalUsername AUTHENTICATION_USERNAME = new PrincipalUsername(RAW_AUTHENTICATION_USERNAME);
     static final String PASSWORD = "Password1234!@#$";
 

@@ -1,21 +1,4 @@
 spring:
-  mail:
-    default-encoding: UTF-8
-    host: #your smtp server
-    username: #your smtp server username
-    password: #your smtp server password
-    port: #your smtp port
-    properties:
-      mail:
-        smtp:
-          auth: true
-          connectiontimeout: 5000
-          timeout: 5000
-          writetimeout: 5000
-          starttls:
-            enable: true
-    protocol: smtp
-    test-connection: true
   datasource:
     hikari:
       username: #your database username

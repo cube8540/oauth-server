@@ -1,11 +1,13 @@
 package cube8540.oauth.authentication.users.application;
 
 import cube8540.oauth.authentication.users.domain.User;
+import cube8540.oauth.authentication.users.domain.UserCredentialsKeyGenerator;
 import cube8540.oauth.authentication.users.domain.UserRepository;
 import cube8540.oauth.authentication.users.domain.UserValidatorFactory;
 import cube8540.oauth.authentication.users.domain.Username;
 import cube8540.oauth.authentication.users.domain.exception.UserNotFoundException;
 import cube8540.oauth.authentication.users.domain.exception.UserRegisterException;
+import cube8540.oauth.authentication.users.infra.DefaultUserCredentialsKeyGenerator;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -21,6 +23,9 @@ public class DefaultUserManagementService implements UserManagementService {
 
     @Setter(onMethod_ = {@Autowired, @Qualifier("defaultUserValidatorFactory")})
     private UserValidatorFactory validatorFactory;
+
+    @Setter
+    private UserCredentialsKeyGenerator keyGenerator = new DefaultUserCredentialsKeyGenerator();
 
     @Autowired
     public DefaultUserManagementService(UserRepository repository, PasswordEncoder encoder) {
@@ -44,10 +49,14 @@ public class DefaultUserManagementService implements UserManagementService {
         if (repository.countByUsername(new Username(registerRequest.getUsername())) > 0) {
             throw UserRegisterException.existsIdentifier(registerRequest.getUsername() + " is exists");
         }
-        User registerUser = new User(registerRequest.getUsername(), registerRequest.getEmail(), registerRequest.getPassword());
+        User registerUser = new User(registerRequest.getUsername(), registerRequest.getPassword());
         registerUser.validation(validatorFactory);
         registerUser.encrypted(encoder);
-        return UserProfile.of(repository.save(registerUser));
+        registerUser.generateCredentialsKey(keyGenerator);
+
+        UserProfile profile = UserProfile.of(repository.save(registerUser));
+        profile.setCredentialsKey(registerUser.getCredentialsKey().getKeyValue());
+        return profile;
     }
 
     @Override

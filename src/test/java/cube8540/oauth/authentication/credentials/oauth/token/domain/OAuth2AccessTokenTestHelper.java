@@ -16,7 +16,7 @@ class OAuth2AccessTokenTestHelper {
     static final String RAW_REFRESH_TOKEN_ID = "REFRESH-TOKEN-ID";
     static final OAuth2TokenId REFRESH_TOKEN_ID = new OAuth2TokenId(RAW_REFRESH_TOKEN_ID);
 
-    static final String RAW_USERNAME = "email@email.com";
+    static final String RAW_USERNAME = "username";
     static final PrincipalUsername USERNAME = new PrincipalUsername(RAW_USERNAME);
 
     static final String RAW_CLIENT_ID = "CLIENT-ID";
