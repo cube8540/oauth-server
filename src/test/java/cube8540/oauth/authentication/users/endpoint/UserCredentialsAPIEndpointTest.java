@@ -12,8 +12,7 @@ import static org.mockito.Mockito.verify;
 @DisplayName("유저 인증 API 엔드포인트 테스트")
 class UserCredentialsAPIEndpointTest {
 
-    private static final String EMAIL = "email@email.com";
-
+    private static final String USERNAME = "username";
     private static final String CREDENTIALS_KEY = "CREDENTIALS-KEY";
 
     private UserCredentialsService service;
@@ -28,8 +27,8 @@ class UserCredentialsAPIEndpointTest {
     @Test
     @DisplayName("계정 활성화")
     void userAccountActive() {
-        endpoint.credentials(EMAIL ,CREDENTIALS_KEY);
+        endpoint.credentials(USERNAME,CREDENTIALS_KEY);
 
-        verify(service, times(1)).accountCredentials(EMAIL, CREDENTIALS_KEY);
+        verify(service, times(1)).accountCredentials(USERNAME, CREDENTIALS_KEY);
     }
 }

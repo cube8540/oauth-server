@@ -17,8 +17,6 @@ class UserTestHelper {
 
     static final String RAW_USERNAME = "username1234";
 
-    static final String RAW_EMAIL = "email@email.com";
-
     static final String PASSWORD = "Password1234!@#$";
     static final String CHANGE_PASSWORD = "ChangePassword123$!@#$";
     static final String ENCRYPTED_PASSWORD = "$2a$10$MrsAcjEPfD4ktbWEb13SBu.lE2OfGWZ2NPqgUoSTeWA7bvh9.k3WC";

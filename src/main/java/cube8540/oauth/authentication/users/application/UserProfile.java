@@ -3,24 +3,26 @@ package cube8540.oauth.authentication.users.application;
 import cube8540.oauth.authentication.users.domain.User;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.Value;
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDateTime;
 
-@Value
+@Data
+@RequiredArgsConstructor
 @ApiModel(value = "유저 계정 정보")
 public class UserProfile {
 
     @ApiModelProperty(value = "유저 아이디", example = "username1234")
-    String username;
-
-    @ApiModelProperty(value = "유저 이메일", example = "email@email.com")
-    String email;
+    private final String username;
 
     @ApiModelProperty(value = "유저 등록일", example = "2020-05-18T05:13:00")
-    LocalDateTime registeredAt;
+    private final LocalDateTime registeredAt;
+
+    @ApiModelProperty(value = "계정 인증키", example = "xxxxxxxxxxxxxx")
+    private String credentialsKey;
 
     public static UserProfile of(User user) {
-        return new UserProfile(user.getUsername().getValue(), user.getEmail().getValue(), user.getRegisteredAt());
+        return new UserProfile(user.getUsername().getValue(), user.getRegisteredAt());
     }
 }

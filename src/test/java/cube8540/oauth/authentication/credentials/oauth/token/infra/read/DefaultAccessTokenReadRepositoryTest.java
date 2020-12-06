@@ -19,7 +19,7 @@ import static org.mockito.Mockito.when;
 @DisplayName("기본 검색 리파지토리 테스트")
 class DefaultAccessTokenReadRepositoryTest {
 
-    private static final String RAW_USERNAME = "email@email.com";
+    private static final String RAW_USERNAME = "username";
 
     @Test
     @DisplayName("액세스 토큰, 클라이언트 검색")
