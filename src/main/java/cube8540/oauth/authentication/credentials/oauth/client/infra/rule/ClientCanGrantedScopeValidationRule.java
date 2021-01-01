@@ -44,7 +44,7 @@ public class ClientCanGrantedScopeValidationRule implements ValidationRule<OAuth
         if (target.getScopes() == null || target.getScopes().isEmpty()) {
             return false;
         }
-        Set<AuthorityCode> accessibleScopes = scopeDetailsService.loadAllScopes()
+        Set<AuthorityCode> accessibleScopes = scopeDetailsService.loadScopes()
                 .stream().map(AuthorityDetails::getCode)
                 .map(AuthorityCode::new).collect(Collectors.toSet());
         return accessibleScopes.containsAll(target.getScopes());

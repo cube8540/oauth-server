@@ -27,8 +27,7 @@ create table if not exists oauth2_clients (
 
 create table if not exists oauth2_scope (
 	scope_id varchar(32) not null primary key,
-	description varchar(64),
-	is_secured boolean not null default false
+	description varchar(64)
 );
 
 create table if not exists oauth2_access_token (

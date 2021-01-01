@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -44,14 +43,8 @@ public class DefaultScopeDetailsService implements OAuth2ScopeManagementService 
     }
 
     @Override
-    public Collection<AuthorityDetails> loadAllScopes() {
+    public Collection<AuthorityDetails> loadScopes() {
         return repository.findAll().stream().map(DefaultOAuth2ScopeDetails::of).collect(Collectors.toList());
-    }
-
-    @Override
-    public Collection<AuthorityDetails> loadPublicScopes() {
-        return repository.findAll().stream().filter(scope -> !scope.isSecured())
-                .map(DefaultOAuth2ScopeDetails::of).collect(Collectors.toList());
     }
 
     @Override
@@ -62,7 +55,6 @@ public class DefaultScopeDetailsService implements OAuth2ScopeManagementService 
         }
 
         OAuth2Scope scope = new OAuth2Scope(registerRequest.getScopeId(), registerRequest.getDescription());
-        scope.setSecured(Optional.ofNullable(registerRequest.getSecured()).orElse(Boolean.TRUE));
         scope.validate(validatorFactory);
         return DefaultOAuth2ScopeDetails.of(repository.save(scope));
     }
@@ -73,7 +65,6 @@ public class DefaultScopeDetailsService implements OAuth2ScopeManagementService 
         OAuth2Scope scope = getScope(scopeId);
 
         scope.setDescription(modifyRequest.getDescription());
-        Optional.ofNullable(modifyRequest.getSecured()).ifPresent(scope::setSecured);
         scope.validate(validatorFactory);
         return DefaultOAuth2ScopeDetails.of(repository.save(scope));
     }

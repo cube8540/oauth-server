@@ -32,7 +32,6 @@ class ScopeApplicationTestHelper {
 
         when(scope.getCode()).thenReturn(SCOPE_ID);
         when(scope.getDescription()).thenReturn(DESCRIPTION);
-        when(scope.isSecured()).thenReturn(SECURED);
 
         return scope;
     }
