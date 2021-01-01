@@ -8,14 +8,11 @@ import lombok.Value;
 import java.beans.ConstructorProperties;
 
 @Value
-@RequiredArgsConstructor(onConstructor_ = @ConstructorProperties({"description", "secured"}))
+@RequiredArgsConstructor(onConstructor_ = @ConstructorProperties({"description"}))
 @ApiModel(value = "스코프 수정 정보")
 public class OAuth2ScopeModifyRequest {
 
     @ApiModelProperty(value = "수정할 스코프 설명", required = true, example = "change description")
     String description;
-
-    @ApiModelProperty(value = "수정할 스코프 보호 여부", required = true, example = "true")
-    Boolean secured;
 
 }

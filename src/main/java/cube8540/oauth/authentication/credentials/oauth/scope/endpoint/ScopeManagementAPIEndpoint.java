@@ -53,20 +53,7 @@ public class ScopeManagementAPIEndpoint {
             @ApiResponse(code = 500, message = "서버에서 알 수 없는 에러가 발생 했습니다.")
     })
     public Map<String, Collection<AuthorityDetails>> scopes() {
-        Collection<AuthorityDetails> scopes = managementService.loadPublicScopes();
-        return Collections.singletonMap("scopes", scopes);
-    }
-
-    @GetMapping(value = "/api/authorized-scopes")
-    @ApiOperation(value = "모든 스코프 검색", notes = "모든 스코프를 반환 합니다.")
-    @ApiImplicitParam(value = "OAuth2 엑세스 토큰", name = "Authorization", required = true, paramType = "header", example = "Bearer xxxxxxxxxx")
-    @ApiResponses(value = {
-            @ApiResponse(code = 401, message = "잘못된 OAuth2 엑세스 토큰 입니다."),
-            @ApiResponse(code = 403, message = "로그인이 되어 있지 않습니다."),
-            @ApiResponse(code = 500, message = "서버에서 알 수 없는 에러가 발생 했습니다.")
-    })
-    public Map<String, Collection<AuthorityDetails>> protectedScopes() {
-        Collection<AuthorityDetails> scopes = managementService.loadAllScopes();
+        Collection<AuthorityDetails> scopes = managementService.loadScopes();
         return Collections.singletonMap("scopes", scopes);
     }
 

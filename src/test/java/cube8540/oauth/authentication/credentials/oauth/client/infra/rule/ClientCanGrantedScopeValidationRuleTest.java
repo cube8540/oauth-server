@@ -74,7 +74,7 @@ class ClientCanGrantedScopeValidationRuleTest {
         Set<AuthorityCode> clientScopes = new HashSet<>(Arrays.asList(new AuthorityCode("SCOPE-1"), new AuthorityCode("SCOPE-2"), new AuthorityCode("SCOPE-6")));
 
         when(client.getScopes()).thenReturn(clientScopes);
-        when(service.loadAllScopes()).thenReturn(scopes);
+        when(service.loadScopes()).thenReturn(scopes);
         rule.setScopeDetailsService(service);
 
         assertFalse(rule.isValid(client));
@@ -89,7 +89,7 @@ class ClientCanGrantedScopeValidationRuleTest {
         Set<AuthorityCode> clientScopes = new HashSet<>(Arrays.asList(new AuthorityCode("SCOPE-1"), new AuthorityCode("SCOPE-2"), new AuthorityCode("SCOPE-3")));
 
         when(client.getScopes()).thenReturn(clientScopes);
-        when(service.loadAllScopes()).thenReturn(scopes);
+        when(service.loadScopes()).thenReturn(scopes);
         rule.setScopeDetailsService(service);
 
         assertTrue(rule.isValid(client));
