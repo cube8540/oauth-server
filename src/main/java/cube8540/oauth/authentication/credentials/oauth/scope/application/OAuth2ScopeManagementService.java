@@ -9,9 +9,7 @@ public interface OAuth2ScopeManagementService extends AuthorityDetailsService {
 
     Long countByScopeId(String scopeId);
 
-    Collection<AuthorityDetails> loadAllScopes();
-
-    Collection<AuthorityDetails> loadPublicScopes();
+    Collection<AuthorityDetails> loadScopes();
 
     AuthorityDetails registerNewScope(OAuth2ScopeRegisterRequest registerRequest);
 
