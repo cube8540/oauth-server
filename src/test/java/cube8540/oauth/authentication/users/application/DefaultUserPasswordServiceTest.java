@@ -2,9 +2,9 @@ package cube8540.oauth.authentication.users.application;
 
 import cube8540.oauth.authentication.users.domain.User;
 import cube8540.oauth.authentication.users.domain.UserCredentialsKeyGenerator;
+import cube8540.oauth.authentication.users.domain.UserNotFoundException;
 import cube8540.oauth.authentication.users.domain.UserRepository;
 import cube8540.oauth.authentication.users.domain.UserValidatorFactory;
-import cube8540.oauth.authentication.users.domain.exception.UserNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
@@ -110,6 +110,19 @@ class DefaultUserPasswordServiceTest {
     @Test
     @DisplayName("만료된 인증키 검사")
     void validateToExpiredCredentialsKey() {
+        User user = makeExpiredPasswordCredentialsKeyUser();
+        UserRepository repository = makeUserRepository(USERNAME, user);
+        PasswordEncoder encoder = makePasswordEncoder(PASSWORD, ENCODED_PASSWORD);
+
+        DefaultUserPasswordService service = new DefaultUserPasswordService(repository, encoder);
+
+        boolean validate = service.validateCredentialsKey(RAW_USERNAME, RAW_PASSWORD_CREDENTIALS_KEY);
+        assertFalse(validate);
+    }
+
+    @Test
+    @DisplayName("할당 되지 않은 인증키 검사")
+    void validateToNotGeneratedKey() {
         User user = makeExpiredPasswordCredentialsKeyUser();
         UserRepository repository = makeUserRepository(USERNAME, user);
         PasswordEncoder encoder = makePasswordEncoder(PASSWORD, ENCODED_PASSWORD);

@@ -129,7 +129,7 @@ class UserApplicationTestHelper {
     static User makeNotCertifiedUser() {
         User user = makeDefaultUser();
 
-        when(user.isCredentials()).thenReturn(false);
+        when(user.getCredentialed()).thenReturn(false);
 
         return user;
     }
@@ -137,7 +137,15 @@ class UserApplicationTestHelper {
     static User makeCertifiedUser() {
         User user = makeDefaultUser();
 
-        when(user.isCredentials()).thenReturn(true);
+        when(user.getCredentialed()).thenReturn(true);
+
+        return user;
+    }
+
+    static User makeNotGeneratedPasswordCredentialsKeyUser() {
+        User user = makeDefaultUser();
+
+        when(user.getPasswordCredentialsKey()).thenReturn(null);
 
         return user;
     }

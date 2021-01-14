@@ -3,17 +3,23 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     val kotlinVersion = "1.4.21"
 
-    id("org.jetbrains.kotlin.jvm") version kotlinVersion
-    id("org.jetbrains.kotlin.kapt") version kotlinVersion
-
-    id("java")
-
     id("org.springframework.boot") version "2.2.2.RELEASE"
     id("io.spring.dependency-management") version "1.0.8.RELEASE"
-    id("org.jetbrains.kotlin.plugin.spring") version kotlinVersion
+
+    kotlin("jvm") version kotlinVersion
+    kotlin("kapt") version kotlinVersion
+    kotlin("plugin.spring") version kotlinVersion
+    kotlin("plugin.jpa") version kotlinVersion
+    kotlin("plugin.allopen") version kotlinVersion
 
     id("org.sonarqube") version "2.7"
     id("jacoco")
+}
+
+allOpen {
+    annotation("javax.persistence.Entity")
+    annotation("javax.persistence.MappedSuperclass")
+    annotation("javax.persistence.Embeddable")
 }
 
 jacoco {
@@ -43,7 +49,7 @@ sonarqube {
     }
 }
 
-tasks.jacocoTestReport {
+tasks.withType<JacocoReport> {
     reports {
         xml.isEnabled = true
         csv.isEnabled = false
@@ -53,7 +59,7 @@ tasks.jacocoTestReport {
     finalizedBy("jacocoTestCoverageVerification")
 }
 
-tasks.test {
+tasks.withType<Test> {
     extensions.configure(JacocoTaskExtension::class) {
         setDestinationFile(file("${buildDir}/jacoco/jacoco.exec"))
     }
@@ -62,7 +68,18 @@ tasks.test {
     finalizedBy("jacocoTestReport")
 }
 
+tasks.withType<KotlinCompile> {
+    kotlinOptions {
+        freeCompilerArgs = listOf("-Xjsr305=strict")
+        jvmTarget = "11"
+    }
+}
+
 dependencies {
+    implementation("org.jetbrains.kotlin:kotlin-reflect")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    implementation("org.jetbrains.kotlin:kotlin-noarg")
+
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
@@ -90,6 +107,8 @@ dependencies {
 
     implementation("org.apache.commons:commons-text:1.8")
     implementation("cube8540.validator:validator-core:1.1.1")
+
+    implementation("org.mockito:mockito-inline:2.21.0")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")

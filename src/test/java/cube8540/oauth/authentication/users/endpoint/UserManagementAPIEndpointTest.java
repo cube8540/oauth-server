@@ -1,7 +1,7 @@
 package cube8540.oauth.authentication.users.endpoint;
 
+import cube8540.oauth.authentication.users.application.RegisteredUserProfile;
 import cube8540.oauth.authentication.users.application.UserManagementService;
-import cube8540.oauth.authentication.users.application.UserProfile;
 import cube8540.oauth.authentication.users.application.UserRegisterRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -19,6 +19,7 @@ class UserManagementAPIEndpointTest {
 
     private static final String USERNAME = "username";
     private static final String PASSWORD = "Password1234!@#$";
+    private static final String CREDENTIALS_KEY = "CREDENTIALS_KEY";
 
     private static final LocalDateTime REGISTERED_DATE_TIME = LocalDateTime.of(2020, 2, 24, 0, 34, 0);
 
@@ -35,7 +36,7 @@ class UserManagementAPIEndpointTest {
     @DisplayName("새 유저 추가")
     void registerNewUser() {
         UserRegisterRequest request = new UserRegisterRequest(USERNAME, PASSWORD);
-        UserProfile userProfile = new UserProfile(USERNAME, REGISTERED_DATE_TIME);
+        RegisteredUserProfile userProfile = new RegisteredUserProfile(USERNAME, REGISTERED_DATE_TIME, CREDENTIALS_KEY);
 
         when(service.registerUser(request)).thenReturn(userProfile);
 
