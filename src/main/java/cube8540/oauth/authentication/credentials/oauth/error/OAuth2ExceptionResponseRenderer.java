@@ -9,6 +9,7 @@ import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.context.request.ServletWebRequest;
 
+import java.io.IOException;
 import java.util.Objects;
 
 public class OAuth2ExceptionResponseRenderer implements ExceptionResponseRenderer<OAuth2Error> {
@@ -33,7 +34,7 @@ public class OAuth2ExceptionResponseRenderer implements ExceptionResponseRendere
     }
 
     @Override
-    public void rendering(ResponseEntity<OAuth2Error> responseEntity, ServletWebRequest webRequest) throws Exception {
+    public void rendering(ResponseEntity<OAuth2Error> responseEntity, ServletWebRequest webRequest) throws IOException {
         if (responseEntity == null) {
             return;
         }
