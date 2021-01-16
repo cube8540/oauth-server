@@ -1,6 +1,5 @@
 package cube8540.oauth.authentication.credentials.resource.domain;
 
-import cube8540.oauth.authentication.credentials.resource.domain.exception.ResourceInvalidException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
