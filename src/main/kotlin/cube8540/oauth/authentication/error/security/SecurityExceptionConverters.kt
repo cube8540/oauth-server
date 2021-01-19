@@ -26,7 +26,7 @@ class AccessDeniedExceptionResponseRenderer(private val messageConverter: HttpMe
             }
 
             val body = responseEntity.body
-            if (body !== null) {
+            if (body != null) {
                 messageConverter.write(body, MediaType.APPLICATION_JSON, output)
             } else {
                 output.body.let {  }

@@ -68,7 +68,7 @@ class User private constructor(
     }
 
     fun credentials(key: String) {
-        if (this.credentialsKey === null) {
+        if (this.credentialsKey == null) {
             throw UserAuthorizationException.invalidKey("Key is not matched")
         }
         assertMatchedResult(this.credentialsKey!!.matches(key))
@@ -88,7 +88,7 @@ class User private constructor(
     }
 
     fun resetPassword(passwordCredentialsKey: String, changePassword: String) {
-        if (this.passwordCredentialsKey === null) {
+        if (this.passwordCredentialsKey == null) {
             throw UserAuthorizationException.invalidKey("Key is not matched")
         }
         assertMatchedResult(this.passwordCredentialsKey!!.matches(passwordCredentialsKey))
@@ -101,17 +101,16 @@ class User private constructor(
     }
 
     private fun assertMatchedResult(result: UserKeyMatchedResult) {
-        if (result === UserKeyMatchedResult.NOT_MATCHED) {
+        if (result == UserKeyMatchedResult.NOT_MATCHED) {
             throw UserAuthorizationException.invalidKey("Key is not matched")
-        } else if (result === UserKeyMatchedResult.EXPIRED) {
+        } else if (result == UserKeyMatchedResult.EXPIRED) {
             throw UserAuthorizationException.keyExpired("Key is expired")
         }
     }
 
     override fun equals(other: Any?): Boolean = when {
-        other === null -> false
-        other === this -> true
-        other is User && other.username === this.username -> true
+        other == null -> false
+        other is User && other.username == this.username -> true
         else -> false
     }
 

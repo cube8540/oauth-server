@@ -43,7 +43,7 @@ class SecuredResource(
     }
 
     fun addAuthority(code: String) {
-        if (authorities === null) {
+        if (authorities == null) {
             authorities = HashSet()
         }
         authorities!!.add(AccessibleAuthority(code))
@@ -52,7 +52,7 @@ class SecuredResource(
     }
 
     fun removeAuthority(code: String) {
-        if (authorities !== null) {
+        if (authorities != null) {
             authorities!!.remove(AccessibleAuthority(code))
             registerSecuredResourceChangedEvent()
         }
@@ -71,8 +71,7 @@ class SecuredResource(
 
     override fun equals(other: Any?): Boolean = when {
         other == null -> false
-        other == this -> true
-        other is SecuredResource && other.resourceId === this.resourceId -> true
+        other is SecuredResource && other.resourceId == this.resourceId -> true
         else -> false
     }
 

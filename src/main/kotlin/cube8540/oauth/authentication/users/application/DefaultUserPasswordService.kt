@@ -48,7 +48,7 @@ class DefaultUserPasswordService @Autowired constructor(
     override fun validateCredentialsKey(username: String, credentialsKey: String): Boolean {
         val user = getUser(username)
 
-        return user.passwordCredentialsKey?.matches(credentialsKey) === UserKeyMatchedResult.MATCHED
+        return user.passwordCredentialsKey?.matches(credentialsKey) == UserKeyMatchedResult.MATCHED
     }
 
     @Transactional
