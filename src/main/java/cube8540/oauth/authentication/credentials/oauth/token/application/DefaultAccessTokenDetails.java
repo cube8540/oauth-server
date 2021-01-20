@@ -54,4 +54,9 @@ public class DefaultAccessTokenDetails implements OAuth2AccessTokenDetails {
         builder.additionalInformation(Optional.ofNullable(accessToken.getAdditionalInformation()).orElse(null));
         return builder.build();
     }
+
+    @Override
+    public boolean getExpired() {
+        return isExpired;
+    }
 }

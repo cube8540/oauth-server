@@ -1,7 +1,6 @@
 package cube8540.oauth.authentication.credentials.oauth.client.application;
 
 import cube8540.oauth.authentication.credentials.AuthorityCode;
-import cube8540.oauth.authentication.credentials.oauth.OAuth2Utils;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.ClientOwner;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2Client;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.OAuth2ClientId;
@@ -21,6 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.net.URI;
 import java.util.Optional;
+
+import static cube8540.oauth.authentication.credentials.oauth.OAuth2UtilsKt.extractGrantType;
 
 @Service
 public class DefaultOAuth2ClientManagementService implements OAuth2ClientManagementService {
@@ -64,7 +65,7 @@ public class DefaultOAuth2ClientManagementService implements OAuth2ClientManagem
         client.setClientName(registerRequest.getClientName());
         client.setOwner(new ClientOwner(registerRequest.getClientOwner()));
         Optional.ofNullable(registerRequest.getGrantTypes())
-                .ifPresent(grantType -> grantType.forEach(grant -> client.addGrantType(OAuth2Utils.extractGrantType(grant))));
+                .ifPresent(grantType -> grantType.forEach(grant -> client.addGrantType(extractGrantType(grant))));
         Optional.ofNullable(registerRequest.getScopes())
                 .ifPresent(scope -> scope.forEach(s -> client.addScope(new AuthorityCode(s))));
         Optional.ofNullable(registerRequest.getRedirectUris())
@@ -89,9 +90,9 @@ public class DefaultOAuth2ClientManagementService implements OAuth2ClientManagem
         Optional.ofNullable(modifyRequest.getNewRedirectUris())
                 .ifPresent(redirectUri -> redirectUri.forEach(uri -> client.addRedirectUri(URI.create(uri))));
         Optional.ofNullable(modifyRequest.getRemoveGrantTypes())
-                .ifPresent(grantType -> grantType.forEach(grant -> client.removeGrantType(OAuth2Utils.extractGrantType(grant))));
+                .ifPresent(grantType -> grantType.forEach(grant -> client.removeGrantType(extractGrantType(grant))));
         Optional.ofNullable(modifyRequest.getNewGrantTypes())
-                .ifPresent(grantType -> grantType.forEach(grant -> client.addGrantType(OAuth2Utils.extractGrantType(grant))));
+                .ifPresent(grantType -> grantType.forEach(grant -> client.addGrantType(extractGrantType(grant))));
         Optional.ofNullable(modifyRequest.getRemoveScopes())
                 .ifPresent(scope -> scope.forEach(s -> client.removeScope(new AuthorityCode(s))));
         Optional.ofNullable(modifyRequest.getNewScopes())

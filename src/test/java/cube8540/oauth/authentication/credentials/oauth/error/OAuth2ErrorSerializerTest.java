@@ -2,7 +2,7 @@ package cube8540.oauth.authentication.credentials.oauth.error;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import cube8540.oauth.authentication.credentials.oauth.OAuth2Utils;
+import cube8540.oauth.authentication.credentials.oauth.ErrorMessageKey;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -46,7 +46,7 @@ class OAuth2ErrorSerializerTest {
     void shouldWriteErrorCodeInJsonGenerator() throws Exception {
         serializer.serialize(error, jsonGenerator, provider);
 
-        verify(jsonGenerator, times(1)).writeStringField(OAuth2Utils.ErrorMessageKey.ERROR, ERROR_CODE);
+        verify(jsonGenerator, times(1)).writeStringField(ErrorMessageKey.ERROR, ERROR_CODE);
     }
 
     @Test
@@ -54,7 +54,7 @@ class OAuth2ErrorSerializerTest {
     void shouldWriteErrorDescriptionInJsonGenerator() throws Exception {
         serializer.serialize(error, jsonGenerator, provider);
 
-        verify(jsonGenerator, times(1)).writeStringField(OAuth2Utils.ErrorMessageKey.DESCRIPTION, ERROR_DESCRIPTION);
+        verify(jsonGenerator, times(1)).writeStringField(ErrorMessageKey.DESCRIPTION, ERROR_DESCRIPTION);
     }
 
     @Test

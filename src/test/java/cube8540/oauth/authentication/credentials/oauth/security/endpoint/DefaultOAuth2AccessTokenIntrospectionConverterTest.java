@@ -1,6 +1,6 @@
 package cube8540.oauth.authentication.credentials.oauth.security.endpoint;
 
-import cube8540.oauth.authentication.credentials.oauth.OAuth2Utils;
+import cube8540.oauth.authentication.credentials.oauth.AccessTokenIntrospectionKey;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AccessTokenDetails;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -30,10 +30,10 @@ class DefaultOAuth2AccessTokenIntrospectionConverterTest {
         when(accessToken.getUsername()).thenReturn(null);
 
         Map<String, Object> result = converter.convertAccessToken(accessToken);
-        assertEquals(RAW_CLIENT_ID, result.get(OAuth2Utils.AccessTokenIntrospectionKey.CLIENT_ID));
-        assertEquals(EXPIRATION.atZone(DEFAULT_TIME_ZONE.toZoneId()).toEpochSecond(), result.get(OAuth2Utils.AccessTokenIntrospectionKey.EXPIRATION));
-        assertEquals(String.join(" ", RAW_SCOPES), result.get(OAuth2Utils.AccessTokenIntrospectionKey.SCOPE));
-        assertNull(result.get(OAuth2Utils.AccessTokenIntrospectionKey.USERNAME));
+        assertEquals(RAW_CLIENT_ID, result.get(AccessTokenIntrospectionKey.CLIENT_ID));
+        assertEquals(EXPIRATION.atZone(DEFAULT_TIME_ZONE.toZoneId()).toEpochSecond(), result.get(AccessTokenIntrospectionKey.EXPIRATION));
+        assertEquals(String.join(" ", RAW_SCOPES), result.get(AccessTokenIntrospectionKey.SCOPE));
+        assertNull(result.get(AccessTokenIntrospectionKey.USERNAME));
     }
 
     @Test
@@ -42,13 +42,13 @@ class DefaultOAuth2AccessTokenIntrospectionConverterTest {
         OAuth2AccessTokenDetails accessToken = makeAccessTokenDetails();
         DefaultOAuth2AccessTokenIntrospectionConverter converter = new DefaultOAuth2AccessTokenIntrospectionConverter();
 
-        when(accessToken.isExpired()).thenReturn(true);
+        when(accessToken.getExpired()).thenReturn(true);
 
         Map<String, Object> result = converter.convertAccessToken(accessToken);
-        assertEquals(RAW_CLIENT_ID, result.get(OAuth2Utils.AccessTokenIntrospectionKey.CLIENT_ID));
-        assertEquals(EXPIRATION.atZone(DEFAULT_TIME_ZONE.toZoneId()).toEpochSecond(), result.get(OAuth2Utils.AccessTokenIntrospectionKey.EXPIRATION));
-        assertEquals(String.join(" ", RAW_SCOPES), result.get(OAuth2Utils.AccessTokenIntrospectionKey.SCOPE));
-        assertEquals(RAW_USERNAME, result.get(OAuth2Utils.AccessTokenIntrospectionKey.USERNAME));
-        assertFalse(Boolean.parseBoolean(result.get(OAuth2Utils.AccessTokenIntrospectionKey.ACTIVE).toString()));
+        assertEquals(RAW_CLIENT_ID, result.get(AccessTokenIntrospectionKey.CLIENT_ID));
+        assertEquals(EXPIRATION.atZone(DEFAULT_TIME_ZONE.toZoneId()).toEpochSecond(), result.get(AccessTokenIntrospectionKey.EXPIRATION));
+        assertEquals(String.join(" ", RAW_SCOPES), result.get(AccessTokenIntrospectionKey.SCOPE));
+        assertEquals(RAW_USERNAME, result.get(AccessTokenIntrospectionKey.USERNAME));
+        assertFalse(Boolean.parseBoolean(result.get(AccessTokenIntrospectionKey.ACTIVE).toString()));
     }
 }

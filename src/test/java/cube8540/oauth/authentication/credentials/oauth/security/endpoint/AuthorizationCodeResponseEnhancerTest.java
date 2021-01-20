@@ -1,6 +1,6 @@
 package cube8540.oauth.authentication.credentials.oauth.security.endpoint;
 
-import cube8540.oauth.authentication.credentials.oauth.OAuth2Utils;
+import cube8540.oauth.authentication.credentials.oauth.AuthorizationResponseKey;
 import cube8540.oauth.authentication.credentials.oauth.security.AuthorizationRequest;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AuthorizationCodeGenerator;
 import org.junit.jupiter.api.DisplayName;
@@ -52,7 +52,7 @@ class AuthorizationCodeResponseEnhancerTest {
         ModelAndView modelAndView = mock(ModelAndView.class);
         enhancer.enhance(modelAndView, request);
         verify(generator, times(1)).generateNewAuthorizationCode(request);
-        verify(modelAndView, times(1)).addObject(OAuth2Utils.AuthorizationResponseKey.CODE, RAW_AUTHORIZATION_CODE);
+        verify(modelAndView, times(1)).addObject(AuthorizationResponseKey.CODE, RAW_AUTHORIZATION_CODE);
     }
 
     @Test
@@ -67,8 +67,8 @@ class AuthorizationCodeResponseEnhancerTest {
 
         ModelAndView modelAndView = mock(ModelAndView.class);
         enhancer.enhance(modelAndView, request);
-        verify(modelAndView, never()).addObject(eq(OAuth2Utils.AuthorizationResponseKey.STATE), anyString());
-        verify(modelAndView, never()).addObject(OAuth2Utils.AuthorizationResponseKey.STATE, null);
+        verify(modelAndView, never()).addObject(eq(AuthorizationResponseKey.STATE), anyString());
+        verify(modelAndView, never()).addObject(AuthorizationResponseKey.STATE, null);
     }
 
     @Test
@@ -83,7 +83,7 @@ class AuthorizationCodeResponseEnhancerTest {
 
         ModelAndView modelAndView = mock(ModelAndView.class);
         enhancer.enhance(modelAndView, request);
-        verify(modelAndView, times(1)).addObject(OAuth2Utils.AuthorizationResponseKey.STATE, STATE);
+        verify(modelAndView, times(1)).addObject(AuthorizationResponseKey.STATE, STATE);
     }
 
     @Test

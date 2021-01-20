@@ -26,4 +26,9 @@ public class DefaultRefreshTokenDetails implements OAuth2RefreshTokenDetails {
                 .isExpired(refreshToken.isExpired())
                 .expiresIn(refreshToken.expiresIn()).build();
     }
+
+    @Override
+    public boolean getExpired() {
+        return isExpired;
+    }
 }

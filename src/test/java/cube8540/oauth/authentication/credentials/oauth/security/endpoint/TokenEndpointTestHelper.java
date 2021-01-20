@@ -1,6 +1,6 @@
 package cube8540.oauth.authentication.credentials.oauth.security.endpoint;
 
-import cube8540.oauth.authentication.credentials.oauth.OAuth2Utils;
+import cube8540.oauth.authentication.credentials.oauth.TokenRequestKey;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AccessTokenDetails;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AccessTokenDetailsService;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AccessTokenGranter;
@@ -79,7 +79,7 @@ class TokenEndpointTestHelper {
         when(token.getUsername()).thenReturn(RAW_USERNAME);
         when(token.getExpiration()).thenReturn(EXPIRATION);
         when(token.getScopes()).thenReturn(RAW_SCOPES);
-        when(token.isExpired()).thenReturn(false);
+        when(token.getExpired()).thenReturn(false);
 
         return token;
     }
@@ -102,13 +102,13 @@ class TokenEndpointTestHelper {
     static Map<String, String> makeRequestMap() {
         Map<String, String> map = new HashMap<>();
 
-        map.put(OAuth2Utils.TokenRequestKey.GRANT_TYPE, GRANT_TYPE);
-        map.put(OAuth2Utils.TokenRequestKey.USERNAME, RAW_USERNAME);
-        map.put(OAuth2Utils.TokenRequestKey.PASSWORD, RAW_PASSWORD);
-        map.put(OAuth2Utils.TokenRequestKey.CLIENT_ID, RAW_CLIENT_ID);
-        map.put(OAuth2Utils.TokenRequestKey.CODE, RAW_CODE);
-        map.put(OAuth2Utils.TokenRequestKey.REDIRECT_URI, REDIRECT_URI.toString());
-        map.put(OAuth2Utils.TokenRequestKey.SCOPE, String.join(" ", RAW_SCOPES));
+        map.put(TokenRequestKey.GRANT_TYPE, GRANT_TYPE);
+        map.put(TokenRequestKey.USERNAME, RAW_USERNAME);
+        map.put(TokenRequestKey.PASSWORD, RAW_PASSWORD);
+        map.put(TokenRequestKey.CLIENT_ID, RAW_CLIENT_ID);
+        map.put(TokenRequestKey.CODE, RAW_CODE);
+        map.put(TokenRequestKey.REDIRECT_URI, REDIRECT_URI.toString());
+        map.put(TokenRequestKey.SCOPE, String.join(" ", RAW_SCOPES));
 
         return map;
     }
@@ -116,7 +116,7 @@ class TokenEndpointTestHelper {
     static Map<String, String> makeRequestMapGrantTypeNull() {
         Map<String, String> map = makeRequestMap();
 
-        map.put(OAuth2Utils.TokenRequestKey.GRANT_TYPE, null);
+        map.put(TokenRequestKey.GRANT_TYPE, null);
 
         return map;
     }
@@ -124,7 +124,7 @@ class TokenEndpointTestHelper {
     static Map<String, String> makeRequestMapGrantTypeImplicit() {
         Map<String, String> map = makeRequestMap();
 
-        map.put(OAuth2Utils.TokenRequestKey.GRANT_TYPE, AuthorizationGrantType.IMPLICIT.getValue());
+        map.put(TokenRequestKey.GRANT_TYPE, AuthorizationGrantType.IMPLICIT.getValue());
 
         return map;
     }

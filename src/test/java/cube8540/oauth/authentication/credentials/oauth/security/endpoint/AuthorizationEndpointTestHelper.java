@@ -2,7 +2,7 @@ package cube8540.oauth.authentication.credentials.oauth.security.endpoint;
 
 import cube8540.oauth.authentication.credentials.AuthorityDetails;
 import cube8540.oauth.authentication.credentials.AuthorityDetailsService;
-import cube8540.oauth.authentication.credentials.oauth.OAuth2Utils;
+import cube8540.oauth.authentication.credentials.oauth.AuthorizationRequestKey;
 import cube8540.oauth.authentication.credentials.oauth.client.domain.exception.ClientNotFoundException;
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ExceptionTranslator;
 import cube8540.oauth.authentication.credentials.oauth.error.RedirectMismatchException;
@@ -36,6 +36,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import static cube8540.oauth.authentication.credentials.oauth.OAuth2UtilsKt.extractScopes;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
@@ -64,7 +65,7 @@ public class AuthorizationEndpointTestHelper {
     static final URI RESOLVED_REDIRECT_URI = URI.create(RAW_RESOLVED_REDIRECT_URI);
 
     static final String RAW_SCOPE = "SCOPE-1 SCOPE-2 SCOPE-3";
-    static final Set<String> SCOPE = OAuth2Utils.extractScopes(RAW_SCOPE);
+    static final Set<String> SCOPE = extractScopes(RAW_SCOPE);
     static final Collection<AuthorityDetails> SCOPE_DETAILS = Arrays.asList(
             mock(AuthorityDetails.class), mock(AuthorityDetails.class), mock(AuthorityDetails.class));
     static final Collection<AuthorityDetails> CLIENT_SCOPE_DETAILS = Arrays.asList(
@@ -128,18 +129,18 @@ public class AuthorizationEndpointTestHelper {
 
     static Map<String, String> makeRequestParameter() {
         Map<String, String> parameter = new HashMap<>();
-        parameter.put(OAuth2Utils.AuthorizationRequestKey.STATE, STATE);
-        parameter.put(OAuth2Utils.AuthorizationRequestKey.REDIRECT_URI, RAW_REDIRECT_URI);
-        parameter.put(OAuth2Utils.AuthorizationRequestKey.CLIENT_ID, RAW_CLIENT_ID);
-        parameter.put(OAuth2Utils.AuthorizationRequestKey.SCOPE, RAW_SCOPE);
-        parameter.put(OAuth2Utils.AuthorizationRequestKey.RESPONSE_TYPE, RESPONSE_TYPE);
+        parameter.put(AuthorizationRequestKey.STATE, STATE);
+        parameter.put(AuthorizationRequestKey.REDIRECT_URI, RAW_REDIRECT_URI);
+        parameter.put(AuthorizationRequestKey.CLIENT_ID, RAW_CLIENT_ID);
+        parameter.put(AuthorizationRequestKey.SCOPE, RAW_SCOPE);
+        parameter.put(AuthorizationRequestKey.RESPONSE_TYPE, RESPONSE_TYPE);
         return parameter;
     }
 
     static HttpServletRequest makeHttpServletRequest() {
         HttpServletRequest request = mock(HttpServletRequest.class);
-        when(request.getParameter(OAuth2Utils.AuthorizationRequestKey.CLIENT_ID)).thenReturn(RAW_CLIENT_ID);
-        when(request.getParameter(OAuth2Utils.AuthorizationRequestKey.REDIRECT_URI)).thenReturn(RAW_REDIRECT_URI);
+        when(request.getParameter(AuthorizationRequestKey.CLIENT_ID)).thenReturn(RAW_CLIENT_ID);
+        when(request.getParameter(AuthorizationRequestKey.REDIRECT_URI)).thenReturn(RAW_REDIRECT_URI);
         return request;
     }
 

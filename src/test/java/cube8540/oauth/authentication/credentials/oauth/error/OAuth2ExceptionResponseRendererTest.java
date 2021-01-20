@@ -25,7 +25,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @DisplayName("OAuth2 기본 예외 응답 메시지 클래스 테스트")
@@ -39,17 +38,6 @@ class OAuth2ExceptionResponseRendererTest {
         when(messageConverter.canWrite(any(), any())).thenReturn(false);
 
         assertThrows(HttpMediaTypeNotSupportedException.class, () -> new OAuth2ExceptionResponseRenderer(messageConverter));
-    }
-
-    @Test
-    @DisplayName("ResponseEntity가 null 일때 응답 메시지 작성")
-    void writeResponseMessageWhenResponseEntityIsNull() throws Exception {
-        HttpMessageConverter<Object> messageConverter = makeConverter();
-        OAuth2ExceptionResponseRenderer renderer = new OAuth2ExceptionResponseRenderer(messageConverter);
-        ServletWebRequest webRequest = makeWebRequest();
-
-        renderer.rendering(null, webRequest);
-        verifyNoMoreInteractions(webRequest.getResponse());
     }
 
     @Test
