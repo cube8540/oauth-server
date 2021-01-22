@@ -3,14 +3,10 @@ package cube8540.oauth.authentication.credentials.oauth.scope.application;
 import cube8540.oauth.authentication.credentials.AuthorityCode;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2Scope;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeRepository;
-import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeValidatorFactory;
-import cube8540.validator.core.ValidationResult;
-import cube8540.validator.core.Validator;
 
 import java.util.Optional;
 
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -23,9 +19,6 @@ class ScopeApplicationTestHelper {
 
     static final String DESCRIPTION = "DESCRIPTION";
     static final String NEW_DESCRIPTION = "NEW-DESCRIPTION";
-
-    static final Boolean SECURED = false;
-    static final Boolean MODIFY_SECURED = true;
 
     static OAuth2Scope makeScope() {
         OAuth2Scope scope = mock(OAuth2Scope.class);
@@ -52,30 +45,5 @@ class ScopeApplicationTestHelper {
         doAnswer(returnsFirstArg()).when(repository).save(isA(OAuth2Scope.class));
 
         return repository;
-    }
-
-    @SuppressWarnings("unchecked")
-    static OAuth2ScopeValidatorFactory makeValidatorFactory() {
-        OAuth2ScopeValidatorFactory factory = mock(OAuth2ScopeValidatorFactory.class);
-        ValidationResult result = mock(ValidationResult.class);
-        Validator<OAuth2Scope> validator = mock(Validator.class);
-
-        when(validator.getResult()).thenReturn(result);
-        when(factory.createValidator(any())).thenReturn(validator);
-
-        return factory;
-    }
-
-    @SuppressWarnings("unchecked")
-    static OAuth2ScopeValidatorFactory makeErrorValidatorFactory(Exception exception) {
-        OAuth2ScopeValidatorFactory factory = mock(OAuth2ScopeValidatorFactory.class);
-        ValidationResult result = mock(ValidationResult.class);
-        Validator<OAuth2Scope> validator = mock(Validator.class);
-
-        when(validator.getResult()).thenReturn(result);
-        doAnswer(invocation -> {throw exception;}).when(result).hasErrorThrows(any());
-        when(factory.createValidator(any())).thenReturn(validator);
-
-        return factory;
     }
 }
