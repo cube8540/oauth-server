@@ -2,7 +2,7 @@ package cube8540.oauth.authentication.credentials.oauth.token.application;
 
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenRepository;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedAccessToken;
-import cube8540.oauth.authentication.credentials.oauth.token.domain.exception.TokenNotFoundException;
+import cube8540.oauth.authentication.credentials.oauth.token.domain.TokenNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.Authentication;

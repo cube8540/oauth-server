@@ -6,8 +6,10 @@ import cube8540.oauth.authentication.credentials.oauth.security.AuthorizationReq
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2RequestValidator;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2TokenRequest;
+import cube8540.oauth.authentication.credentials.oauth.token.domain.AccessTokenDetailsWithClient;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.AuthorizationCodeGenerator;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.AuthorizationCodeRepository;
+import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenReadRepository;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenRepository;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizationCode;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedAccessToken;
@@ -19,8 +21,6 @@ import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2TokenE
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2TokenId;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2TokenIdGenerator;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.PrincipalUsername;
-import cube8540.oauth.authentication.credentials.oauth.token.domain.read.Oauth2AccessTokenReadRepository;
-import cube8540.oauth.authentication.credentials.oauth.token.domain.read.model.AccessTokenDetailsWithClient;
 import org.springframework.security.authentication.AccountStatusException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -147,8 +147,8 @@ class OAuth2TokenApplicationTestHelper {
         return repository;
     }
 
-    static Oauth2AccessTokenReadRepository makeAccessTokenReadRepository(String username, List<AccessTokenDetailsWithClient> tokenWithClients) {
-        Oauth2AccessTokenReadRepository repository = mock(Oauth2AccessTokenReadRepository.class);
+    static OAuth2AccessTokenReadRepository makeAccessTokenReadRepository(String username, List<AccessTokenDetailsWithClient> tokenWithClients) {
+        OAuth2AccessTokenReadRepository repository = mock(OAuth2AccessTokenReadRepository.class);
 
         when(repository.readAccessTokenWithClientByUsername(username)).thenReturn(tokenWithClients);
 

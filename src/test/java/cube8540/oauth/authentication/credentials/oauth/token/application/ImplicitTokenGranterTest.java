@@ -2,6 +2,7 @@ package cube8540.oauth.authentication.credentials.oauth.token.application;
 
 import cube8540.oauth.authentication.AuthenticationApplication;
 import cube8540.oauth.authentication.credentials.AuthorityCode;
+import cube8540.oauth.authentication.credentials.oauth.error.InvalidRequestException;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2TokenRequest;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenRepository;
@@ -10,6 +11,8 @@ import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2Compos
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
+import org.springframework.security.oauth2.core.OAuth2Error;
+import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 
 import java.time.Clock;
 import java.util.Collections;
@@ -30,10 +33,25 @@ import static cube8540.oauth.authentication.credentials.oauth.token.application.
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeTokenIdGenerator;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeTokenRequest;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 @DisplayName("암묵적 동의를 통한 토큰 부여 테스트")
 class ImplicitTokenGranterTest {
+
+    @Test
+    @DisplayName("요청한 유저 아이디가 null 일때 엑세스 코드 생성")
+    void generateAccessTokenWhenRequestUsernameIsNull() {
+        OAuth2ClientDetails clientDetails = makeClientDetails();
+        OAuth2AccessTokenRepository repository = makeEmptyAccessTokenRepository();
+        OAuth2TokenRequest request = makeTokenRequest();
+        ImplicitTokenGranter granter = new ImplicitTokenGranter(makeTokenIdGenerator(ACCESS_TOKEN_ID), repository);
+
+        when(request.getUsername()).thenReturn(null);
+
+        OAuth2Error error = assertThrows(InvalidRequestException.class, () -> granter.createAccessToken(clientDetails, request)).getError();
+        assertEquals(OAuth2ErrorCodes.INVALID_REQUEST, error.getErrorCode());
+    }
 
     @Test
     @DisplayName("요청 스코프가 null 일때 엑세스 코드 생성")

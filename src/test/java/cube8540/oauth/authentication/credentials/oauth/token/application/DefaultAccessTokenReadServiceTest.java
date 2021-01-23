@@ -1,7 +1,7 @@
 package cube8540.oauth.authentication.credentials.oauth.token.application;
 
-import cube8540.oauth.authentication.credentials.oauth.token.domain.read.Oauth2AccessTokenReadRepository;
-import cube8540.oauth.authentication.credentials.oauth.token.domain.read.model.AccessTokenDetailsWithClient;
+import cube8540.oauth.authentication.credentials.oauth.token.domain.AccessTokenDetailsWithClient;
+import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenReadRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -19,7 +19,7 @@ class DefaultAccessTokenReadServiceTest {
     @DisplayName("인증 받은 유저의 액세스 토큰 검색")
     void getAuthenticatedUserAccessToken() {
         List<AccessTokenDetailsWithClient> accessTokenDetailsWithClients = new ArrayList<>();
-        Oauth2AccessTokenReadRepository repository = makeAccessTokenReadRepository(RAW_USERNAME, accessTokenDetailsWithClients);
+        OAuth2AccessTokenReadRepository repository = makeAccessTokenReadRepository(RAW_USERNAME, accessTokenDetailsWithClients);
         DefaultAccessTokenReadService service = new DefaultAccessTokenReadService(repository);
 
         List<AccessTokenDetailsWithClient> tokens = service.getAuthorizeAccessTokens(RAW_USERNAME);
