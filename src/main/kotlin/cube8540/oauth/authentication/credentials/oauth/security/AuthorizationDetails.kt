@@ -31,7 +31,7 @@ interface OAuth2ClientDetails {
     val clientSecret: String?
 
     @get:ApiModelProperty(value = "클라이언트명", required = true, example = "client name")
-    val clientName: String
+    val clientName: String?
 
     @get:ApiModelProperty(value = "클라이언트 라디이렉트 URI", required = true, example = "[\"http://localhost:8082/callback\", \"http://localhost:8083/callback\"]")
     val registeredRedirectUris: Set<URI>?
@@ -40,10 +40,10 @@ interface OAuth2ClientDetails {
     val authorizedGrantTypes: Set<AuthorizationGrantType>?
 
     @get:ApiModelProperty(value = "클라이언트 스코프", required = true, example = "[\"TEST-1\", \"TEST-2\"]")
-    val scopes: Set<String>?
+    val scopes: Set<String>
 
     @get:ApiModelProperty(value = "클라이언트 소유자", required = true, example = "username1234")
-    val owner: String
+    val owner: String?
 
     @get:ApiModelProperty(value = "클라이언트 엑세스 토큰 유효 시간", required = true, example = "600000000000")
     val accessTokenValiditySeconds: Int?
@@ -65,5 +65,5 @@ interface OAuth2AccessTokenDetails: OAuth2TokenDetails {
 
     val refreshToken: OAuth2RefreshTokenDetails?
 
-    val additionalInformation: Map<String, String>?
+    val additionalInformation: Map<String, String?>?
 }

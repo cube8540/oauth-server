@@ -46,7 +46,7 @@ class DefaultAccessTokenIntrospector(private val accessTokenService: OAuth2Acces
     }
 
     private fun convertClaims(accessToken: OAuth2AccessTokenDetails): Map<String, *> {
-        val claims = HashMap<String, Any>()
+        val claims = HashMap<String, Any?>()
 
         if (accessToken.clientId != null) {
             claims[OAuth2IntrospectionClaimNames.CLIENT_ID] = accessToken.clientId!!

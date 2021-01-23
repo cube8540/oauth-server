@@ -1,4 +1,4 @@
-package cube8540.oauth.authentication.credentials.oauth.client.infra.rule;
+package cube8540.oauth.authentication.credentials.oauth.client.infra;
 
 import cube8540.oauth.authentication.credentials.AuthorityCode;
 import cube8540.oauth.authentication.credentials.AuthorityDetails;

@@ -60,7 +60,7 @@ open class InvalidRequestException protected constructor(code: String, message: 
     }
 }
 
-open class UserDeniedAuthorizationException(message: String):
+open class UserDeniedAuthorizationException(message: String?):
         AbstractOAuth2AuthenticationException(FORBIDDEN, OAuth2Error(OAuth2ErrorCodes.ACCESS_DENIED, message, null))
 
 open class RedirectMismatchException(message: String):
