@@ -10,10 +10,8 @@ class AuthorizationCodeResponseEnhancer(private val codeGenerator: OAuth2Authori
 
     constructor(codeGenerator: OAuth2AuthorizationCodeGenerator): this(codeGenerator, null)
 
-    override fun setNext(handler: AuthorizationResponseEnhancer): AuthorizationResponseEnhancer {
-        this.nextEnhancer = handler
-        return this
-    }
+    override fun setNext(handler: AuthorizationResponseEnhancer): AuthorizationResponseEnhancer =
+        handler.also { this.nextEnhancer = handler }
 
     override fun enhance(modelAndView: ModelAndView, request: AuthorizationRequest): ModelAndView {
         if (request.responseType?.equals(OAuth2AuthorizationResponseType.CODE) == true) {
