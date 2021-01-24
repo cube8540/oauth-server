@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletResponse
 
 class DefaultAuthenticationExceptionEntryPoint<T>(
     private val translator: ExceptionTranslator<T>,
+
     private val renderer: ExceptionResponseRenderer<T>
 ): AuthenticationEntryPoint {
 
@@ -17,5 +18,4 @@ class DefaultAuthenticationExceptionEntryPoint<T>(
         renderer.rendering(responseEntity, ServletWebRequest(request, response))
         response.flushBuffer()
     }
-
 }

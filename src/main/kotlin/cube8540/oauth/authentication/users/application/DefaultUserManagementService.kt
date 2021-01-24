@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class DefaultUserManagementService @Autowired constructor(
     private val repository: UserRepository,
+
     private val encoder: PasswordEncoder
 ): UserManagementService {
 

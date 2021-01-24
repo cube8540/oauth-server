@@ -7,17 +7,13 @@ import java.io.IOException
 import javax.servlet.ServletException
 
 interface ExceptionTranslator<T> {
-
     @JvmDefault
     fun <B> response(status: HttpStatus, body: B): ResponseEntity<B> = ResponseEntity(body, status)
 
     fun translate(exception: Exception): ResponseEntity<T>
-
 }
 
 interface ExceptionResponseRenderer<T> {
-
     @Throws(IOException::class, ServletException::class)
     fun rendering(responseEntity: ResponseEntity<T>, webRequest: ServletWebRequest)
-
 }

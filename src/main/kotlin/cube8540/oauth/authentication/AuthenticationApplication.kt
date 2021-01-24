@@ -16,11 +16,14 @@ import javax.annotation.PostConstruct
 class AuthenticationApplication {
 
     companion object {
-        @JvmField val DEFAULT_ZONE_OFFSET: ZoneOffset = ZoneOffset.of("+09:00")
+        @JvmField
+        val DEFAULT_ZONE_OFFSET: ZoneOffset = ZoneOffset.of("+09:00")
 
-        @JvmField val DEFAULT_TIME_ZONE: TimeZone = TimeZone.getTimeZone("Asia/Seoul")
+        @JvmField
+        val DEFAULT_TIME_ZONE: TimeZone = TimeZone.getTimeZone("Asia/Seoul")
 
-        @JvmField val DEFAULT_CLOCK: Clock = Clock.system(DEFAULT_TIME_ZONE.toZoneId())
+        @JvmField
+        val DEFAULT_CLOCK: Clock = Clock.system(DEFAULT_TIME_ZONE.toZoneId())
     }
 
     @PostConstruct

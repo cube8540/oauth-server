@@ -17,13 +17,14 @@ open class ErrorCodes internal constructor() {
 }
 
 class ErrorMessage<T>(val errorCode: String?, val description: T?): Serializable {
-
     companion object {
-        @JvmField val ACCESS_DENIED_ERROR: ErrorMessage<Any> = ErrorMessage(ErrorCodes.ACCESS_DENIED, "access denied")
+        @JvmField
+        val ACCESS_DENIED_ERROR: ErrorMessage<Any> = ErrorMessage(ErrorCodes.ACCESS_DENIED, "access denied")
 
-        @JvmField val UNKNOWN_SERVER_ERROR: ErrorMessage<Any> = ErrorMessage(ErrorCodes.SERVER_ERROR, "unknown server error")
+        @JvmField
+        val UNKNOWN_SERVER_ERROR: ErrorMessage<Any> = ErrorMessage(ErrorCodes.SERVER_ERROR, "unknown server error")
 
-        @JvmStatic fun <T> instance(errorCode: String?, description: T?): ErrorMessage<T> = ErrorMessage(errorCode, description)
+        @JvmStatic
+        fun <T> instance(errorCode: String?, description: T?): ErrorMessage<T> = ErrorMessage(errorCode, description)
     }
-
 }

@@ -12,6 +12,7 @@ import org.springframework.web.HttpMediaTypeNotSupportedException
 import org.springframework.web.context.request.ServletWebRequest
 
 class AccessDeniedExceptionResponseRenderer(private val messageConverter: HttpMessageConverter<Any>): ExceptionResponseRenderer<ErrorMessage<Any>> {
+
     init {
         if (!messageConverter.canWrite(ErrorMessage::class.java, MediaType.APPLICATION_JSON)) {
             throw HttpMediaTypeNotSupportedException("application/json media type is must be supported")
