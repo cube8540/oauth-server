@@ -38,11 +38,11 @@ class DefaultUserPasswordService @Autowired constructor(
     }
 
     @Transactional
-    override fun forgotPassword(username: String): UserProfile {
+    override fun forgotPassword(username: String): ForgotUserPassword {
         val user = getUser(username)
 
         user.forgotPassword(keyGenerator)
-        return UserProfile(repository.save(user))
+        return ForgotUserPassword(repository.save(user))
     }
 
     @Transactional

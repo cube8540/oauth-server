@@ -13,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.ENCODED_PASSWORD;
 import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.NEW_PASSWORD;
 import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.PASSWORD;
+import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.PASSWORD_CREDENTIALS_KEY;
 import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.RAW_PASSWORD_CREDENTIALS_KEY;
 import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.RAW_USERNAME;
 import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.USERNAME;
@@ -27,11 +28,13 @@ import static cube8540.oauth.authentication.users.application.UserApplicationTes
 import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.makeResetPasswordRequest;
 import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.makeUserRepository;
 import static cube8540.oauth.authentication.users.application.UserApplicationTestHelper.makeValidatorFactory;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.when;
 
 @DisplayName("기본 유저 패스워드 서비스 테스트")
 class DefaultUserPasswordServiceTest {
@@ -84,16 +87,18 @@ class DefaultUserPasswordServiceTest {
     void forgotPasswordRequest() {
         User user = makeDefaultUser();
         UserRepository repository = makeUserRepository(USERNAME, user);
-        UserCredentialsKeyGenerator keyGenerator = makeKeyGenerator();
+        UserCredentialsKeyGenerator keyGenerator = makeKeyGenerator(RAW_PASSWORD_CREDENTIALS_KEY);
         PasswordEncoder encoder = makePasswordEncoder(PASSWORD, ENCODED_PASSWORD);
 
         DefaultUserPasswordService service = new DefaultUserPasswordService(repository, encoder);
         InOrder inOrder = inOrder(user, repository);
         service.setKeyGenerator(keyGenerator);
+        when(user.getPasswordCredentialsKey()).thenReturn(PASSWORD_CREDENTIALS_KEY);
 
-        service.forgotPassword(RAW_USERNAME);
+        ForgotUserPassword forgotUser = service.forgotPassword(RAW_USERNAME);
         inOrder.verify(user, times(1)).forgotPassword(keyGenerator);
         inOrder.verify(repository, times(1)).save(user);
+        assertEquals(RAW_PASSWORD_CREDENTIALS_KEY, forgotUser.getCredentialsKey());
     }
 
     @Test
