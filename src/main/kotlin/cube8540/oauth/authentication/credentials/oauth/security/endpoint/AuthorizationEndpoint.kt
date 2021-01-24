@@ -39,13 +39,16 @@ import org.springframework.web.servlet.view.RedirectView
 import java.net.URI
 import java.security.Principal
 import java.util.*
-import kotlin.collections.HashMap
 
 @Controller
 @SessionAttributes(value = [AUTHORIZATION_REQUEST_ATTRIBUTE, ORIGINAL_AUTHORIZATION_REQUEST_ATTRIBUTE])
 class AuthorizationEndpoint @Autowired constructor(
-    @Qualifier("defaultOAuth2ClientDetailsService") private val clientDetailsService: OAuth2ClientDetailsService,
-    @Qualifier("defaultScopeDetailsService") private val scopeDetailsService: AuthorityDetailsService,
+    @Qualifier("defaultOAuth2ClientDetailsService")
+    private val clientDetailsService: OAuth2ClientDetailsService,
+
+    @Qualifier("defaultScopeDetailsService")
+    private val scopeDetailsService: AuthorityDetailsService,
+
     private val responseEnhancer: AuthorizationResponseEnhancer
 ) {
 
@@ -202,7 +205,7 @@ class AuthorizationEndpoint @Autowired constructor(
         return if (authorizationRequest.requestScopes?.isNotEmpty() == true) {
             authorizationRequest.requestScopes!!
         } else {
-            clientDetails.scopes ?: Collections.emptySet()
+            clientDetails.scopes
         }
     }
 

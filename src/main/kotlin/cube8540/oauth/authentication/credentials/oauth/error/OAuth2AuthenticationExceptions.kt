@@ -25,10 +25,12 @@ open class InvalidClientException protected constructor(code: String, message: S
     AbstractOAuth2AuthenticationException(UNAUTHORIZED, OAuth2Error(code, message, null)) {
 
     companion object {
-        @JvmStatic fun invalidClient(message: String): InvalidClientException =
+        @JvmStatic
+        fun invalidClient(message: String): InvalidClientException =
             InvalidClientException(OAuth2ErrorCodes.INVALID_CLIENT, message)
 
-        @JvmStatic fun unauthorizedClient(message: String): InvalidClientException =
+        @JvmStatic
+        fun unauthorizedClient(message: String): InvalidClientException =
             InvalidClientException(OAuth2ErrorCodes.UNAUTHORIZED_CLIENT, message)
     }
 }
@@ -37,13 +39,16 @@ open class InvalidGrantException protected constructor(code: String, message: St
     AbstractOAuth2AuthenticationException(BAD_REQUEST, OAuth2Error(code, message, null)) {
 
     companion object {
-        @JvmStatic fun invalidGrant(message: String) =
+        @JvmStatic
+        fun invalidGrant(message: String) =
             InvalidGrantException(OAuth2ErrorCodes.INVALID_GRANT, message)
 
-        @JvmStatic fun invalidScope(message: String) =
+        @JvmStatic
+        fun invalidScope(message: String) =
             InvalidGrantException(OAuth2ErrorCodes.INVALID_SCOPE, message)
 
-        @JvmStatic fun unsupportedGrantType(message: String) =
+        @JvmStatic
+        fun unsupportedGrantType(message: String) =
             InvalidGrantException(OAuth2ErrorCodes.UNSUPPORTED_GRANT_TYPE, message)
     }
 }
@@ -52,16 +57,18 @@ open class InvalidRequestException protected constructor(code: String, message: 
     AbstractOAuth2AuthenticationException(BAD_REQUEST, OAuth2Error(code, message, null)) {
 
     companion object {
-        @JvmStatic fun invalidRequest(message: String) =
+        @JvmStatic
+        fun invalidRequest(message: String) =
             InvalidRequestException(OAuth2ErrorCodes.INVALID_REQUEST, message)
 
-        @JvmStatic fun unsupportedResponseType(message: String) =
+        @JvmStatic
+        fun unsupportedResponseType(message: String) =
             InvalidRequestException(OAuth2ErrorCodes.UNSUPPORTED_RESPONSE_TYPE, message)
     }
 }
 
 open class UserDeniedAuthorizationException(message: String?):
-        AbstractOAuth2AuthenticationException(FORBIDDEN, OAuth2Error(OAuth2ErrorCodes.ACCESS_DENIED, message, null))
+    AbstractOAuth2AuthenticationException(FORBIDDEN, OAuth2Error(OAuth2ErrorCodes.ACCESS_DENIED, message, null))
 
 open class RedirectMismatchException(message: String):
     InvalidGrantException(OAuth2ErrorCodes.INVALID_GRANT, message)

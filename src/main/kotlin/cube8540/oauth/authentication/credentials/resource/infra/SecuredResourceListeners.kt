@@ -14,5 +14,4 @@ class SecuredObjectChangedEventListener @Autowired constructor(
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT, classes = [SecuredResourceChangedEvent::class])
     fun reloadMetadataSource() = reloadableMetadataSource.reload()
-
 }

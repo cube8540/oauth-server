@@ -15,7 +15,6 @@ import org.springframework.security.oauth2.server.resource.introspection.OAuth2I
 import org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector
 import java.util.*
 import java.util.stream.Collectors
-import kotlin.collections.HashMap
 
 class DefaultAccessTokenIntrospector(private val accessTokenService: OAuth2AccessTokenDetailsService, private val authenticationProvider: AuthenticationProvider): OpaqueTokenIntrospector {
 

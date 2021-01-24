@@ -29,7 +29,9 @@ class OAuth2AuthorizedRefreshToken(
 ): AbstractAggregateRoot<OAuth2AuthorizedRefreshToken>() {
 
     companion object {
-        @JvmStatic @Transient protected var clock: Clock = AuthenticationApplication.DEFAULT_CLOCK
+        @JvmStatic
+        @Transient
+        protected var clock: Clock = AuthenticationApplication.DEFAULT_CLOCK
     }
 
     @EmbeddedId

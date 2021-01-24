@@ -66,6 +66,7 @@ class AuthorizationCodeTokenGranter @Autowired constructor(
 
     private data class AuthorizationCodeRequest(
         private val clientDetails: OAuth2ClientDetails,
+
         private val tokenRequest: OAuth2TokenRequest
     ): AuthorizationRequest {
 
@@ -76,10 +77,10 @@ class AuthorizationCodeTokenGranter @Autowired constructor(
         override val state: String? = tokenRequest.state
 
         override var redirectUri: URI? = tokenRequest.redirectUri
-            set(value) = throw UnsupportedOperationException("${this.javaClass.name}#setRedirectURI")
+            set(_) = throw UnsupportedOperationException("${this.javaClass.name}#setRedirectURI")
 
         override var requestScopes: Set<String>? = tokenRequest.scopes
-            set(value) = throw UnsupportedOperationException("${this.javaClass.name}#setRequestScopes")
+            set(_) = throw UnsupportedOperationException("${this.javaClass.name}#setRequestScopes")
 
         override val responseType: OAuth2AuthorizationResponseType = OAuth2AuthorizationResponseType.CODE
     }

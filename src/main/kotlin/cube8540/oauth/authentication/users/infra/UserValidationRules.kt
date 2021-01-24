@@ -5,7 +5,7 @@ import cube8540.validator.core.ValidationError
 import cube8540.validator.core.ValidationRule
 import java.util.regex.Pattern
 
-class DefaultUsernameValidationRule(val property: String, val message: String): ValidationRule<User> {
+class DefaultUsernameValidationRule(private val property: String, private val message: String): ValidationRule<User> {
 
     companion object {
         private const val REQUIRED_PATTERN_VALUE = "^(?=.*?[a-z])(?=.*?[0-9]).{4,18}$"
@@ -29,7 +29,7 @@ class DefaultUsernameValidationRule(val property: String, val message: String): 
         Pattern.compile(WHITELIST_PATTERN_VALUE).matcher(username).matches()
 }
 
-class DefaultUserPasswordValidationRule(val property: String, val message: String): ValidationRule<User> {
+class DefaultUserPasswordValidationRule(private val property: String, private val message: String): ValidationRule<User> {
 
     companion object {
         private const val REQUIRED_PATTERN_VALUE = "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{12,30}$"

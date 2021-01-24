@@ -5,6 +5,4 @@ import javax.persistence.Column
 import javax.persistence.Embeddable
 
 @Embeddable
-data class AccessibleAuthority(
-    var authority: String
-): Serializable
+data class AccessibleAuthority(var authority: String): Serializable

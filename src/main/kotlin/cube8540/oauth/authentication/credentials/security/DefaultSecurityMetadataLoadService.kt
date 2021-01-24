@@ -8,6 +8,7 @@ import org.springframework.security.access.ConfigAttribute
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher
 import org.springframework.security.web.util.matcher.RequestMatcher
 import org.springframework.stereotype.Service
+import java.util.*
 import java.util.function.Function
 import java.util.stream.Collectors
 
@@ -15,6 +16,7 @@ import java.util.stream.Collectors
 class DefaultSecurityMetadataLoadService(private val repository: SecuredResourceRepository): SecurityMetadataLoadService {
 
     private val keyGenerator = Function { resource: SecuredResource -> requestMatcher(resource) }
+
     private val valueGenerator = Function { resource: SecuredResource -> authorityToConfigAttribute(resource.authorities) }
 
     override fun loadSecurityMetadata(): Map<RequestMatcher, Collection<ConfigAttribute>> =

@@ -8,7 +8,7 @@ import cube8540.validator.core.ValidationRule
 import java.util.*
 import java.util.stream.Collectors
 
-class SecuredResourceIdRule(val property: String, val message: String): ValidationRule<SecuredResource> {
+class SecuredResourceIdRule(private val property: String, private val message: String): ValidationRule<SecuredResource> {
 
     companion object {
         const val DEFAULT_PROPERTY = "resourceId"
@@ -21,10 +21,9 @@ class SecuredResourceIdRule(val property: String, val message: String): Validati
         target.resourceId.value.isNotEmpty()
 
     override fun error(): ValidationError = ValidationError(property, message)
-
 }
 
-class SecuredResourceRule(val property: String, val message: String): ValidationRule<SecuredResource> {
+class SecuredResourceRule(private val property: String, private val message: String): ValidationRule<SecuredResource> {
 
     companion object {
         const val DEFAULT_PROPERTY = "resource"
@@ -41,8 +40,10 @@ class SecuredResourceRule(val property: String, val message: String): Validation
 }
 
 class SecuredResourceAuthoritiesRule(
-    val property: String,
-    val message: String,
+    private val property: String,
+
+    private val message: String,
+
     private val scopeDetailsService: AuthorityDetailsService
 ): ValidationRule<SecuredResource> {
 

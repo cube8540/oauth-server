@@ -8,7 +8,6 @@ import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationResp
 import java.net.URI
 import java.security.Principal
 import java.util.*
-import kotlin.collections.HashSet
 
 interface AuthorizationRequest {
     val clientId: String?
@@ -112,16 +111,16 @@ data class DefaultOAuth2TokenRequest(
 
 interface OAuth2RequestValidator {
     fun validateScopes(clientDetails: OAuth2ClientDetails, scopes: Set<String>?): Boolean
-    fun validateScopes(approvalScopes: Set<String>, requestScopes: Set<String>?): Boolean
 
+    fun validateScopes(approvalScopes: Set<String>, requestScopes: Set<String>?): Boolean
 }
 
 class DefaultOAuth2RequestValidator: OAuth2RequestValidator {
     override fun validateScopes(clientDetails: OAuth2ClientDetails, scopes: Set<String>?): Boolean =
-        validateScopes(clientDetails.scopes?: Collections.emptySet(), scopes)
+        validateScopes(clientDetails.scopes, scopes)
+
     override fun validateScopes(approvalScopes: Set<String>, requestScopes: Set<String>?): Boolean =
         requestScopes == null || approvalScopes.containsAll(requestScopes)
-
 }
 
 private fun extractResponseType(responseType: String?) = when (responseType) {

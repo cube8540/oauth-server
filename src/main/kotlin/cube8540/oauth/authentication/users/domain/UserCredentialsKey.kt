@@ -10,7 +10,8 @@ data class UserCredentialsKey(var keyValue: String) {
     var expiryDateTime: LocalDateTime = LocalDateTime.now(clock).plusMinutes(5)
 
     companion object {
-        @JvmStatic protected var clock: Clock = Clock.system(AuthenticationApplication.DEFAULT_TIME_ZONE.toZoneId())
+        @JvmStatic
+        protected var clock: Clock = Clock.system(AuthenticationApplication.DEFAULT_TIME_ZONE.toZoneId())
     }
 
     fun matches(key: String): UserKeyMatchedResult = when {

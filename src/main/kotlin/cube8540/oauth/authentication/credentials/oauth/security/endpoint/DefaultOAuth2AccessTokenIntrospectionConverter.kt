@@ -3,6 +3,7 @@ package cube8540.oauth.authentication.credentials.oauth.security.endpoint
 import cube8540.oauth.authentication.AuthenticationApplication
 import cube8540.oauth.authentication.credentials.oauth.AccessTokenIntrospectionKey
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AccessTokenDetails
+import java.util.*
 
 class DefaultOAuth2AccessTokenIntrospectionConverter: OAuth2AccessTokenIntrospectionConverter {
 

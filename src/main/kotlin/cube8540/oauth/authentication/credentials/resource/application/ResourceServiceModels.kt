@@ -13,14 +13,13 @@ data class AccessibleAuthorityValue @ConstructorProperties(value = ["authority"]
     val authority: String
 ) {
     companion object {
-
-        @JvmStatic fun of(authority: AccessibleAuthority) = AccessibleAuthorityValue(authority.authority)
+        @JvmStatic
+        fun of(authority: AccessibleAuthority) = AccessibleAuthorityValue(authority.authority)
     }
 }
 
 @ApiModel(value = "보호 자원 상세 정보")
 interface SecuredResourceDetails {
-
     @get:ApiModelProperty(value = "보호 자원 아이디", required = true, example = "resource-id")
     val resourceId: String
 
@@ -32,5 +31,4 @@ interface SecuredResourceDetails {
 
     @get:ApiModelProperty(value = "보호 자원 접근 가능 스코프", required = true, example = "[{\"authority\": \"ROLE_USER\", \"authorityType\": \"AUTHORITY\"}, {\"authority\": \"access.test\", \"authorityType\": \"SCOPE\"}]")
     val authorities: List<AccessibleAuthorityValue>
-
 }

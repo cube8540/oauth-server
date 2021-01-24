@@ -26,7 +26,8 @@ import java.util.*
 
 @RestController
 class OAuth2TokenIntrospectionEndpoint @Autowired constructor(
-    @Qualifier("defaultOAuth2AccessTokenDetailsService") private val service: OAuth2AccessTokenDetailsService
+    @Qualifier("defaultOAuth2AccessTokenDetailsService")
+    private val service: OAuth2AccessTokenDetailsService
 ) {
 
     private val logger = LoggerFactory.getLogger(this.javaClass)

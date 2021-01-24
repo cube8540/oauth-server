@@ -17,7 +17,9 @@ import org.springframework.transaction.annotation.Transactional
 @Service(value = "oAuth2ClientNotCheckedAccessTokenDetailsService")
 class OAuth2ClientNotCheckedAccessTokenDetailsService @Autowired constructor(
     private val tokenRepository: OAuth2AccessTokenRepository,
-    @Qualifier("defaultUserService") private val userDetailsService: UserDetailsService
+
+    @Qualifier("defaultUserService")
+    private val userDetailsService: UserDetailsService
 ): OAuth2AccessTokenDetailsService {
 
     @Transactional(readOnly = true)

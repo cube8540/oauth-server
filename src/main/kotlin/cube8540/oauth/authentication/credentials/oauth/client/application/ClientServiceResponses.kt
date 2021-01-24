@@ -32,7 +32,8 @@ data class DefaultOAuth2ClientDetails(
 ): OAuth2ClientDetails, CredentialsContainer {
 
     companion object {
-        @JvmStatic fun of(client: OAuth2Client): DefaultOAuth2ClientDetails {
+        @JvmStatic
+        fun of(client: OAuth2Client): DefaultOAuth2ClientDetails {
             val scopes = client.scopes?.map(AuthorityCode::value)?.toSet() ?: Collections.emptySet()
             val tokenValidity = client.accessTokenValidity?.let(Duration::toSeconds) ?: 0L
             val refreshValidity = client.refreshTokenValidity?.let(Duration::toSeconds) ?: 0L

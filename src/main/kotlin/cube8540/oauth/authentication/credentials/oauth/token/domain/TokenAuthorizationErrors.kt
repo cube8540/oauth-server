@@ -6,7 +6,6 @@ class OAuth2AccessTokenExpiredException(message: String?, cause: Throwable?): OA
     constructor(message: String?): this(message, null)
 }
 
-class OAuth2AccessTokenNotFoundException(accessToken: String?, cause: Throwable?):
-    OAuth2AccessTokenRegistrationException("$accessToken is not found", cause) {
+class OAuth2AccessTokenNotFoundException(accessToken: String?, cause: Throwable?): OAuth2AccessTokenRegistrationException("$accessToken is not found", cause) {
     constructor(accessToken: String?): this(accessToken, null)
 }

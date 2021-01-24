@@ -2,6 +2,7 @@ package cube8540.oauth.authentication.credentials.resource.domain
 
 import org.springframework.data.domain.AbstractAggregateRoot
 import java.net.URI
+import java.util.*
 import javax.persistence.AttributeOverride
 import javax.persistence.CollectionTable
 import javax.persistence.Column

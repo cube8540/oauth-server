@@ -8,13 +8,16 @@ import java.util.stream.Collectors
 
 data class DefaultSecuredResourceDetails(
     override val resourceId: String,
+
     override val resource: URI,
+
     override val method: ResourceMethod,
+
     override val authorities: List<AccessibleAuthorityValue>
 ): SecuredResourceDetails {
-
     companion object {
-        @JvmStatic fun of(resource: SecuredResource): DefaultSecuredResourceDetails {
+        @JvmStatic
+        fun of(resource: SecuredResource): DefaultSecuredResourceDetails {
             val authorities = resource.authorities?.stream()
                 ?.map { auth -> AccessibleAuthorityValue(auth.authority) }
                 ?.collect(Collectors.toList())?: Collections.emptyList()

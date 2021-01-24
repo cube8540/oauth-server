@@ -13,7 +13,9 @@ import java.net.URI
 
 class AuthorizationImplicitResponseEnhancer(
     private val tokenGranter: OAuth2AccessTokenGranter,
+
     private val clientDetailsService: OAuth2ClientDetailsService,
+
     var nextEnhancer: AuthorizationResponseEnhancer?
 ): AuthorizationResponseEnhancer {
 

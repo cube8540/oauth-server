@@ -24,7 +24,8 @@ abstract class AbstractOAuth2TokenGranter(
 ): OAuth2AccessTokenGranter {
 
     companion object {
-        @JvmStatic protected var clock: Clock = AuthenticationApplication.DEFAULT_CLOCK
+        @JvmStatic
+        protected var clock: Clock = AuthenticationApplication.DEFAULT_CLOCK
     }
 
     var refreshTokenIdGenerator: OAuth2TokenIdGenerator? = null

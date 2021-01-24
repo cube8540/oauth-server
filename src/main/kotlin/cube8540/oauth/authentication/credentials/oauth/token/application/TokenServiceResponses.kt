@@ -31,7 +31,8 @@ data class DefaultAccessTokenDetails(
     companion object {
         private const val TOKEN_TYPE = "Bearer"
 
-        @JvmStatic fun of(accessToken: OAuth2AuthorizedAccessToken): DefaultAccessTokenDetails =
+        @JvmStatic
+        fun of(accessToken: OAuth2AuthorizedAccessToken): DefaultAccessTokenDetails =
             DefaultAccessTokenDetails(
                 tokenValue = accessToken.tokenId.value,
                 clientId = accessToken.client.value,
@@ -57,7 +58,8 @@ data class DefaultRefreshTokenDetails(
     override val expiresIn: Long
 ): OAuth2RefreshTokenDetails {
     companion object {
-        @JvmStatic fun of(refreshToken: OAuth2AuthorizedRefreshToken): DefaultRefreshTokenDetails =
+        @JvmStatic
+        fun of(refreshToken: OAuth2AuthorizedRefreshToken): DefaultRefreshTokenDetails =
             DefaultRefreshTokenDetails(
                 tokenValue = refreshToken.tokenId.value,
                 expiration = refreshToken.expiration,

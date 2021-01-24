@@ -15,7 +15,6 @@ import java.security.NoSuchAlgorithmException
 import java.security.SecureRandom
 import java.util.*
 import java.util.stream.Collectors
-import kotlin.collections.LinkedHashMap
 import kotlin.experimental.and
 
 @Component
@@ -80,5 +79,4 @@ class WithScopeComposeUniqueKeyGenerator: OAuth2ComposeUniqueKeyGenerator {
             throw IllegalArgumentException(exception)
         }
     }
-
 }

@@ -31,7 +31,10 @@ import java.lang.Exception
 import java.util.*
 
 @RestController
-class ClientManagementAPIEndpoint @Autowired constructor(@Qualifier("defaultOAuth2ClientManagementService") private val service: OAuth2ClientManagementService) {
+class ClientManagementAPIEndpoint @Autowired constructor(
+    @Qualifier("defaultOAuth2ClientManagementService")
+    private val service: OAuth2ClientManagementService
+) {
 
     companion object {
         private const val DEFAULT_CLIENT_PAGE_SIZE = 10

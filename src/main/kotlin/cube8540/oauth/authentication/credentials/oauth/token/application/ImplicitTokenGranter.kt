@@ -16,7 +16,9 @@ import java.time.LocalDateTime
 
 @Service
 class ImplicitTokenGranter @Autowired constructor(
-    @Qualifier("defaultTokenIdGenerator") tokenIdGenerator: OAuth2TokenIdGenerator,
+    @Qualifier("defaultTokenIdGenerator")
+    tokenIdGenerator: OAuth2TokenIdGenerator,
+
     tokenRepository: OAuth2AccessTokenRepository
 ): AbstractOAuth2TokenGranter(tokenIdGenerator, tokenRepository) {
 

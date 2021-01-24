@@ -32,8 +32,11 @@ import java.security.Principal
 
 @RestController
 class OAuth2TokenEndpoint @Autowired constructor(
-    @Qualifier("accessTokenGranter") private val tokenGranter: OAuth2AccessTokenGranter,
-    @Qualifier("clientAuthenticationBaseTokenRevoker") private val tokenRevoker: OAuth2TokenRevoker
+    @Qualifier("accessTokenGranter")
+    private val tokenGranter: OAuth2AccessTokenGranter,
+
+    @Qualifier("clientAuthenticationBaseTokenRevoker")
+    private val tokenRevoker: OAuth2TokenRevoker
 ) {
 
     private val logger = LoggerFactory.getLogger(this.javaClass)

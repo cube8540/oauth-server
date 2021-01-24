@@ -13,6 +13,7 @@ import org.springframework.security.oauth2.core.AuthorizationGrantType
 import java.time.Clock
 import java.time.Duration
 import java.time.LocalDateTime
+import java.util.*
 import javax.persistence.AttributeOverride
 import javax.persistence.CascadeType
 import javax.persistence.CollectionTable
@@ -69,7 +70,9 @@ class OAuth2AuthorizedAccessToken(
 ): AbstractAggregateRoot<OAuth2AuthorizedAccessToken>() {
 
     companion object {
-        @JvmStatic @Transient protected var clock: Clock = AuthenticationApplication.DEFAULT_CLOCK
+        @JvmStatic
+        @Transient
+        protected var clock: Clock = AuthenticationApplication.DEFAULT_CLOCK
     }
 
     @EmbeddedId

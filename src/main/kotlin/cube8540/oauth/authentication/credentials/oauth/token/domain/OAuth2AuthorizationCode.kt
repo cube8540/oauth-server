@@ -33,7 +33,9 @@ class OAuth2AuthorizationCode(
 ): AbstractAggregateRoot<OAuth2AuthorizationCode>() {
 
     companion object {
-        @JvmStatic @Transient protected var clock: Clock = AuthenticationApplication.DEFAULT_CLOCK
+        @JvmStatic
+        @Transient
+        protected var clock: Clock = AuthenticationApplication.DEFAULT_CLOCK
     }
 
     @Id

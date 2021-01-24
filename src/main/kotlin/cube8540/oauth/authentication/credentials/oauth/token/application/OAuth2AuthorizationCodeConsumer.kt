@@ -6,5 +6,4 @@ import java.util.*
 interface OAuth2AuthorizationCodeConsumer {
 
     fun consume(code: String): Optional<OAuth2AuthorizationCode>
-
 }

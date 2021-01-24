@@ -13,24 +13,28 @@ class ClientErrorCodes: ErrorCodes() {
 
 class ClientInvalidException(code: String, errors: Collection<ValidationError>): ServiceInvalidException(code, errors) {
     companion object {
-        @JvmStatic fun instance(errors: List<ValidationError>) = ClientInvalidException(ErrorCodes.INVALID_REQUEST, errors)
+        @JvmStatic
+        fun instance(errors: List<ValidationError>) = ClientInvalidException(ErrorCodes.INVALID_REQUEST, errors)
     }
 }
 
 class ClientRegisterException(code: String, description: String): ServiceException(code, description) {
     companion object {
-        @JvmStatic fun existsIdentifier(description: String) = ClientRegisterException(ErrorCodes.EXISTS_IDENTIFIER, description)
+        @JvmStatic
+        fun existsIdentifier(description: String) = ClientRegisterException(ErrorCodes.EXISTS_IDENTIFIER, description)
     }
 }
 
 class ClientNotFoundException(code: String, description: String): ServiceException(code, description) {
     companion object {
-        @JvmStatic fun instance(description: String) = ClientNotFoundException(ErrorCodes.NOT_FOUND, description)
+        @JvmStatic
+        fun instance(description: String) = ClientNotFoundException(ErrorCodes.NOT_FOUND, description)
     }
 }
 
 class ClientAuthorizationException(code: String, description: String): ServiceException(code, description) {
     companion object {
-        @JvmStatic fun invalidPassword(description: String) = ClientAuthorizationException(ClientErrorCodes.INVALID_PASSWORD, description)
+        @JvmStatic
+        fun invalidPassword(description: String) = ClientAuthorizationException(ClientErrorCodes.INVALID_PASSWORD, description)
     }
 }

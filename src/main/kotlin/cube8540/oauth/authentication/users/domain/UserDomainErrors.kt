@@ -18,44 +18,43 @@ open class UserErrorCodes: ErrorCodes() {
 }
 
 class UserAuthorizationException(code: String, description: String): ServiceException(code, description) {
-
     companion object {
-        @JvmStatic fun invalidPassword(description: String): UserAuthorizationException =
+        @JvmStatic
+        fun invalidPassword(description: String): UserAuthorizationException =
             UserAuthorizationException(UserErrorCodes.INVALID_PASSWORD, description)
 
-        @JvmStatic fun keyExpired(description: String): UserAuthorizationException =
+        @JvmStatic
+        fun keyExpired(description: String): UserAuthorizationException =
             UserAuthorizationException(UserErrorCodes.KEY_EXPIRED, description)
 
-        @JvmStatic fun invalidKey(description: String): UserAuthorizationException =
+        @JvmStatic
+        fun invalidKey(description: String): UserAuthorizationException =
             UserAuthorizationException(UserErrorCodes.INVALID_KEY, description)
 
-        @JvmStatic fun alreadyCredentials(description: String): UserAuthorizationException =
+        @JvmStatic
+        fun alreadyCredentials(description: String): UserAuthorizationException =
             UserAuthorizationException(UserErrorCodes.ALREADY_CREDENTIALS, description)
     }
-
 }
 
 class UserNotFoundException(code: String, description: String): ServiceException(code, description) {
-
     companion object {
-        @JvmStatic fun instance(description: String) = UserNotFoundException(ErrorCodes.NOT_FOUND, description)
+        @JvmStatic
+        fun instance(description: String) = UserNotFoundException(ErrorCodes.NOT_FOUND, description)
     }
-
 }
 
 class UserInvalidException(code: String, errors: List<ValidationError>): ServiceInvalidException(code, errors) {
-
     companion object {
-        @JvmStatic fun instance(errors: List<ValidationError>): UserInvalidException =
+        @JvmStatic
+        fun instance(errors: List<ValidationError>): UserInvalidException =
             UserInvalidException(ErrorCodes.INVALID_REQUEST, errors)
     }
-
 }
 
 class UserRegisterException(code: String, description: String): ServiceException(code, description) {
-
     companion object {
-        @JvmStatic fun existsIdentifier(description: String) = UserRegisterException(ErrorCodes.EXISTS_IDENTIFIER, description)
+        @JvmStatic
+        fun existsIdentifier(description: String) = UserRegisterException(ErrorCodes.EXISTS_IDENTIFIER, description)
     }
-
 }

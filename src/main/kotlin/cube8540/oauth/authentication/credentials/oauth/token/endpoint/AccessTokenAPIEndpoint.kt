@@ -28,7 +28,9 @@ import java.util.*
 @Api(value = "OAuth2 엑세스 토큰 API 엔드 포인트")
 class AccessTokenAPIEndpoint @Autowired constructor(
     private val service: AccessTokenReadService,
-    @Qualifier("defaultTokenRevoker") private val revoker: OAuth2TokenRevoker
+
+    @Qualifier("defaultTokenRevoker")
+    private val revoker: OAuth2TokenRevoker
 ) {
 
     @set:[Autowired Qualifier("tokenExceptionTranslator")]

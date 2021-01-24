@@ -8,9 +8,8 @@ data class DefaultOAuth2ScopeDetails(
 
     override val description: String
 ): AuthorityDetails {
-
     companion object {
-        @JvmStatic fun of(scope: OAuth2Scope): DefaultOAuth2ScopeDetails = DefaultOAuth2ScopeDetails(scope.code.value, scope.description)
+        @JvmStatic
+        fun of(scope: OAuth2Scope): DefaultOAuth2ScopeDetails = DefaultOAuth2ScopeDetails(scope.code.value, scope.description)
     }
-
 }

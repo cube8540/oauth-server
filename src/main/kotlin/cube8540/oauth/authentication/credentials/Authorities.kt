@@ -16,11 +16,9 @@ interface AuthorityDetails {
 
     @get:ApiModelProperty(value = "권한 설명", required = true, example = "Default User Authority")
     val description: String
-
 }
 
 interface AuthorityDetailsService {
 
     fun loadAuthorityByAuthorityCodes(authorities: Collection<String>): Collection<AuthorityDetails>
-
 }

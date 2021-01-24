@@ -30,5 +30,4 @@ data class DefaultAccessTokenDetailsWithClient(
         expiresIn = accessToken.expiresIn(),
         additionalInformation = accessToken.additionalInformation?.toMap()
     )
-
 }

@@ -7,15 +7,12 @@ import cube8540.oauth.authentication.credentials.oauth.security.AuthorizationReq
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetails
 import java.net.URI
 import java.util.*
-import kotlin.collections.HashSet
 
 interface RedirectResolver {
-
     fun resolveRedirectURI(redirectURI: String?, clientDetails: OAuth2ClientDetails): URI
 }
 
 interface ScopeApprovalResolver {
-
     fun resolveApprovalScopes(originalRequest: AuthorizationRequest, approvalParameters: Map<String, String?>): Set<String>
 }
 

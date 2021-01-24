@@ -23,9 +23,13 @@ import java.time.LocalDateTime
 
 @Service
 class ResourceOwnerPasswordTokenGranter @Autowired constructor(
-    @Qualifier("defaultTokenIdGenerator") tokenIdGenerator: OAuth2TokenIdGenerator,
+    @Qualifier("defaultTokenIdGenerator")
+    tokenIdGenerator: OAuth2TokenIdGenerator,
+
     tokenRepository: OAuth2AccessTokenRepository,
-    @Qualifier("oauthAuthenticationBean") private val authenticationManager: AuthenticationManager
+
+    @Qualifier("oauthAuthenticationBean")
+    private val authenticationManager: AuthenticationManager
 ): AbstractOAuth2TokenGranter(tokenIdGenerator, tokenRepository) {
 
     override fun createAccessToken(clientDetails: OAuth2ClientDetails, tokenRequest: OAuth2TokenRequest): OAuth2AuthorizedAccessToken {

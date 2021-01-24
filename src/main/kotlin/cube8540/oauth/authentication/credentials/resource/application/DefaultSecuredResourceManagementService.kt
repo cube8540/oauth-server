@@ -15,9 +15,7 @@ import java.net.URI
 import java.util.stream.Collectors
 
 @Service
-class DefaultSecuredResourceManagementService @Autowired constructor(
-    private val repository: SecuredResourceRepository
-): SecuredResourceManagementService {
+class DefaultSecuredResourceManagementService @Autowired constructor(private val repository: SecuredResourceRepository): SecuredResourceManagementService {
 
     @set:[Autowired Qualifier("defaultSecuredResourceValidatorFactory")]
     lateinit var validatorFactory: SecuredResourceValidatorFactory
