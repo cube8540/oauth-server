@@ -1,11 +1,11 @@
 package cube8540.oauth.authentication
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AccessTokenDetailsService
-import cube8540.oauth.authentication.credentials.oauth.security.introspector.DefaultAccessTokenIntrospector
-import cube8540.oauth.authentication.credentials.security.RoleSecurityConfig
-import cube8540.oauth.authentication.credentials.security.ScopeSecurityConfig
-import cube8540.oauth.authentication.credentials.security.TypeBasedAuthorityVoter
+import cube8540.oauth.authentication.oauth.security.OAuth2AccessTokenDetailsService
+import cube8540.oauth.authentication.oauth.security.introspector.DefaultAccessTokenIntrospector
+import cube8540.oauth.authentication.security.RoleSecurityConfig
+import cube8540.oauth.authentication.security.ScopeSecurityConfig
+import cube8540.oauth.authentication.security.TypeBasedAuthorityVoter
 import cube8540.oauth.authentication.error.DefaultAuthenticationExceptionEntryPoint
 import cube8540.oauth.authentication.error.security.AccessDeniedExceptionResponseRenderer
 import cube8540.oauth.authentication.error.security.AccessDeniedExceptionTranslator
