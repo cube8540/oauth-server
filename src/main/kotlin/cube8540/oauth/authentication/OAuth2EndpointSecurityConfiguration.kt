@@ -17,6 +17,7 @@ import cube8540.oauth.authentication.oauth.token.application.ImplicitTokenGrante
 import cube8540.oauth.authentication.oauth.token.application.RefreshTokenGranter
 import cube8540.oauth.authentication.oauth.token.application.ResourceOwnerPasswordTokenGranter
 import cube8540.oauth.authentication.error.DefaultAuthenticationExceptionEntryPoint
+import cube8540.oauth.authentication.oauth.security.endpoint.AuthorizationImplicitResponseEnhancer
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
@@ -107,7 +108,7 @@ class OAuth2EndpointSecurityConfiguration: WebSecurityConfigurerAdapter() {
     fun authorizationResponseEnhancer(accessTokenGranter: OAuth2AccessTokenGranter,
             codeGranter:OAuth2AuthorizationCodeGenerator): AuthorizationResponseEnhancer {
         val enhancer: AuthorizationResponseEnhancer = AuthorizationCodeResponseEnhancer(codeGranter)
-        enhancer.setNext(enhancer)
+        enhancer.setNext(AuthorizationImplicitResponseEnhancer(accessTokenGranter, clientDetailsService))
 
         return enhancer
     }

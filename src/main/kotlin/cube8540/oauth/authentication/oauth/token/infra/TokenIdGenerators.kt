@@ -37,16 +37,14 @@ class DefaultAuthorizationCodeGenerator(private val keyLength: Int): Authorizati
     override fun generate(): String {
         val bytes = ByteArray(keyLength)
         random.nextBytes(bytes)
-
         return getRandomCode(bytes)
     }
 
     private fun getRandomCode(bytes: ByteArray): String {
         val chars = CharArray(bytes.size)
         for (i in bytes.indices) {
-            chars[i] = DEFAULT_CODEC[(bytes[i] and 0xFF.toByte()) % DEFAULT_CODEC.size]
+            chars[i] = DEFAULT_CODEC[(bytes[i].toInt() and 0xFF) % DEFAULT_CODEC.size]
         }
-
         return String(chars)
     }
 }

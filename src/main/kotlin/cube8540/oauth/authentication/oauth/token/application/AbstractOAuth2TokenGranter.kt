@@ -14,6 +14,7 @@ import cube8540.oauth.authentication.oauth.token.domain.OAuth2ComposeUniqueKey
 import cube8540.oauth.authentication.oauth.token.domain.OAuth2ComposeUniqueKeyGenerator
 import cube8540.oauth.authentication.oauth.token.domain.OAuth2TokenEnhancer
 import cube8540.oauth.authentication.oauth.token.domain.OAuth2TokenIdGenerator
+import org.springframework.beans.factory.annotation.Autowired
 import java.time.Clock
 import java.time.LocalDateTime
 
@@ -34,6 +35,7 @@ abstract class AbstractOAuth2TokenGranter(
 
     var tokenEnhancer: OAuth2TokenEnhancer = NullOAuth2TokenEnhancer()
 
+    @set:[Autowired]
     var composeUniqueKeyGenerator: OAuth2ComposeUniqueKeyGenerator = DefaultOAuth2ComposeUniqueKeyGenerator()
 
     override fun grant(clientDetails: OAuth2ClientDetails, tokenRequest: OAuth2TokenRequest): OAuth2AccessTokenDetails {
