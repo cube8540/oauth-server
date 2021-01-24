@@ -1,0 +1,2038 @@
+{
+	"info": {
+		"_postman_id": "bf63ebaf-a6a9-4939-9c35-14002167d4bf",
+		"name": "OAuth2 Authentication Server",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "OAuth2 인가",
+			"item": [
+				{
+					"name": "OAuth2 Authorization Code Request",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/auth/oauth/authorize?client_id={{client_id}}&redirect_uri=http://localhost:8080/callback&response_type=code",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"auth",
+								"oauth",
+								"authorize"
+							],
+							"query": [
+								{
+									"key": "client_id",
+									"value": "{{client_id}}"
+								},
+								{
+									"key": "redirect_uri",
+									"value": "http://localhost:8080/callback"
+								},
+								{
+									"key": "response_type",
+									"value": "code"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "OAuth2 Authorization Code Grant",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{client_secret}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{client_id}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "grant_type",
+									"value": "authorization_code",
+									"type": "text"
+								},
+								{
+									"key": "code",
+									"value": "lXb3et",
+									"type": "text"
+								},
+								{
+									"key": "redirect_uri",
+									"value": "http://localhost:8080/callback",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://{{base_uri}}/oauth/token",
+							"protocol": "http",
+							"host": [
+								"{{base_uri}}"
+							],
+							"path": [
+								"oauth",
+								"token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "OAuth2 Implicit Token Request",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/auth/oauth/authorize?client_id={{client_id}}&redirect_uri=http://localhost:8080/callback&response_type=token",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"auth",
+								"oauth",
+								"authorize"
+							],
+							"query": [
+								{
+									"key": "client_id",
+									"value": "{{client_id}}"
+								},
+								{
+									"key": "redirect_uri",
+									"value": "http://localhost:8080/callback"
+								},
+								{
+									"key": "response_type",
+									"value": "token"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "OAuth2 Client Credentials Grant",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{client_secret}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{client_id}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "grant_type",
+									"value": "client_credentials",
+									"type": "text"
+								}
+							],
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{base_uri}}/oauth/token",
+							"protocol": "http",
+							"host": [
+								"{{base_uri}}"
+							],
+							"path": [
+								"oauth",
+								"token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "OAuth2 Resource Owner Password Grant",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{client_secret}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{client_id}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "grant_type",
+									"value": "password",
+									"type": "text"
+								},
+								{
+									"key": "username",
+									"value": "admin",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "admin",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://{{base_uri}}/oauth/token",
+							"protocol": "http",
+							"host": [
+								"{{base_uri}}"
+							],
+							"path": [
+								"oauth",
+								"token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "OAuth2 Refresh Token Grant",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{client_secret}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{client_id}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "grant_type",
+									"value": "refresh_token",
+									"type": "text"
+								},
+								{
+									"key": "refresh_token",
+									"value": "8b983c073158459684f2f195a2470403",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://{{base_uri}}/oauth/token",
+							"protocol": "http",
+							"host": [
+								"{{base_uri}}"
+							],
+							"path": [
+								"oauth",
+								"token"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "유저 API",
+			"item": [
+				{
+					"name": "등록된 아이디 갯수 검색 API",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "clientSecret",
+									"value": "{{client_secret}}",
+									"type": "string"
+								},
+								{
+									"key": "clientId",
+									"value": "{{client_id}}",
+									"type": "string"
+								},
+								{
+									"key": "client_authentication",
+									"value": "header",
+									"type": "string"
+								},
+								{
+									"key": "tokenName",
+									"value": "",
+									"type": "string"
+								},
+								{
+									"key": "accessTokenUrl",
+									"value": "http://{{base_uri}}/oauth/token",
+									"type": "string"
+								},
+								{
+									"key": "grant_type",
+									"value": "client_credentials",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://{{base_uri}}/api/accounts/attributes/username?username={{new_user_id}}",
+							"protocol": "http",
+							"host": [
+								"{{base_uri}}"
+							],
+							"path": [
+								"api",
+								"accounts",
+								"attributes",
+								"username"
+							],
+							"query": [
+								{
+									"key": "username",
+									"value": "{{new_user_id}}"
+								}
+							]
+						},
+						"description": "매개 변수로 받은 아이디의 갯수를 검색 합니다. 주로 아이디 중복 검사에서 사용 합니다."
+					},
+					"response": []
+				},
+				{
+					"name": "유저 등록 API",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "clientSecret",
+									"value": "{{client_secret}}",
+									"type": "string"
+								},
+								{
+									"key": "clientId",
+									"value": "{{client_id}}",
+									"type": "string"
+								},
+								{
+									"key": "tokenName",
+									"value": "",
+									"type": "string"
+								},
+								{
+									"key": "accessTokenUrl",
+									"value": "http://{{base_uri}}/oauth/token",
+									"type": "string"
+								},
+								{
+									"key": "grant_type",
+									"value": "client_credentials",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								},
+								{
+									"key": "client_authentication",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"{{new_user_id}}\",\r\n    \"password\": \"{{new_user_password}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{base_uri}}/api/accounts",
+							"protocol": "http",
+							"host": [
+								"{{base_uri}}"
+							],
+							"path": [
+								"api",
+								"accounts"
+							]
+						},
+						"description": "새 계정을 등록 합니다."
+					},
+					"response": []
+				},
+				{
+					"name": "유저 활성화 API",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "clientSecret",
+									"value": "{{client_secret}}",
+									"type": "string"
+								},
+								{
+									"key": "clientId",
+									"value": "{{client_id}}",
+									"type": "string"
+								},
+								{
+									"key": "client_authentication",
+									"value": "header",
+									"type": "string"
+								},
+								{
+									"key": "tokenName",
+									"value": "",
+									"type": "string"
+								},
+								{
+									"key": "accessTokenUrl",
+									"value": "http://{{base_uri}}/oauth/token",
+									"type": "string"
+								},
+								{
+									"key": "grant_type",
+									"value": "client_credentials",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "username",
+									"value": "{{new_user_id}}",
+									"type": "text"
+								},
+								{
+									"key": "credentialsKey",
+									"value": "e267ffd92fed456490cb02df5a4ae668",
+									"type": "text"
+								}
+							],
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{base_uri}}/api/accounts/attributes/active",
+							"protocol": "http",
+							"host": [
+								"{{base_uri}}"
+							],
+							"path": [
+								"api",
+								"accounts",
+								"attributes",
+								"active"
+							]
+						},
+						"description": "처음 계정을 등록할 시 할당 받은 계정 활성화 키를 이용하여 계정을 활성화 시킵니다."
+					},
+					"response": []
+				},
+				{
+					"name": "유저 정보 API",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "tokenType",
+									"value": "Bearer",
+									"type": "string"
+								},
+								{
+									"key": "accessToken",
+									"value": "0b6aa2eb23734013aa94b44ac93aab0d",
+									"type": "string"
+								},
+								{
+									"key": "clientSecret",
+									"value": "{{client_secret}}",
+									"type": "string"
+								},
+								{
+									"key": "clientId",
+									"value": "{{client_id}}",
+									"type": "string"
+								},
+								{
+									"key": "client_authentication",
+									"value": "header",
+									"type": "string"
+								},
+								{
+									"key": "tokenName",
+									"value": "",
+									"type": "string"
+								},
+								{
+									"key": "accessTokenUrl",
+									"value": "http://{{base_uri}}/oauth/token",
+									"type": "string"
+								},
+								{
+									"key": "grant_type",
+									"value": "client_credentials",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://{{base_uri}}/api/accounts/{{new_user_id}}",
+							"protocol": "http",
+							"host": [
+								"{{base_uri}}"
+							],
+							"path": [
+								"api",
+								"accounts",
+								"{{new_user_id}}"
+							]
+						},
+						"description": "요청 받은 계정의 정보를 반환 합니다."
+					},
+					"response": []
+				},
+				{
+					"name": "패스워드 변경 API",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "tokenType",
+									"value": "Bearer",
+									"type": "string"
+								},
+								{
+									"key": "accessToken",
+									"value": "0b6aa2eb23734013aa94b44ac93aab0d",
+									"type": "string"
+								},
+								{
+									"key": "clientSecret",
+									"value": "{{client_secret}}",
+									"type": "string"
+								},
+								{
+									"key": "clientId",
+									"value": "{{client_id}}",
+									"type": "string"
+								},
+								{
+									"key": "client_authentication",
+									"value": "header",
+									"type": "string"
+								},
+								{
+									"key": "tokenName",
+									"value": "",
+									"type": "string"
+								},
+								{
+									"key": "accessTokenUrl",
+									"value": "http://{{base_uri}}/oauth/token",
+									"type": "string"
+								},
+								{
+									"key": "grant_type",
+									"value": "client_credentials",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"existingPassword\": \"{{new_user_password}}\",\r\n    \"newPassword\": \"{{change_user_password}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{base_uri}}/api/accounts/{{new_user_id}}/attributes/password",
+							"protocol": "http",
+							"host": [
+								"{{base_uri}}"
+							],
+							"path": [
+								"api",
+								"accounts",
+								"{{new_user_id}}",
+								"attributes",
+								"password"
+							]
+						},
+						"description": "요청한 계정의 패스워드를 변경 합니다."
+					},
+					"response": []
+				},
+				{
+					"name": "패스워드 분실 API",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "tokenType",
+									"value": "Bearer",
+									"type": "string"
+								},
+								{
+									"key": "accessToken",
+									"value": "0b6aa2eb23734013aa94b44ac93aab0d",
+									"type": "string"
+								},
+								{
+									"key": "clientSecret",
+									"value": "{{client_secret}}",
+									"type": "string"
+								},
+								{
+									"key": "clientId",
+									"value": "{{client_id}}",
+									"type": "string"
+								},
+								{
+									"key": "client_authentication",
+									"value": "header",
+									"type": "string"
+								},
+								{
+									"key": "tokenName",
+									"value": "",
+									"type": "string"
+								},
+								{
+									"key": "accessTokenUrl",
+									"value": "http://{{base_uri}}/oauth/token",
+									"type": "string"
+								},
+								{
+									"key": "grant_type",
+									"value": "client_credentials",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://{{base_uri}}/api/accounts/attributes/password?username={{new_user_id}}",
+							"protocol": "http",
+							"host": [
+								"{{base_uri}}"
+							],
+							"path": [
+								"api",
+								"accounts",
+								"attributes",
+								"password"
+							],
+							"query": [
+								{
+									"key": "username",
+									"value": "{{new_user_id}}"
+								}
+							]
+						},
+						"description": "패스워드를 분실한 계정에 패스워드 초기화 키를 할당합니다. 해당 요청 이후에도 로그인은 가능 합니다."
+					},
+					"response": []
+				},
+				{
+					"name": "패스워드 초기화 API",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "tokenType",
+									"value": "Bearer",
+									"type": "string"
+								},
+								{
+									"key": "accessToken",
+									"value": "e0fbea3501224b669a3bed55dcaf3f43",
+									"type": "string"
+								},
+								{
+									"key": "clientSecret",
+									"value": "{{client_secret}}",
+									"type": "string"
+								},
+								{
+									"key": "clientId",
+									"value": "{{client_id}}",
+									"type": "string"
+								},
+								{
+									"key": "client_authentication",
+									"value": "header",
+									"type": "string"
+								},
+								{
+									"key": "tokenName",
+									"value": "",
+									"type": "string"
+								},
+								{
+									"key": "accessTokenUrl",
+									"value": "http://{{base_uri}}/oauth/token",
+									"type": "string"
+								},
+								{
+									"key": "grant_type",
+									"value": "client_credentials",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"{{new_user_id}}\",\r\n    \"credentialsKey\": \"311a2f86e1b349f6ac191bf82e1a4b13\",\r\n    \"newPassword\": \"{{change_user_password}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{base_uri}}/api/accounts/attributes/password",
+							"protocol": "http",
+							"host": [
+								"{{base_uri}}"
+							],
+							"path": [
+								"api",
+								"accounts",
+								"attributes",
+								"password"
+							]
+						},
+						"description": "패스워드 초기화 키를 사용하여 계정의 패스워드를 초기화 합니다."
+					},
+					"response": []
+				},
+				{
+					"name": "유저 삭제 API",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "tokenType",
+									"value": "Bearer",
+									"type": "string"
+								},
+								{
+									"key": "accessToken",
+									"value": "0b6aa2eb23734013aa94b44ac93aab0d",
+									"type": "string"
+								},
+								{
+									"key": "clientSecret",
+									"value": "{{client_secret}}",
+									"type": "string"
+								},
+								{
+									"key": "clientId",
+									"value": "{{client_id}}",
+									"type": "string"
+								},
+								{
+									"key": "client_authentication",
+									"value": "header",
+									"type": "string"
+								},
+								{
+									"key": "tokenName",
+									"value": "",
+									"type": "string"
+								},
+								{
+									"key": "accessTokenUrl",
+									"value": "http://{{base_uri}}/oauth/token",
+									"type": "string"
+								},
+								{
+									"key": "grant_type",
+									"value": "client_credentials",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://{{base_uri}}/api/accounts/{{new_user_id}}",
+							"protocol": "http",
+							"host": [
+								"{{base_uri}}"
+							],
+							"path": [
+								"api",
+								"accounts",
+								"{{new_user_id}}"
+							]
+						},
+						"description": "요청한 계정을 삭제 합니다."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "OAuth2 클라이언트 API",
+			"item": [
+				{
+					"name": "등록된 클라이언트 아이디 검색 API",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "tokenType",
+									"value": "Bearer",
+									"type": "string"
+								},
+								{
+									"key": "clientSecret",
+									"value": "{{client_secret}}",
+									"type": "string"
+								},
+								{
+									"key": "clientId",
+									"value": "{{client_id}}",
+									"type": "string"
+								},
+								{
+									"key": "client_authentication",
+									"value": "header",
+									"type": "string"
+								},
+								{
+									"key": "tokenName",
+									"value": "",
+									"type": "string"
+								},
+								{
+									"key": "accessTokenUrl",
+									"value": "http://{{base_uri}}/oauth/token",
+									"type": "string"
+								},
+								{
+									"key": "grant_type",
+									"value": "client_credentials",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_uri}}/api/clients/attributes/client-id?clientId={{new_client_id}}",
+							"host": [
+								"{{base_uri}}"
+							],
+							"path": [
+								"api",
+								"clients",
+								"attributes",
+								"client-id"
+							],
+							"query": [
+								{
+									"key": "clientId",
+									"value": "{{new_client_id}}"
+								}
+							]
+						},
+						"description": "저장소에 저장된 클라이언트 아이디의 갯수를 검색 합니다. 주로 클라이언트 아이디 중복 검사에서 사용 합니다."
+					},
+					"response": []
+				},
+				{
+					"name": "클라이언트 등록 API",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "clientSecret",
+									"value": "{{client_secret}}",
+									"type": "string"
+								},
+								{
+									"key": "clientId",
+									"value": "{{client_id}}",
+									"type": "string"
+								},
+								{
+									"key": "client_authentication",
+									"value": "header",
+									"type": "string"
+								},
+								{
+									"key": "tokenName",
+									"value": "",
+									"type": "string"
+								},
+								{
+									"key": "accessTokenUrl",
+									"value": "http://{{base_uri}}/oauth/token",
+									"type": "string"
+								},
+								{
+									"key": "grant_type",
+									"value": "client_credentials",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"clientId\": \"{{new_client_id}}\",\r\n  \"secret\": \"{{new_client_secret}}\",\r\n  \"clientName\": \"client name\",\r\n  \"clientOwner\": \"{{new_user_id}}\",\r\n  \"grantTypes\": [\r\n    \"authorization_code\",\r\n    \"refresh_token\",\r\n    \"client_credentials\"\r\n  ],\r\n  \"redirectUris\": [\r\n    \"http://localhost:8080/callback\",\r\n    \"http://localhost:8081/callback\"\r\n  ],\r\n  \"scopes\": [\r\n      \"{{new_scope_id}}\"\r\n  ],\r\n  \"refreshTokenValiditySeconds\": 600,\r\n  \"accessTokenValiditySeconds\": 60\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_uri}}/api/clients",
+							"host": [
+								"{{base_uri}}"
+							],
+							"path": [
+								"api",
+								"clients"
+							]
+						},
+						"description": "새 클라이언트를 저장소에 등록합니다. 등록된 클라이언트를 이용해 앞으로 OAuth2 토큰 발급을 할 수 있습니다."
+					},
+					"response": []
+				},
+				{
+					"name": "클라이언트 수정 API",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "tokenType",
+									"value": "Bearer",
+									"type": "string"
+								},
+								{
+									"key": "clientSecret",
+									"value": "{{client_secret}}",
+									"type": "string"
+								},
+								{
+									"key": "clientId",
+									"value": "{{client_id}}",
+									"type": "string"
+								},
+								{
+									"key": "client_authentication",
+									"value": "header",
+									"type": "string"
+								},
+								{
+									"key": "tokenName",
+									"value": "",
+									"type": "string"
+								},
+								{
+									"key": "accessTokenUrl",
+									"value": "http://{{base_uri}}/oauth/token",
+									"type": "string"
+								},
+								{
+									"key": "grant_type",
+									"value": "client_credentials",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"accessTokenValiditySeconds\": 60,\r\n  \"clientName\": \"change-name\",\r\n  \"newGrantTypes\": [\r\n    \"authorization_code\",\r\n    \"refresh_token\",\r\n    \"client_credentials\"\r\n  ],\r\n  \"newRedirectUris\": [\r\n    \"http://localhost:8082/callback\",\r\n    \"http://localhost:8083/callback\"\r\n  ],\r\n  \"newScopes\": [\r\n      \"{{new_scope_id}}\"\r\n  ],\r\n  \"refreshTokenValiditySeconds\": 600,\r\n  \"removeGrantTypes\": [\r\n    \"authorization_code\",\r\n    \"refresh_token\",\r\n    \"client_credentials\"\r\n  ],\r\n  \"removeRedirectUris\": [\r\n    \"http://localhost:8080/callback\",\r\n    \"http://localhost:8081/callback\"\r\n  ],\r\n  \"removeScopes\": [\r\n      \"{{new_scope_id}}\"\r\n  ],\r\n  \"removeRedirectUri\": [\r\n    \"http://localhost:8080/callback\",\r\n    \"http://localhost:8081/callback\"\r\n  ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_uri}}/api/clients/{{new_client_id}}",
+							"host": [
+								"{{base_uri}}"
+							],
+							"path": [
+								"api",
+								"clients",
+								"{{new_client_id}}"
+							]
+						},
+						"description": "등록된 클라이언트를 수정 합니다."
+					},
+					"response": []
+				},
+				{
+					"name": "클라이언트 검색 API",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "tokenType",
+									"value": "Bearer",
+									"type": "string"
+								},
+								{
+									"key": "clientSecret",
+									"value": "{{client_secret}}",
+									"type": "string"
+								},
+								{
+									"key": "clientId",
+									"value": "{{client_id}}",
+									"type": "string"
+								},
+								{
+									"key": "client_authentication",
+									"value": "header",
+									"type": "string"
+								},
+								{
+									"key": "tokenName",
+									"value": "",
+									"type": "string"
+								},
+								{
+									"key": "accessTokenUrl",
+									"value": "http://{{base_uri}}/oauth/token",
+									"type": "string"
+								},
+								{
+									"key": "grant_type",
+									"value": "client_credentials",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_uri}}/api/clients/{{new_client_id}}",
+							"host": [
+								"{{base_uri}}"
+							],
+							"path": [
+								"api",
+								"clients",
+								"{{new_client_id}}"
+							]
+						},
+						"description": "요청한 클라이언트의 정보를 검색 합니다."
+					},
+					"response": []
+				},
+				{
+					"name": "클라이언트 패스워드 변경 API",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"existsSecret\": \"{{new_client_secret}}\",\r\n    \"newSecret\": \"{{chage_client_secret}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_uri}}/api/clients/{{new_client_id}}/attributes/secret",
+							"host": [
+								"{{base_uri}}"
+							],
+							"path": [
+								"api",
+								"clients",
+								"{{new_client_id}}",
+								"attributes",
+								"secret"
+							]
+						},
+						"description": "등록된 클라이언트의 패스워드를 수정 합니다."
+					},
+					"response": []
+				},
+				{
+					"name": "등록된 클라이언트 검색 API",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "tokenType",
+									"value": "Bearer",
+									"type": "string"
+								},
+								{
+									"key": "clientSecret",
+									"value": "{{client_secret}}",
+									"type": "string"
+								},
+								{
+									"key": "clientId",
+									"value": "{{client_id}}",
+									"type": "string"
+								},
+								{
+									"key": "client_authentication",
+									"value": "header",
+									"type": "string"
+								},
+								{
+									"key": "tokenName",
+									"value": "",
+									"type": "string"
+								},
+								{
+									"key": "accessTokenUrl",
+									"value": "http://{{base_uri}}/oauth/token",
+									"type": "string"
+								},
+								{
+									"key": "grant_type",
+									"value": "client_credentials",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_uri}}/api/clients?owner={{new_user_id}}",
+							"host": [
+								"{{base_uri}}"
+							],
+							"path": [
+								"api",
+								"clients"
+							],
+							"query": [
+								{
+									"key": "owner",
+									"value": "{{new_user_id}}"
+								}
+							]
+						},
+						"description": "요청한 소유자에게 등록된 클라이언트를 모두 반환 합니다."
+					},
+					"response": []
+				},
+				{
+					"name": "클라이언트 삭제 API",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "tokenType",
+									"value": "Bearer",
+									"type": "string"
+								},
+								{
+									"key": "clientSecret",
+									"value": "{{client_secret}}",
+									"type": "string"
+								},
+								{
+									"key": "clientId",
+									"value": "{{client_id}}",
+									"type": "string"
+								},
+								{
+									"key": "client_authentication",
+									"value": "header",
+									"type": "string"
+								},
+								{
+									"key": "tokenName",
+									"value": "",
+									"type": "string"
+								},
+								{
+									"key": "accessTokenUrl",
+									"value": "http://{{base_uri}}/oauth/token",
+									"type": "string"
+								},
+								{
+									"key": "grant_type",
+									"value": "client_credentials",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_uri}}/api/clients/{{new_client_id}}",
+							"host": [
+								"{{base_uri}}"
+							],
+							"path": [
+								"api",
+								"clients",
+								"{{new_client_id}}"
+							]
+						},
+						"description": "등록된 클라이언트를 삭제 합니다."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "OAuth2 스코프 API",
+			"item": [
+				{
+					"name": "등록된 스코프 아이디 갯수 검색 API",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "clientSecret",
+									"value": "{{client_secret}}",
+									"type": "string"
+								},
+								{
+									"key": "clientId",
+									"value": "{{client_id}}",
+									"type": "string"
+								},
+								{
+									"key": "client_authentication",
+									"value": "header",
+									"type": "string"
+								},
+								{
+									"key": "tokenName",
+									"value": "",
+									"type": "string"
+								},
+								{
+									"key": "accessTokenUrl",
+									"value": "http://{{base_uri}}/oauth/token",
+									"type": "string"
+								},
+								{
+									"key": "grant_type",
+									"value": "client_credentials",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_uri}}/api/scopes/attributes/scopeId?id={{new_scope_id}}",
+							"host": [
+								"{{base_uri}}"
+							],
+							"path": [
+								"api",
+								"scopes",
+								"attributes",
+								"scopeId"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "{{new_scope_id}}"
+								}
+							]
+						},
+						"description": "매개 변수로 받은 스코프의 갯수를 검색 합니다. 주로 스코프 중복 검사에서 사용 합니다."
+					},
+					"response": []
+				},
+				{
+					"name": "스코프 등록 API",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"description\": \"new scope\",\r\n    \"scopeId\": \"{{new_scope_id}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_uri}}/api/scopes",
+							"host": [
+								"{{base_uri}}"
+							],
+							"path": [
+								"api",
+								"scopes"
+							]
+						},
+						"description": "새 스코프를 등록 합니다."
+					},
+					"response": []
+				},
+				{
+					"name": "스코프 수정 API",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "clientSecret",
+									"value": "{{client_secret}}",
+									"type": "string"
+								},
+								{
+									"key": "clientId",
+									"value": "{{client_id}}",
+									"type": "string"
+								},
+								{
+									"key": "client_authentication",
+									"value": "header",
+									"type": "string"
+								},
+								{
+									"key": "tokenName",
+									"value": "",
+									"type": "string"
+								},
+								{
+									"key": "accessTokenUrl",
+									"value": "http://{{base_uri}}/oauth/token",
+									"type": "string"
+								},
+								{
+									"key": "grant_type",
+									"value": "client_credentials",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"description\": \"new description\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_uri}}/api/scopes/{{new_scope_id}}",
+							"host": [
+								"{{base_uri}}"
+							],
+							"path": [
+								"api",
+								"scopes",
+								"{{new_scope_id}}"
+							]
+						},
+						"description": "스코프의 정보를 변경 합니다."
+					},
+					"response": []
+				},
+				{
+					"name": "모든 스코프 검색 API",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "clientSecret",
+									"value": "{{client_secret}}",
+									"type": "string"
+								},
+								{
+									"key": "clientId",
+									"value": "{{client_id}}",
+									"type": "string"
+								},
+								{
+									"key": "client_authentication",
+									"value": "header",
+									"type": "string"
+								},
+								{
+									"key": "tokenName",
+									"value": "",
+									"type": "string"
+								},
+								{
+									"key": "accessTokenUrl",
+									"value": "http://{{base_uri}}/oauth/token",
+									"type": "string"
+								},
+								{
+									"key": "grant_type",
+									"value": "client_credentials",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_uri}}/api/scopes",
+							"host": [
+								"{{base_uri}}"
+							],
+							"path": [
+								"api",
+								"scopes"
+							]
+						},
+						"description": "스코프를 반환 합니다."
+					},
+					"response": []
+				},
+				{
+					"name": "스코프 삭제 API",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "clientSecret",
+									"value": "{{client_secret}}",
+									"type": "string"
+								},
+								{
+									"key": "clientId",
+									"value": "{{client_id}}",
+									"type": "string"
+								},
+								{
+									"key": "client_authentication",
+									"value": "header",
+									"type": "string"
+								},
+								{
+									"key": "tokenName",
+									"value": "",
+									"type": "string"
+								},
+								{
+									"key": "accessTokenUrl",
+									"value": "http://{{base_uri}}/oauth/token",
+									"type": "string"
+								},
+								{
+									"key": "grant_type",
+									"value": "client_credentials",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_uri}}/api/scopes/{{new_scope_id}}",
+							"host": [
+								"{{base_uri}}"
+							],
+							"path": [
+								"api",
+								"scopes",
+								"{{new_scope_id}}"
+							]
+						},
+						"description": "스코프를 삭제 합니다."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "OAuth2 토큰 API",
+			"item": [
+				{
+					"name": "토큰 검색 API",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "tokenType",
+									"value": "Bearer",
+									"type": "string"
+								},
+								{
+									"key": "clientSecret",
+									"value": "{{client_secret}}",
+									"type": "string"
+								},
+								{
+									"key": "clientId",
+									"value": "{{client_id}}",
+									"type": "string"
+								},
+								{
+									"key": "client_authentication",
+									"value": "header",
+									"type": "string"
+								},
+								{
+									"key": "tokenName",
+									"value": "",
+									"type": "string"
+								},
+								{
+									"key": "accessTokenUrl",
+									"value": "http://{{base_uri}}/oauth/token",
+									"type": "string"
+								},
+								{
+									"key": "grant_type",
+									"value": "client_credentials",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_uri}}/api/tokens?username={{new_user_id}}",
+							"host": [
+								"{{base_uri}}"
+							],
+							"path": [
+								"api",
+								"tokens"
+							],
+							"query": [
+								{
+									"key": "username",
+									"value": "{{new_user_id}}"
+								}
+							]
+						},
+						"description": "요청 받은 유저의 엑세스 토큰을 검색 합니다."
+					},
+					"response": []
+				},
+				{
+					"name": "토큰 삭제 API",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_uri}}/api/tokens/{{tokens}}",
+							"host": [
+								"{{base_uri}}"
+							],
+							"path": [
+								"api",
+								"tokens",
+								"{{tokens}}"
+							]
+						},
+						"description": "OAuth 토큰을 삭제 합니다."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "보호 자원 API",
+			"item": [
+				{
+					"name": "등록된 보호 자원 아이디 갯수 검색 API",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "tokenType",
+									"value": "Bearer",
+									"type": "string"
+								},
+								{
+									"key": "clientSecret",
+									"value": "{{client_secret}}",
+									"type": "string"
+								},
+								{
+									"key": "clientId",
+									"value": "{{client_id}}",
+									"type": "string"
+								},
+								{
+									"key": "client_authentication",
+									"value": "header",
+									"type": "string"
+								},
+								{
+									"key": "tokenName",
+									"value": "",
+									"type": "string"
+								},
+								{
+									"key": "accessTokenUrl",
+									"value": "http://{{base_uri}}/oauth/token",
+									"type": "string"
+								},
+								{
+									"key": "grant_type",
+									"value": "client_credentials",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_uri}}/api/secured-resources/attributes/resource-id?resourceId={{new_secured_resource_id}}",
+							"host": [
+								"{{base_uri}}"
+							],
+							"path": [
+								"api",
+								"secured-resources",
+								"attributes",
+								"resource-id"
+							],
+							"query": [
+								{
+									"key": "resourceId",
+									"value": "{{new_secured_resource_id}}"
+								}
+							]
+						},
+						"description": "저장소에 저장된 자원 아이디의 갯수를 검색 합니다. 주로 자원 아이디 중복 검사에서 사용 합니다."
+					},
+					"response": []
+				},
+				{
+					"name": "보호 자원 등록 API",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "tokenType",
+									"value": "Bearer",
+									"type": "string"
+								},
+								{
+									"key": "clientSecret",
+									"value": "{{client_secret}}",
+									"type": "string"
+								},
+								{
+									"key": "clientId",
+									"value": "{{client_id}}",
+									"type": "string"
+								},
+								{
+									"key": "client_authentication",
+									"value": "header",
+									"type": "string"
+								},
+								{
+									"key": "tokenName",
+									"value": "",
+									"type": "string"
+								},
+								{
+									"key": "accessTokenUrl",
+									"value": "http://{{base_uri}}/oauth/token",
+									"type": "string"
+								},
+								{
+									"key": "grant_type",
+									"value": "client_credentials",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"authorities\": [\r\n    {\r\n      \"authority\": \"{{new_scope_id}}\"\r\n    }\r\n  ],\r\n  \"method\": \"GET\",\r\n  \"resource\": \"{{new_secured_resource}}\",\r\n  \"resourceId\": \"{{new_secured_resource_id}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_uri}}/api/secured-resources",
+							"host": [
+								"{{base_uri}}"
+							],
+							"path": [
+								"api",
+								"secured-resources"
+							]
+						},
+						"description": "새 보호 자원을 등록 합니다."
+					},
+					"response": []
+				},
+				{
+					"name": "보호 자원 수정 API",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"method\": \"POST\",\r\n  \"newAuthorities\": [\r\n    {\r\n      \"authority\": \"{{new_scope_id}}\"\r\n    }\r\n  ],\r\n  \"removeAuthorities\": [\r\n    {\r\n      \"authority\": \"{{new_scope_id}}\"\r\n    }\r\n  ],\r\n  \"resource\": \"{{change_secured_resource}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_uri}}/api/secured-resources/{{new_secured_resource_id}}",
+							"host": [
+								"{{base_uri}}"
+							],
+							"path": [
+								"api",
+								"secured-resources",
+								"{{new_secured_resource_id}}"
+							]
+						},
+						"description": "보호 자원을 수정 합니다."
+					},
+					"response": []
+				},
+				{
+					"name": "등록된 보호 자원 검색 API",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "tokenType",
+									"value": "Bearer",
+									"type": "string"
+								},
+								{
+									"key": "clientSecret",
+									"value": "{{client_secret}}",
+									"type": "string"
+								},
+								{
+									"key": "clientId",
+									"value": "{{client_id}}",
+									"type": "string"
+								},
+								{
+									"key": "client_authentication",
+									"value": "header",
+									"type": "string"
+								},
+								{
+									"key": "tokenName",
+									"value": "",
+									"type": "string"
+								},
+								{
+									"key": "accessTokenUrl",
+									"value": "http://{{base_uri}}/oauth/token",
+									"type": "string"
+								},
+								{
+									"key": "grant_type",
+									"value": "client_credentials",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_uri}}/api/secured-resources",
+							"host": [
+								"{{base_uri}}"
+							],
+							"path": [
+								"api",
+								"secured-resources"
+							]
+						},
+						"description": "저장소에 저장된 모든 보호 자원을 검색 합니다."
+					},
+					"response": []
+				},
+				{
+					"name": "보호 자원 삭제 API",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "tokenType",
+									"value": "Bearer",
+									"type": "string"
+								},
+								{
+									"key": "clientSecret",
+									"value": "{{client_secret}}",
+									"type": "string"
+								},
+								{
+									"key": "clientId",
+									"value": "{{client_id}}",
+									"type": "string"
+								},
+								{
+									"key": "client_authentication",
+									"value": "header",
+									"type": "string"
+								},
+								{
+									"key": "tokenName",
+									"value": "",
+									"type": "string"
+								},
+								{
+									"key": "accessTokenUrl",
+									"value": "http://{{base_uri}}/oauth/token",
+									"type": "string"
+								},
+								{
+									"key": "grant_type",
+									"value": "client_credentials",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_uri}}/api/secured-resources/{{new_secured_resource_id}}",
+							"host": [
+								"{{base_uri}}"
+							],
+							"path": [
+								"api",
+								"secured-resources",
+								"{{new_secured_resource_id}}"
+							]
+						},
+						"description": "보호 자원을 삭제 합니다."
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
