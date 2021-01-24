@@ -45,7 +45,7 @@ class ClientManagementAPIEndpoint @Autowired constructor(
 
     var clientPageSize: Int = DEFAULT_CLIENT_PAGE_SIZE
 
-    @GetMapping(value = ["/api/clients/attributes/clientId"])
+    @GetMapping(value = ["/api/clients/attributes/client-id"])
     @ApiOperation(value = "클라이언트 아이디 갯수 검색", notes = "저장소에 저장된 클라이언트 아이디의 갯수를 검색 합니다. 주로 클라이언트 아이디 중복 검사에서 사용 합니다.")
     fun countClientId(@ApiParam(value = "클라이언트 아이디", required = true, example = "client-id") @RequestParam clientId: String): Map<String, Long> {
         val count = service.countClient(clientId)
