@@ -1,7 +1,7 @@
 package cube8540.oauth.authentication.credentials.oauth.token.infra;
 
-import cube8540.oauth.authentication.credentials.oauth.token.domain.exception.TokenAccessDeniedException;
-import cube8540.oauth.authentication.credentials.oauth.token.domain.exception.TokenNotFoundException;
+import cube8540.oauth.authentication.credentials.oauth.token.domain.TokenAccessDeniedException;
+import cube8540.oauth.authentication.credentials.oauth.token.domain.TokenNotFoundException;
 import cube8540.oauth.authentication.error.message.ErrorMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

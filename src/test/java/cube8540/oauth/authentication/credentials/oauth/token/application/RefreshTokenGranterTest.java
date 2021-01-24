@@ -3,6 +3,7 @@ package cube8540.oauth.authentication.credentials.oauth.token.application;
 import cube8540.oauth.authentication.AuthenticationApplication;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidClientException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidGrantException;
+import cube8540.oauth.authentication.credentials.oauth.error.InvalidRequestException;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2ClientDetails;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2RequestValidator;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2TokenRequest;
@@ -42,6 +43,7 @@ import static cube8540.oauth.authentication.credentials.oauth.token.application.
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeEmptyAccessTokenRepository;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeEmptyRefreshTokenRepository;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeErrorValidator;
+import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeExistsAccessToken;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makePassValidator;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeRefreshToken;
 import static cube8540.oauth.authentication.credentials.oauth.token.application.OAuth2TokenApplicationTestHelper.makeRefreshTokenRepository;
@@ -56,6 +58,24 @@ import static org.mockito.Mockito.when;
 
 @DisplayName("리플레시 토큰을 통한 토큰 부여 테스트")
 class RefreshTokenGranterTest {
+
+    @Test
+    @DisplayName("요청한 리플래시 토큰이 null 일시")
+    void generateAccessTokenWhenRequestRefreshTokenIsNull() {
+        OAuth2ClientDetails clientDetails = makeClientDetails();
+        OAuth2TokenRequest request = makeTokenRequest();
+        OAuth2AuthorizedAccessToken accessToken = makeAccessToken(APPROVED_SCOPES);
+        OAuth2AuthorizedRefreshToken refreshToken = makeRefreshToken(accessToken);
+        OAuth2AccessTokenRepository accessTokenRepository = makeEmptyAccessTokenRepository();
+        OAuth2RefreshTokenRepository refreshTokenRepository = makeRefreshTokenRepository(REFRESH_TOKEN_ID, refreshToken);
+        OAuth2TokenIdGenerator generator = makeTokenIdGenerator(NEW_ACCESS_TOKEN_ID);
+        RefreshTokenGranter granter = new RefreshTokenGranter(accessTokenRepository, refreshTokenRepository, generator);
+
+        when(request.getRefreshToken()).thenReturn(null);
+
+        OAuth2Error error = assertThrows(InvalidRequestException.class, () -> granter.createAccessToken(clientDetails, request)).getError();
+        assertEquals(OAuth2ErrorCodes.INVALID_REQUEST, error.getErrorCode());
+    }
 
     @Test
     @DisplayName("등록 되지 않은 리플래시 토큰으로 엑세스 토큰 생성")
@@ -260,7 +280,7 @@ class RefreshTokenGranterTest {
         OAuth2TokenIdGenerator generator = makeTokenIdGenerator(NEW_ACCESS_TOKEN_ID);
         RefreshTokenGranter granter = new RefreshTokenGranter(accessTokenRepository, refreshTokenRepository, generator);
 
-        assertFalse(granter.isReturnsExistsToken(null, null));
+        assertFalse(granter.isReturnsExistsToken(makeExistsAccessToken(), makeAccessToken()));
     }
 
     private void assertAccessToken(OAuth2AuthorizedRefreshToken refreshToken, OAuth2RefreshTokenRepository refreshTokenRepository, OAuth2AuthorizedAccessToken newAccessToken) {

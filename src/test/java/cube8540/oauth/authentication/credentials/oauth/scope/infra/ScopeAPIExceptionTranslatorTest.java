@@ -1,8 +1,8 @@
 package cube8540.oauth.authentication.credentials.oauth.scope.infra;
 
-import cube8540.oauth.authentication.credentials.oauth.scope.domain.exception.ScopeInvalidException;
-import cube8540.oauth.authentication.credentials.oauth.scope.domain.exception.ScopeNotFoundException;
-import cube8540.oauth.authentication.credentials.oauth.scope.domain.exception.ScopeRegisterException;
+import cube8540.oauth.authentication.credentials.oauth.scope.domain.ScopeInvalidException;
+import cube8540.oauth.authentication.credentials.oauth.scope.domain.ScopeNotFoundException;
+import cube8540.oauth.authentication.credentials.oauth.scope.domain.ScopeRegisterException;
 import cube8540.oauth.authentication.error.message.ErrorMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

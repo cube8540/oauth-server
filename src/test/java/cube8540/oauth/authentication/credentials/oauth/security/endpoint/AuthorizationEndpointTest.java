@@ -1,6 +1,6 @@
 package cube8540.oauth.authentication.credentials.oauth.security.endpoint;
 
-import cube8540.oauth.authentication.credentials.oauth.OAuth2Utils;
+import cube8540.oauth.authentication.credentials.oauth.AuthorizationRequestKey;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidGrantException;
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidRequestException;
 import cube8540.oauth.authentication.credentials.oauth.error.OAuth2ClientRegistrationException;
@@ -117,7 +117,22 @@ class AuthorizationEndpointTest {
         OAuth2ClientDetails clientDetails = makeClientDetails();
         AuthorizationEndpoint endpoint = new AuthorizationEndpoint(makeClientDetailsService(clientDetails), makeAuthorityDetailsService(), makeResponseEnhancer());
 
-        parameter.put(OAuth2Utils.AuthorizationRequestKey.RESPONSE_TYPE, null);
+        parameter.put(AuthorizationRequestKey.RESPONSE_TYPE, null);
+
+        OAuth2Error error = assertThrows(InvalidRequestException.class, () -> endpoint.authorize(parameter, model, principal)).getError();
+        assertEquals(OAuth2ErrorCodes.INVALID_REQUEST, error.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("요청 받은 클라이언트 아이디가 null 일때 인가 요청")
+    void requestAuthorizationWhenClientIdIsNull() {
+        Principal principal = makeAuthorizedAuthentication();
+        Map<String, Object> model = makeEmptyModel();
+        Map<String, String> parameter = makeRequestParameter();
+        OAuth2ClientDetails clientDetails = makeClientDetails();
+        AuthorizationEndpoint endpoint = new AuthorizationEndpoint(makeClientDetailsService(clientDetails), makeAuthorityDetailsService(), makeResponseEnhancer());
+
+        parameter.put(AuthorizationRequestKey.CLIENT_ID, null);
 
         OAuth2Error error = assertThrows(InvalidRequestException.class, () -> endpoint.authorize(parameter, model, principal)).getError();
         assertEquals(OAuth2ErrorCodes.INVALID_REQUEST, error.getErrorCode());
@@ -155,7 +170,7 @@ class AuthorizationEndpointTest {
         endpoint.setRedirectResolver(redirectResolver);
         endpoint.setRequestValidator(passValidator);
         endpoint.setApprovalPage(FORWARD_PAGE);
-        parameter.put(OAuth2Utils.AuthorizationRequestKey.SCOPE, null);
+        parameter.put(AuthorizationRequestKey.SCOPE, null);
 
         ModelAndView modelAndView = endpoint.authorize(parameter, model, principal);
         AuthorizationRequest storedRequest = (AuthorizationRequest) model.get(AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE);
@@ -352,7 +367,7 @@ class AuthorizationEndpointTest {
         endpoint.setSessionAttributeStore(sessionAttributeStore);
         endpoint.setRedirectResolver(redirectResolver);
         endpoint.setExceptionTranslator(translator);
-        when(request.getParameter(OAuth2Utils.AuthorizationRequestKey.STATE)).thenReturn(STATE);
+        when(request.getParameter(AuthorizationRequestKey.STATE)).thenReturn(STATE);
 
         ModelAndView modelAndView = endpoint.handleOtherException(exception, webRequest);
         assertNotNull(modelAndView.getView());
@@ -377,7 +392,7 @@ class AuthorizationEndpointTest {
         endpoint.setSessionAttributeStore(sessionAttributeStore);
         endpoint.setRedirectResolver(redirectResolver);
         endpoint.setExceptionTranslator(translator);
-        when(request.getParameter(OAuth2Utils.AuthorizationRequestKey.STATE)).thenReturn(null);
+        when(request.getParameter(AuthorizationRequestKey.STATE)).thenReturn(null);
 
         ModelAndView modelAndView = endpoint.handleOtherException(exception, webRequest);
         assertNotNull(modelAndView.getView());

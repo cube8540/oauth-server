@@ -1,6 +1,7 @@
 package cube8540.oauth.authentication.credentials.oauth.token.application;
 
 import cube8540.oauth.authentication.credentials.oauth.error.InvalidClientException;
+import cube8540.oauth.authentication.credentials.oauth.error.InvalidRequestException;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenNotFoundException;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AccessTokenRepository;
 import cube8540.oauth.authentication.credentials.oauth.token.domain.OAuth2AuthorizedAccessToken;
@@ -28,6 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @DisplayName("기본 토큰 검색 테스트")
 class DefaultOAuth2AccessTokenDetailsServiceTest {
@@ -80,6 +82,23 @@ class DefaultOAuth2AccessTokenDetailsServiceTest {
 
         String errorCode = assertThrows(InvalidClientException.class, () -> service.readAccessTokenUser(RAW_ACCESS_TOKEN_ID)).getError().getErrorCode();
         assertEquals(OAuth2ErrorCodes.INVALID_CLIENT, errorCode);
+    }
+
+    @Test
+    @DisplayName("검색된 토큰의 유저 아이디가 null 일시")
+    void getAccessTokenWhenFindTokenUsernameIsNull() {
+        User userDetails = makeUserDetails();
+        UserDetailsService userDetailsService = makeUserDetailsService(RAW_USERNAME, userDetails);
+        OAuth2AuthorizedAccessToken accessToken = makeAccessToken();
+        OAuth2AccessTokenRepository repository = makeAccessTokenRepository(ACCESS_TOKEN_ID, accessToken);
+        Authentication authentication = makeAuthentication(RAW_CLIENT_ID);
+        DefaultOAuth2AccessTokenDetailsService service = new DefaultOAuth2AccessTokenDetailsService(repository, userDetailsService);
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        when(accessToken.getUsername()).thenReturn(null);
+
+        String errorCode = assertThrows(InvalidRequestException.class, () -> service.readAccessTokenUser(RAW_ACCESS_TOKEN_ID)).getError().getErrorCode();
+        assertEquals(OAuth2ErrorCodes.INVALID_REQUEST, errorCode);
     }
 
     @Test

@@ -56,6 +56,23 @@ import static org.mockito.Mockito.when;
 class AuthorizationCodeGranterTest {
 
     @Test
+    @DisplayName("요청한 인가 코드가 null 일때")
+    void generateAccessTokenWhenRequestAuthorizationCodeIsNull() {
+        OAuth2ClientDetails clientDetails = makeClientDetails();
+        OAuth2TokenRequest request = makeTokenRequest();
+        OAuth2TokenIdGenerator generator = makeTokenIdGenerator(ACCESS_TOKEN_ID);
+        OAuth2AccessTokenRepository repository = makeEmptyAccessTokenRepository();
+        OAuth2AuthorizationCode authorizationCode = makeAuthorizationCode();
+        OAuth2AuthorizationCodeConsumer consumer = makeCodeConsumer(RAW_AUTHORIZATION_CODE, authorizationCode);
+        AuthorizationCodeTokenGranter granter = new AuthorizationCodeTokenGranter(generator, repository, consumer);
+
+        when(request.getCode()).thenReturn(null);
+
+        OAuth2Error error = assertThrows(InvalidRequestException.class, () -> granter.createAccessToken(clientDetails, request)).getError();
+        assertEquals(OAuth2ErrorCodes.INVALID_REQUEST, error.getErrorCode());
+    }
+
+    @Test
     @DisplayName("인가 코드를 찾을 수 없을떄 엑세스 토큰 생성")
     void generateAccessTokenWhenAuthorizationCodeNotFound() {
         OAuth2ClientDetails clientDetails = makeClientDetails();

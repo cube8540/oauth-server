@@ -93,7 +93,7 @@ class DefaultAccessTokenIntrospectorTest {
 
         introspector.setClientId(RAW_CLIENT_ID);
         introspector.setClientSecret(CLIENT_SECRET);
-        when(accessToken.isExpired()).thenReturn(true);
+        when(accessToken.getExpired()).thenReturn(true);
 
         assertThrows(OAuth2IntrospectionException.class, () -> introspector.introspect(RAW_ACCESS_TOKEN_ID));
     }

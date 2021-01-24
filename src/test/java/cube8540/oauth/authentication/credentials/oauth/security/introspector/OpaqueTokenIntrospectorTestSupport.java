@@ -65,7 +65,7 @@ public class OpaqueTokenIntrospectorTestSupport {
         when(token.getScopes()).thenReturn(RAW_SCOPES);
         when(token.getExpiration()).thenReturn(EXPIRATION_DATETIME);
         when(token.getAdditionalInformation()).thenReturn(ADDITIONAL_INFO);
-        when(token.isExpired()).thenReturn(false);
+        when(token.getExpired()).thenReturn(false);
 
         return token;
     }
@@ -79,7 +79,7 @@ public class OpaqueTokenIntrospectorTestSupport {
         when(token.getScopes()).thenReturn(RAW_SCOPES);
         when(token.getExpiration()).thenReturn(EXPIRATION_DATETIME);
         when(token.getAdditionalInformation()).thenReturn(ADDITIONAL_INFO);
-        when(token.isExpired()).thenReturn(false);
+        when(token.getExpired()).thenReturn(false);
 
         return token;
     }

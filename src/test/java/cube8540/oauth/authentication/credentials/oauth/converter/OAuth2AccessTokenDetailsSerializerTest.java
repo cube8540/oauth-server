@@ -2,7 +2,7 @@ package cube8540.oauth.authentication.credentials.oauth.converter;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import cube8540.oauth.authentication.credentials.oauth.OAuth2Utils;
+import cube8540.oauth.authentication.credentials.oauth.AccessTokenSerializeKey;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2AccessTokenDetails;
 import cube8540.oauth.authentication.credentials.oauth.security.OAuth2RefreshTokenDetails;
 import org.junit.jupiter.api.DisplayName;
@@ -42,11 +42,11 @@ class OAuth2AccessTokenDetailsSerializerTest {
         serializer.serialize(accessToken, jsonGenerator, provider);
         InOrder inOrder = inOrder(jsonGenerator);
         inOrder.verify(jsonGenerator, times(1)).writeStartObject();
-        inOrder.verify(jsonGenerator, times(1)).writeStringField(OAuth2Utils.AccessTokenSerializeKey.ACCESS_TOKEN, TOKEN_VALUE);
-        inOrder.verify(jsonGenerator, times(1)).writeStringField(OAuth2Utils.AccessTokenSerializeKey.TOKEN_TYPE, TOKEN_TYPE);
-        inOrder.verify(jsonGenerator, times(1)).writeNumberField(OAuth2Utils.AccessTokenSerializeKey.EXPIRES_IN, EXPIRES_IN);
-        inOrder.verify(jsonGenerator, times(1)).writeStringField(OAuth2Utils.AccessTokenSerializeKey.SCOPE, excepted);
-        inOrder.verify(jsonGenerator, times(1)).writeStringField(OAuth2Utils.AccessTokenSerializeKey.REFRESH_TOKEN, REFRESH_TOKEN_VALUE);
+        inOrder.verify(jsonGenerator, times(1)).writeStringField(AccessTokenSerializeKey.ACCESS_TOKEN, TOKEN_VALUE);
+        inOrder.verify(jsonGenerator, times(1)).writeStringField(AccessTokenSerializeKey.TOKEN_TYPE, TOKEN_TYPE);
+        inOrder.verify(jsonGenerator, times(1)).writeNumberField(AccessTokenSerializeKey.EXPIRES_IN, EXPIRES_IN);
+        inOrder.verify(jsonGenerator, times(1)).writeStringField(AccessTokenSerializeKey.SCOPE, excepted);
+        inOrder.verify(jsonGenerator, times(1)).writeStringField(AccessTokenSerializeKey.REFRESH_TOKEN, REFRESH_TOKEN_VALUE);
         inOrder.verify(jsonGenerator, times(1)).writeStringField("TEST-1", "TEST-1-VALUE");
         inOrder.verify(jsonGenerator, times(1)).writeStringField("TEST-2", "TEST-2-VALUE");
         inOrder.verify(jsonGenerator, times(1)).writeStringField("TEST-3", "TEST-3-VALUE");

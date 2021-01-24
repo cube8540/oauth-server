@@ -1,11 +1,11 @@
 package cube8540.oauth.authentication.credentials.resource.application;
 
 import cube8540.oauth.authentication.credentials.resource.domain.ResourceMethod;
+import cube8540.oauth.authentication.credentials.resource.domain.ResourceNotFoundException;
+import cube8540.oauth.authentication.credentials.resource.domain.ResourceRegisterException;
 import cube8540.oauth.authentication.credentials.resource.domain.SecuredResource;
 import cube8540.oauth.authentication.credentials.resource.domain.SecuredResourceRepository;
 import cube8540.oauth.authentication.credentials.resource.domain.SecuredResourceValidatorFactory;
-import cube8540.oauth.authentication.credentials.resource.domain.exception.ResourceNotFoundException;
-import cube8540.oauth.authentication.credentials.resource.domain.exception.ResourceRegisterException;
 import cube8540.oauth.authentication.error.message.ErrorCodes;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

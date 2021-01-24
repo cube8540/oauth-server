@@ -1,10 +1,10 @@
 package cube8540.oauth.authentication.users.infra;
 
 import cube8540.oauth.authentication.error.message.ErrorMessage;
-import cube8540.oauth.authentication.users.domain.exception.UserAuthorizationException;
-import cube8540.oauth.authentication.users.domain.exception.UserInvalidException;
-import cube8540.oauth.authentication.users.domain.exception.UserNotFoundException;
-import cube8540.oauth.authentication.users.domain.exception.UserRegisterException;
+import cube8540.oauth.authentication.users.domain.UserAuthorizationException;
+import cube8540.oauth.authentication.users.domain.UserInvalidException;
+import cube8540.oauth.authentication.users.domain.UserNotFoundException;
+import cube8540.oauth.authentication.users.domain.UserRegisterException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

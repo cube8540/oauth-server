@@ -2,9 +2,8 @@ package cube8540.oauth.authentication.credentials.oauth.scope.application;
 
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2Scope;
 import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeRepository;
-import cube8540.oauth.authentication.credentials.oauth.scope.domain.OAuth2ScopeValidatorFactory;
-import cube8540.oauth.authentication.credentials.oauth.scope.domain.exception.ScopeNotFoundException;
-import cube8540.oauth.authentication.credentials.oauth.scope.domain.exception.ScopeRegisterException;
+import cube8540.oauth.authentication.credentials.oauth.scope.domain.ScopeNotFoundException;
+import cube8540.oauth.authentication.credentials.oauth.scope.domain.ScopeRegisterException;
 import cube8540.oauth.authentication.error.message.ErrorCodes;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,10 +15,8 @@ import static cube8540.oauth.authentication.credentials.oauth.scope.application.
 import static cube8540.oauth.authentication.credentials.oauth.scope.application.ScopeApplicationTestHelper.RAW_SCOPE_ID;
 import static cube8540.oauth.authentication.credentials.oauth.scope.application.ScopeApplicationTestHelper.SCOPE_ID;
 import static cube8540.oauth.authentication.credentials.oauth.scope.application.ScopeApplicationTestHelper.makeEmptyScopeRepository;
-import static cube8540.oauth.authentication.credentials.oauth.scope.application.ScopeApplicationTestHelper.makeErrorValidatorFactory;
 import static cube8540.oauth.authentication.credentials.oauth.scope.application.ScopeApplicationTestHelper.makeScope;
 import static cube8540.oauth.authentication.credentials.oauth.scope.application.ScopeApplicationTestHelper.makeScopeRepository;
-import static cube8540.oauth.authentication.credentials.oauth.scope.application.ScopeApplicationTestHelper.makeValidatorFactory;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.inOrder;
@@ -42,28 +39,12 @@ class DefaultScopeDetailsServiceTest {
     }
 
     @Test
-    @DisplayName("유효 하지 않은 데이터로 스코프 등록시")
-    void registerScopeWithInvalidData() {
-        OAuth2ScopeRepository repository = makeEmptyScopeRepository();
-        OAuth2ScopeValidatorFactory factory = makeErrorValidatorFactory(new TestScopeException());
-        DefaultScopeDetailsService service = new DefaultScopeDetailsService(repository);
-        OAuth2ScopeRegisterRequest request = new OAuth2ScopeRegisterRequest(RAW_SCOPE_ID, DESCRIPTION);
-
-        service.setValidatorFactory(factory);
-
-        assertThrows(TestScopeException.class, () -> service.registerNewScope(request));
-    }
-
-    @Test
     @DisplayName("새 스코프 등록")
     void registerNewScope() {
         OAuth2ScopeRepository repository = makeEmptyScopeRepository();
-        OAuth2ScopeValidatorFactory factory = makeValidatorFactory();
         DefaultScopeDetailsService service = new DefaultScopeDetailsService(repository);
         OAuth2ScopeRegisterRequest request = new OAuth2ScopeRegisterRequest(RAW_SCOPE_ID, DESCRIPTION);
         ArgumentCaptor<OAuth2Scope> scopeCaptor = ArgumentCaptor.forClass(OAuth2Scope.class);
-
-        service.setValidatorFactory(factory);
 
         service.registerNewScope(request);
         verify(repository, times(1)).save(scopeCaptor.capture());
@@ -87,15 +68,11 @@ class DefaultScopeDetailsServiceTest {
         OAuth2Scope scope = makeScope();
         OAuth2ScopeRepository repository = makeScopeRepository(SCOPE_ID, scope);
         OAuth2ScopeModifyRequest request = new OAuth2ScopeModifyRequest(NEW_DESCRIPTION);
-        OAuth2ScopeValidatorFactory factory = makeValidatorFactory();
         DefaultScopeDetailsService service = new DefaultScopeDetailsService(repository);
-
-        service.setValidatorFactory(factory);
 
         service.modifyScope(RAW_SCOPE_ID, request);
         InOrder inOrder = inOrder(scope, repository);
         inOrder.verify(scope, times(1)).setDescription(NEW_DESCRIPTION);
-        inOrder.verify(scope, times(1)).validate(factory);
         inOrder.verify(repository, times(1)).save(scope);
     }
 
@@ -118,6 +95,4 @@ class DefaultScopeDetailsServiceTest {
         service.removeScope(RAW_SCOPE_ID);
         verify(repository, times(1)).delete(scope);
     }
-
-    private static class TestScopeException extends RuntimeException {}
 }

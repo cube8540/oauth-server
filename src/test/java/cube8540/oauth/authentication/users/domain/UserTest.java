@@ -1,8 +1,5 @@
 package cube8540.oauth.authentication.users.domain;
 
-import cube8540.oauth.authentication.users.domain.exception.UserAuthorizationException;
-import cube8540.oauth.authentication.users.domain.exception.UserErrorCodes;
-import cube8540.oauth.authentication.users.domain.exception.UserInvalidException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -203,7 +200,7 @@ class UserTest {
 
         user.credentials(RAW_CREDENTIALS_KEY);
         assertNull(user.getCredentialsKey());
-        assertTrue(user.isCredentials());
+        assertTrue(user.getCredentialed());
     }
 
     @Test

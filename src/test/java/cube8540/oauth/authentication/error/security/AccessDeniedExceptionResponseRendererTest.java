@@ -26,7 +26,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @DisplayName("접근 거부 예외 응답 메시지 클래스 테스트")
@@ -44,19 +43,8 @@ public class AccessDeniedExceptionResponseRendererTest {
     }
 
     @Test
-    @DisplayName("ResponseEntity 가 null 일떄 응답 객체에 응답 메시지를 작성")
-    void writeResponseMessageByNullResponseEntity() throws Exception {
-        HttpMessageConverter<Object> messageConverter = makeDefaultMessageConverter();
-        AccessDeniedExceptionResponseRenderer renderer = new AccessDeniedExceptionResponseRenderer(messageConverter);
-        ServletWebRequest webRequest = makeServletWebRequest();
-
-        renderer.rendering(null, webRequest);
-        verifyNoMoreInteractions(webRequest.getResponse());
-    }
-
-    @Test
     @DisplayName("응답 객체에 ResponseEntity 에 저장된 HTTP 상태 코드 복사")
-    void copyHttpStatusCodeInResponseEntityToResponseObject() throws Exception {
+    void copyHttpStatusCodeInResponseEntityToResponseObject() {
         HttpMessageConverter<Object> messageConverter = makeDefaultMessageConverter();
         ResponseEntity<ErrorMessage<Object>> responseEntity = makeAccessDeniedResponseEntity(makeAccessDeniedErrorMessage());
         AccessDeniedExceptionResponseRenderer renderer = new AccessDeniedExceptionResponseRenderer(messageConverter);
