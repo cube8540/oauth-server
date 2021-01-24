@@ -13,7 +13,7 @@ interface UserManagementService {
 interface UserPasswordService {
     fun changePassword(username: String, changeRequest: ChangePasswordRequest): UserProfile
 
-    fun forgotPassword(username: String): UserProfile
+    fun forgotPassword(username: String): ForgotUserPassword
 
     fun validateCredentialsKey(username: String, credentialsKey: String): Boolean
 

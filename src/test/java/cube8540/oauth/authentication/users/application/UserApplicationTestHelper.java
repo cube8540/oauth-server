@@ -32,6 +32,7 @@ class UserApplicationTestHelper {
 
     static final String RAW_CREDENTIALS_KEY = "CREDENTIALS-KEY";
     static final String RAW_PASSWORD_CREDENTIALS_KEY = "PASSWORD-CREDENTIALS-KEY";
+    static final UserCredentialsKey PASSWORD_CREDENTIALS_KEY = new UserCredentialsKey(RAW_PASSWORD_CREDENTIALS_KEY);
 
     static UserRepository makeUserRepository(Username username, User user) {
         UserRepository repository = mock(UserRepository.class);
