@@ -18,9 +18,9 @@ data class DefaultSecuredResourceDetails(
     companion object {
         @JvmStatic
         fun of(resource: SecuredResource): DefaultSecuredResourceDetails {
-            val authorities = resource.authorities?.stream()
-                ?.map { auth -> AccessibleAuthorityValue(auth.authority) }
-                ?.collect(Collectors.toList())?: Collections.emptyList()
+            val authorities = resource.authorities
+                ?.map { auth -> AccessibleAuthorityValue(auth.authority) }?.toList()
+                ?: Collections.emptyList()
 
             return DefaultSecuredResourceDetails(resource.resourceId.value, resource.resource, resource.method, authorities)
         }

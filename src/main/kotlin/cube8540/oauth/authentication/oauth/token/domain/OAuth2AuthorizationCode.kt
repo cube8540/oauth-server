@@ -69,9 +69,7 @@ class OAuth2AuthorizationCode(
         this.clientId = request.clientId?.let { client -> OAuth2ClientId(client) }
         this.username = request.username?.let { username -> PrincipalUsername(username) }
         this.redirectURI = request.redirectUri
-        this.approvedScopes = request.requestScopes?.stream()
-            ?.map { scope -> AuthorityCode(scope) }
-            ?.collect(Collectors.toSet())
+        this.approvedScopes = request.requestScopes?.map { scope -> AuthorityCode(scope) }?.toMutableSet()
     }
 
     fun validateWithAuthorizationRequest(request: AuthorizationRequest) {

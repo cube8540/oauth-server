@@ -1,7 +1,9 @@
 package cube8540.oauth.authentication.resource.infra
 
+import cube8540.oauth.authentication.resource.domain.AccessibleAuthority
 import cube8540.oauth.authentication.security.AuthorityDetailsService
 import cube8540.oauth.authentication.resource.domain.SecuredResource
+import cube8540.oauth.authentication.security.AuthorityDetails
 import cube8540.validator.core.ValidationError
 import cube8540.validator.core.ValidationRule
 import java.util.*
@@ -54,16 +56,12 @@ class SecuredResourceAuthoritiesRule(
     constructor(scopeDetailsService: AuthorityDetailsService): this(DEFAULT_PROPERTY, DEFAULT_MESSAGE, scopeDetailsService)
 
     override fun isValid(target: SecuredResource): Boolean {
-        val targetScopes = target.authorities?.stream()
-            ?.map { auth -> auth.authority }?.collect(Collectors.toSet())?: Collections.emptyList()
-
+        val targetScopes = target.authorities?.map(AccessibleAuthority::authority)?.toSet() ?: Collections.emptyList()
         if (targetScopes.isEmpty()) {
             return true
         }
-
-        return scopeDetailsService.loadAuthorityByAuthorityCodes(targetScopes).stream()
-            .map { auth -> auth.code }.collect(Collectors.toList())
-            .containsAll(targetScopes)
+        return scopeDetailsService.loadAuthorityByAuthorityCodes(targetScopes)
+            .map(AuthorityDetails::code).toList().containsAll(targetScopes)
     }
 
     override fun error(): ValidationError = ValidationError(property, message)

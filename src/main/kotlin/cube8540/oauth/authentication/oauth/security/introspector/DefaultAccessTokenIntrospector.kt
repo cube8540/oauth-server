@@ -62,7 +62,7 @@ class DefaultAccessTokenIntrospector(private val accessTokenService: OAuth2Acces
 
     private fun extractAuthorities(accessToken: OAuth2AccessTokenDetails): Collection<GrantedAuthority> {
         return if (accessToken.scopes != null && accessToken.scopes!!.isNotEmpty()) {
-            accessToken.scopes!!.stream().map { grant -> SimpleGrantedAuthority(grant) }.collect(Collectors.toList())
+            accessToken.scopes!!.map { grant -> SimpleGrantedAuthority(grant) }
         } else {
             Collections.emptySet()
         }

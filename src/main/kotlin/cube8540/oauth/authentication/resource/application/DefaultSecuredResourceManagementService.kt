@@ -57,9 +57,7 @@ class DefaultSecuredResourceManagementService @Autowired constructor(private val
 
     @Transactional(readOnly = true)
     override fun getResources(): List<SecuredResourceDetails> =
-        repository.findAll().stream()
-            .map { res -> DefaultSecuredResourceDetails.of(res) }
-            .collect(Collectors.toList())
+        repository.findAll().map(DefaultSecuredResourceDetails::of).toList()
 
     private fun getResource(resourceId: String): SecuredResource =
         repository.findById(SecuredResourceId(resourceId))

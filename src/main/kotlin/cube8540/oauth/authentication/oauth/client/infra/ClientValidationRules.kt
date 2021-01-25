@@ -90,10 +90,8 @@ class ClientCanGrantedScopeValidationRule(private val property: String, private 
         if (target.scopes == null || target.scopes!!.isEmpty()) {
             return false
         }
-        val accessibleScopes = scopeDetailsService!!.loadScopes().stream()
-            .map(AuthorityDetails::code)
-            .map { code -> AuthorityCode(code) }
-            .collect(Collectors.toSet())
+        val accessibleScopes = scopeDetailsService!!.loadScopes()
+            .map(AuthorityDetails::code).map { code -> AuthorityCode(code) }.toSet()
         return accessibleScopes.containsAll(target.scopes!!)
     }
 
