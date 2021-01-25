@@ -14,7 +14,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/auth/oauth/authorize?client_id={{client_id}}&redirect_uri=http://localhost:8080/callback&response_type=code",
+							"raw": "http://{{base_uri}}/oauth/authorize?client_id={{client_id}}&redirect_uri=http://localhost:8080/callback&response_type=code",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -103,7 +103,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/auth/oauth/authorize?client_id={{client_id}}&redirect_uri=http://localhost:8080/callback&response_type=token",
+							"raw": "http://localhost:8080/{{base_uri}}/authorize?client_id={{client_id}}&redirect_uri=http://localhost:8080/callback&response_type=token",
 							"protocol": "http",
 							"host": [
 								"localhost"
