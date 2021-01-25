@@ -19,7 +19,7 @@ data class DefaultSecuredResourceDetails(
         @JvmStatic
         fun of(resource: SecuredResource): DefaultSecuredResourceDetails {
             val authorities = resource.authorities
-                ?.map { auth -> AccessibleAuthorityValue(auth.authority) }?.toList()
+                ?.map { AccessibleAuthorityValue(it.authority) }?.toList()
                 ?: Collections.emptyList()
 
             return DefaultSecuredResourceDetails(resource.resourceId.value, resource.resource, resource.method, authorities)

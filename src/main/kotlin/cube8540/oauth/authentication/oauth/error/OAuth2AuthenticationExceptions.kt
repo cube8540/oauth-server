@@ -15,7 +15,7 @@ open class AbstractOAuth2AuthenticationException(val statusCode: Int, val error:
         val delimiter = ", "
 
         val errorMessage = error.description
-        errorMessage?.let { msg -> builder.append(delimiter).append("error_description=\"").append(msg).append("\"") }
+        errorMessage?.let { builder.append(delimiter).append("error_description=\"").append(it).append("\"") }
 
         return builder.toString()
     }

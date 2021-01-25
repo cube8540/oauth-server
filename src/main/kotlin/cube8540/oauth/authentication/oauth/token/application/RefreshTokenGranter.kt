@@ -58,7 +58,7 @@ class RefreshTokenGranter @Autowired constructor(
 
     protected fun extractGrantScope(accessToken: OAuth2AuthorizedAccessToken, tokenRequest: OAuth2TokenRequest): Set<AuthorityCode> {
         return if (tokenRequest.scopes != null && tokenRequest.scopes!!.isNotEmpty()) {
-            tokenRequest.scopes!!.map { code -> AuthorityCode(code) }.toSet()
+            tokenRequest.scopes!!.map { AuthorityCode(it) }.toSet()
         } else {
             accessToken.scopes.toSet()
         }

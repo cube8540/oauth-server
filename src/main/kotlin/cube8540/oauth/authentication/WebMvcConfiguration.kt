@@ -45,7 +45,7 @@ class WebMvcConfiguration: WebMvcConfigurer {
     }
 
     override fun configureMessageConverters(converters: MutableList<HttpMessageConverter<*>>) {
-        converters.removeIf { converter: HttpMessageConverter<*> -> converter is MappingJackson2HttpMessageConverter }
+        converters.removeIf { it is MappingJackson2HttpMessageConverter }
         converters.add(MappingJackson2HttpMessageConverter(escapeObjectMapper()!!))
     }
 

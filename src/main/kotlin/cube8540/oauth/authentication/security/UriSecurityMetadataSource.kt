@@ -20,15 +20,15 @@ class UriSecurityMetadataSource(private val service: SecurityMetadataLoadService
         val request = (`object` as FilterInvocation).request
 
         return metadata.entries
-            .filter { entry -> entry.key.matches(request) }
-            .map { entry -> entry.value }
-            .flatMap { entries -> entries.asIterable() }
+            .filter { it.key.matches(request) }
+            .map { it.value }
+            .flatMap { it.asIterable() }
             .toMutableSet()
     }
 
     override fun getAllConfigAttributes(): MutableCollection<ConfigAttribute> =
         metadata.values
-            .flatMap { values -> values.asIterable() }
+            .flatMap { it.asIterable() }
             .toMutableSet()
 
     override fun supports(clazz: Class<*>): Boolean = FilterInvocation::class.java.isAssignableFrom(clazz)

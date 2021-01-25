@@ -91,7 +91,7 @@ class ClientCanGrantedScopeValidationRule(private val property: String, private 
             return false
         }
         val accessibleScopes = scopeDetailsService!!.loadScopes()
-            .map(AuthorityDetails::code).map { code -> AuthorityCode(code) }.toSet()
+            .map(AuthorityDetails::code).map { AuthorityCode(it) }.toSet()
         return accessibleScopes.containsAll(target.scopes!!)
     }
 

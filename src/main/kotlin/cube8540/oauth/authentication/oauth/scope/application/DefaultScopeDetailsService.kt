@@ -48,7 +48,7 @@ class DefaultScopeDetailsService @Autowired constructor(private val repository: 
 
     @Transactional(readOnly = true)
     override fun loadAuthorityByAuthorityCodes(authorities: Collection<String>): Collection<AuthorityDetails> {
-        val scopeIn = authorities.map { authority -> AuthorityCode(authority) }
+        val scopeIn = authorities.map { AuthorityCode(it) }
 
         return repository.findAllById(scopeIn).map(DefaultOAuth2ScopeDetails::of).toList()
     }

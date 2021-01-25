@@ -66,10 +66,10 @@ class OAuth2AuthorizationCode(
     var approvedScopes: MutableSet<AuthorityCode>? = null
 
     fun setAuthorizationRequest(request: AuthorizationRequest) {
-        this.clientId = request.clientId?.let { client -> OAuth2ClientId(client) }
-        this.username = request.username?.let { username -> PrincipalUsername(username) }
+        this.clientId = request.clientId?.let { OAuth2ClientId(it) }
+        this.username = request.username?.let { PrincipalUsername(it) }
         this.redirectURI = request.redirectUri
-        this.approvedScopes = request.requestScopes?.map { scope -> AuthorityCode(scope) }?.toMutableSet()
+        this.approvedScopes = request.requestScopes?.map { AuthorityCode(it) }?.toMutableSet()
     }
 
     fun validateWithAuthorizationRequest(request: AuthorizationRequest) {
@@ -82,7 +82,7 @@ class OAuth2AuthorizationCode(
             throw RedirectMismatchException("Redirect URI mismatched")
         }
 
-        if (clientId != request.clientId?.let { id -> OAuth2ClientId(id) }) {
+        if (clientId != request.clientId?.let { OAuth2ClientId(it) }) {
             throw invalidClient("Client id mismatch")
         }
     }
