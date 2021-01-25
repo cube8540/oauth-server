@@ -75,13 +75,13 @@ http://localhost:8080/oauth/token?grant_type=authorization_code
 #### 자원 소유자 인증
 Authorization Code Flow 와 마찬 가지로 자원 소유자의 인증을 위해 브라우저를 키고 아래의 주소로 이동합니다.
 ```
-http://localhost:8080/oauth/authorize?response_type=code
+http://localhost:8080/oauth/authorize?response_type=token
 &redirect_uri=http://example-your-app.com/callback
 &client_id=<your-client-id>
 ```
 |  파라미터명    |  필수 여부     |  타입   |  설명  |
 | :-----------:   | :--------------: | :-----:  | -------------------------------------------------------------------------------------------------------------- |
-| response_type | Required       | String | 응답 타입 받드시 **code** 이어야 합니다.                                                                         |
+| response_type | Required       | String | 응답 타입 받드시 **token** 이어야 합니다.                                                                         |
 | redirect_uri  | Optional       | URI    | 인가 코드를 받을 URI. 클라이언트에 등록된 URI가 여러개면 필수로 포함되어야 합니다.                                  |
 | client_id     | Required       | String | 클라이언트 아이디                                                                                               |
 | state         | Optional(권장) | String | CSRF 토큰 역할을 합니다. 만약 state 값에 대한 검증이 누락 되었거나 미흡하면 사용자 계정을 탈취 당할 수 있습니다.     |
