@@ -32,6 +32,7 @@ class UserApplicationTestHelper {
 
     static final String RAW_CREDENTIALS_KEY = "CREDENTIALS-KEY";
     static final String RAW_PASSWORD_CREDENTIALS_KEY = "PASSWORD-CREDENTIALS-KEY";
+    static final UserCredentialsKey PASSWORD_CREDENTIALS_KEY = new UserCredentialsKey(RAW_PASSWORD_CREDENTIALS_KEY);
 
     static UserRepository makeUserRepository(Username username, User user) {
         UserRepository repository = mock(UserRepository.class);
@@ -129,7 +130,7 @@ class UserApplicationTestHelper {
     static User makeNotCertifiedUser() {
         User user = makeDefaultUser();
 
-        when(user.isCredentials()).thenReturn(false);
+        when(user.getCredentialed()).thenReturn(false);
 
         return user;
     }
@@ -137,7 +138,15 @@ class UserApplicationTestHelper {
     static User makeCertifiedUser() {
         User user = makeDefaultUser();
 
-        when(user.isCredentials()).thenReturn(true);
+        when(user.getCredentialed()).thenReturn(true);
+
+        return user;
+    }
+
+    static User makeNotGeneratedPasswordCredentialsKeyUser() {
+        User user = makeDefaultUser();
+
+        when(user.getPasswordCredentialsKey()).thenReturn(null);
 
         return user;
     }
