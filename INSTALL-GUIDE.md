@@ -38,15 +38,15 @@ spring:
     hibernate:
       ddl-auto: validate
     show-sql: true
-logging:
-  config: #your logback config file location
 front:
   endpoint:
+    login-success-page: http://localhost:8080
+    logout-success-page: http://localhost:8080
     register-page: http://localhost:8080/front/register
     forgot-password-page: http://localhost:8080/front/forgot-password
 oauth-resource-server:
-  client-id: #your client id
-  client-secret: #your client secret
+  client-id: oauth-client
+  client-secret: oauth-secret
 ```
 - spring.datasource
 
@@ -83,9 +83,12 @@ $ java -jar -Dspring.profiles.active=local build/libs/authentication-<version>.j
 Username: admin
 Password: admin
 ```
+첫 실행 후 반드시 패스워드를 변경해 주세요.
 
 ## Default OAuth2 Client ID/Secret
 ```
 Client ID: oauth-client
 Client Secret: oauth-secret
 ```
+첫 실행 후 반드시 client secret을 변경해 주세요. 이 후 src/main/resources/application.yml 에서 oauth-resource-server.client-secret 역시
+변경한 값으로 바꿔 주세요
