@@ -125,7 +125,7 @@ class OAuth2Client(
     }
 
     fun validate(factory: OAuth2ClientValidatorFactory) =
-        factory.createValidator(this).result.hasErrorThrows { errors -> ClientInvalidException.instance(errors) }
+        factory.createValidator(this).result.hasErrorThrows { ClientInvalidException.instance(it) }
 
     fun changeSecret(existsSecret: String, changeSecret: String, encoder: PasswordEncoder) {
         if (!encoder.matches(existsSecret, secret)) {

@@ -47,10 +47,10 @@ class DefaultOAuth2ClientManagementService(private val repository: OAuth2ClientR
 
         val client = OAuth2Client(registerRequest.clientId, registerRequest.secret)
         client.clientName = registerRequest.clientName
-        client.owner = registerRequest.clientOwner?.let { owner -> ClientOwner(owner) }
-        registerRequest.grantTypes?.forEach { grant -> client.addGrantType(extractGrantType(grant)) }
-        registerRequest.scopes?.forEach { scope -> client.addScope(AuthorityCode(scope)) }
-        registerRequest.redirectUris?.forEach { uri -> client.addRedirectUri(URI.create(uri)) }
+        client.owner = registerRequest.clientOwner?.let { ClientOwner(it) }
+        registerRequest.grantTypes?.forEach { client.addGrantType(extractGrantType(it)) }
+        registerRequest.scopes?.forEach { client.addScope(AuthorityCode(it)) }
+        registerRequest.redirectUris?.forEach { client.addRedirectUri(URI.create(it)) }
         registerRequest.accessTokenValiditySeconds?.run(client::setAccessTokenValidity)
         registerRequest.refreshTokenValiditySeconds?.run(client::setRefreshTokenValidity)
 
@@ -64,12 +64,12 @@ class DefaultOAuth2ClientManagementService(private val repository: OAuth2ClientR
         val client = getClient(clientId)
 
         client.clientName = modifyRequest.clientName
-        modifyRequest.removeRedirectUris?.forEach { uri -> client.removeRedirectUri(URI.create(uri)) }
-        modifyRequest.newRedirectUris?.forEach { uri -> client.addRedirectUri(URI.create(uri)) }
-        modifyRequest.removeGrantTypes?.forEach { grant -> client.removeGrantType(extractGrantType(grant)) }
-        modifyRequest.newGrantTypes?.forEach { grant -> client.addGrantType(extractGrantType(grant)) }
-        modifyRequest.removeScopes?.forEach { scope -> client.removeScope(AuthorityCode(scope)) }
-        modifyRequest.newScopes?.forEach { scope -> client.addScope(AuthorityCode(scope)) }
+        modifyRequest.removeRedirectUris?.forEach { client.removeRedirectUri(URI.create(it)) }
+        modifyRequest.newRedirectUris?.forEach { client.addRedirectUri(URI.create(it)) }
+        modifyRequest.removeGrantTypes?.forEach { client.removeGrantType(extractGrantType(it)) }
+        modifyRequest.newGrantTypes?.forEach { client.addGrantType(extractGrantType(it)) }
+        modifyRequest.removeScopes?.forEach { client.removeScope(AuthorityCode(it)) }
+        modifyRequest.newScopes?.forEach { client.addScope(AuthorityCode(it)) }
         modifyRequest.accessTokenValiditySeconds?.run(client::setAccessTokenValidity)
         modifyRequest.refreshTokenValiditySeconds?.run(client::setRefreshTokenValidity)
 

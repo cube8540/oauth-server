@@ -28,7 +28,7 @@ class DefaultSecuredResourceManagementService @Autowired constructor(private val
 
         val resource = SecuredResource(SecuredResourceId(registerRequest.resourceId),
             URI.create(registerRequest.resource), ResourceMethod.of(registerRequest.method))
-        registerRequest.authorities?.forEach { auth -> resource.addAuthority(auth.authority) }
+        registerRequest.authorities?.forEach { resource.addAuthority(it.authority) }
         resource.validation(validatorFactory)
         return DefaultSecuredResourceDetails.of(repository.save(resource))
     }
@@ -38,8 +38,8 @@ class DefaultSecuredResourceManagementService @Autowired constructor(private val
         val resource = getResource(resourceId)
 
         resource.changeResourceInfo(URI.create(modifyRequest.resource), ResourceMethod.of(modifyRequest.method))
-        modifyRequest.removeAuthorities?.forEach { auth -> resource.removeAuthority(auth.authority) }
-        modifyRequest.newAuthorities?.forEach { auth -> resource.addAuthority(auth.authority) }
+        modifyRequest.removeAuthorities?.forEach { resource.removeAuthority(it.authority) }
+        modifyRequest.newAuthorities?.forEach { resource.addAuthority(it.authority) }
         resource.validation(validatorFactory)
         return DefaultSecuredResourceDetails.of(repository.save(resource))
     }
@@ -57,9 +57,7 @@ class DefaultSecuredResourceManagementService @Autowired constructor(private val
 
     @Transactional(readOnly = true)
     override fun getResources(): List<SecuredResourceDetails> =
-        repository.findAll().stream()
-            .map { res -> DefaultSecuredResourceDetails.of(res) }
-            .collect(Collectors.toList())
+        repository.findAll().map(DefaultSecuredResourceDetails::of).toList()
 
     private fun getResource(resourceId: String): SecuredResource =
         repository.findById(SecuredResourceId(resourceId))

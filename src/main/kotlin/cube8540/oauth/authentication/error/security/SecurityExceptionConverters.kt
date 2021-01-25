@@ -20,17 +20,17 @@ class AccessDeniedExceptionResponseRenderer(private val messageConverter: HttpMe
     }
 
     override fun rendering(responseEntity: ResponseEntity<ErrorMessage<Any>>, webRequest: ServletWebRequest) {
-        ServletServerHttpResponse(webRequest.response!!).use { output ->
-            output.setStatusCode(responseEntity.statusCode)
+        ServletServerHttpResponse(webRequest.response!!).use {
+            it.setStatusCode(responseEntity.statusCode)
             if (!responseEntity.headers.isEmpty()) {
-                output.headers.putAll(responseEntity.headers)
+                it.headers.putAll(responseEntity.headers)
             }
 
             val body = responseEntity.body
             if (body != null) {
-                messageConverter.write(body, MediaType.APPLICATION_JSON, output)
+                messageConverter.write(body, MediaType.APPLICATION_JSON, it)
             } else {
-                output.body.let {  }
+                it.body.let {  }
             }
         }
     }

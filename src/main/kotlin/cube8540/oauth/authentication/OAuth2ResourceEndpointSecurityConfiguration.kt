@@ -62,7 +62,7 @@ class OAuth2ResourceEndpointSecurityConfiguration: WebSecurityConfigurerAdapter(
 
     override fun configure(http: HttpSecurity) {
         http.oauth2ResourceServer()
-                .opaqueToken { introsptor -> introsptor.introspector(accessTokenIntrospector()) }
+                .opaqueToken { it.introspector(accessTokenIntrospector()) }
                 .and()
             .cors()
                 .configurationSource { CorsConfiguration().applyPermitDefaultValues() }

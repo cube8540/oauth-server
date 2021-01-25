@@ -60,14 +60,11 @@ class WithScopeComposeUniqueKeyGenerator: OAuth2ComposeUniqueKeyGenerator {
 
     override fun generateKey(token: OAuth2AuthorizedAccessToken): OAuth2ComposeUniqueKey {
         val values = LinkedHashMap<String, String?>()
-
         if (token.username != null) {
             values[USERNAME_KEY] = token.username!!.value
         }
         values[CLIENT_KEY] = token.client.value
-        values[SCOPE_KEY] = token.scopes.stream()
-            .map(AuthorityCode::value).sorted()
-            .collect(Collectors.toList()).toString()
+        values[SCOPE_KEY] = token.scopes.map(AuthorityCode::value).sorted().toList().toString()
 
         try {
             val digest = MessageDigest.getInstance("MD5")

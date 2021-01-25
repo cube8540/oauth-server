@@ -19,17 +19,17 @@ class UriSecurityMetadataSource(private val service: SecurityMetadataLoadService
     override fun getAttributes(`object`: Any?): MutableCollection<ConfigAttribute> {
         val request = (`object` as FilterInvocation).request
 
-        return metadata.entries.stream()
-            .filter { entry -> entry.key.matches(request) }
-            .map { entry -> entry.value }
-            .flatMap { entries -> entries.stream() }
-            .collect(Collectors.toSet())
+        return metadata.entries
+            .filter { it.key.matches(request) }
+            .map { it.value }
+            .flatMap { it.asIterable() }
+            .toMutableSet()
     }
 
     override fun getAllConfigAttributes(): MutableCollection<ConfigAttribute> =
-        metadata.values.stream()
-            .flatMap { values -> values.stream() }
-            .collect(Collectors.toSet())
+        metadata.values
+            .flatMap { it.asIterable() }
+            .toMutableSet()
 
     override fun supports(clazz: Class<*>): Boolean = FilterInvocation::class.java.isAssignableFrom(clazz)
 }

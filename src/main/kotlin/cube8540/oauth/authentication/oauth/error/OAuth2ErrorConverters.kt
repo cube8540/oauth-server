@@ -77,17 +77,17 @@ class OAuth2ExceptionResponseRenderer(private val converter: HttpMessageConverte
     constructor(converter: HttpMessageConverter<Any>): this(converter, MediaType.ALL)
 
     override fun rendering(responseEntity: ResponseEntity<OAuth2Error>, webRequest: ServletWebRequest) {
-        ServletServerHttpResponse(webRequest.response!!).use { output ->
-            output.setStatusCode(responseEntity.statusCode)
+        ServletServerHttpResponse(webRequest.response!!).use {
+            it.setStatusCode(responseEntity.statusCode)
             if (!responseEntity.headers.isEmpty()) {
-                output.headers.putAll(responseEntity.headers)
+                it.headers.putAll(responseEntity.headers)
             }
 
             val body = responseEntity.body
             if (body != null) {
-                converter.write(body, supportedMediaType, output)
+                converter.write(body, supportedMediaType, it)
             } else {
-                output.body.let {  }
+                it.body.let {  }
             }
         }
     }

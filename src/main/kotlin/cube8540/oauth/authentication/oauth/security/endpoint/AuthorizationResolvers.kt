@@ -38,10 +38,10 @@ class DefaultScopeApprovalResolver: ScopeApprovalResolver {
 
     override fun resolveApprovalScopes(originalRequest: AuthorizationRequest, approvalParameters: Map<String, String?>): Set<String> {
         val approvalScopes: MutableSet<String> = HashSet()
-        originalRequest.requestScopes?.forEach { scope ->
-            val approvalScope = approvalParameters[scope]
+        originalRequest.requestScopes?.forEach {
+            val approvalScope = approvalParameters[it]
             if ("true" == approvalScope?.toLowerCase()) {
-                approvalScopes.add(scope)
+                approvalScopes.add(it)
             }
         }
         if (approvalScopes.isEmpty()) {

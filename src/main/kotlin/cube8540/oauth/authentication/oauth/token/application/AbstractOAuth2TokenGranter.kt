@@ -61,9 +61,9 @@ abstract class AbstractOAuth2TokenGranter(
 
     protected open fun extractGrantScope(clientDetails: OAuth2ClientDetails, tokenRequest: OAuth2TokenRequest): Set<AuthorityCode> {
         return if (tokenRequest.scopes != null && tokenRequest.scopes!!.isNotEmpty()) {
-            tokenRequest.scopes!!.map { code -> AuthorityCode(code) }.toSet()
+            tokenRequest.scopes!!.map { AuthorityCode(it) }.toSet()
         } else {
-            clientDetails.scopes.map { code -> AuthorityCode(code) }.toSet()
+            clientDetails.scopes.map { AuthorityCode(it) }.toSet()
         }
     }
 

@@ -63,7 +63,7 @@ data class DefaultAuthorizationRequest(
         username = principal?.name,
         requestScopes = extractScopes(requestMap[AuthorizationRequestKey.SCOPE]),
         responseType = extractResponseType(requestMap[AuthorizationRequestKey.RESPONSE_TYPE]),
-        redirectUri = requestMap[AuthorizationRequestKey.REDIRECT_URI]?.let { uri -> URI.create(uri) }
+        redirectUri = requestMap[AuthorizationRequestKey.REDIRECT_URI]?.let { URI.create(it) }
     )
 
     constructor(authorizationRequest: AuthorizationRequest): this(
@@ -72,7 +72,7 @@ data class DefaultAuthorizationRequest(
         username = authorizationRequest.username,
         redirectUri = authorizationRequest.redirectUri,
         responseType = authorizationRequest.responseType,
-        requestScopes = authorizationRequest.requestScopes?.let { scopes -> HashSet(scopes) }
+        requestScopes = authorizationRequest.requestScopes?.let { HashSet(it) }
     )
 }
 
@@ -104,8 +104,8 @@ data class DefaultOAuth2TokenRequest(
         refreshToken = requestMap[TokenRequestKey.REFRESH_TOKEN],
         scopes = extractScopes(requestMap[TokenRequestKey.SCOPE]),
         state = requestMap[TokenRequestKey.STATE],
-        grantType = requestMap[TokenRequestKey.GRANT_TYPE]?.let { type -> AuthorizationGrantType(type) },
-        redirectUri = requestMap[TokenRequestKey.REDIRECT_URI]?.let { uri -> URI(uri) },
+        grantType = requestMap[TokenRequestKey.GRANT_TYPE]?.let { AuthorizationGrantType(it) },
+        redirectUri = requestMap[TokenRequestKey.REDIRECT_URI]?.let { URI(it) },
     )
 }
 

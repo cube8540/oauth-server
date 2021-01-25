@@ -13,7 +13,7 @@ import javax.persistence.AttributeConverter
 class RedirectUriConverter: AttributeConverter<URI, String> {
     override fun convertToDatabaseColumn(attribute: URI?): String? = attribute?.toString()
 
-    override fun convertToEntityAttribute(dbData: String?): URI? = dbData?.let { data -> URI.create(data) }
+    override fun convertToEntityAttribute(dbData: String?): URI? = dbData?.let { URI.create(it) }
 }
 
 class AuthorizationGrantTypeConverter: AttributeConverter<AuthorizationGrantType, String> {
@@ -38,7 +38,7 @@ class OAuth2AccessTokenDetailsSerializer: StdSerializer<OAuth2AccessTokenDetails
     }
 
     private fun writeAdditionalInformationField(value: OAuth2AccessTokenDetails, generator: JsonGenerator) =
-        value.additionalInformation?.entries?.forEach { entry ->  generator.writeStringField(entry.key, entry.value)}
+        value.additionalInformation?.entries?.forEach { generator.writeStringField(it.key, it.value)}
 
     private fun writeRefreshTokenField(value: OAuth2AccessTokenDetails, generator: JsonGenerator) =
         generator.writeStringField(AccessTokenSerializeKey.REFRESH_TOKEN, value.refreshToken?.tokenValue)

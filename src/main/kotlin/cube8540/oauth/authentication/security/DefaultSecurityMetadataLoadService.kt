@@ -9,18 +9,12 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher
 import org.springframework.security.web.util.matcher.RequestMatcher
 import org.springframework.stereotype.Service
 import java.util.*
-import java.util.function.Function
-import java.util.stream.Collectors
 
 @Service
 class DefaultSecurityMetadataLoadService(private val repository: SecuredResourceRepository): SecurityMetadataLoadService {
 
-    private val keyGenerator = Function { resource: SecuredResource -> requestMatcher(resource) }
-
-    private val valueGenerator = Function { resource: SecuredResource -> authorityToConfigAttribute(resource.authorities) }
-
     override fun loadSecurityMetadata(): Map<RequestMatcher, Collection<ConfigAttribute>> =
-        repository.findAll().stream().collect(Collectors.toMap(keyGenerator, valueGenerator))
+        repository.findAll().map { requestMatcher(it) to authorityToConfigAttribute(it.authorities) }.toMap()
 
     private fun requestMatcher(securedResource: SecuredResource): RequestMatcher = when (securedResource.method) {
         ResourceMethod.ALL -> {
@@ -34,7 +28,7 @@ class DefaultSecurityMetadataLoadService(private val repository: SecuredResource
     private fun authorityToConfigAttribute(authorities: Set<AccessibleAuthority>?): Collection<ConfigAttribute> {
         val configAttributes = HashSet<ConfigAttribute>()
 
-        authorities?.forEach { authority -> configAttributes.add(ScopeSecurityConfig(authority.authority)) }
+        authorities?.forEach { configAttributes.add(ScopeSecurityConfig(it.authority)) }
 
         return configAttributes
     }

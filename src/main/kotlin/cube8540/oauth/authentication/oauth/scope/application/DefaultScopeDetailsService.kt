@@ -18,9 +18,7 @@ class DefaultScopeDetailsService @Autowired constructor(private val repository: 
     override fun countByScopeId(scopeId: String): Long = repository.countByCode(AuthorityCode(scopeId))
 
     @Transactional(readOnly = true)
-    override fun loadScopes(): Collection<AuthorityDetails> = repository.findAll().stream()
-        .map { authority -> DefaultOAuth2ScopeDetails.of(authority) }
-        .collect(Collectors.toList())
+    override fun loadScopes(): Collection<AuthorityDetails> = repository.findAll().map(DefaultOAuth2ScopeDetails::of)
 
     @Transactional
     override fun registerNewScope(registerRequest: OAuth2ScopeRegisterRequest): AuthorityDetails {
@@ -50,11 +48,9 @@ class DefaultScopeDetailsService @Autowired constructor(private val repository: 
 
     @Transactional(readOnly = true)
     override fun loadAuthorityByAuthorityCodes(authorities: Collection<String>): Collection<AuthorityDetails> {
-        val scopeIn = authorities.stream().map { authority -> AuthorityCode(authority) }.collect(Collectors.toList())
+        val scopeIn = authorities.map { AuthorityCode(it) }
 
-        return repository.findAllById(scopeIn).stream()
-            .map { authority -> DefaultOAuth2ScopeDetails.of(authority) }
-            .collect(Collectors.toList())
+        return repository.findAllById(scopeIn).map(DefaultOAuth2ScopeDetails::of).toList()
     }
 
     private fun getScope(scopeId: String): OAuth2Scope = repository
