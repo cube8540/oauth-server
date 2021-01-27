@@ -30,7 +30,7 @@ class ClientAPIExceptionTranslatorTest {
         ClientAuthorizationException e = mock(ClientAuthorizationException.class);
 
         ResponseEntity<ErrorMessage<Object>> result = translator.translate(e);
-        assertEquals(HttpStatus.UNAUTHORIZED, result.getStatusCode());
+        assertEquals(HttpStatus.FORBIDDEN, result.getStatusCode());
     }
 
     @Test

@@ -60,8 +60,6 @@ class ClientManagementAPIEndpoint @Autowired constructor(
         ApiImplicitParam(value = "클라이언트 소유자", name = "owner", required = true, example = "username1234")
     ])
     @ApiResponses(value = [
-        ApiResponse(code = 401, message = "잘못된 OAuth2 엑세스 토큰 입니다."),
-        ApiResponse(code = 403, message = "로그인이 되어 있지 않습니다."),
         ApiResponse(code = 500, message = "서버에서 알 수 없는 에러가 발생 했습니다.")
     ])
     fun clients(@ApiParam(hidden = true) @RequestParam requestParameter: Map<String, String>): Page<OAuth2ClientDetails> {
@@ -76,8 +74,6 @@ class ClientManagementAPIEndpoint @Autowired constructor(
     @ApiImplicitParam(value = "OAuth2 엑세스 토큰", name = "Authorization", required = true, paramType = "header", example = "Bearer xxxxxxxxxx")
     @ApiResponses(value = [
         ApiResponse(code = 400, message = "이미 사용중인 클라이언트 아이디 이거나, 요청 정보중 허용 되지 않는 정보가 있습니다."),
-        ApiResponse(code = 401, message = "잘못된 OAuth2 엑세스 토큰 입니다."),
-        ApiResponse(code = 403, message = "로그인이 되어 있지 않습니다."),
         ApiResponse(code = 500, message = "서버에서 알 수 없는 에러가 발생 했습니다.")
     ])
     fun registerNewClient(@RequestBody registerRequest: OAuth2ClientRegisterRequest): OAuth2ClientDetails = service.registerNewClient(registerRequest)
@@ -86,8 +82,6 @@ class ClientManagementAPIEndpoint @Autowired constructor(
     @ApiOperation(value = "클라이언트 정보 검색", notes = "요청한 클라이언트의 정보를 검색 합니다.")
     @ApiImplicitParam(value = "OAuth2 엑세스 토큰", name = "Authorization", required = true, paramType = "header", example = "Bearer xxxxxxxxxx")
     @ApiResponses(value = [
-        ApiResponse(code = 401, message = "잘못된 OAuth2 엑세스 토큰 입니다."),
-        ApiResponse(code = 403, message = "로그인이 되어 있지 않습니다."),
         ApiResponse(code = 404, message = "등록 되지 않은 클라이언트 입니다."),
         ApiResponse(code = 500, message = "서버에서 알 수 없는 에러가 발생 했습니다.")
     ])
@@ -99,8 +93,6 @@ class ClientManagementAPIEndpoint @Autowired constructor(
     @ApiImplicitParam(value = "OAuth2 엑세스 토큰", name = "Authorization", required = true, paramType = "header", example = "Bearer xxxxxxxxxx")
     @ApiResponses(value = [
         ApiResponse(code = 400, message = "요청 정보중 허용 되지 않는 정보가 있습니다."),
-        ApiResponse(code = 401, message = "잘못된 OAuth2 엑세스 토큰 입니다."),
-        ApiResponse(code = 403, message = "로그인이 되어 있지 않습니다."),
         ApiResponse(code = 404, message = "등록 되지 않은 클라이언트 입니다."),
         ApiResponse(code = 500, message = "서버에서 알 수 없는 에러가 발생 했습니다.")
     ])
@@ -113,9 +105,7 @@ class ClientManagementAPIEndpoint @Autowired constructor(
     @ApiOperation(value = "클라이언트 패스워드 수정", notes = "등록된 클라이언트의 패스워드를 수정 합니다.")
     @ApiImplicitParam(value = "OAuth2 엑세스 토큰", name = "Authorization", required = true, paramType = "header", example = "Bearer xxxxxxxxxx")
     @ApiResponses(value = [
-        ApiResponse(code = 400, message = "이전에 사용하던 패스워드와 일치하지 않습니다."),
-        ApiResponse(code = 401, message = "잘못된 OAuth2 엑세스 토큰 입니다."),
-        ApiResponse(code = 403, message = "로그인이 되어 있지 않습니다."),
+        ApiResponse(code = 403, message = "OAuth2 토큰이 잘못 되었거나, 이전에 사용하던 패스워드와 일치하지 않습니다."),
         ApiResponse(code = 404, message = "등록 되지 않은 클라이언트 입니다."),
         ApiResponse(code = 500, message = "서버에서 알 수 없는 에러가 발생 했습니다.")
     ])
@@ -129,7 +119,6 @@ class ClientManagementAPIEndpoint @Autowired constructor(
     @ApiImplicitParam(value = "OAuth2 엑세스 토큰", name = "Authorization", required = true, paramType = "header", example = "Bearer xxxxxxxxxx")
     @ApiResponses(value = [
         ApiResponse(code = 401, message = "잘못된 OAuth2 엑세스 토큰 입니다."),
-        ApiResponse(code = 403, message = "로그인이 되어 있지 않습니다."),
         ApiResponse(code = 404, message = "등록 되지 않은 클라이언트 입니다."),
         ApiResponse(code = 500, message = "서버에서 알 수 없는 에러가 발생 했습니다.")
     ])

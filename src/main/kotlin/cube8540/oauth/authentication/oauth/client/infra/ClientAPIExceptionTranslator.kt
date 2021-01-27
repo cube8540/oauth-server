@@ -27,7 +27,7 @@ class ClientAPIExceptionTranslator: ExceptionTranslator<ErrorMessage<Any>> {
             response(HttpStatus.BAD_REQUEST, ErrorMessage.instance(exception.code, exception.message))
         }
         is ClientAuthorizationException -> {
-            response(HttpStatus.UNAUTHORIZED, ErrorMessage.instance(exception.code, exception.message))
+            response(HttpStatus.FORBIDDEN, ErrorMessage.instance(exception.code, exception.message))
         }
         else -> {
             logger.error("Handle exception {} {}", exception.javaClass, exception.message)
