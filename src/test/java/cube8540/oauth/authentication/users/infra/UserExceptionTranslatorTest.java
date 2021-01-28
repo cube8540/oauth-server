@@ -57,6 +57,6 @@ class UserExceptionTranslatorTest {
         UserAuthorizationException e = mock(UserAuthorizationException.class);
 
         ResponseEntity<ErrorMessage<Object>> response = translator.translate(e);
-        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
     }
 }
