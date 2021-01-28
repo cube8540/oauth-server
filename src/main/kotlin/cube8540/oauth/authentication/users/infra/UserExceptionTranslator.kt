@@ -28,7 +28,7 @@ class UserExceptionTranslator: ExceptionTranslator<ErrorMessage<Any>> {
             response(HttpStatus.BAD_REQUEST, instance(exception.code, exception.errors.toTypedArray()))
         }
         is UserAuthorizationException -> {
-            response(HttpStatus.UNAUTHORIZED, instance(exception.code, exception.message))
+            response(HttpStatus.FORBIDDEN, instance(exception.code, exception.message))
         }
         else -> {
             logger.error("Handle exception {} {}", exception.javaClass, exception.message)
