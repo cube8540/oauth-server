@@ -1,5 +1,6 @@
 package cube8540.oauth.authentication.oauth.security.endpoint;
 
+import cube8540.oauth.authentication.oauth.security.AutoApprovalScopeHandler;
 import cube8540.oauth.authentication.security.AuthorityDetails;
 import cube8540.oauth.authentication.security.AuthorityDetailsService;
 import cube8540.oauth.authentication.oauth.AuthorizationRequestKey;
@@ -31,6 +32,7 @@ import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -91,6 +93,10 @@ public class AuthorizationEndpointTestHelper {
     static final long EXPIRATION_IN = 600000;
 
     static final Map<String, String> ADDITIONAL_INFO = new HashMap<>();
+
+    static final Set<String> REQUIRED_APPROVAL_SCOPES = new HashSet<>(Arrays.asList("REQUIRED-SCOPE-1", "REQUIRED-SCOPE-2", "REQUIRED-SCOPE-3"));
+    static final Collection<AuthorityDetails>  REQUIRED_APPROVAL_SCOPE_DETAILS = Arrays.asList(
+            mock(AuthorityDetails.class), mock(AuthorityDetails.class), mock(AuthorityDetails.class));
 
     static Map<String, Object> makeEmptyModel() {
         Map<String, Object> model = new HashMap<>();
@@ -174,6 +180,7 @@ public class AuthorizationEndpointTestHelper {
 
         when(service.loadAuthorityByAuthorityCodes(SCOPE)).thenReturn(SCOPE_DETAILS);
         when(service.loadAuthorityByAuthorityCodes(CLIENT_SCOPE)).thenReturn(CLIENT_SCOPE_DETAILS);
+        when(service.loadAuthorityByAuthorityCodes(REQUIRED_APPROVAL_SCOPES)).thenReturn(REQUIRED_APPROVAL_SCOPE_DETAILS);
 
         return service;
     }
@@ -188,10 +195,10 @@ public class AuthorizationEndpointTestHelper {
         return clientDetails;
     }
 
-    static OAuth2ClientDetailsService makeClientDetailsService(OAuth2ClientDetails client) {
+    static OAuth2ClientDetailsService makeClientDetailsService(String clientId, OAuth2ClientDetails client) {
         OAuth2ClientDetailsService service = mock(OAuth2ClientDetailsService.class);
 
-        when(service.loadClientDetailsByClientId(any())).thenReturn(client);
+        when(service.loadClientDetailsByClientId(clientId)).thenReturn(client);
 
         return service;
     }
@@ -304,5 +311,22 @@ public class AuthorizationEndpointTestHelper {
         when(granter.grant(any(), any())).thenReturn(accessToken);
 
         return granter;
+    }
+
+    static AutoApprovalScopeHandler makeAutoApprovalScopeHandler(Principal authentication, OAuth2ClientDetails clientDetails, Set<String> requestScopes) {
+        AutoApprovalScopeHandler handler = mock(AutoApprovalScopeHandler.class);
+
+        when(handler.filterRequiredPermissionScopes(authentication, clientDetails, requestScopes))
+                .thenReturn(REQUIRED_APPROVAL_SCOPES);
+
+        return handler;
+    }
+
+    static AutoApprovalScopeHandler makeAllApprovalScopeHandler(Principal authentication, OAuth2ClientDetails clientDetails, Set<String> requestScopes) {
+        AutoApprovalScopeHandler handler = mock(AutoApprovalScopeHandler.class);
+
+        when(handler.filterRequiredPermissionScopes(authentication, clientDetails, requestScopes)).thenReturn(Collections.emptySet());
+
+        return handler;
     }
 }

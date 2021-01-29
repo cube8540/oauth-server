@@ -31,6 +31,11 @@ class UserTestHelper {
     static final LocalDateTime EXPIRATION_DATETIME = NOW.plusMinutes(5);
     static final LocalDateTime NOT_EXPIRATION_DATETIME = EXPIRATION_DATETIME.plusMinutes(1);
 
+    static final String CLIENT_ID = "CLIENT-ID";
+    static final String AUTHORITY = "APPROVAL-AUTHORITY";
+
+    static final ApprovalAuthority APPROVAL_AUTHORITY = new ApprovalAuthority(CLIENT_ID, AUTHORITY);
+
     static Clock makeDefaultClock() {
         return Clock.fixed(NOW.toInstant(AuthenticationApplication.DEFAULT_ZONE_OFFSET), AuthenticationApplication.DEFAULT_TIME_ZONE.toZoneId());
     }

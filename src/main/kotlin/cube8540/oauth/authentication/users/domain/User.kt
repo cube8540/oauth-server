@@ -3,16 +3,22 @@ package cube8540.oauth.authentication.users.domain
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.DynamicInsert
 import org.hibernate.annotations.DynamicUpdate
+import org.hibernate.annotations.Fetch
+import org.hibernate.annotations.FetchMode
 import org.hibernate.annotations.UpdateTimestamp
 import org.springframework.data.domain.AbstractAggregateRoot
 import org.springframework.security.crypto.password.PasswordEncoder
 import java.time.LocalDateTime
+import java.util.*
 import javax.persistence.AttributeOverride
 import javax.persistence.AttributeOverrides
+import javax.persistence.CollectionTable
 import javax.persistence.Column
+import javax.persistence.ElementCollection
 import javax.persistence.Embedded
 import javax.persistence.EmbeddedId
 import javax.persistence.Entity
+import javax.persistence.JoinColumn
 import javax.persistence.Table
 
 @Entity
@@ -44,6 +50,15 @@ class User private constructor(
 
     @Column(name = "is_credentials", nullable = false)
     var credentialed: Boolean  = false
+
+    @ElementCollection
+    @CollectionTable(name = "user_approval_scopes", joinColumns = [JoinColumn(name = "username", nullable = false)])
+    @AttributeOverrides(value = [
+        AttributeOverride(name = "clientId", column = Column(name = "client_id", nullable = false, length = 32)),
+        AttributeOverride(name = "scopeId", column = Column(name = "scope_id", nullable = false, length = 32))
+    ])
+    @Fetch(FetchMode.JOIN)
+    var approvalAuthorities: MutableSet<ApprovalAuthority>? = null
 
     @CreationTimestamp
     @Column(name = "registered_at", nullable = false)
@@ -98,6 +113,20 @@ class User private constructor(
 
     fun encrypted(encoder: PasswordEncoder) {
         this.password = encoder.encode(this.password)
+    }
+
+    fun addApprovalAuthority(clientId: String, authority: String) {
+        if (approvalAuthorities == null) {
+            approvalAuthorities = HashSet()
+        }
+        approvalAuthorities!!.add(ApprovalAuthority(clientId, authority))
+    }
+
+    fun revokeApprovalAuthority(clientId: String, authority: String) {
+        if (approvalAuthorities == null) {
+            approvalAuthorities = HashSet()
+        }
+        approvalAuthorities!!.remove(ApprovalAuthority(clientId, authority))
     }
 
     private fun assertMatchedResult(result: UserKeyMatchedResult) {
