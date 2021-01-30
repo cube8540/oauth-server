@@ -44,6 +44,8 @@ front:
     logout-success-page: http://localhost:8080
     register-page: http://localhost:8080/front/register
     forgot-password-page: http://localhost:8080/front/forgot-password
+remember-me:
+  key: rememberMeToken
 oauth-resource-server:
   client-id: oauth-client
   client-secret: oauth-secret

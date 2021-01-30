@@ -1,5 +1,8 @@
 package cube8540.oauth.authentication
 
+import cube8540.oauth.authentication.rememberme.application.TokenRepositoryBasedRememberMeService
+import cube8540.oauth.authentication.rememberme.domain.RememberMeTokenRepository
+import cube8540.oauth.authentication.rememberme.infra.RandomRememberMeTokenGenerator
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
@@ -37,6 +40,9 @@ class WebSecurityConfiguration: WebSecurityConfigurerAdapter() {
     @set:[Autowired]
     lateinit var passwordEncoder: PasswordEncoder
 
+    @set:[Autowired]
+    lateinit var rememberMeRepository: RememberMeTokenRepository
+
     override fun configure(auth: AuthenticationManagerBuilder) {
         auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder)
     }
@@ -66,6 +72,10 @@ class WebSecurityConfiguration: WebSecurityConfigurerAdapter() {
                 .and()
             .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
+                .and()
+            .rememberMe()
+                .key(environment.getProperty("remember-me.key")!!)
+                .rememberMeServices(TokenRepositoryBasedRememberMeService(environment.getProperty("remember-me.key")!!, RandomRememberMeTokenGenerator(), rememberMeRepository, userDetailsService))
                 .and()
             .exceptionHandling()
                 .defaultAuthenticationEntryPointFor(LoginUrlAuthenticationEntryPoint(DEFAULT_LOGIN_PAGE), AntPathRequestMatcher("/oauth/authorize"))
