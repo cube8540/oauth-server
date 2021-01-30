@@ -27,7 +27,7 @@ jacoco {
 }
 
 group = "cube8540.oauth"
-version = "2.7.0"
+version = "2.7.2"
 
 configurations {
     compileOnly {
