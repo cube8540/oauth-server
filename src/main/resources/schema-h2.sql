@@ -121,4 +121,24 @@ create table if not exists authority_accessible_resources (
 	constraint fk_accessible_resource_resource foreign key (resource_id) references secured_resource (resource_id) on delete cascade
 );
 
+create table if not exists user_approval_scopes (
+    username varchar(32) not null,
+    client_id varchar(32) not null,
+    scope_id varchar(32) not null,
+
+    constraint fk_user_approval_scopes_username foreign key (username) references `user` (username) on delete cascade,
+    constraint fk_user_approval_scopes_client_id foreign key (client_id) references oauth2_clients (client_id) on delete cascade,
+    constraint fk_user_approval_scopes_scope_id foreign key (scope_id) references oauth2_scope (scope_id) on delete cascade
+);
+
+create table if not exists remember_me_token (
+    series varchar(32) not null,
+    token varchar(32) not null,
+    username varchar(32) not null,
+    registered_at timestamp not null,
+    last_used_at timestamp not null,
+
+    constraint fk_remember_me_username foreign key (username) references `user` (username) on delete cascade
+);
+
 commit;

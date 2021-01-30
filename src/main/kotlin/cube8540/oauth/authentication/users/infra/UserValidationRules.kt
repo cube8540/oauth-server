@@ -1,5 +1,7 @@
 package cube8540.oauth.authentication.users.infra
 
+import cube8540.oauth.authentication.oauth.error.OAuth2ClientRegistrationException
+import cube8540.oauth.authentication.oauth.security.OAuth2ClientDetailsService
 import cube8540.oauth.authentication.users.domain.User
 import cube8540.validator.core.ValidationError
 import cube8540.validator.core.ValidationRule
@@ -51,4 +53,38 @@ class DefaultUserPasswordValidationRule(private val property: String, private va
 
     private fun matchesWhitelistPattern(password: String): Boolean =
         Pattern.compile(WHITELIST_PATTERN_VALUE).matcher(password).matches()
+}
+
+class DefaultApprovalAuthorityValidationRule(private val property: String, private val message: String): ValidationRule<User> {
+
+    companion object {
+        private const val DEFAULT_PROPERTY = "approvalAuthority"
+        private const val DEFAULT_MESSAGE = "포함할 수 없는 권한 입니다."
+    }
+
+    var clientDetailsService: OAuth2ClientDetailsService? = null
+
+    constructor(): this(DEFAULT_PROPERTY, DEFAULT_MESSAGE)
+
+    override fun isValid(target: User): Boolean {
+        if (this.clientDetailsService == null) {
+            return false
+        }
+        if (target.approvalAuthorities == null || target.approvalAuthorities!!.isEmpty()) {
+            return true
+        }
+        return try {
+            target.approvalAuthorities!!
+                .groupBy(keySelector = { it.clientId }, valueTransform = { it.scopeId })
+                .map { (clientId, scopes) ->
+                    clientDetailsService!!.loadClientDetailsByClientId(clientId).scopes.containsAll(scopes)
+                }
+                .all { it }
+        } catch (e: OAuth2ClientRegistrationException) {
+            false
+        }
+    }
+
+    override fun error(): ValidationError = ValidationError(property, message)
+
 }

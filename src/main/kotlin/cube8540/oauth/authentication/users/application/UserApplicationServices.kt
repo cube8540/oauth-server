@@ -1,5 +1,7 @@
 package cube8540.oauth.authentication.users.application
 
+import cube8540.oauth.authentication.users.domain.ApprovalAuthority
+
 interface UserManagementService {
     fun countUser(username: String): Long
 
@@ -24,4 +26,12 @@ interface UserCredentialsService {
     fun grantCredentialsKey(username: String): UserProfile
 
     fun accountCredentials(username: String, credentialsKey: String): UserProfile
+}
+
+interface UserApprovalAuthorityService {
+    fun getApprovalAuthorities(username: String): Collection<ApprovalAuthority>
+
+    fun grantApprovalAuthorities(username: String, authorities: Collection<ApprovalAuthority>): UserProfile
+
+    fun revokeApprovalAuthorities(username: String, authorities: Collection<ApprovalAuthority>): UserProfile
 }
