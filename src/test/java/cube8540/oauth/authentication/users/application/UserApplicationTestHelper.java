@@ -1,5 +1,7 @@
 package cube8540.oauth.authentication.users.application;
 
+import cube8540.oauth.authentication.oauth.security.OAuth2ClientDetails;
+import cube8540.oauth.authentication.users.domain.ApprovalAuthority;
 import cube8540.oauth.authentication.users.domain.User;
 import cube8540.oauth.authentication.users.domain.UserCredentialsKey;
 import cube8540.oauth.authentication.users.domain.UserCredentialsKeyGenerator;
@@ -9,10 +11,15 @@ import cube8540.oauth.authentication.users.domain.UserValidatorFactory;
 import cube8540.oauth.authentication.users.domain.Username;
 import cube8540.validator.core.ValidationResult;
 import cube8540.validator.core.Validator;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.security.Principal;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
@@ -33,6 +40,24 @@ class UserApplicationTestHelper {
     static final String RAW_CREDENTIALS_KEY = "CREDENTIALS-KEY";
     static final String RAW_PASSWORD_CREDENTIALS_KEY = "PASSWORD-CREDENTIALS-KEY";
     static final UserCredentialsKey PASSWORD_CREDENTIALS_KEY = new UserCredentialsKey(RAW_PASSWORD_CREDENTIALS_KEY);
+
+    static final String CLIENT_A_ID = "CLIENT-A";
+    static final String CLIENT_B_ID = "CLIENT-B";
+    static final String CLIENT_C_ID = "CLIENT-C";
+
+    static final Set<String> CLIENT_A_APPROVAL_AUTHORITIES = new HashSet<>(Arrays.asList("TEST-1", "TEST-2", "TEST-3"));
+    static final Set<String> CLIENT_B_APPROVAL_AUTHORITIES = new HashSet<>(Arrays.asList("TEST-2", "TEST-3", "TEST-4"));
+    static final Set<String> CLIENT_C_APPROVAL_AUTHORITIES = new HashSet<>(Arrays.asList("TEST-3", "TEST-4", "TEST-5"));
+
+    public static final Set<ApprovalAuthority> AUTHORITIES_A = CLIENT_A_APPROVAL_AUTHORITIES.stream()
+            .map(scope -> new ApprovalAuthority(CLIENT_A_ID, scope)).collect(Collectors.toSet());
+    public static final Set<ApprovalAuthority> AUTHORITIES_B = CLIENT_B_APPROVAL_AUTHORITIES.stream()
+            .map(scope -> new ApprovalAuthority(CLIENT_B_ID, scope)).collect(Collectors.toSet());
+    public static final Set<ApprovalAuthority> AUTHORITIES_C = CLIENT_C_APPROVAL_AUTHORITIES.stream()
+            .map(scope -> new ApprovalAuthority(CLIENT_C_ID, scope)).collect(Collectors.toSet());
+
+    static final Set<String> REQUEST_SCOPES = new HashSet<>(Arrays.asList("TEST-1", "TEST-2", "TEST-3", "TEST-4", "TEST-5"));
+    static final Set<String> ALL_APPROVAL_SCOPES = new HashSet<>(Arrays.asList("TEST-1", "TEST-2", "TEST-3"));
 
     static UserRepository makeUserRepository(Username username, User user) {
         UserRepository repository = mock(UserRepository.class);
@@ -181,10 +206,28 @@ class UserApplicationTestHelper {
         return user;
     }
 
-    static Principal makePrincipal(String username) {
-        Principal principal = mock(Principal.class);
+    static Set<ApprovalAuthority> makeComposeApprovalAuthorities() {
+        Set<ApprovalAuthority> compose = new HashSet<>();
+        compose.addAll(AUTHORITIES_A);
+        compose.addAll(AUTHORITIES_B);
+        compose.addAll(AUTHORITIES_C);
 
-        when(principal.getName()).thenReturn(username);
-        return principal;
+        return compose;
+    }
+
+    static Principal makeAuthentication(String username) {
+        Principal authentication = mock(Authentication.class);
+
+        when(authentication.getName()).thenReturn(username);
+
+        return authentication;
+    }
+
+    static OAuth2ClientDetails makeClientDetails(String clientId) {
+        OAuth2ClientDetails clientDetails = mock(OAuth2ClientDetails.class);
+
+        when(clientDetails.getClientId()).thenReturn(clientId);
+
+        return clientDetails;
     }
 }

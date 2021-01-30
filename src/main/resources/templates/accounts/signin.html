@@ -26,7 +26,15 @@
                         <div class="input-box">
                             <label for="password">패스워드</label>
                             <input type="password" id="password" name="password">
+                        </div>
+                    </div>
+                    <div class="form-input">
+                        <div class="input-box">
                             <div class="options" th:if="${@environment.getProperty('front.endpoint.forgot-password-page') != null}">
+                                <span class="remember-me">
+                                    <label for="remember-me">Remember Me</label>
+                                    <input type="checkbox" id="remember-me" name="remember-me">
+                                </span>
                                 <span class="forgot-password">
                                     <a th:href="${@environment.getProperty('front.endpoint.forgot-password-page')}">패스워드 찾기</a>
                                 </span>

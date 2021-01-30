@@ -5,7 +5,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import static cube8540.oauth.authentication.users.domain.UserTestHelper.APPROVAL_AUTHORITY;
+import static cube8540.oauth.authentication.users.domain.UserTestHelper.AUTHORITY;
 import static cube8540.oauth.authentication.users.domain.UserTestHelper.CHANGE_PASSWORD;
+import static cube8540.oauth.authentication.users.domain.UserTestHelper.CLIENT_ID;
 import static cube8540.oauth.authentication.users.domain.UserTestHelper.ENCRYPTED_PASSWORD;
 import static cube8540.oauth.authentication.users.domain.UserTestHelper.PASSWORD;
 import static cube8540.oauth.authentication.users.domain.UserTestHelper.RAW_CREDENTIALS_KEY;
@@ -21,6 +24,7 @@ import static cube8540.oauth.authentication.users.domain.UserTestHelper.makePass
 import static cube8540.oauth.authentication.users.domain.UserTestHelper.makePasswordEncoder;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -211,5 +215,35 @@ class UserTest {
 
         user.encrypted(encoder);
         assertEquals(ENCRYPTED_PASSWORD, user.getPassword());
+    }
+
+    @Test
+    @DisplayName("유저 승인 권한 추가")
+    void addApprovalAuthority() {
+        User user = new User(RAW_USERNAME, PASSWORD);
+
+        user.addApprovalAuthority(CLIENT_ID, AUTHORITY);
+        assertTrue(user.getApprovalAuthorities().contains(APPROVAL_AUTHORITY));
+    }
+
+    @Test
+    @DisplayName("유저 승인 권한이 null 일때 승인 권한 삭제")
+    void revokeApprovalAuthorityWhenUserApprovalAuthoritiesIsNull() {
+        User user = new User(RAW_USERNAME, PASSWORD);
+
+        user.setApprovalAuthorities(null);
+
+        assertDoesNotThrow(() -> user.revokeApprovalAuthority(CLIENT_ID, AUTHORITY));
+    }
+
+    @Test
+    @DisplayName("유저 승인 권한 삭제")
+    void revokeApprovalAuthority() {
+        User user = new User(RAW_USERNAME, PASSWORD);
+
+        user.addApprovalAuthority(CLIENT_ID, AUTHORITY);
+        user.revokeApprovalAuthority(CLIENT_ID, AUTHORITY);
+
+        assertFalse(user.getApprovalAuthorities().contains(APPROVAL_AUTHORITY));
     }
 }

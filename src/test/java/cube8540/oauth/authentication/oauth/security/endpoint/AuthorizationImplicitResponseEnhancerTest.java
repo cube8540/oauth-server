@@ -15,6 +15,7 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import static cube8540.oauth.authentication.oauth.security.endpoint.AuthorizationEndpointTestHelper.EXPIRATION_IN;
 import static cube8540.oauth.authentication.oauth.security.endpoint.AuthorizationEndpointTestHelper.RAW_ACCESS_TOKEN_ID;
+import static cube8540.oauth.authentication.oauth.security.endpoint.AuthorizationEndpointTestHelper.RAW_CLIENT_ID;
 import static cube8540.oauth.authentication.oauth.security.endpoint.AuthorizationEndpointTestHelper.RAW_RESOLVED_REDIRECT_URI;
 import static cube8540.oauth.authentication.oauth.security.endpoint.AuthorizationEndpointTestHelper.RAW_RESOLVED_SCOPES;
 import static cube8540.oauth.authentication.oauth.security.endpoint.AuthorizationEndpointTestHelper.RAW_USERNAME;
@@ -40,7 +41,7 @@ class AuthorizationImplicitResponseEnhancerTest {
     @DisplayName("응답 타입이 TOKEN 이 아닐때")
     void responseTypeNotToken() {
         OAuth2AccessTokenGranter granter = makeTokenGranter(makeAccessToken());
-        OAuth2ClientDetailsService clientDetailsService = makeClientDetailsService(makeClientDetails());
+        OAuth2ClientDetailsService clientDetailsService = makeClientDetailsService(RAW_CLIENT_ID, makeClientDetails());
         AuthorizationRequest request = makeAuthorizationRequest();
         AuthorizationImplicitResponseEnhancer enhancer = new AuthorizationImplicitResponseEnhancer(granter, clientDetailsService);
 
@@ -62,7 +63,7 @@ class AuthorizationImplicitResponseEnhancerTest {
         RedirectView redirectView = new RedirectView(RAW_RESOLVED_REDIRECT_URI);
         OAuth2AccessTokenGranter granter = makeTokenGranter(makeAccessToken());
         OAuth2ClientDetails clientDetails = makeClientDetails();
-        OAuth2ClientDetailsService clientDetailsService = makeClientDetailsService(clientDetails);
+        OAuth2ClientDetailsService clientDetailsService = makeClientDetailsService(RAW_CLIENT_ID, clientDetails);
         AuthorizationRequest request = makeAuthorizationRequest();
         AuthorizationImplicitResponseEnhancer enhancer = new AuthorizationImplicitResponseEnhancer(granter, clientDetailsService);
 
@@ -90,7 +91,7 @@ class AuthorizationImplicitResponseEnhancerTest {
         RedirectView redirectView = new RedirectView(RAW_RESOLVED_REDIRECT_URI);
         OAuth2AccessTokenGranter granter = makeTokenGranter(makeAccessToken());
         OAuth2ClientDetails clientDetails = makeClientDetails();
-        OAuth2ClientDetailsService clientDetailsService = makeClientDetailsService(clientDetails);
+        OAuth2ClientDetailsService clientDetailsService = makeClientDetailsService(RAW_CLIENT_ID, clientDetails);
         AuthorizationRequest request = makeAuthorizationRequest();
         AuthorizationImplicitResponseEnhancer enhancer = new AuthorizationImplicitResponseEnhancer(granter, clientDetailsService);
 
@@ -112,7 +113,7 @@ class AuthorizationImplicitResponseEnhancerTest {
     void notHasNextEnhancer() {
         AuthorizationRequest request = makeAuthorizationRequest();
         OAuth2AccessTokenGranter granter = makeTokenGranter(makeAccessToken());
-        OAuth2ClientDetailsService clientDetailsService = makeClientDetailsService(makeClientDetails());
+        OAuth2ClientDetailsService clientDetailsService = makeClientDetailsService(RAW_CLIENT_ID, makeClientDetails());
         AuthorizationImplicitResponseEnhancer enhancer = new AuthorizationImplicitResponseEnhancer(granter, clientDetailsService);
 
         ModelAndView modelAndView = mock(ModelAndView.class);
@@ -125,7 +126,7 @@ class AuthorizationImplicitResponseEnhancerTest {
         ModelAndView modelAndView = mock(ModelAndView.class);
         AuthorizationRequest request = makeAuthorizationRequest();
         OAuth2AccessTokenGranter granter = makeTokenGranter(makeAccessToken());
-        OAuth2ClientDetailsService clientDetailsService = makeClientDetailsService(makeClientDetails());
+        OAuth2ClientDetailsService clientDetailsService = makeClientDetailsService(RAW_CLIENT_ID, makeClientDetails());
         AuthorizationImplicitResponseEnhancer enhancer = new AuthorizationImplicitResponseEnhancer(granter, clientDetailsService);
 
         AuthorizationImplicitResponseEnhancer nextEnhancer = mock(AuthorizationImplicitResponseEnhancer.class);
