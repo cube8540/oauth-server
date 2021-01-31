@@ -18,6 +18,7 @@ import cube8540.oauth.authentication.oauth.security.endpoint.AuthorizationEndpoi
 import cube8540.oauth.authentication.oauth.security.endpoint.AuthorizationEndpoint.Companion.ORIGINAL_AUTHORIZATION_REQUEST_ATTRIBUTE
 import cube8540.oauth.authentication.error.ExceptionTranslator
 import cube8540.oauth.authentication.oauth.security.AutoApprovalScopeHandler
+import cube8540.oauth.authentication.oauth.security.endpoint.AuthorizationEndpoint.Companion.AUTHORIZATION_AUTO_APPROVAL_SCOPES_NAME
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
@@ -42,7 +43,7 @@ import java.security.Principal
 import java.util.*
 
 @Controller
-@SessionAttributes(value = [AUTHORIZATION_REQUEST_ATTRIBUTE, ORIGINAL_AUTHORIZATION_REQUEST_ATTRIBUTE])
+@SessionAttributes(value = [AUTHORIZATION_REQUEST_ATTRIBUTE, ORIGINAL_AUTHORIZATION_REQUEST_ATTRIBUTE, AUTHORIZATION_AUTO_APPROVAL_SCOPES_NAME])
 class AuthorizationEndpoint @Autowired constructor(
     @Qualifier("defaultOAuth2ClientDetailsService")
     private val clientDetailsService: OAuth2ClientDetailsService,
@@ -60,6 +61,7 @@ class AuthorizationEndpoint @Autowired constructor(
         const val AUTHORIZATION_REQUEST_ATTRIBUTE = "authorizationRequest"
         const val AUTHORIZATION_REQUEST_CLIENT_NAME = "authorizationRequestClientName"
         const val AUTHORIZATION_REQUEST_SCOPES_NAME = "authorizationRequestScopes"
+        const val AUTHORIZATION_AUTO_APPROVAL_SCOPES_NAME = "authorizationAutoApprovalScopes"
 
         const val DEFAULT_FORWARD_PREFIX = "forward:"
 
@@ -102,17 +104,19 @@ class AuthorizationEndpoint @Autowired constructor(
         if (!requestValidator.validateScopes(clientDetails, authorizationRequest.requestScopes)) {
             throw invalidScope("cannot grant scope")
         }
+
+        authorizationRequest.requestScopes = extractRequestScopes(clientDetails, authorizationRequest)
         val requireApprovalScopes = autoApprovalHandler.filterRequiredPermissionScopes(principal, clientDetails,
-            extractRequestScopes(clientDetails, authorizationRequest))
+            authorizationRequest.requestScopes!!)
         if (isApproval(requireApprovalScopes)) {
             return responseEnhancer.enhance(ModelAndView(RedirectView(redirectUri.toString())), authorizationRequest)
         }
-        authorizationRequest.requestScopes = requireApprovalScopes
 
         model[AUTHORIZATION_REQUEST_ATTRIBUTE] = authorizationRequest
+        model[AUTHORIZATION_AUTO_APPROVAL_SCOPES_NAME] = authorizationRequest.requestScopes!!.subtract(requireApprovalScopes)
         model[ORIGINAL_AUTHORIZATION_REQUEST_ATTRIBUTE] = parameters
 
-        val scopeDetails = scopeDetailsService.loadAuthorityByAuthorityCodes(authorizationRequest.requestScopes!!)
+        val scopeDetails = scopeDetailsService.loadAuthorityByAuthorityCodes(requireApprovalScopes)
         return ModelAndView(approvalPage)
             .addObject(AUTHORIZATION_REQUEST_CLIENT_NAME, clientDetails.clientName)
             .addObject(AUTHORIZATION_REQUEST_SCOPES_NAME, scopeDetails)
@@ -127,13 +131,14 @@ class AuthorizationEndpoint @Autowired constructor(
 
             val originalAuthorizationRequestMap: Map<*, *>? = (model[ORIGINAL_AUTHORIZATION_REQUEST_ATTRIBUTE] as Map<*, *>?)
             val originalAuthorizationRequest: AuthorizationRequest? = (model[AUTHORIZATION_REQUEST_ATTRIBUTE] as AuthorizationRequest?)
-            if (originalAuthorizationRequestMap == null || originalAuthorizationRequest == null) {
+            val autoApprovalScopes: Set<*>? = (model[AUTHORIZATION_AUTO_APPROVAL_SCOPES_NAME] as Set<*>?)
+            if (originalAuthorizationRequestMap == null || originalAuthorizationRequest == null || autoApprovalScopes == null) {
                 throw invalidRequest("Cannot approval uninitialized authorization request")
             }
 
             val authorizationRequest = DefaultAuthorizationRequest(originalAuthorizationRequest)
             val approvalScopes = approvalResolver.resolveApprovalScopes(originalAuthorizationRequest, approvalParameters)
-            authorizationRequest.requestScopes = approvalScopes
+            authorizationRequest.requestScopes = approvalScopes.plus(autoApprovalScopes.map { it as String })
 
             val redirectUri = authorizationRequest.redirectUri!!
             if (originalAuthorizationRequestMap[AuthorizationRequestKey.REDIRECT_URI] == null) {

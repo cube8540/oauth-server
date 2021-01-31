@@ -94,9 +94,15 @@ public class AuthorizationEndpointTestHelper {
 
     static final Map<String, String> ADDITIONAL_INFO = new HashMap<>();
 
-    static final Set<String> REQUIRED_APPROVAL_SCOPES = new HashSet<>(Arrays.asList("REQUIRED-SCOPE-1", "REQUIRED-SCOPE-2", "REQUIRED-SCOPE-3"));
+    static final Set<String> REQUIRE_APPROVAL_CLIENT_SCOPES = new HashSet<>(Arrays.asList("CLIENT-SCOPE-1", "CLIENT-SCOPE-2"));
+    static final Collection<AuthorityDetails>  REQUIRED_APPROVAL_CLIENT_SCOPE_DETAILS = Arrays.asList(
+            mock(AuthorityDetails.class), mock(AuthorityDetails.class));
+
+    static final Set<String> REQUIRED_APPROVAL_SCOPES = new HashSet<>(Arrays.asList("CLIENT-SCOPE-1", "CLIENT-SCOPE-2"));
     static final Collection<AuthorityDetails>  REQUIRED_APPROVAL_SCOPE_DETAILS = Arrays.asList(
-            mock(AuthorityDetails.class), mock(AuthorityDetails.class), mock(AuthorityDetails.class));
+            mock(AuthorityDetails.class), mock(AuthorityDetails.class));
+
+    static final Set<String> APPROVAL_SCOPES = new HashSet<>(Arrays.asList("APPROVAL-SCOPE-1", "APPROVAL-SCOPE-2"));
 
     static Map<String, Object> makeEmptyModel() {
         Map<String, Object> model = new HashMap<>();
@@ -107,11 +113,12 @@ public class AuthorizationEndpointTestHelper {
         return model;
     }
 
-    static Map<String, Object> makeModel(Map<?, ?> originalRequest, AuthorizationRequest request) {
+    static Map<String, Object> makeModel(Map<?, ?> originalRequest, AuthorizationRequest request, Set<String> autoApprovalScopes) {
         Map<String, Object> model = makeEmptyModel();
 
         model.put(AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE, request);
         model.put(AuthorizationEndpoint.ORIGINAL_AUTHORIZATION_REQUEST_ATTRIBUTE, originalRequest);
+        model.put(AuthorizationEndpoint.AUTHORIZATION_AUTO_APPROVAL_SCOPES_NAME, autoApprovalScopes);
 
         return model;
     }
@@ -313,11 +320,11 @@ public class AuthorizationEndpointTestHelper {
         return granter;
     }
 
-    static AutoApprovalScopeHandler makeAutoApprovalScopeHandler(Principal authentication, OAuth2ClientDetails clientDetails, Set<String> requestScopes) {
+    static AutoApprovalScopeHandler makeAutoApprovalScopeHandler(Principal authentication, OAuth2ClientDetails clientDetails, Set<String> requestScopes, Set<String> returns) {
         AutoApprovalScopeHandler handler = mock(AutoApprovalScopeHandler.class);
 
         when(handler.filterRequiredPermissionScopes(authentication, clientDetails, requestScopes))
-                .thenReturn(REQUIRED_APPROVAL_SCOPES);
+                .thenReturn(returns);
 
         return handler;
     }
@@ -328,5 +335,19 @@ public class AuthorizationEndpointTestHelper {
         when(handler.filterRequiredPermissionScopes(authentication, clientDetails, requestScopes)).thenReturn(Collections.emptySet());
 
         return handler;
+    }
+
+    static Set<String> subtract(Set<String> a, Set<String> b) {
+        Set<String> newA = new HashSet<>(a);
+
+        newA.removeAll(b);
+        return newA;
+    }
+
+    static Set<String> plus(Set<String> a, Set<String> b) {
+        Set<String> newA = new HashSet<>(a);
+
+        newA.addAll(b);
+        return newA;
     }
 }
