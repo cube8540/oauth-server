@@ -29,6 +29,7 @@ import java.security.Principal;
 import java.util.Collections;
 import java.util.Map;
 
+import static cube8540.oauth.authentication.oauth.security.endpoint.AuthorizationEndpointTestHelper.APPROVAL_SCOPES;
 import static cube8540.oauth.authentication.oauth.security.endpoint.AuthorizationEndpointTestHelper.CLIENT_NAME;
 import static cube8540.oauth.authentication.oauth.security.endpoint.AuthorizationEndpointTestHelper.CLIENT_SCOPE;
 import static cube8540.oauth.authentication.oauth.security.endpoint.AuthorizationEndpointTestHelper.FORWARD_PAGE;
@@ -43,6 +44,7 @@ import static cube8540.oauth.authentication.oauth.security.endpoint.Authorizatio
 import static cube8540.oauth.authentication.oauth.security.endpoint.AuthorizationEndpointTestHelper.RAW_USERNAME;
 import static cube8540.oauth.authentication.oauth.security.endpoint.AuthorizationEndpointTestHelper.REQUIRED_APPROVAL_SCOPES;
 import static cube8540.oauth.authentication.oauth.security.endpoint.AuthorizationEndpointTestHelper.REQUIRED_APPROVAL_SCOPE_DETAILS;
+import static cube8540.oauth.authentication.oauth.security.endpoint.AuthorizationEndpointTestHelper.REQUIRE_APPROVAL_CLIENT_SCOPES;
 import static cube8540.oauth.authentication.oauth.security.endpoint.AuthorizationEndpointTestHelper.RESOLVED_REDIRECT_URI;
 import static cube8540.oauth.authentication.oauth.security.endpoint.AuthorizationEndpointTestHelper.SCOPE;
 import static cube8540.oauth.authentication.oauth.security.endpoint.AuthorizationEndpointTestHelper.STATE;
@@ -73,6 +75,8 @@ import static cube8540.oauth.authentication.oauth.security.endpoint.Authorizatio
 import static cube8540.oauth.authentication.oauth.security.endpoint.AuthorizationEndpointTestHelper.makeServletWebRequest;
 import static cube8540.oauth.authentication.oauth.security.endpoint.AuthorizationEndpointTestHelper.makeSessionAttributeStore;
 import static cube8540.oauth.authentication.oauth.security.endpoint.AuthorizationEndpointTestHelper.makeSessionStatus;
+import static cube8540.oauth.authentication.oauth.security.endpoint.AuthorizationEndpointTestHelper.plus;
+import static cube8540.oauth.authentication.oauth.security.endpoint.AuthorizationEndpointTestHelper.subtract;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -98,7 +102,7 @@ class AuthorizationEndpointTest {
                 makeClientDetailsService(RAW_CLIENT_ID, clientDetails),
                 makeAuthorityDetailsService(),
                 makeResponseEnhancer(),
-                makeAutoApprovalScopeHandler(principal, clientDetails, SCOPE));
+                makeAutoApprovalScopeHandler(principal, clientDetails, SCOPE, REQUIRED_APPROVAL_SCOPES));
 
         assertThrows(InsufficientAuthenticationException.class, () -> endpoint.authorize(parameter, model, principal));
     }
@@ -114,7 +118,7 @@ class AuthorizationEndpointTest {
                 makeClientDetailsService(RAW_CLIENT_ID, clientDetails),
                 makeAuthorityDetailsService(),
                 makeResponseEnhancer(),
-                makeAutoApprovalScopeHandler(principal, clientDetails, SCOPE));
+                makeAutoApprovalScopeHandler(principal, clientDetails, SCOPE, REQUIRED_APPROVAL_SCOPES));
 
         assertThrows(InsufficientAuthenticationException.class, () -> endpoint.authorize(parameter, model, principal));
     }
@@ -130,7 +134,7 @@ class AuthorizationEndpointTest {
                 makeClientDetailsService(RAW_CLIENT_ID, clientDetails),
                 makeAuthorityDetailsService(),
                 makeResponseEnhancer(),
-                makeAutoApprovalScopeHandler(principal, clientDetails, SCOPE));
+                makeAutoApprovalScopeHandler(principal, clientDetails, SCOPE, REQUIRED_APPROVAL_SCOPES));
 
         parameter.put(AuthorizationRequestKey.RESPONSE_TYPE, null);
 
@@ -149,7 +153,7 @@ class AuthorizationEndpointTest {
                 makeClientDetailsService(RAW_CLIENT_ID, clientDetails),
                 makeAuthorityDetailsService(),
                 makeResponseEnhancer(),
-                makeAutoApprovalScopeHandler(principal, clientDetails, SCOPE));
+                makeAutoApprovalScopeHandler(principal, clientDetails, SCOPE, REQUIRED_APPROVAL_SCOPES));
 
         parameter.put(AuthorizationRequestKey.CLIENT_ID, null);
 
@@ -170,7 +174,7 @@ class AuthorizationEndpointTest {
                 makeClientDetailsService(RAW_CLIENT_ID, clientDetails),
                 makeAuthorityDetailsService(),
                 makeResponseEnhancer(),
-                makeAutoApprovalScopeHandler(principal, clientDetails, SCOPE));
+                makeAutoApprovalScopeHandler(principal, clientDetails, SCOPE, REQUIRED_APPROVAL_SCOPES));
 
         endpoint.setRedirectResolver(redirectResolver);
         endpoint.setRequestValidator(errorValidator);
@@ -192,7 +196,7 @@ class AuthorizationEndpointTest {
                 makeClientDetailsService(RAW_CLIENT_ID, clientDetails),
                 makeAuthorityDetailsService(),
                 makeResponseEnhancer(),
-                makeAutoApprovalScopeHandler(principal, clientDetails, CLIENT_SCOPE));
+                makeAutoApprovalScopeHandler(principal, clientDetails, CLIENT_SCOPE, REQUIRE_APPROVAL_CLIENT_SCOPES));
 
         endpoint.setRedirectResolver(redirectResolver);
         endpoint.setRequestValidator(passValidator);
@@ -202,8 +206,41 @@ class AuthorizationEndpointTest {
         ModelAndView modelAndView = endpoint.authorize(parameter, model, principal);
         AuthorizationRequest storedRequest = (AuthorizationRequest) model.get(AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE);
         assertStoredRequest(model, parameter, modelAndView, storedRequest);
-        assertEquals(REQUIRED_APPROVAL_SCOPES, storedRequest.getRequestScopes());
+        assertEquals(CLIENT_SCOPE, storedRequest.getRequestScopes());
         assertEquals(REQUIRED_APPROVAL_SCOPE_DETAILS, modelAndView.getModel().get(AuthorizationEndpoint.AUTHORIZATION_REQUEST_SCOPES_NAME));
+        assertEquals(subtract(CLIENT_SCOPE, REQUIRE_APPROVAL_CLIENT_SCOPES), model.get(AuthorizationEndpoint.AUTHORIZATION_AUTO_APPROVAL_SCOPES_NAME));
+    }
+
+    @Test
+    @DisplayName("요청한 스코프가 nul 이며 모든 스코프가 자동 승인일시")
+    void requestAuthorizationWhenRequestScopeIsNullAndScopeAllAutoApproval() {
+        ArgumentCaptor<ModelAndView> viewCaptor = ArgumentCaptor.forClass(ModelAndView.class);
+        ArgumentCaptor<AuthorizationRequest> requestCaptor = ArgumentCaptor.forClass(AuthorizationRequest.class);
+        Principal principal = makeAuthorizedAuthentication();
+        Map<String, Object> model = makeEmptyModel();
+        Map<String, String> parameter = makeRequestParameter();
+        OAuth2ClientDetails clientDetails = makeClientDetails();
+        OAuth2RequestValidator passValidator = makePassRequestValidator(clientDetails, Collections.emptySet());
+        RedirectResolver redirectResolver = makeRedirectResolver(clientDetails, RAW_REDIRECT_URI, RESOLVED_REDIRECT_URI);
+        AuthorizationResponseEnhancer responseEnhancer = makeResponseEnhancer();
+        AuthorizationEndpoint endpoint = new AuthorizationEndpoint(
+                makeClientDetailsService(RAW_CLIENT_ID, clientDetails),
+                makeAuthorityDetailsService(),
+                responseEnhancer,
+                makeAutoApprovalScopeHandler(principal, clientDetails, SCOPE, REQUIRED_APPROVAL_SCOPES));
+
+        endpoint.setRedirectResolver(redirectResolver);
+        endpoint.setRequestValidator(passValidator);
+        endpoint.setApprovalPage(FORWARD_PAGE);
+        parameter.put(AuthorizationRequestKey.SCOPE, null);
+
+        ModelAndView modelAndView = endpoint.authorize(parameter, model, principal);
+        assertEquals(makeEmptyModel(), model);
+        assertTrue(modelAndView.getView() instanceof RedirectView);
+        assertEquals(RESOLVED_REDIRECT_URI.toString(), ((RedirectView) modelAndView.getView()).getUrl());
+        verify(responseEnhancer, times(1)).enhance(viewCaptor.capture(), requestCaptor.capture());
+        assertEquals(modelAndView, viewCaptor.getValue());
+        assertEquals(CLIENT_SCOPE, requestCaptor.getValue().getRequestScopes());
     }
 
     @Test
@@ -219,7 +256,7 @@ class AuthorizationEndpointTest {
                 makeClientDetailsService(RAW_CLIENT_ID, clientDetails),
                 makeAuthorityDetailsService(),
                 makeResponseEnhancer(),
-                makeAutoApprovalScopeHandler(principal, clientDetails, SCOPE));
+                makeAutoApprovalScopeHandler(principal, clientDetails, SCOPE, REQUIRED_APPROVAL_SCOPES));
 
         endpoint.setRedirectResolver(redirectResolver);
         endpoint.setRequestValidator(passValidator);
@@ -228,14 +265,16 @@ class AuthorizationEndpointTest {
         ModelAndView modelAndView = endpoint.authorize(parameter, model, principal);
         AuthorizationRequest storedRequest = (AuthorizationRequest) model.get(AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTRIBUTE);
         assertStoredRequest(model, parameter, modelAndView, storedRequest);
-        assertEquals(REQUIRED_APPROVAL_SCOPES, storedRequest.getRequestScopes());
+        assertEquals(SCOPE, storedRequest.getRequestScopes());
         assertEquals(REQUIRED_APPROVAL_SCOPE_DETAILS, modelAndView.getModel().get(AuthorizationEndpoint.AUTHORIZATION_REQUEST_SCOPES_NAME));
+        assertEquals(subtract(SCOPE, REQUIRED_APPROVAL_SCOPES), model.get(AuthorizationEndpoint.AUTHORIZATION_AUTO_APPROVAL_SCOPES_NAME));
     }
 
     @Test
     @DisplayName("모든 스코프가 자동 승인 일시")
-    void requiredApprovalScopesIsEmpty() {
+    void requestAuthorizationWhenScopeAllAutoApproval() {
         ArgumentCaptor<ModelAndView> viewCaptor = ArgumentCaptor.forClass(ModelAndView.class);
+        ArgumentCaptor<AuthorizationRequest> requestCaptor = ArgumentCaptor.forClass(AuthorizationRequest.class);
         Principal principal = makeAuthorizedAuthentication();
         Map<String, Object> model = makeEmptyModel();
         Map<String, String> parameter = makeRequestParameter();
@@ -257,8 +296,9 @@ class AuthorizationEndpointTest {
         assertEquals(makeEmptyModel(), model);
         assertTrue(modelAndView.getView() instanceof RedirectView);
         assertEquals(RESOLVED_REDIRECT_URI.toString(), ((RedirectView) modelAndView.getView()).getUrl());
-        verify(responseEnhancer, times(1)).enhance(viewCaptor.capture(), any());
+        verify(responseEnhancer, times(1)).enhance(viewCaptor.capture(), requestCaptor.capture());
         assertEquals(modelAndView, viewCaptor.getValue());
+        assertEquals(SCOPE, requestCaptor.getValue().getRequestScopes());
     }
 
     @Test
@@ -273,7 +313,7 @@ class AuthorizationEndpointTest {
                 makeClientDetailsService(RAW_CLIENT_ID, clientDetails),
                 makeAuthorityDetailsService(),
                 makeResponseEnhancer(),
-                makeAutoApprovalScopeHandler(principal, clientDetails, SCOPE));
+                makeAutoApprovalScopeHandler(principal, clientDetails, SCOPE, REQUIRED_APPROVAL_SCOPES));
 
         assertThrows(InsufficientAuthenticationException.class, () -> endpoint.approval(approvalParameter, model, sessionStatus, principal));
     }
@@ -290,7 +330,7 @@ class AuthorizationEndpointTest {
                 makeClientDetailsService(RAW_CLIENT_ID, clientDetails),
                 makeAuthorityDetailsService(),
                 makeResponseEnhancer(),
-                makeAutoApprovalScopeHandler(principal, clientDetails, SCOPE));
+                makeAutoApprovalScopeHandler(principal, clientDetails, SCOPE, REQUIRED_APPROVAL_SCOPES));
 
         assertThrows(InsufficientAuthenticationException.class, () -> endpoint.approval(approvalParameter, model, sessionStatus, principal));
     }
@@ -300,11 +340,11 @@ class AuthorizationEndpointTest {
     void approvalScopeWhenSessionNotHasOriginalAuthorizationRequest() {
         Principal principal = makeAuthorizedAuthentication();
         Map<String, String> approvalParameter = makeEmptyApprovalParameter();
-        Map<String, Object> model = makeModel(null, makeAuthorizationRequest());
+        Map<String, Object> model = makeModel(null, makeAuthorizationRequest(), Collections.emptySet());
         SessionStatus sessionStatus = makeSessionStatus();
         OAuth2ClientDetails clientDetails = makeClientDetails();
         AuthorizationEndpoint endpoint = new AuthorizationEndpoint(makeClientDetailsService(RAW_CLIENT_ID, clientDetails), makeAuthorityDetailsService(), makeResponseEnhancer(),
-                makeAutoApprovalScopeHandler(principal, clientDetails, SCOPE));
+                makeAutoApprovalScopeHandler(principal, clientDetails, SCOPE, REQUIRED_APPROVAL_SCOPES));
 
         OAuth2Error error = assertThrows(InvalidRequestException.class, () -> endpoint.approval(approvalParameter, model, sessionStatus, principal)).getError();
         assertEquals(OAuth2ErrorCodes.INVALID_REQUEST, error.getErrorCode());
@@ -315,30 +355,46 @@ class AuthorizationEndpointTest {
     void approvalScopeWhenSessionNotHasAuthorizationRequest() {
         Principal principal = makeAuthorizedAuthentication();
         Map<String, String> approvalParameter = makeEmptyApprovalParameter();
-        Map<String, Object> model = makeModel(makeRequestParameter(), null);
+        Map<String, Object> model = makeModel(makeRequestParameter(), null, Collections.emptySet());
         SessionStatus sessionStatus = makeSessionStatus();
         OAuth2ClientDetails clientDetails = makeClientDetails();
         AuthorizationEndpoint endpoint = new AuthorizationEndpoint(makeClientDetailsService(RAW_CLIENT_ID, clientDetails), makeAuthorityDetailsService(), makeResponseEnhancer(),
-                makeAutoApprovalScopeHandler(principal, clientDetails, SCOPE));
+                makeAutoApprovalScopeHandler(principal, clientDetails, SCOPE, REQUIRED_APPROVAL_SCOPES));
 
         OAuth2Error error = assertThrows(InvalidRequestException.class, () -> endpoint.approval(approvalParameter, model, sessionStatus, principal)).getError();
         assertEquals(OAuth2ErrorCodes.INVALID_REQUEST, error.getErrorCode());
     }
 
     @Test
-    @DisplayName("스코프 허용")
-    void approvalScope() {
+    @DisplayName("세션에 자동 허가 스코프 접오가 없을때 스코프 허용")
+    void approvalScopeWhenAutoApprovalScopeIsNull() {
+        Principal principal = makeAuthorizedAuthentication();
+        Map<String, String> approvalParameter = makeEmptyApprovalParameter();
+        Map<String, Object> model = makeModel(makeRequestParameter(), makeAuthorizationRequest(), null);
+        SessionStatus sessionStatus = makeSessionStatus();
+        OAuth2ClientDetails clientDetails = makeClientDetails();
+        AuthorizationEndpoint endpoint = new AuthorizationEndpoint(makeClientDetailsService(RAW_CLIENT_ID, clientDetails), makeAuthorityDetailsService(), makeResponseEnhancer(),
+                makeAutoApprovalScopeHandler(principal, clientDetails, SCOPE, REQUIRED_APPROVAL_SCOPES));
+
+        OAuth2Error error = assertThrows(InvalidRequestException.class, () -> endpoint.approval(approvalParameter, model, sessionStatus, principal)).getError();
+        assertEquals(OAuth2ErrorCodes.INVALID_REQUEST, error.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("자동 허용 스코프가 비어 있을떄 스코프 허용")
+    void approvalScopeWhenAutoApprovalScopeIsEmpty() {
+        ArgumentCaptor<AuthorizationRequest> requestCaptor = ArgumentCaptor.forClass(AuthorizationRequest.class);
         ArgumentCaptor<ModelAndView> viewCaptor = ArgumentCaptor.forClass(ModelAndView.class);
         Principal principal = makeAuthorizedAuthentication();
         OAuth2ClientDetails clientDetails = makeClientDetails();
         Map<String, String> approvalParameter = makeEmptyApprovalParameter();
         Map<String, String> originalAuthorizationRequestMap = makeRequestParameter();
         AuthorizationRequest originalAuthorizationRequest = makeAuthorizationRequest();
-        Map<String, Object> model = makeModel(originalAuthorizationRequestMap, originalAuthorizationRequest);
+        Map<String, Object> model = makeModel(originalAuthorizationRequestMap, originalAuthorizationRequest, Collections.emptySet());
         AuthorizationResponseEnhancer enhancer = makeResponseEnhancer();
         SessionStatus sessionStatus = makeSessionStatus();
         ScopeApprovalResolver resolver = makeScopeApprovalResolver(originalAuthorizationRequest, approvalParameter, RAW_RESOLVED_SCOPES);
-        AutoApprovalScopeHandler autoApprovalScopeHandler = makeAutoApprovalScopeHandler(principal, clientDetails, SCOPE);
+        AutoApprovalScopeHandler autoApprovalScopeHandler = makeAutoApprovalScopeHandler(principal, clientDetails, SCOPE, REQUIRED_APPROVAL_SCOPES);
         AuthorizationEndpoint endpoint = new AuthorizationEndpoint(
                 makeClientDetailsService(RAW_CLIENT_ID, clientDetails), makeAuthorityDetailsService(), enhancer, autoApprovalScopeHandler);
 
@@ -350,8 +406,40 @@ class AuthorizationEndpointTest {
         verify(originalAuthorizationRequest, never()).setRedirectUri(any());
         assertTrue(modelAndView.getView() instanceof RedirectView);
         assertEquals(RESOLVED_REDIRECT_URI.toString(), ((RedirectView) modelAndView.getView()).getUrl());
-        verify(enhancer, times(1)).enhance(viewCaptor.capture(), any());
+        verify(enhancer, times(1)).enhance(viewCaptor.capture(), requestCaptor.capture());
         assertEquals(modelAndView, viewCaptor.getValue());
+        assertEquals(RAW_RESOLVED_SCOPES, requestCaptor.getValue().getRequestScopes());
+    }
+
+    @Test
+    @DisplayName("자동 허용 스코프가 비어 있지 않을때 스코프 허용")
+    void approvalScopeWhenAutoApprovalScopeIsNotEmpty() {
+        ArgumentCaptor<AuthorizationRequest> requestCaptor = ArgumentCaptor.forClass(AuthorizationRequest.class);
+        ArgumentCaptor<ModelAndView> viewCaptor = ArgumentCaptor.forClass(ModelAndView.class);
+        Principal principal = makeAuthorizedAuthentication();
+        OAuth2ClientDetails clientDetails = makeClientDetails();
+        Map<String, String> approvalParameter = makeEmptyApprovalParameter();
+        Map<String, String> originalAuthorizationRequestMap = makeRequestParameter();
+        AuthorizationRequest originalAuthorizationRequest = makeAuthorizationRequest();
+        Map<String, Object> model = makeModel(originalAuthorizationRequestMap, originalAuthorizationRequest, APPROVAL_SCOPES);
+        AuthorizationResponseEnhancer enhancer = makeResponseEnhancer();
+        SessionStatus sessionStatus = makeSessionStatus();
+        ScopeApprovalResolver resolver = makeScopeApprovalResolver(originalAuthorizationRequest, approvalParameter, RAW_RESOLVED_SCOPES);
+        AutoApprovalScopeHandler autoApprovalScopeHandler = makeAutoApprovalScopeHandler(principal, clientDetails, SCOPE, REQUIRED_APPROVAL_SCOPES);
+        AuthorizationEndpoint endpoint = new AuthorizationEndpoint(
+                makeClientDetailsService(RAW_CLIENT_ID, clientDetails), makeAuthorityDetailsService(), enhancer, autoApprovalScopeHandler);
+
+        endpoint.setApprovalResolver(resolver);
+
+        ModelAndView modelAndView = endpoint.approval(approvalParameter, model, sessionStatus, principal);
+        verify(autoApprovalScopeHandler, times(1)).storeAutoApprovalScopes(principal, clientDetails, plus(RAW_RESOLVED_SCOPES, APPROVAL_SCOPES));
+        verify(originalAuthorizationRequest, never()).setRequestScopes(any());
+        verify(originalAuthorizationRequest, never()).setRedirectUri(any());
+        assertTrue(modelAndView.getView() instanceof RedirectView);
+        assertEquals(RESOLVED_REDIRECT_URI.toString(), ((RedirectView) modelAndView.getView()).getUrl());
+        verify(enhancer, times(1)).enhance(viewCaptor.capture(), requestCaptor.capture());
+        assertEquals(modelAndView, viewCaptor.getValue());
+        assertEquals(plus(RAW_RESOLVED_SCOPES, APPROVAL_SCOPES), requestCaptor.getValue().getRequestScopes());
     }
 
     @Test
@@ -361,7 +449,7 @@ class AuthorizationEndpointTest {
         ServletWebRequest webRequest = makeServletWebRequest();
         OAuth2ExceptionTranslator translator = makeExceptionTranslator(exception, INVALID_GRANT_RESPONSE);
         AuthorizationEndpoint endpoint = new AuthorizationEndpoint(makeClientDetailsService(RAW_CLIENT_ID, makeClientDetails()), makeAuthorityDetailsService(), makeResponseEnhancer(),
-                makeAutoApprovalScopeHandler(makeAuthorizedAuthentication(), makeClientDetails(), SCOPE));
+                makeAutoApprovalScopeHandler(makeAuthorizedAuthentication(), makeClientDetails(), SCOPE, REQUIRED_APPROVAL_SCOPES));
 
         endpoint.setExceptionTranslator(translator);
 
@@ -380,7 +468,7 @@ class AuthorizationEndpointTest {
         AuthorizationEndpoint endpoint = new AuthorizationEndpoint(
                 makeClientDetailsService(RAW_CLIENT_ID, makeClientDetails()),
                 makeAuthorityDetailsService(), makeResponseEnhancer(),
-                makeAutoApprovalScopeHandler(makeAuthorizedAuthentication(), makeClientDetails(), SCOPE));
+                makeAutoApprovalScopeHandler(makeAuthorizedAuthentication(), makeClientDetails(), SCOPE, REQUIRED_APPROVAL_SCOPES));
 
         endpoint.setExceptionTranslator(translator);
 
@@ -402,7 +490,7 @@ class AuthorizationEndpointTest {
                 clientDetailsService,
                 makeAuthorityDetailsService(),
                 makeResponseEnhancer(),
-                makeAutoApprovalScopeHandler(makeAuthorizedAuthentication(), makeClientDetails(), SCOPE));
+                makeAutoApprovalScopeHandler(makeAuthorizedAuthentication(), makeClientDetails(), SCOPE, REQUIRED_APPROVAL_SCOPES));
 
         endpoint.setSessionAttributeStore(sessionAttributeStore);
         endpoint.setExceptionTranslator(translator);
@@ -426,7 +514,7 @@ class AuthorizationEndpointTest {
                 makeClientDetailsService(RAW_CLIENT_ID, clientDetails),
                 makeAuthorityDetailsService(),
                 makeResponseEnhancer(),
-                makeAutoApprovalScopeHandler(makeAuthorizedAuthentication(), makeClientDetails(), SCOPE));
+                makeAutoApprovalScopeHandler(makeAuthorizedAuthentication(), makeClientDetails(), SCOPE, REQUIRED_APPROVAL_SCOPES));
 
         endpoint.setSessionAttributeStore(sessionAttributeStore);
         endpoint.setRedirectResolver(redirectResolver);
@@ -452,7 +540,7 @@ class AuthorizationEndpointTest {
                 makeClientDetailsService(RAW_CLIENT_ID, clientDetails),
                 makeAuthorityDetailsService(),
                 makeResponseEnhancer(),
-                makeAutoApprovalScopeHandler(makeAuthorizedAuthentication(), makeClientDetails(), SCOPE));
+                makeAutoApprovalScopeHandler(makeAuthorizedAuthentication(), makeClientDetails(), SCOPE, REQUIRED_APPROVAL_SCOPES));
 
         endpoint.setSessionAttributeStore(sessionAttributeStore);
         endpoint.setRedirectResolver(redirectResolver);
@@ -481,7 +569,7 @@ class AuthorizationEndpointTest {
                 makeClientDetailsService(RAW_CLIENT_ID, clientDetails),
                 makeAuthorityDetailsService(),
                 makeResponseEnhancer(),
-                makeAutoApprovalScopeHandler(makeAuthorizedAuthentication(), makeClientDetails(), SCOPE));
+                makeAutoApprovalScopeHandler(makeAuthorizedAuthentication(), makeClientDetails(), SCOPE, REQUIRED_APPROVAL_SCOPES));
 
         endpoint.setSessionAttributeStore(sessionAttributeStore);
         endpoint.setRedirectResolver(redirectResolver);
@@ -509,7 +597,7 @@ class AuthorizationEndpointTest {
                 clientDetailsService,
                 makeAuthorityDetailsService(),
                 makeResponseEnhancer(),
-                makeAutoApprovalScopeHandler(makeAuthorizedAuthentication(), makeClientDetails(), SCOPE));
+                makeAutoApprovalScopeHandler(makeAuthorizedAuthentication(), makeClientDetails(), SCOPE, REQUIRED_APPROVAL_SCOPES));
 
         endpoint.setSessionAttributeStore(sessionAttributeStore);
         endpoint.setExceptionTranslator(translator);
@@ -533,7 +621,7 @@ class AuthorizationEndpointTest {
                 makeClientDetailsService(RAW_CLIENT_ID, clientDetails),
                 makeAuthorityDetailsService(),
                 makeResponseEnhancer(),
-                makeAutoApprovalScopeHandler(makeAuthorizedAuthentication(), makeClientDetails(), SCOPE));
+                makeAutoApprovalScopeHandler(makeAuthorizedAuthentication(), makeClientDetails(), SCOPE, REQUIRED_APPROVAL_SCOPES));
 
         endpoint.setSessionAttributeStore(sessionAttributeStore);
         endpoint.setRedirectResolver(redirectResolver);
@@ -559,7 +647,7 @@ class AuthorizationEndpointTest {
                 makeClientDetailsService(RAW_CLIENT_ID, clientDetails),
                 makeAuthorityDetailsService(),
                 makeResponseEnhancer(),
-                makeAutoApprovalScopeHandler(makeAuthorizedAuthentication(), makeClientDetails(), SCOPE));
+                makeAutoApprovalScopeHandler(makeAuthorizedAuthentication(), makeClientDetails(), SCOPE, REQUIRED_APPROVAL_SCOPES));
 
         endpoint.setSessionAttributeStore(sessionAttributeStore);
         endpoint.setRedirectResolver(redirectResolver);
@@ -588,7 +676,7 @@ class AuthorizationEndpointTest {
                 makeClientDetailsService(RAW_CLIENT_ID, clientDetails),
                 makeAuthorityDetailsService(),
                 makeResponseEnhancer(),
-                makeAutoApprovalScopeHandler(makeAuthorizedAuthentication(), makeClientDetails(), SCOPE));
+                makeAutoApprovalScopeHandler(makeAuthorizedAuthentication(), makeClientDetails(), SCOPE, REQUIRED_APPROVAL_SCOPES));
 
         endpoint.setSessionAttributeStore(sessionAttributeStore);
         endpoint.setRedirectResolver(redirectResolver);
