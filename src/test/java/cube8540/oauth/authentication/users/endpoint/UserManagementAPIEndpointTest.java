@@ -18,6 +18,7 @@ import static org.mockito.Mockito.when;
 class UserManagementAPIEndpointTest {
 
     private static final String USERNAME = "username";
+    private static final String UID = "UID";
     private static final String PASSWORD = "Password1234!@#$";
     private static final String CREDENTIALS_KEY = "CREDENTIALS_KEY";
 
@@ -36,7 +37,7 @@ class UserManagementAPIEndpointTest {
     @DisplayName("새 유저 추가")
     void registerNewUser() {
         UserRegisterRequest request = new UserRegisterRequest(USERNAME, PASSWORD);
-        RegisteredUserProfile userProfile = new RegisteredUserProfile(USERNAME, REGISTERED_DATE_TIME, CREDENTIALS_KEY);
+        RegisteredUserProfile userProfile = new RegisteredUserProfile(USERNAME, UID, REGISTERED_DATE_TIME, CREDENTIALS_KEY);
 
         when(service.registerUser(request)).thenReturn(userProfile);
 

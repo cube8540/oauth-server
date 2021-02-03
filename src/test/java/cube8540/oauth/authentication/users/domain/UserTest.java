@@ -14,6 +14,7 @@ import static cube8540.oauth.authentication.users.domain.UserTestHelper.PASSWORD
 import static cube8540.oauth.authentication.users.domain.UserTestHelper.RAW_CREDENTIALS_KEY;
 import static cube8540.oauth.authentication.users.domain.UserTestHelper.RAW_PASSWORD_CREDENTIALS_KEY;
 import static cube8540.oauth.authentication.users.domain.UserTestHelper.RAW_USERNAME;
+import static cube8540.oauth.authentication.users.domain.UserTestHelper.UID;
 import static cube8540.oauth.authentication.users.domain.UserTestHelper.makeCredentialsKey;
 import static cube8540.oauth.authentication.users.domain.UserTestHelper.makeErrorValidatorFactory;
 import static cube8540.oauth.authentication.users.domain.UserTestHelper.makeExpiredKey;
@@ -22,6 +23,7 @@ import static cube8540.oauth.authentication.users.domain.UserTestHelper.makeMism
 import static cube8540.oauth.authentication.users.domain.UserTestHelper.makeMismatchesEncoder;
 import static cube8540.oauth.authentication.users.domain.UserTestHelper.makePassValidatorFactory;
 import static cube8540.oauth.authentication.users.domain.UserTestHelper.makePasswordEncoder;
+import static cube8540.oauth.authentication.users.domain.UserTestHelper.makeUidGenerator;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -35,7 +37,7 @@ class UserTest {
     @Test
     @DisplayName("유효 하지 않은 정보가 저장 되어 있을시")
     void userDataInvalid() {
-        User user = new User(RAW_USERNAME, PASSWORD);
+        User user = new User(makeUidGenerator(UID), RAW_USERNAME, PASSWORD);
 
         UserValidatorFactory factory = makeErrorValidatorFactory(user);
 
@@ -45,7 +47,7 @@ class UserTest {
     @Test
     @DisplayName("모든 데이터가 유효할시")
     void userDataAllowed() {
-        User user = new User(RAW_USERNAME, PASSWORD);
+        User user = new User(makeUidGenerator(UID), RAW_USERNAME, PASSWORD);
 
         UserValidatorFactory factory = makePassValidatorFactory(user);
 
@@ -55,7 +57,7 @@ class UserTest {
     @Test
     @DisplayName("패스워드 변경시 이전에 사용 하던 패스워드와 일치 하지 않을시")
     void changePasswordWhenNotMatchedExistingPassword() {
-        User user = new User(RAW_USERNAME, PASSWORD);
+        User user = new User(makeUidGenerator(UID), RAW_USERNAME, PASSWORD);
         PasswordEncoder encoder = makeMismatchesEncoder(PASSWORD, ENCRYPTED_PASSWORD);
 
         UserAuthorizationException e = assertThrows(UserAuthorizationException.class, () -> user.changePassword(PASSWORD, CHANGE_PASSWORD, encoder));
@@ -65,7 +67,7 @@ class UserTest {
     @Test
     @DisplayName("패스워드 변경")
     void changePassword() {
-        User user = new User(RAW_USERNAME, PASSWORD);
+        User user = new User(makeUidGenerator(UID), RAW_USERNAME, PASSWORD);
         PasswordEncoder encoder = makePasswordEncoder(PASSWORD, ENCRYPTED_PASSWORD);
 
         user.encrypted(encoder);
@@ -77,7 +79,7 @@ class UserTest {
     @Test
     @DisplayName("패스워드 분실")
     void forgotPassword() {
-        User user = new User(RAW_USERNAME, PASSWORD);
+        User user = new User(makeUidGenerator(UID), RAW_USERNAME, PASSWORD);
         UserCredentialsKey key = makeCredentialsKey(RAW_PASSWORD_CREDENTIALS_KEY);
         UserCredentialsKeyGenerator generator = makeKeyGenerator(key);
 
@@ -89,7 +91,7 @@ class UserTest {
     @Test
     @DisplayName("패스워드 인증키가 할당 되지 않은 계정의 패스워드 초기화")
     void resetPasswordToNotGeneratedCredentialsKeyUser() {
-        User user = new User(RAW_USERNAME, PASSWORD);
+        User user = new User(makeUidGenerator(UID), RAW_USERNAME, PASSWORD);
 
         UserAuthorizationException e = assertThrows(UserAuthorizationException.class, () -> user.resetPassword(RAW_PASSWORD_CREDENTIALS_KEY, CHANGE_PASSWORD));
         assertEquals(UserErrorCodes.INVALID_KEY, e.getCode());
@@ -98,7 +100,7 @@ class UserTest {
     @Test
     @DisplayName("패스워드 인증키가 매칭 되지 않은 계정의 패스워드 초기화")
     void resetPasswordKeyIsNotMatched() {
-        User user = new User(RAW_USERNAME, PASSWORD);
+        User user = new User(makeUidGenerator(UID), RAW_USERNAME, PASSWORD);
 
         UserCredentialsKey key = makeMismatchedKey();
         UserCredentialsKeyGenerator generator = makeKeyGenerator(key);
@@ -111,7 +113,7 @@ class UserTest {
     @Test
     @DisplayName("패스워드 인증키가 만료된 계정의 패스워드 초기화")
     void resetPasswordKeyIsExpired() {
-        User user = new User(RAW_USERNAME, PASSWORD);
+        User user = new User(makeUidGenerator(UID), RAW_USERNAME, PASSWORD);
 
         UserCredentialsKey key = makeExpiredKey();
         UserCredentialsKeyGenerator generator = makeKeyGenerator(key);
@@ -124,7 +126,7 @@ class UserTest {
     @Test
     @DisplayName("패스워드 초기화")
     void resetPassword() {
-        User user = new User(RAW_USERNAME, PASSWORD);
+        User user = new User(makeUidGenerator(UID), RAW_USERNAME, PASSWORD);
 
         UserCredentialsKey key = makeCredentialsKey(RAW_CREDENTIALS_KEY);
         UserCredentialsKeyGenerator generator = makeKeyGenerator(key);
@@ -138,7 +140,7 @@ class UserTest {
     @Test
     @DisplayName("인증키 할당")
     void grantedCredentialsKey() {
-        User user = new User(RAW_USERNAME, PASSWORD);
+        User user = new User(makeUidGenerator(UID), RAW_USERNAME, PASSWORD);
 
         UserCredentialsKey key = makeCredentialsKey(RAW_CREDENTIALS_KEY);
         UserCredentialsKeyGenerator generator = makeKeyGenerator(key);
@@ -150,7 +152,7 @@ class UserTest {
     @Test
     @DisplayName("이미 인증 받은 계정에 인증키 할당")
     void grantedCredentialsKeyToAlreadyCredentialsUser() {
-        User user = new User(RAW_USERNAME, PASSWORD);
+        User user = new User(makeUidGenerator(UID), RAW_USERNAME, PASSWORD);
 
         UserCredentialsKey key = makeCredentialsKey(RAW_CREDENTIALS_KEY);
         UserCredentialsKeyGenerator generator = makeKeyGenerator(key);
@@ -164,7 +166,7 @@ class UserTest {
     @Test
     @DisplayName("인증키가 할당 되지 않은 유저 계정 인증")
     void accountAuthenticationToNotGeneratedKeyUser() {
-        User user = new User(RAW_USERNAME, PASSWORD);
+        User user = new User(makeUidGenerator(UID), RAW_USERNAME, PASSWORD);
 
         UserAuthorizationException e = assertThrows(UserAuthorizationException.class, () -> user.credentials(RAW_CREDENTIALS_KEY));
         assertEquals(UserErrorCodes.INVALID_KEY, e.getCode());
@@ -173,7 +175,7 @@ class UserTest {
     @Test
     @DisplayName("인증키가 매칭 되지 않은 계정 인증")
     void accountAuthenticationKeyIsNotMatched() {
-        User user = new User(RAW_USERNAME, PASSWORD);
+        User user = new User(makeUidGenerator(UID), RAW_USERNAME, PASSWORD);
 
         UserCredentialsKeyGenerator generator = makeKeyGenerator(makeMismatchedKey());
         user.generateCredentialsKey(generator);
@@ -185,7 +187,7 @@ class UserTest {
     @Test
     @DisplayName("인증키가 만료된 계정 인증")
     void accountAuthenticationKeyIsExpired() {
-        User user = new User(RAW_USERNAME, PASSWORD);
+        User user = new User(makeUidGenerator(UID), RAW_USERNAME, PASSWORD);
 
         UserCredentialsKeyGenerator generator = makeKeyGenerator(makeExpiredKey());
         user.generateCredentialsKey(generator);
@@ -197,7 +199,7 @@ class UserTest {
     @Test
     @DisplayName("계정 인증")
     void accountAuthentication() {
-        User user = new User(RAW_USERNAME, PASSWORD);
+        User user = new User(makeUidGenerator(UID), RAW_USERNAME, PASSWORD);
 
         UserCredentialsKeyGenerator generator = makeKeyGenerator(makeCredentialsKey(RAW_CREDENTIALS_KEY));
         user.generateCredentialsKey(generator);
@@ -211,7 +213,7 @@ class UserTest {
     @DisplayName("패스워드 암호화")
     void passwordEncrypting() {
         PasswordEncoder encoder = makePasswordEncoder(PASSWORD, ENCRYPTED_PASSWORD);
-        User user = new User(RAW_USERNAME, PASSWORD);
+        User user = new User(makeUidGenerator(UID), RAW_USERNAME, PASSWORD);
 
         user.encrypted(encoder);
         assertEquals(ENCRYPTED_PASSWORD, user.getPassword());
@@ -220,7 +222,7 @@ class UserTest {
     @Test
     @DisplayName("유저 승인 권한 추가")
     void addApprovalAuthority() {
-        User user = new User(RAW_USERNAME, PASSWORD);
+        User user = new User(makeUidGenerator(UID), RAW_USERNAME, PASSWORD);
 
         user.addApprovalAuthority(CLIENT_ID, AUTHORITY);
         assertTrue(user.getApprovalAuthorities().contains(APPROVAL_AUTHORITY));
@@ -229,7 +231,7 @@ class UserTest {
     @Test
     @DisplayName("유저 승인 권한이 null 일때 승인 권한 삭제")
     void revokeApprovalAuthorityWhenUserApprovalAuthoritiesIsNull() {
-        User user = new User(RAW_USERNAME, PASSWORD);
+        User user = new User(makeUidGenerator(UID), RAW_USERNAME, PASSWORD);
 
         user.setApprovalAuthorities(null);
 
@@ -239,7 +241,7 @@ class UserTest {
     @Test
     @DisplayName("유저 승인 권한 삭제")
     void revokeApprovalAuthority() {
-        User user = new User(RAW_USERNAME, PASSWORD);
+        User user = new User(makeUidGenerator(UID), RAW_USERNAME, PASSWORD);
 
         user.addApprovalAuthority(CLIENT_ID, AUTHORITY);
         user.revokeApprovalAuthority(CLIENT_ID, AUTHORITY);

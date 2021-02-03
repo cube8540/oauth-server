@@ -5,9 +5,11 @@ import cube8540.oauth.authentication.users.domain.UserCredentialsKeyGenerator
 import cube8540.oauth.authentication.users.domain.UserNotFoundException
 import cube8540.oauth.authentication.users.domain.UserRegisterException
 import cube8540.oauth.authentication.users.domain.UserRepository
+import cube8540.oauth.authentication.users.domain.UserUidGenerator
 import cube8540.oauth.authentication.users.domain.UserValidatorFactory
 import cube8540.oauth.authentication.users.domain.Username
 import cube8540.oauth.authentication.users.infra.DefaultUserCredentialsKeyGenerator
+import cube8540.oauth.authentication.users.infra.DefaultUserUidGenerator
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -26,6 +28,8 @@ class DefaultUserManagementService @Autowired constructor(
 
     var keyGenerator: UserCredentialsKeyGenerator = DefaultUserCredentialsKeyGenerator()
 
+    var uidGenerator: UserUidGenerator = DefaultUserUidGenerator()
+
     @Transactional(readOnly = true)
     override fun countUser(username: String): Long = repository.countByUsername(Username(username))
 
@@ -38,7 +42,7 @@ class DefaultUserManagementService @Autowired constructor(
             throw UserRegisterException.existsIdentifier("${registerRequest.username} is exists")
         }
 
-        val registerUser = User(registerRequest.username, registerRequest.password)
+        val registerUser = User(uidGenerator, registerRequest.username, registerRequest.password)
         registerUser.validation(validatorFactory)
         registerUser.encrypted(encoder)
         registerUser.generateCredentialsKey(keyGenerator)

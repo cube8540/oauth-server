@@ -20,15 +20,22 @@ import javax.persistence.EmbeddedId
 import javax.persistence.Entity
 import javax.persistence.JoinColumn
 import javax.persistence.Table
+import javax.persistence.UniqueConstraint
 
 @Entity
-@Table(name = "user")
+@Table(name = "user", uniqueConstraints = [
+    UniqueConstraint(name = "user_uid_unique_key", columnNames = ["uid"])
+])
 @DynamicInsert
 @DynamicUpdate
 class User private constructor(
     @EmbeddedId
     @AttributeOverride(name = "value", column = Column(name = "username"))
     var username: Username,
+
+    @Embedded
+    @AttributeOverride(name = "value", column = Column(name = "uid", length = 32))
+    var uid: Uid,
 
     @Column(name = "password", length = 64, nullable = false)
     var password: String
@@ -68,7 +75,8 @@ class User private constructor(
     @Column(name = "last_updated_at", nullable = false)
     var lastUpdatedAt: LocalDateTime? = LocalDateTime.now()
 
-    constructor(username: String, password: String): this(Username(username), password) {
+    constructor(uidGenerator: UserUidGenerator, username: String, password: String):
+            this(Username(username), uidGenerator.generateUid(), password) {
         super.registerEvent(UserRegisteredEvent(Username(username)))
     }
 

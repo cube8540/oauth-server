@@ -36,6 +36,9 @@ class UserTestHelper {
 
     static final ApprovalAuthority APPROVAL_AUTHORITY = new ApprovalAuthority(CLIENT_ID, AUTHORITY);
 
+    static final String RAW_UID = "UID";
+    static final Uid UID = new Uid(RAW_UID);
+
     static Clock makeDefaultClock() {
         return Clock.fixed(NOW.toInstant(AuthenticationApplication.DEFAULT_ZONE_OFFSET), AuthenticationApplication.DEFAULT_TIME_ZONE.toZoneId());
     }
@@ -118,4 +121,10 @@ class UserTestHelper {
         return keyGenerator;
     }
 
+    static UserUidGenerator makeUidGenerator(Uid uid) {
+        UserUidGenerator generator = mock(UserUidGenerator.class);
+
+        when(generator.generateUid()).thenReturn(uid);
+        return generator;
+    }
 }
