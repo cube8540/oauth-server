@@ -63,7 +63,8 @@ insert into authority_accessible_resources(authority, resource_id) select 'manag
 
 insert into authority_accessible_resources(authority, resource_id) select 'management.user', 'USER-MANAGEMENT-API' where not exists (select initialize_datetime from initialize);
 
-
 insert into initialize select current_timestamp where not exists (select * from initialize);
+
+update `user` set uid = replace(random_uuid(), '-', '') where uid is null;
 
 commit;

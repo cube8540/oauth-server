@@ -21,10 +21,6 @@ class DefaultUserService @Autowired constructor(
         val user = repository.findById(Username(username))
             .orElseThrow { UsernameNotFoundException("$username is not found") }
 
-        return User.builder()
-            .username(user.username.value).password(user.password)
-            .accountLocked(!user.credentialed)
-            .authorities(Collections.emptyList())
-            .build()
+        return SecurityUser.of(user)
     }
 }
