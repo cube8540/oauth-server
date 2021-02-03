@@ -17,11 +17,9 @@
 							"raw": "http://{{base_uri}}/oauth/authorize?client_id={{client_id}}&redirect_uri=http://localhost:8080/callback&response_type=code",
 							"protocol": "http",
 							"host": [
-								"localhost"
+								"{{base_uri}}"
 							],
-							"port": "8080",
 							"path": [
-								"auth",
 								"oauth",
 								"authorize"
 							],
@@ -103,14 +101,12 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/{{base_uri}}/authorize?client_id={{client_id}}&redirect_uri=http://localhost:8080/callback&response_type=token",
+							"raw": "http://{{base_uri}}/oauth/authorize?client_id={{client_id}}&redirect_uri=http://localhost:8080/callback&response_type=token",
 							"protocol": "http",
 							"host": [
-								"localhost"
+								"{{base_uri}}"
 							],
-							"port": "8080",
 							"path": [
-								"auth",
 								"oauth",
 								"authorize"
 							],
@@ -160,12 +156,7 @@
 									"value": "client_credentials",
 									"type": "text"
 								}
-							],
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
+							]
 						},
 						"url": {
 							"raw": "http://{{base_uri}}/oauth/token",
@@ -279,6 +270,130 @@
 							"path": [
 								"oauth",
 								"token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "OAuth2 Revoke Token",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{client_secret}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{client_id}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://{{base_uri}}/oauth/token?token={{tokens}}",
+							"protocol": "http",
+							"host": [
+								"{{base_uri}}"
+							],
+							"path": [
+								"oauth",
+								"token"
+							],
+							"query": [
+								{
+									"key": "token",
+									"value": "{{tokens}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "OAuth2 Introspection",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{client_secret}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{client_id}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "token",
+									"value": "{{tokens}}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://{{base_uri}}/oauth/token_info",
+							"protocol": "http",
+							"host": [
+								"{{base_uri}}"
+							],
+							"path": [
+								"oauth",
+								"token_info"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "OAuth2 User Info",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{client_secret}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{client_id}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://{{base_uri}}/oauth/user_info?token={{tokens}}",
+							"protocol": "http",
+							"host": [
+								"{{base_uri}}"
+							],
+							"path": [
+								"oauth",
+								"user_info"
+							],
+							"query": [
+								{
+									"key": "token",
+									"value": "{{tokens}}"
+								}
 							]
 						}
 					},
@@ -484,12 +599,7 @@
 									"value": "e267ffd92fed456490cb02df5a4ae668",
 									"type": "text"
 								}
-							],
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
+							]
 						},
 						"url": {
 							"raw": "http://{{base_uri}}/api/accounts/attributes/active",
