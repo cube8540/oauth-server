@@ -2,6 +2,7 @@ package cube8540.oauth.authentication.users.application;
 
 import cube8540.oauth.authentication.oauth.security.OAuth2ClientDetails;
 import cube8540.oauth.authentication.users.domain.ApprovalAuthority;
+import cube8540.oauth.authentication.users.domain.Uid;
 import cube8540.oauth.authentication.users.domain.User;
 import cube8540.oauth.authentication.users.domain.UserCredentialsKey;
 import cube8540.oauth.authentication.users.domain.UserCredentialsKeyGenerator;
@@ -32,6 +33,9 @@ class UserApplicationTestHelper {
 
     static final String RAW_USERNAME = "username";
     static final Username USERNAME = new Username(RAW_USERNAME);
+
+    static final String RAW_UID = "UID";
+    static final Uid UID = new Uid(RAW_UID);
 
     static final String PASSWORD = "Password1234!@#$";
     static final String NEW_PASSWORD = "NewPassword1234!@#$";
@@ -89,6 +93,7 @@ class UserApplicationTestHelper {
         User user = mock(User.class);
 
         when(user.getUsername()).thenReturn(USERNAME);
+        when(user.getUid()).thenReturn(UID);
         when(user.getPassword()).thenReturn(PASSWORD);
 
         return user;

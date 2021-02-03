@@ -6,6 +6,10 @@ interface UserCredentialsKeyGenerator {
     fun generateKey(): UserCredentialsKey
 }
 
+interface UserUidGenerator {
+    fun generateUid(): Uid
+}
+
 interface UserValidatorFactory {
     fun createValidator(user: User): Validator<User>
 }
