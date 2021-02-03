@@ -54,7 +54,7 @@ class DefaultUserServiceTest {
         DefaultUserService service = new DefaultUserService(repository);
 
         UserDetails result = service.loadUserByUsername(RAW_USERNAME);
-        assertEquals(Collections.unmodifiableSet(Collections.emptySet()), result.getAuthorities());
+        assertEquals(Collections.emptyList(), result.getAuthorities());
         assertTrue(result.isAccountNonLocked());
     }
 }
