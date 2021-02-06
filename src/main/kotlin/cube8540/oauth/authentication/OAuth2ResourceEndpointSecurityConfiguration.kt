@@ -85,8 +85,8 @@ class OAuth2ResourceEndpointSecurityConfiguration: WebSecurityConfigurerAdapter(
 
     private fun accessTokenIntrospector(): DefaultAccessTokenIntrospector {
         val introspector = DefaultAccessTokenIntrospector(accessTokenService, authenticationProvider)
-        introspector.clientId = environment.getProperty("oauth-resource-server.client-id")
-        introspector.clientSecret = environment.getProperty("oauth-resource-server.client-secret")
+        introspector.clientId = environment.getProperty("init-oauth-client.client-id")
+        introspector.clientSecret = environment.getProperty("init-oauth-client.client-secret")
         return introspector
     }
 }

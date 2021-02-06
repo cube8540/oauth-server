@@ -53,6 +53,11 @@ class DefaultScopeDetailsService @Autowired constructor(private val repository: 
         return repository.findAllById(scopeIn).map(DefaultOAuth2ScopeDetails::of).toList()
     }
 
+    @Transactional(readOnly = true)
+    override fun loadInitializeAuthority(): Collection<AuthorityDetails> = repository
+        .findByInitializeTrue()
+        .map { DefaultOAuth2ScopeDetails.of(it) }
+
     private fun getScope(scopeId: String): OAuth2Scope = repository
         .findById(AuthorityCode(scopeId))
         .orElseThrow { ScopeNotFoundException.instance(scopeId) }

@@ -17,10 +17,13 @@ class OAuth2Scope private constructor(
     var code: AuthorityCode,
 
     @Column(name = "description", length = 32)
-    var description: String
+    var description: String,
+
+    @Column(name = "initialize", nullable = false)
+    var initialize: Boolean
 ): AbstractAggregateRoot<OAuth2Scope>() {
 
-    constructor(scopeId: String, description: String): this(AuthorityCode(scopeId), description)
+    constructor(scopeId: String, description: String): this(AuthorityCode(scopeId), description, false)
 
     override fun equals(other: Any?): Boolean = when {
         other == null -> false
