@@ -1,32 +1,18 @@
--- insert default user
-insert into user(username, password, registered_at, last_updated_at, is_credentials) select 'admin', '$2a$10$uTSfWKXF20lwumttjUbxteWVJBedSEQkYxC6qJJbEVUYjzvM6q7Q2', current_timestamp, current_timestamp, true where not exists (select initialize_datetime from initialize);
-
--- insert default client
-insert into oauth2_clients(client_id, client_secret, client_name, access_token_validity, refresh_token_validity, oauth2_client_owner) select 'oauth-client', '$2a$10$IKIfJYgEf7s5fAdpDFLmIu7.nEIFFgqDRRbfptstuHNav6kVdvFxK', 'client-name', 600000000000, 7200000000000, 'admin' where not exists (select initialize_datetime from initialize);
-insert into oauth2_client_grant_type(client_id, grant_type) select 'oauth-client', 'authorization_code' where not exists (select initialize_datetime from initialize);
-insert into oauth2_client_grant_type(client_id, grant_type) select 'oauth-client', 'refresh_token' where not exists (select initialize_datetime from initialize);
-insert into oauth2_client_grant_type(client_id, grant_type) select 'oauth-client', 'client_credentials' where not exists (select initialize_datetime from initialize);
-
 -- insert user scope
 insert into oauth2_scope(scope_id, description) select 'access.oauth.scope', 'access oauth scope api' where not exists (select initialize_datetime from initialize);
 insert into oauth2_scope(scope_id, description) select 'access.oauth.client', 'access oauth client api' where not exists (select initialize_datetime from initialize);
 insert into oauth2_scope(scope_id, description) select 'access.oauth.token', 'access oauth token api' where not exists (select initialize_datetime from initialize);
 insert into oauth2_scope(scope_id, description) select 'management.user', 'management user api' where not exists (select initialize_datetime from initialize);
+update oauth2_scope set initialize = true where scope_id = 'access.oauth.scope';
+update oauth2_scope set initialize = true where scope_id = 'access.oauth.client';
+update oauth2_scope set initialize = true where scope_id = 'access.oauth.token';
+update oauth2_scope set initialize = true where scope_id = 'management.user';
 
 -- insert admin scope
 insert into oauth2_scope(scope_id, description) select 'management.server', 'management server configuration' where not exists (select initialize_datetime from initialize);
 insert into oauth2_scope(scope_id, description) select 'management.oauth', 'management oauth configuration' where not exists (select initialize_datetime from initialize);
-
--- insert client scope
-insert into oauth2_client_scope(client_id, scope_id) select 'oauth-client', 'access.oauth.scope' where not exists (select initialize_datetime from initialize);
-insert into oauth2_client_scope(client_id, scope_id) select 'oauth-client', 'access.oauth.client' where not exists (select initialize_datetime from initialize);
-insert into oauth2_client_scope(client_id, scope_id) select 'oauth-client', 'access.oauth.token' where not exists (select initialize_datetime from initialize);
-insert into oauth2_client_scope(client_id, scope_id) select 'oauth-client', 'management.user' where not exists (select initialize_datetime from initialize);
-insert into oauth2_client_scope(client_id, scope_id) select 'oauth-client', 'management.oauth' where not exists (select initialize_datetime from initialize);
-insert into oauth2_client_scope(client_id, scope_id) select 'oauth-client', 'management.server' where not exists (select initialize_datetime from initialize);
-
--- insert client redirect uri
-insert into oauth2_client_redirect_uri(client_id, redirect_uri) select 'oauth-client', 'http://localhost:8080/callback' where not exists (select initialize_datetime from initialize);
+update oauth2_scope set initialize = true where scope_id = 'management.server';
+update oauth2_scope set initialize = true where scope_id = 'management.oauth';
 
 -- oauth2 client security resource api
 insert into secured_resource(resource_id, method, resource) select 'TOKEN-READ-API', 'GET', '/api/tokens/**' where not exists (select initialize_datetime from initialize);

@@ -28,6 +28,12 @@ front:
     forgot-password-page: #your forgot password page endpoint
 remember-me:
   key: #your remember me token key
-oauth-resource-server:
-  client-id: #your client id
-  client-secret: #your client secret
+init-user:
+  username: #default user id
+  password: #default user password
+init-oauth-client:
+  client-id: #default client id
+  client-secret: #default client secret
+  client-name: #default client name
+  client-redirect-uri: #default redirect uri(http://localhost:8080,http://localhost:8081...)
+  client-grant-type: #default grant type(authorization_code,implicit,refresh_token,client_credentials,password,.....)

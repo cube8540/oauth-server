@@ -144,4 +144,6 @@ create table if not exists remember_me_token (
 alter table `user` add column if not exists uid varchar(32);
 alter table `user` add unique if not exists `user_uid_unique_key`(uid);
 
+alter table oauth2_scope add column if not exists initialize boolean not null default false;
+
 commit;
