@@ -46,9 +46,15 @@ front:
     forgot-password-page: http://localhost:8080/front/forgot-password
 remember-me:
   key: rememberMeToken
-oauth-resource-server:
-  client-id: oauth-client
-  client-secret: oauth-secret
+init-user:
+  username: admin
+  password: admin
+init-oauth-client:
+  client-id: oauth2-client
+  client-secret: oauth2-secret
+  client-name: default client
+  client-redirect-uri: http://localhost:8080
+  client-grant-type: authorization_code,implicit,refresh_token,client_credentials,password
 ```
 - spring.datasource
 
@@ -69,6 +75,14 @@ OAuth2 인증 코드 방식의 인가 페이지 두 화면을 뿐임으로 새 �
 
 logback 설정 정보 입니다.
 
+- init-oauth-client
+
+인증서버의 클라이언트 아이디와 패스워드를 설정합니다.
+
+- init-user
+
+초기 유저의 아이디와 비밀번호를 설정합니다.
+
 ## Build and start
 아래의 명령어로 서버를 시작할 수 있습니다.
 ```
@@ -79,18 +93,3 @@ $ gradlew bootRun --args='--spring.profiles.active=local'
 $ gradle bootJar
 $ java -jar -Dspring.profiles.active=local build/libs/authentication-<version>.jar
 ```
-
-## Default Username/Password
-```
-Username: admin
-Password: admin
-```
-첫 실행 후 반드시 패스워드를 변경해 주세요.
-
-## Default OAuth2 Client ID/Secret
-```
-Client ID: oauth-client
-Client Secret: oauth-secret
-```
-첫 실행 후 반드시 client secret을 변경해 주세요. 이 후 src/main/resources/application.yml 에서 oauth-resource-server.client-secret 역시
-변경한 값으로 바꿔 주세요

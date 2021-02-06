@@ -21,4 +21,6 @@ interface AuthorityDetails {
 interface AuthorityDetailsService {
 
     fun loadAuthorityByAuthorityCodes(authorities: Collection<String>): Collection<AuthorityDetails>
+
+    fun loadInitializeAuthority(): Collection<AuthorityDetails>
 }

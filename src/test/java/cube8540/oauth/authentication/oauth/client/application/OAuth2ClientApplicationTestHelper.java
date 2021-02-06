@@ -1,11 +1,13 @@
 package cube8540.oauth.authentication.oauth.client.application;
 
-import cube8540.oauth.authentication.security.AuthorityCode;
 import cube8540.oauth.authentication.oauth.client.domain.ClientOwner;
 import cube8540.oauth.authentication.oauth.client.domain.OAuth2Client;
 import cube8540.oauth.authentication.oauth.client.domain.OAuth2ClientId;
 import cube8540.oauth.authentication.oauth.client.domain.OAuth2ClientRepository;
 import cube8540.oauth.authentication.oauth.client.domain.OAuth2ClientValidatorFactory;
+import cube8540.oauth.authentication.security.AuthorityCode;
+import cube8540.oauth.authentication.security.AuthorityDetails;
+import cube8540.oauth.authentication.security.AuthorityDetailsService;
 import cube8540.validator.core.ValidationResult;
 import cube8540.validator.core.Validator;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -58,6 +60,14 @@ public class OAuth2ClientApplicationTestHelper {
     static final List<String> RAW_SCOPES = SCOPES.stream().map(AuthorityCode::getValue).collect(Collectors.toList());
     static final List<String> RAW_NEW_SCOPES = NEW_SCOPES.stream().map(AuthorityCode::getValue).collect(Collectors.toList());
     static final List<String> RAW_REMOVE_SCOPES = REMOVE_SCOPES.stream().map(AuthorityCode::getValue).collect(Collectors.toList());
+
+    static final String RAW_INITIALIZE_GRANT = "client_credentials,authorization_code,password";
+    static final Set<AuthorizationGrantType> INITIALIZE_GRANT_TYPE = Arrays.stream(RAW_INITIALIZE_GRANT.split(","))
+            .map(AuthorizationGrantType::new).collect(Collectors.toSet());
+
+    static final String RAW_INITIALIZE_REDIRECT_URI = "http://localhost:8080/auth,http://localhost:8081";
+    static final Set<URI> INITIALIZE_REDIRECT_URI = Arrays.stream(RAW_INITIALIZE_REDIRECT_URI.split(","))
+            .map(URI::create).collect(Collectors.toSet());
 
     static final Integer ACCESS_TOKEN_VALIDITY_SECONDS = 6000;
     static final Integer REFRESH_TOKEN_VALIDITY_SECONDS = 60000;
@@ -131,5 +141,22 @@ public class OAuth2ClientApplicationTestHelper {
         when(factory.createValidator(any())).thenReturn(validator);
 
         return factory;
+    }
+
+    static Set<AuthorityDetails> makeAuthorityDetails(List<String> codes) {
+        Set<AuthorityDetails> details = new HashSet<>();
+        for (String code : codes) {
+            AuthorityDetails detail = mock(AuthorityDetails.class);
+
+            when(detail.getCode()).thenReturn(code);
+            details.add(detail);
+        }
+        return details;
+    }
+
+    static AuthorityDetailsService makeInitializerAuthorityDetailsService(Set<AuthorityDetails> authorityDetails) {
+        AuthorityDetailsService service = mock(AuthorityDetailsService.class);
+        when(service.loadInitializeAuthority()).thenReturn(authorityDetails);
+        return service;
     }
 }
