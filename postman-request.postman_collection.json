@@ -1000,6 +1000,73 @@
 						"description": "요청한 계정을 삭제 합니다."
 					},
 					"response": []
+				},
+				{
+					"name": "유저 새 인증키 할당",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "tokenType",
+									"value": "Bearer",
+									"type": "string"
+								},
+								{
+									"key": "clientSecret",
+									"value": "{{client_secret}}",
+									"type": "string"
+								},
+								{
+									"key": "clientId",
+									"value": "{{client_id}}",
+									"type": "string"
+								},
+								{
+									"key": "client_authentication",
+									"value": "header",
+									"type": "string"
+								},
+								{
+									"key": "tokenName",
+									"value": "",
+									"type": "string"
+								},
+								{
+									"key": "accessTokenUrl",
+									"value": "http://{{base_uri}}/oauth/token",
+									"type": "string"
+								},
+								{
+									"key": "grant_type",
+									"value": "client_credentials",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "http://{{base_uri}}/api/accounts/{{new_user_id}}/attributes/credentials-key",
+							"protocol": "http",
+							"host": [
+								"{{base_uri}}"
+							],
+							"path": [
+								"api",
+								"accounts",
+								"{{new_user_id}}",
+								"attributes",
+								"credentials-key"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
