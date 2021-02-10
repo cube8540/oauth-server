@@ -31,4 +31,12 @@ class UserCredentialsAPIEndpointTest {
 
         verify(service, times(1)).accountCredentials(USERNAME, CREDENTIALS_KEY);
     }
+
+    @Test
+    @DisplayName("새 인증키 할당")
+    void userGeneratedNewCredentialsKey() {
+        endpoint.generateCredentialsKey(USERNAME);
+
+        verify(service, times(1)).grantCredentialsKey(USERNAME);
+    }
 }
