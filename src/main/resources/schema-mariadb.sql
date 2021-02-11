@@ -63,6 +63,9 @@ create table if not exists oauth2_authorization_code (
 	constraint fk_authorization_code_username foreign key (username) references user (username) on delete cascade
 );
 
+alter table oauth2_authorization_code add column if not exists code_challenge varchar(248);
+alter table oauth2_authorization_code add column if not exists code_challenge_method varchar(8);
+
 create table if not exists oauth2_client_grant_type (
 	client_id varchar(32) not null,
 	grant_type varchar(32) not null,

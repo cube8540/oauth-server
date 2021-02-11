@@ -3,7 +3,6 @@ package cube8540.oauth.authentication.oauth.token.application;
 import cube8540.oauth.authentication.AuthenticationApplication;
 import cube8540.oauth.authentication.oauth.error.InvalidGrantException;
 import cube8540.oauth.authentication.oauth.error.InvalidRequestException;
-import cube8540.oauth.authentication.oauth.security.AuthorizationRequest;
 import cube8540.oauth.authentication.oauth.security.OAuth2ClientDetails;
 import cube8540.oauth.authentication.oauth.security.OAuth2RequestValidator;
 import cube8540.oauth.authentication.oauth.security.OAuth2TokenRequest;
@@ -26,6 +25,7 @@ import static cube8540.oauth.authentication.oauth.token.application.OAuth2TokenA
 import static cube8540.oauth.authentication.oauth.token.application.OAuth2TokenApplicationTestHelper.ACCESS_TOKEN_VALIDITY_SECONDS;
 import static cube8540.oauth.authentication.oauth.token.application.OAuth2TokenApplicationTestHelper.APPROVED_SCOPES;
 import static cube8540.oauth.authentication.oauth.token.application.OAuth2TokenApplicationTestHelper.CLIENT_ID;
+import static cube8540.oauth.authentication.oauth.token.application.OAuth2TokenApplicationTestHelper.CODE_VERIFIER;
 import static cube8540.oauth.authentication.oauth.token.application.OAuth2TokenApplicationTestHelper.COMPOSE_UNIQUE_KEY;
 import static cube8540.oauth.authentication.oauth.token.application.OAuth2TokenApplicationTestHelper.RAW_APPROVED_SCOPES;
 import static cube8540.oauth.authentication.oauth.token.application.OAuth2TokenApplicationTestHelper.RAW_AUTHORIZATION_CODE;
@@ -145,7 +145,7 @@ class AuthorizationCodeGranterTest {
     @Test
     @DisplayName("리플래시 토큰 아이디 생성자가 설정 되어 있지 않을때 엑세스 토큰 생성")
     void generateAccessTokenWhenRefreshTokenIdGeneratorNotSet() {
-        ArgumentCaptor<AuthorizationRequest> requestCaptor = ArgumentCaptor.forClass(AuthorizationRequest.class);
+        ArgumentCaptor<OAuth2TokenRequest> requestCaptor = ArgumentCaptor.forClass(OAuth2TokenRequest.class);
         OAuth2ClientDetails clientDetails = makeClientDetails();
         OAuth2TokenRequest request = makeTokenRequest();
         OAuth2TokenIdGenerator generator = makeTokenIdGenerator(ACCESS_TOKEN_ID);
@@ -166,13 +166,14 @@ class AuthorizationCodeGranterTest {
         assertEquals(RAW_CLIENT_ID, requestCaptor.getValue().getClientId());
         assertEquals(STATE, requestCaptor.getValue().getState());
         assertEquals(ACCESS_TOKEN_ID, accessToken.getRefreshToken().getTokenId());
+        assertEquals(CODE_VERIFIER, requestCaptor.getValue().getCodeVerifier());
         assertAccessToken(accessToken);
     }
 
     @Test
     @DisplayName("리플래시 토큰 아이디 생성자가 설정 되어 있을떄 엑세스 토큰 생성")
     void generateAccessTokenWhenRefreshTokenIdGeneratorSet() {
-        ArgumentCaptor<AuthorizationRequest> requestCaptor = ArgumentCaptor.forClass(AuthorizationRequest.class);
+        ArgumentCaptor<OAuth2TokenRequest> requestCaptor = ArgumentCaptor.forClass(OAuth2TokenRequest.class);
         OAuth2ClientDetails clientDetails = makeClientDetails();
         OAuth2TokenRequest request = makeTokenRequest();
         OAuth2TokenIdGenerator generator = makeTokenIdGenerator(ACCESS_TOKEN_ID);
@@ -194,6 +195,7 @@ class AuthorizationCodeGranterTest {
         assertEquals(RAW_CLIENT_ID, requestCaptor.getValue().getClientId());
         assertEquals(STATE, requestCaptor.getValue().getState());
         assertEquals(REFRESH_TOKEN_ID, accessToken.getRefreshToken().getTokenId());
+        assertEquals(CODE_VERIFIER, requestCaptor.getValue().getCodeVerifier());
         assertAccessToken(accessToken);
 
     }

@@ -1,5 +1,6 @@
 package cube8540.oauth.authentication.oauth.security.endpoint
 
+import com.nimbusds.oauth2.sdk.pkce.CodeVerifier
 import cube8540.oauth.authentication.oauth.security.AuthorizationRequest
 import cube8540.oauth.authentication.oauth.security.OAuth2AccessTokenDetails
 import cube8540.oauth.authentication.oauth.security.OAuth2AccessTokenGranter
@@ -55,5 +56,6 @@ class AuthorizationImplicitResponseEnhancer(
         override val state: String? = request.state
         override val redirectUri: URI? = request.redirectUri
         override val scopes: Set<String>? = request.requestScopes
+        override val codeVerifier: CodeVerifier? = null
     }
 }

@@ -1,6 +1,6 @@
 package cube8540.oauth.authentication.oauth.token.application;
 
-import cube8540.oauth.authentication.security.AuthorityCode;
+import com.nimbusds.oauth2.sdk.pkce.CodeVerifier;
 import cube8540.oauth.authentication.oauth.client.domain.OAuth2ClientId;
 import cube8540.oauth.authentication.oauth.security.AuthorizationRequest;
 import cube8540.oauth.authentication.oauth.security.OAuth2ClientDetails;
@@ -21,6 +21,7 @@ import cube8540.oauth.authentication.oauth.token.domain.OAuth2TokenEnhancer;
 import cube8540.oauth.authentication.oauth.token.domain.OAuth2TokenId;
 import cube8540.oauth.authentication.oauth.token.domain.OAuth2TokenIdGenerator;
 import cube8540.oauth.authentication.oauth.token.domain.PrincipalUsername;
+import cube8540.oauth.authentication.security.AuthorityCode;
 import org.springframework.security.authentication.AccountStatusException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -106,6 +107,9 @@ class OAuth2TokenApplicationTestHelper {
 
     static final String RAW_COMPOSE_UNIQUE_KEY = "COMPOSE_UNIQUE_KEY";
     static final OAuth2ComposeUniqueKey COMPOSE_UNIQUE_KEY = new OAuth2ComposeUniqueKey(RAW_COMPOSE_UNIQUE_KEY);
+
+    static final String RAW_CODE_VERIFIER = "FP7Am8xqMbyTCBgSYiTVuVkVv8ffScYCt2wali8JVC8";
+    static final CodeVerifier CODE_VERIFIER = new CodeVerifier(RAW_CODE_VERIFIER);
 
     static OAuth2ComposeUniqueKeyGenerator makeComposeUniqueKeyGenerator() {
         OAuth2ComposeUniqueKeyGenerator generator = mock(OAuth2ComposeUniqueKeyGenerator.class);
@@ -216,6 +220,7 @@ class OAuth2TokenApplicationTestHelper {
         when(request.getRefreshToken()).thenReturn(RAW_REFRESH_TOKEN_ID);
         when(request.getState()).thenReturn(STATE);
         when(request.getGrantType()).thenReturn(GRANT_TYPE);
+        when(request.getCodeVerifier()).thenReturn(CODE_VERIFIER);
 
         return request;
     }
