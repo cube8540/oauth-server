@@ -1,17 +1,24 @@
 package cube8540.oauth.authentication.oauth.token.domain
 
+import com.nimbusds.jose.util.Base64URL
+import com.nimbusds.oauth2.sdk.pkce.CodeChallenge
+import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod
 import cube8540.oauth.authentication.AuthenticationApplication
 import cube8540.oauth.authentication.security.AuthorityCode
 import cube8540.oauth.authentication.oauth.client.domain.OAuth2ClientId
+import cube8540.oauth.authentication.oauth.converter.CodeChallengeConverter
+import cube8540.oauth.authentication.oauth.converter.CodeChallengeMethodConverter
 import cube8540.oauth.authentication.oauth.converter.RedirectUriConverter
 import cube8540.oauth.authentication.oauth.error.InvalidClientException.Companion.invalidClient
 import cube8540.oauth.authentication.oauth.error.InvalidGrantException.Companion.invalidGrant
 import cube8540.oauth.authentication.oauth.error.RedirectMismatchException
 import cube8540.oauth.authentication.oauth.security.AuthorizationRequest
+import cube8540.oauth.authentication.oauth.security.OAuth2TokenRequest
 import org.springframework.data.domain.AbstractAggregateRoot
 import java.net.URI
 import java.time.Clock
 import java.time.LocalDateTime
+import java.util.*
 import java.util.stream.Collectors
 import javax.persistence.AttributeOverride
 import javax.persistence.CollectionTable
@@ -65,14 +72,31 @@ class OAuth2AuthorizationCode(
     @AttributeOverride(name = "value", column = Column(name = "scope_id", length = 32, nullable = false))
     var approvedScopes: MutableSet<AuthorityCode>? = null
 
+    @Column(name = "code_challenge", length = 248)
+    @Convert(converter = CodeChallengeConverter::class)
+    var codeChallenge: CodeChallenge? = null
+
+    @Column(name = "code_challenge_method", length = 8)
+    @Convert(converter = CodeChallengeMethodConverter::class)
+    var codeChallengeMethod: CodeChallengeMethod? = null
+
     fun setAuthorizationRequest(request: AuthorizationRequest) {
         this.clientId = request.clientId?.let { OAuth2ClientId(it) }
         this.username = request.username?.let { PrincipalUsername(it) }
         this.redirectURI = request.redirectUri
         this.approvedScopes = request.requestScopes?.map { AuthorityCode(it) }?.toMutableSet()
+        this.codeChallenge = request.codeChallenge
+        this.codeChallengeMethod = request.codeChallengeMethod
+
+        if (this.codeChallenge == null && this.codeChallengeMethod != null) {
+            throw invalidGrant("Code challenge is required")
+        }
+        if (this.codeChallenge != null && this.codeChallengeMethod == null) {
+            this.codeChallengeMethod = CodeChallengeMethod.PLAIN
+        }
     }
 
-    fun validateWithAuthorizationRequest(request: AuthorizationRequest) {
+    fun validateWithAuthorizationRequest(request: OAuth2TokenRequest) {
         if (expirationDateTime?.isBefore(LocalDateTime.now(clock)) == true) {
             throw invalidGrant("Authorization code is expired")
         }
@@ -84,6 +108,18 @@ class OAuth2AuthorizationCode(
 
         if (clientId != request.clientId?.let { OAuth2ClientId(it) }) {
             throw invalidClient("Client id mismatch")
+        }
+
+        if ((this.codeChallenge != null && request.codeVerifier == null) ||
+            (this.codeChallenge == null && request.codeVerifier != null)) {
+            throw invalidGrant("Code verifier mismatch")
+        }
+
+        if ((this.codeChallenge != null && request.codeVerifier != null)) {
+            val other = CodeChallenge.compute(this.codeChallengeMethod, request.codeVerifier)
+            if (this.codeChallenge != other) {
+                throw invalidGrant("Code verifier mismatch")
+            }
         }
     }
 

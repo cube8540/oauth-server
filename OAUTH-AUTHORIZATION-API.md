@@ -21,6 +21,9 @@ OAuth2에서 가장 많이 볼 수 있는 인증 유형 입니다. 클라이언�
 http://localhost:8080/oauth/authorize?response_type=code
 &redirect_uri=http://example-your-app.com/callback
 &client_id=<your-client-id>
+&state=k3VADnxT2ScEz16VqDawrDSjHUG2WqcALiZSSCEpgAN
+&code_challenge=efe_rqmpENryXVEZv63WKXAg4p6YJUiDJoZJBu8JuVE
+$code_challenge_method=S265
 ```
 |  파라미터명    |  필수 여부     |  타입   |  설명  |
 | :-----------:   | :--------------: | :-----:  | -------------------------------------------------------------------------------------------------------------- |
@@ -29,11 +32,13 @@ http://localhost:8080/oauth/authorize?response_type=code
 | client_id     | Required       | String | 클라이언트 아이디                                                                                               |
 | state         | Optional(권장) | String | CSRF 토큰 역할을 합니다. 만약 state 값에 대한 검증이 누락 되었거나 미흡하면 사용자 계정을 탈취 당할 수 있습니다.     |
 | scope         | Optional       | String | 인증 후 얻을 스코프 입니다. 스코프는 여러개를 요청할 수 있으며 공백으로 구별 합니다. 생략될시 모든 스코프를 얻습니다. |
+| code_challenge | Optional(권장) | String | PKCE(Proof Key for Client Exchange)를 통해 권한 부여 코드를 보호하는데 사용합니다. code_challenge_method가 포함되면 필수 입니다. 자세한 사항은 [PKCE](https://tools.ietf.org/html/rfc7636) 을 참고해 주세요. |
+| code_challenge_method | Optional(권장) | String | code_challenge 매개 변수에 대한 code_verifier를 인코딩 하는데 사용 되는 메소드로 S256 혹은 plain으로 설정 합니다. 제외될 경우 plain으로 간주하게 됩니다. 자세한 사항은 [PKCE](https://tools.ietf.org/html/rfc7636) 을 참고해 주세요. |
 
 위 요청을 하면 권한 서버는 자원 소유자의 인증을 위해 인증 페이지로 리다이렉트 하게 됩니다. 이후 자원 소유자가 인증을 완료하고
 인가를 허락할시 /oauth/authorize 를 요청 할 때 이용한 **redirect_uri**로 **code** 를 전달 합니다.
 ```
-http://example-your-app.com/callback?code=xxxxxxx
+http://example-your-app.com/callback?code=xxxxxxx&state=k3VADnxT2ScEz16VqDawrDSjHUG2WqcALiZSSCEpgAN
 ```
 |  파라미터명    |  타입   |  설명                     |
 | :-----------:   | :-----:  | -------------------------- |
@@ -48,6 +53,7 @@ http://localhost:8080/oauth/token?grant_type=authorization_code
 &redirect_uri=http://example-your-app.com/callback
 &client_id=<your-client-id>
 &client_secret=<your-client-secret>
+&code_verifier=IAouJo2w1U8DnurVA5dgfqP5WZ5KLCMdiaeY89ZNum2
 ```
 |  파라미터명    | 필수 여부 |  타입   |  설명  |
 | :-----------:   | :---------: | :-----:  | --------------------------------------------------------------- |
@@ -58,6 +64,7 @@ http://localhost:8080/oauth/token?grant_type=authorization_code
 | client_secret | Optional  | String | 클라이언트 패스워드. BasicAuth 사용시 생략될 수 있습니다.          |
 | state         | Optional  | String | 권한 서버로 부터 받은 state 값. 받지 않았을시 생략 할 수 있습니다. |
 | scope         | Optional  | String | /oauth/authorize 호출시 입력 되었던 스코프 입니다.               |
+| code_verifier | Optional  | String | authorization_code를 얻는 데 사용된 동일한 code_verifier 입니다. 인증 코드 요청에 PKCE가 사용된 경우 필수 입니다. [PKCE](https://tools.ietf.org/html/rfc7636) 을 참고해 주세요. |
 
 위 요청을 통해 아래와 같이 Access Token 을 발급 받을 수 있습니다.
 ```json

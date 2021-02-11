@@ -22,6 +22,8 @@ class TokenRequestKey private constructor() {
         const val REDIRECT_URI = "redirect_uri"
 
         const val SCOPE = "scope"
+
+        const val CODE_VERIFIER = "code_verifier"
     }
 }
 
@@ -36,6 +38,10 @@ class AuthorizationRequestKey private constructor() {
         const val SCOPE = "scope"
 
         const val RESPONSE_TYPE = "response_type"
+
+        const val CODE_CHALLENGE = "code_challenge"
+
+        const val CODE_CHALLENGE_METHOD = "code_challenge_method"
     }
 }
 
