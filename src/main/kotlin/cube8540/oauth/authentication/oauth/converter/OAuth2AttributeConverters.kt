@@ -3,6 +3,8 @@ package cube8540.oauth.authentication.oauth.converter
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.ser.std.StdSerializer
+import com.nimbusds.oauth2.sdk.pkce.CodeChallenge
+import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod
 import cube8540.oauth.authentication.oauth.AccessTokenSerializeKey
 import cube8540.oauth.authentication.oauth.extractGrantType
 import cube8540.oauth.authentication.oauth.security.OAuth2AccessTokenDetails
@@ -20,6 +22,18 @@ class AuthorizationGrantTypeConverter: AttributeConverter<AuthorizationGrantType
     override fun convertToDatabaseColumn(attribute: AuthorizationGrantType): String = attribute.value
 
     override fun convertToEntityAttribute(dbData: String): AuthorizationGrantType = extractGrantType(dbData)
+}
+
+class CodeChallengeConverter: AttributeConverter<CodeChallenge, String> {
+    override fun convertToDatabaseColumn(attribute: CodeChallenge?): String? = attribute?.value
+
+    override fun convertToEntityAttribute(dbData: String?): CodeChallenge? = dbData?.let { CodeChallenge.parse(it) }
+}
+
+class CodeChallengeMethodConverter: AttributeConverter<CodeChallengeMethod, String> {
+    override fun convertToDatabaseColumn(attribute: CodeChallengeMethod?): String? = attribute?.toString()
+
+    override fun convertToEntityAttribute(dbData: String?): CodeChallengeMethod? = dbData?.let { CodeChallengeMethod.parse(it) }
 }
 
 class OAuth2AccessTokenDetailsSerializer: StdSerializer<OAuth2AccessTokenDetails>(OAuth2AccessTokenDetails::class.java) {

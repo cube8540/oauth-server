@@ -1,5 +1,8 @@
 package cube8540.oauth.authentication.oauth.security
 
+import com.nimbusds.oauth2.sdk.pkce.CodeChallenge
+import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod
+import com.nimbusds.oauth2.sdk.pkce.CodeVerifier
 import cube8540.oauth.authentication.oauth.AuthorizationRequestKey
 import cube8540.oauth.authentication.oauth.TokenRequestKey
 import cube8540.oauth.authentication.oauth.extractScopes
@@ -21,6 +24,10 @@ interface AuthorizationRequest {
     var requestScopes: Set<String>?
 
     val responseType: OAuth2AuthorizationResponseType?
+
+    val codeChallenge: CodeChallenge?
+
+    val codeChallengeMethod: CodeChallengeMethod?
 }
 
 interface OAuth2TokenRequest {
@@ -41,6 +48,8 @@ interface OAuth2TokenRequest {
     val redirectUri: URI?
 
     val scopes: Set<String>?
+
+    val codeVerifier: CodeVerifier?
 }
 
 data class DefaultAuthorizationRequest(
@@ -54,7 +63,11 @@ data class DefaultAuthorizationRequest(
 
     override var requestScopes: Set<String>?,
 
-    override val responseType: OAuth2AuthorizationResponseType?
+    override val responseType: OAuth2AuthorizationResponseType?,
+
+    override val codeChallenge: CodeChallenge?,
+
+    override val codeChallengeMethod: CodeChallengeMethod?
 ): AuthorizationRequest {
 
     constructor(requestMap: Map<String, String?>, principal: Principal?): this(
@@ -63,7 +76,9 @@ data class DefaultAuthorizationRequest(
         username = principal?.name,
         requestScopes = extractScopes(requestMap[AuthorizationRequestKey.SCOPE]),
         responseType = extractResponseType(requestMap[AuthorizationRequestKey.RESPONSE_TYPE]),
-        redirectUri = requestMap[AuthorizationRequestKey.REDIRECT_URI]?.let { URI.create(it) }
+        redirectUri = requestMap[AuthorizationRequestKey.REDIRECT_URI]?.let { URI.create(it) },
+        codeChallenge = requestMap[AuthorizationRequestKey.CODE_CHALLENGE]?.let { CodeChallenge.parse(it) },
+        codeChallengeMethod = requestMap[AuthorizationRequestKey.CODE_CHALLENGE_METHOD]?.let { CodeChallengeMethod.parse(it) }
     )
 
     constructor(authorizationRequest: AuthorizationRequest): this(
@@ -72,7 +87,9 @@ data class DefaultAuthorizationRequest(
         username = authorizationRequest.username,
         redirectUri = authorizationRequest.redirectUri,
         responseType = authorizationRequest.responseType,
-        requestScopes = authorizationRequest.requestScopes?.let { HashSet(it) }
+        requestScopes = authorizationRequest.requestScopes?.let { HashSet(it) },
+        codeChallenge = authorizationRequest.codeChallenge,
+        codeChallengeMethod = authorizationRequest.codeChallengeMethod
     )
 }
 
@@ -93,7 +110,9 @@ data class DefaultOAuth2TokenRequest(
 
     override val scopes: Set<String>?,
 
-    override val state: String?
+    override val state: String?,
+
+    override val codeVerifier: CodeVerifier?
 ): OAuth2TokenRequest {
 
     constructor(requestMap: Map<String, String?>): this(
@@ -106,6 +125,7 @@ data class DefaultOAuth2TokenRequest(
         state = requestMap[TokenRequestKey.STATE],
         grantType = requestMap[TokenRequestKey.GRANT_TYPE]?.let { AuthorizationGrantType(it) },
         redirectUri = requestMap[TokenRequestKey.REDIRECT_URI]?.let { URI(it) },
+        codeVerifier = requestMap[TokenRequestKey.CODE_VERIFIER]?.let { CodeVerifier(it) }
     )
 }
 

@@ -1,9 +1,13 @@
 package cube8540.oauth.authentication.oauth.token.domain;
 
-import cube8540.oauth.authentication.security.AuthorityCode;
+import com.nimbusds.oauth2.sdk.pkce.CodeChallenge;
+import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod;
+import com.nimbusds.oauth2.sdk.pkce.CodeVerifier;
 import cube8540.oauth.authentication.oauth.client.domain.OAuth2ClientId;
 import cube8540.oauth.authentication.oauth.security.AuthorizationCode;
 import cube8540.oauth.authentication.oauth.security.AuthorizationRequest;
+import cube8540.oauth.authentication.oauth.security.OAuth2TokenRequest;
+import cube8540.oauth.authentication.security.AuthorityCode;
 
 import java.net.URI;
 import java.time.LocalDateTime;
@@ -41,6 +45,17 @@ class OAuth2AuthorizationCodeTestHelper {
     static final Set<String> RAW_SCOPES = new HashSet<>(Arrays.asList("SCOPE-1", "SCOPE-2", "SCOPE-3"));
     static final Set<AuthorityCode> SCOPES = RAW_SCOPES.stream().map(AuthorityCode::new).collect(Collectors.toSet());
 
+    static final String RAW_CODE_VERIFIER = "FP7Am8xqMbyTCBgSYiTVuVkVv8ffScYCt2wali8JVC8";
+    static final CodeVerifier CODE_VERIFIER = new CodeVerifier(RAW_CODE_VERIFIER);
+
+    static final String RAW_DIFFERENT_CODE_VERIFIER = "AnBhW7vVk8j4tdsc6jqcZ6YIwHbWhFzpIctxyTCv8jC";
+    static final CodeVerifier DIFFERENT_CODE_VERIFIER = new CodeVerifier(RAW_DIFFERENT_CODE_VERIFIER);
+
+    static final CodeChallengeMethod CODE_CHALLENGE_METHOD = CodeChallengeMethod.S256;
+
+    static final CodeChallenge CODE_CHALLENGE = CodeChallenge.compute(CODE_CHALLENGE_METHOD, CODE_VERIFIER);
+
+
     static AuthorizationCodeGenerator makeDefaultCodeGenerator() {
         AuthorizationCodeGenerator generator = mock(AuthorizationCodeGenerator.class);
         when(generator.generate()).thenReturn(RAW_CODE);
@@ -55,6 +70,21 @@ class OAuth2AuthorizationCodeTestHelper {
         when(request.getState()).thenReturn(STATE);
         when(request.getRedirectUri()).thenReturn(REDIRECT_URI);
         when(request.getRequestScopes()).thenReturn(RAW_SCOPES);
+        when(request.getCodeChallenge()).thenReturn(CODE_CHALLENGE);
+        when(request.getCodeChallengeMethod()).thenReturn(CODE_CHALLENGE_METHOD);
+
+        return request;
+    }
+
+    static OAuth2TokenRequest makeTokenRequest() {
+        OAuth2TokenRequest request = mock(OAuth2TokenRequest.class);
+
+        when(request.getClientId()).thenReturn(RAW_CLIENT_ID);
+        when(request.getUsername()).thenReturn(RAW_USERNAME);
+        when(request.getState()).thenReturn(STATE);
+        when(request.getRedirectUri()).thenReturn(REDIRECT_URI);
+        when(request.getScopes()).thenReturn(RAW_SCOPES);
+        when(request.getCodeVerifier()).thenReturn(CODE_VERIFIER);
 
         return request;
     }
