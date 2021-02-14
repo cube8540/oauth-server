@@ -1,6 +1,6 @@
 package cube8540.oauth.authentication.users.endpoint;
 
-import cube8540.oauth.authentication.users.application.RegisteredUserProfile;
+import cube8540.oauth.authentication.users.application.CredentialsKeyUserProfile;
 import cube8540.oauth.authentication.users.application.UserManagementService;
 import cube8540.oauth.authentication.users.application.UserRegisterRequest;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,7 +37,7 @@ class UserManagementAPIEndpointTest {
     @DisplayName("새 유저 추가")
     void registerNewUser() {
         UserRegisterRequest request = new UserRegisterRequest(USERNAME, PASSWORD);
-        RegisteredUserProfile userProfile = new RegisteredUserProfile(USERNAME, UID, REGISTERED_DATE_TIME, CREDENTIALS_KEY);
+        CredentialsKeyUserProfile userProfile = new CredentialsKeyUserProfile(USERNAME, UID, REGISTERED_DATE_TIME, CREDENTIALS_KEY);
 
         when(service.registerUser(request)).thenReturn(userProfile);
 
