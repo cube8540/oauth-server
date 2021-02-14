@@ -18,11 +18,11 @@ class DefaultUserCredentialsService @Autowired constructor(
     var keyGenerator: UserCredentialsKeyGenerator = DefaultUserCredentialsKeyGenerator()
 
     @Transactional
-    override fun grantCredentialsKey(username: String): UserProfile {
+    override fun grantCredentialsKey(username: String): CredentialsKeyUserProfile {
         val user = getUser(username)
 
         user.generateCredentialsKey(keyGenerator)
-        return UserProfile(repository.save(user))
+        return CredentialsKeyUserProfile(repository.save(user))
     }
 
     @Transactional
