@@ -5,8 +5,8 @@ import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 import java.time.LocalDateTime
 
-@ApiModel(value = "유저 계정 등록 정보")
-data class RegisteredUserProfile(
+@ApiModel(value = "유저 계정 인증키 등록 정보")
+data class CredentialsKeyUserProfile(
 
     @ApiModelProperty(value = "유저 아이디", example = "username1234")
     val username: String,

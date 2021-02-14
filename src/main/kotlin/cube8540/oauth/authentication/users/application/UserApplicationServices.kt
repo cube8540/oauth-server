@@ -7,7 +7,7 @@ interface UserManagementService {
 
     fun loadUserProfile(username: String): UserProfile
 
-    fun registerUser(registerRequest: UserRegisterRequest): RegisteredUserProfile
+    fun registerUser(registerRequest: UserRegisterRequest): CredentialsKeyUserProfile
 
     fun removeUser(username: String): UserProfile
 }
@@ -23,7 +23,7 @@ interface UserPasswordService {
 }
 
 interface UserCredentialsService {
-    fun grantCredentialsKey(username: String): UserProfile
+    fun grantCredentialsKey(username: String): CredentialsKeyUserProfile
 
     fun accountCredentials(username: String, credentialsKey: String): UserProfile
 }

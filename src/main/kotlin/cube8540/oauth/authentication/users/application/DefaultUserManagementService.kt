@@ -37,7 +37,7 @@ class DefaultUserManagementService @Autowired constructor(
     override fun loadUserProfile(username: String): UserProfile = UserProfile(getUser(username))
 
     @Transactional
-    override fun registerUser(registerRequest: UserRegisterRequest): RegisteredUserProfile {
+    override fun registerUser(registerRequest: UserRegisterRequest): CredentialsKeyUserProfile {
         if (countUser(registerRequest.username) > 0) {
             throw UserRegisterException.existsIdentifier("${registerRequest.username} is exists")
         }
@@ -47,7 +47,7 @@ class DefaultUserManagementService @Autowired constructor(
         registerUser.encrypted(encoder)
         registerUser.generateCredentialsKey(keyGenerator)
 
-        return RegisteredUserProfile(repository.save(registerUser))
+        return CredentialsKeyUserProfile(repository.save(registerUser))
     }
 
     @Transactional
