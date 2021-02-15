@@ -1,11 +1,11 @@
 package cube8540.oauth.authentication.resource.endpoint
 
+import cube8540.oauth.authentication.error.ExceptionTranslator
+import cube8540.oauth.authentication.error.message.ErrorMessage
 import cube8540.oauth.authentication.resource.application.SecuredResourceDetails
 import cube8540.oauth.authentication.resource.application.SecuredResourceManagementService
 import cube8540.oauth.authentication.resource.application.SecuredResourceModifyRequest
 import cube8540.oauth.authentication.resource.application.SecuredResourceRegisterRequest
-import cube8540.oauth.authentication.error.ExceptionTranslator
-import cube8540.oauth.authentication.error.message.ErrorMessage
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiImplicitParam
 import io.swagger.annotations.ApiOperation
@@ -22,18 +22,20 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.util.*
 
 @RestController
+@RequestMapping(value = ["/api/secured-resources"])
 @Api(value = "보호 자원 관리 API 엔드 포인트")
 class SecuredResourceManagementAPIEndpoint @Autowired constructor(private val service: SecuredResourceManagementService) {
 
     @set:[Autowired Qualifier("securedResourceExceptionTranslator")]
     lateinit var translator: ExceptionTranslator<ErrorMessage<Any>>
 
-    @GetMapping(value = ["/api/secured-resources/attributes/resource-id"])
+    @GetMapping(value = ["/attributes/resource-id"])
     @ApiOperation(value = "자원 아이디 갯수 검색", notes = "저장소에 저장된 자원 아이디의 갯수를 검색 합니다. 주로 자원 아이디 중복 검사에서 사용 합니다.")
     @ApiImplicitParam(value = "OAuth2 엑세스 토큰", name = "Authorization", required = true, paramType = "header", example = "Bearer xxxxxxxxxx")
     fun countResourceId(@ApiParam(value = "자원 아이디", required = true, example = "resource-id") @RequestParam resourceId: String): Map<String, Long> {
@@ -41,7 +43,7 @@ class SecuredResourceManagementAPIEndpoint @Autowired constructor(private val se
         return Collections.singletonMap("count", count)
     }
 
-    @GetMapping(value = ["/api/secured-resources"])
+    @GetMapping
     @ApiOperation(value = "등록된 보호 자원 검색", notes = "저장소에 저장된 모든 보호 자원을 검색 합니다.")
     @ApiImplicitParam(value = "OAuth2 엑세스 토큰", name = "Authorization", required = true, paramType = "header", example = "Bearer xxxxxxxxxx")
     @ApiResponses(value = [
@@ -53,7 +55,7 @@ class SecuredResourceManagementAPIEndpoint @Autowired constructor(private val se
         return Collections.singletonMap("resources", resources)
     }
 
-    @PostMapping(value = ["/api/secured-resources"])
+    @PostMapping
     @ApiOperation(value = "보호 자원 등록", notes = "새 보호 자원을 등록 합니다.")
     @ApiImplicitParam(value = "OAuth2 엑세스 토큰", name = "Authorization", required = true, paramType = "header", example = "Bearer xxxxxxxxxx")
     @ApiResponses(value = [
@@ -63,7 +65,7 @@ class SecuredResourceManagementAPIEndpoint @Autowired constructor(private val se
     ])
     fun registerNewResource(@RequestBody registerRequest: SecuredResourceRegisterRequest) = service.registerNewResource(registerRequest)
 
-    @PutMapping(value = ["/api/secured-resources/{resourceId}"])
+    @PutMapping(value = ["/{resourceId}"])
     @ApiOperation(value = "보호 자원 수정", notes = "보호 자원을 수정 합니다.")
     @ApiImplicitParam(value = "OAuth2 엑세스 토큰", name = "Authorization", required = true, paramType = "header", example = "Bearer xxxxxxxxxx")
     @ApiResponses(value = [
@@ -77,7 +79,7 @@ class SecuredResourceManagementAPIEndpoint @Autowired constructor(private val se
         @RequestBody modifyRequest: SecuredResourceModifyRequest
     ) = service.modifyResource(resourceId, modifyRequest)
 
-    @DeleteMapping(value = ["/api/secured-resources/{resourceId}"])
+    @DeleteMapping(value = ["/{resourceId}"])
     @ApiOperation(value = "보호 자원 삭제", notes = "보호 자원을 삭제 합니다.")
     @ApiImplicitParam(value = "OAuth2 엑세스 토큰", name = "Authorization", required = true, paramType = "header", example = "Bearer xxxxxxxxxx")
     @ApiResponses(value = [

@@ -5,7 +5,6 @@ import cube8540.oauth.authentication.error.message.ErrorMessage
 import cube8540.oauth.authentication.users.application.ChangePasswordRequest
 import cube8540.oauth.authentication.users.application.ResetPasswordRequest
 import cube8540.oauth.authentication.users.application.UserPasswordService
-import cube8540.oauth.authentication.users.application.UserProfile
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiImplicitParam
 import io.swagger.annotations.ApiOperation
@@ -17,15 +16,16 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.ExceptionHandler
+import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import java.lang.Exception
 
 @RestController
+@RequestMapping(value = ["/api/accounts"])
 @Api(value = "유저 패스워드 관리 API 엔드 포인트")
 class UserPasswordAPIEndpoint @Autowired constructor(
     private val service: UserPasswordService
@@ -34,7 +34,7 @@ class UserPasswordAPIEndpoint @Autowired constructor(
     @set:[Autowired Qualifier("userExceptionTranslator")]
     lateinit var translator: ExceptionTranslator<ErrorMessage<Any>>
 
-    @PutMapping(value = ["/api/accounts/{username}/attributes/password"])
+    @PatchMapping(value = ["/{username}/attributes/password"])
     @ApiOperation(value = "계정 패스워드 변경", notes = "요청한 계정의 패스워드를 변경 합니다.")
     @ApiImplicitParam(value = "OAuth2 엑세스 토큰", name = "Authorization", required = true, paramType = "header", example = "Bearer xxxxxxxxxx")
     @ApiResponses(value = [
@@ -48,7 +48,7 @@ class UserPasswordAPIEndpoint @Autowired constructor(
         @RequestBody changeRequest: ChangePasswordRequest
     ) = service.changePassword(username, changeRequest)
 
-    @DeleteMapping(value = ["/api/accounts/attributes/password"])
+    @DeleteMapping(value = ["/attributes/password"])
     @ApiOperation(value = "패스워드를 분실", notes = "패스워드를 분실한 계정에 패스워드 초기화 키를 할당합니다. 해당 요청 이후에도 로그인은 가능 합니다.")
     @ApiImplicitParam(value = "OAuth2 엑세스 토큰", name = "Authorization", required = true, paramType = "header", example = "Bearer xxxxxxxxxx")
     @ApiResponses(value = [
@@ -58,7 +58,7 @@ class UserPasswordAPIEndpoint @Autowired constructor(
     fun forgotPassword(@ApiParam(value = "패스워드를 분실한 유저의 아이디", required = true) @RequestParam username: String) =
         service.forgotPassword(username)
 
-    @PostMapping(value = ["/api/accounts/attributes/password"])
+    @PostMapping(value = ["/attributes/password"])
     @ApiOperation(value = "패스워드 초기화", notes = "패스워드 초기화 키를 사용하여 계정의 패스워드를 초기화 합니다.")
     @ApiImplicitParam(value = "OAuth2 엑세스 토큰", name = "Authorization", required = true, paramType = "header", example = "Bearer xxxxxxxxxx")
     @ApiResponses(value = [
