@@ -13,13 +13,15 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ExceptionHandler
+import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.PutMapping
+import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
+@RequestMapping(value = ["/api/accounts"])
 @Api(value = "유저 계정 인증 API 엔드 포인트")
 class UserCredentialsAPIEndpoint @Autowired constructor(
     private val service: UserCredentialsService
@@ -28,7 +30,7 @@ class UserCredentialsAPIEndpoint @Autowired constructor(
     @set:[Autowired Qualifier("userExceptionTranslator")]
     lateinit var translator: ExceptionTranslator<ErrorMessage<Any>>
 
-    @PutMapping(value = ["/api/accounts/attributes/active"])
+    @PatchMapping(value = ["/attributes/active"])
     @ApiOperation(value = "계정 활성화", notes = "처음 계정을 등록할 시 할당 받은 계정 활성화 키를 이용하여 계정을 활성화 시킵니다.")
     @ApiImplicitParam(value = "OAuth2 엑세스 토큰", name = "Authorization", required = true, paramType = "header", example = "Bearer xxxxxxxxxx")
     @ApiResponses(value = [
@@ -41,7 +43,7 @@ class UserCredentialsAPIEndpoint @Autowired constructor(
         @ApiParam(value = "계정 활성화 키", required = true, example = "xxxxxxxx") @RequestParam credentialsKey: String
     ) = service.accountCredentials(username, credentialsKey)
 
-    @PostMapping(value = ["/api/accounts/{username}/attributes/credentials-key"])
+    @PostMapping(value = ["/{username}/attributes/credentials-key"])
     @ApiOperation(value = "계정 인증키 할당", notes = "계정의 활성화에 필요한 인증키를 할당 합니다.")
     @ApiImplicitParam(value = "OAuth2 엑세스 토큰", name = "Authorization", required = true, paramType = "header", example = "Bearer xxxxxxxxxx")
     @ApiResponses(value = [

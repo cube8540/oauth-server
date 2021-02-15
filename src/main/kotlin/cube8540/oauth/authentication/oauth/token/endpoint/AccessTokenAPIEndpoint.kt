@@ -1,11 +1,11 @@
 package cube8540.oauth.authentication.oauth.token.endpoint
 
+import cube8540.oauth.authentication.error.ExceptionTranslator
+import cube8540.oauth.authentication.error.message.ErrorMessage
 import cube8540.oauth.authentication.oauth.security.OAuth2TokenDetails
 import cube8540.oauth.authentication.oauth.security.OAuth2TokenRevoker
 import cube8540.oauth.authentication.oauth.token.application.AccessTokenReadService
 import cube8540.oauth.authentication.oauth.token.domain.AccessTokenDetailsWithClient
-import cube8540.oauth.authentication.error.ExceptionTranslator
-import cube8540.oauth.authentication.error.message.ErrorMessage
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiImplicitParam
 import io.swagger.annotations.ApiOperation
@@ -19,12 +19,13 @@ import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import java.lang.Exception
 import java.util.*
 
 @RestController
+@RequestMapping(value = ["/api/tokens"])
 @Api(value = "OAuth2 엑세스 토큰 API 엔드 포인트")
 class AccessTokenAPIEndpoint @Autowired constructor(
     private val service: AccessTokenReadService,
@@ -36,7 +37,7 @@ class AccessTokenAPIEndpoint @Autowired constructor(
     @set:[Autowired Qualifier("tokenExceptionTranslator")]
     lateinit var translator: ExceptionTranslator<ErrorMessage<Any>>
 
-    @GetMapping(value = ["/api/tokens"])
+    @GetMapping
     @ApiOperation(value = "OAuth2 토큰 검색", notes = "요청 받은 유저의 엑세스 토큰을 검색 합니다.")
     @ApiImplicitParam(value = "OAuth2 엑세스 토큰", name = "Authorization", required = true, paramType = "header", example = "Bearer xxxxxxxxxx")
     @ApiResponses(value = [
@@ -49,7 +50,7 @@ class AccessTokenAPIEndpoint @Autowired constructor(
         return Collections.singletonMap("tokens", tokens)
     }
 
-    @DeleteMapping(value = ["/api/tokens/{accessToken}"])
+    @DeleteMapping(value = ["/{accessToken}"])
     @ApiOperation(value = "OAuth2 토큰  삭제", notes = "OAuth 토큰을 삭제 합니다.")
     @ApiImplicitParam(value = "OAuth2 엑세스 토큰", name = "Authorization", required = true, paramType = "header", example = "Bearer xxxxxxxxxx")
     @ApiResponses(value = [
