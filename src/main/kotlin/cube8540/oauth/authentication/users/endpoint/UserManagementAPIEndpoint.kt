@@ -19,11 +19,13 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.util.*
 
 @RestController
+@RequestMapping(value = ["/api/accounts"])
 @Api(value = "유저 계정 관리 API 엔드 포인트")
 class UserManagementAPIEndpoint @Autowired constructor(
     private val service: UserManagementService
@@ -32,7 +34,7 @@ class UserManagementAPIEndpoint @Autowired constructor(
     @set:[Autowired Qualifier("userExceptionTranslator")]
     lateinit var translator: ExceptionTranslator<ErrorMessage<Any>>
 
-    @GetMapping(value = ["/api/accounts/{username}"])
+    @GetMapping(value = ["/{username}"])
     @ApiOperation(value = "계정 정보 검색", notes = "요청 받은 계정의 정보를 반환 합니다.")
     @ApiImplicitParam(value = "OAuth2 엑세스 토큰", name = "Authorization", required = true, paramType = "header", example = "Bearer xxxxxxxxxx")
     @ApiResponses(value = [
@@ -42,7 +44,7 @@ class UserManagementAPIEndpoint @Autowired constructor(
     fun getProfile(@ApiParam(name = "username", required = true, example = "username1234") @PathVariable username: String) =
         service.loadUserProfile(username)
 
-    @DeleteMapping(value = ["/api/accounts/{username}"])
+    @DeleteMapping(value = ["/{username}"])
     @ApiOperation(value = "계정 삭제", notes = "요청한 계정을 삭제 합니다.")
     @ApiImplicitParam(value = "OAuth2 엑세스 토큰", name = "Authorization", required = true, paramType = "header", example = "Bearer xxxxxxxxxx")
     @ApiResponses(value = [
@@ -52,7 +54,7 @@ class UserManagementAPIEndpoint @Autowired constructor(
     fun removeProfile(@ApiParam(name = "username", required = true, example = "username1234") @PathVariable username: String) =
         service.removeUser(username)
 
-    @PostMapping(value = ["/api/accounts"])
+    @PostMapping
     @ApiOperation(value = "계정 등록", notes = "새 계정을 등록 합니다.")
     @ApiImplicitParam(value = "OAuth2 엑세스 토큰", name = "Authorization", required = true, paramType = "header", example = "Bearer xxxxxxxxxx")
     @ApiResponses(value = [
@@ -61,7 +63,7 @@ class UserManagementAPIEndpoint @Autowired constructor(
     ])
     fun registerUserAccounts(@RequestBody registerRequest: UserRegisterRequest) = service.registerUser(registerRequest)
 
-    @GetMapping(value = ["/api/accounts/attributes/username"])
+    @GetMapping(value = ["/attributes/username"])
     @ApiOperation(value = "등록된 아이디 갯수 검색", notes = "매개 변수로 받은 아이디의 갯수를 검색 합니다. 주로 아이디 중복 검사에서 사용 합니다.")
     @ApiImplicitParam(value = "OAuth2 엑세스 토큰", name = "Authorization", required = true, paramType = "header", example = "Bearer xxxxxxxxxx")
     @ApiResponses(value = [

@@ -1,12 +1,13 @@
 package cube8540.oauth.authentication.oauth.client.endpoint
 
+import cube8540.oauth.authentication.error.ExceptionTranslator
+import cube8540.oauth.authentication.error.message.ErrorMessage
 import cube8540.oauth.authentication.oauth.client.application.OAuth2ChangeSecretRequest
 import cube8540.oauth.authentication.oauth.client.application.OAuth2ClientManagementService
 import cube8540.oauth.authentication.oauth.client.application.OAuth2ClientModifyRequest
 import cube8540.oauth.authentication.oauth.client.application.OAuth2ClientRegisterRequest
 import cube8540.oauth.authentication.oauth.security.OAuth2ClientDetails
-import cube8540.oauth.authentication.error.ExceptionTranslator
-import cube8540.oauth.authentication.error.message.ErrorMessage
+import io.swagger.annotations.Api
 import io.swagger.annotations.ApiImplicitParam
 import io.swagger.annotations.ApiImplicitParams
 import io.swagger.annotations.ApiOperation
@@ -21,16 +22,19 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import java.lang.Exception
 import java.util.*
 
 @RestController
+@RequestMapping(value = ["/api/clients"])
+@Api(value = "OAuth2 클라이언트 관리 API 엔드 포인트")
 class ClientManagementAPIEndpoint @Autowired constructor(
     @Qualifier("defaultOAuth2ClientManagementService")
     private val service: OAuth2ClientManagementService
@@ -45,14 +49,14 @@ class ClientManagementAPIEndpoint @Autowired constructor(
 
     var clientPageSize: Int = DEFAULT_CLIENT_PAGE_SIZE
 
-    @GetMapping(value = ["/api/clients/attributes/client-id"])
+    @GetMapping(value = ["/attributes/client-id"])
     @ApiOperation(value = "클라이언트 아이디 갯수 검색", notes = "저장소에 저장된 클라이언트 아이디의 갯수를 검색 합니다. 주로 클라이언트 아이디 중복 검사에서 사용 합니다.")
     fun countClientId(@ApiParam(value = "클라이언트 아이디", required = true, example = "client-id") @RequestParam clientId: String): Map<String, Long> {
         val count = service.countClient(clientId)
         return Collections.singletonMap("count", count)
     }
 
-    @GetMapping(value = ["/api/clients"])
+    @GetMapping
     @ApiOperation(value = "등록된 클라이언트 검색", notes = "요청한 소유자에게 등록된 클라이언트를 모두 반환 합니다.")
     @ApiImplicitParams(value = [
         ApiImplicitParam(value = "OAuth2 엑세스 토큰", name = "Authorization", required = true, paramType = "header", example = "Bearer xxxxxxxxxx"),
@@ -69,7 +73,7 @@ class ClientManagementAPIEndpoint @Autowired constructor(
         return service.loadClientDetails(requestParameter["owner"]!!, pageable)
     }
 
-    @PostMapping(value = ["/api/clients"])
+    @PostMapping
     @ApiOperation(value = "새 클라이언트 등록", notes = "새 클라이언트를 저장소에 등록합니다. 등록된 클라이언트를 이용해 앞으로 OAuth2 토큰 발급을 할 수 있습니다.")
     @ApiImplicitParam(value = "OAuth2 엑세스 토큰", name = "Authorization", required = true, paramType = "header", example = "Bearer xxxxxxxxxx")
     @ApiResponses(value = [
@@ -78,7 +82,7 @@ class ClientManagementAPIEndpoint @Autowired constructor(
     ])
     fun registerNewClient(@RequestBody registerRequest: OAuth2ClientRegisterRequest): OAuth2ClientDetails = service.registerNewClient(registerRequest)
 
-    @GetMapping(value = ["/api/clients/{clientId}"])
+    @GetMapping(value = ["/{clientId}"])
     @ApiOperation(value = "클라이언트 정보 검색", notes = "요청한 클라이언트의 정보를 검색 합니다.")
     @ApiImplicitParam(value = "OAuth2 엑세스 토큰", name = "Authorization", required = true, paramType = "header", example = "Bearer xxxxxxxxxx")
     @ApiResponses(value = [
@@ -88,7 +92,7 @@ class ClientManagementAPIEndpoint @Autowired constructor(
     fun client(@ApiParam(value = "검색할 클라이언트 아이디", required = true, example = "oauth-id") @PathVariable clientId: String): OAuth2ClientDetails =
         service.loadClientDetails(clientId)
 
-    @PutMapping(value = ["/api/clients/{clientId}"])
+    @PutMapping(value = ["/{clientId}"])
     @ApiOperation(value = "클라이언트 수정", notes = "등록된 클라이언트를 수정 합니다.")
     @ApiImplicitParam(value = "OAuth2 엑세스 토큰", name = "Authorization", required = true, paramType = "header", example = "Bearer xxxxxxxxxx")
     @ApiResponses(value = [
@@ -101,7 +105,7 @@ class ClientManagementAPIEndpoint @Autowired constructor(
         @RequestBody modifyRequest: OAuth2ClientModifyRequest
     ) = service.modifyClient(clientId, modifyRequest)
 
-    @PutMapping(value = ["/api/clients/{clientId}/attributes/secret"])
+    @PatchMapping(value = ["/{clientId}/attributes/secret"])
     @ApiOperation(value = "클라이언트 패스워드 수정", notes = "등록된 클라이언트의 패스워드를 수정 합니다.")
     @ApiImplicitParam(value = "OAuth2 엑세스 토큰", name = "Authorization", required = true, paramType = "header", example = "Bearer xxxxxxxxxx")
     @ApiResponses(value = [
@@ -114,7 +118,7 @@ class ClientManagementAPIEndpoint @Autowired constructor(
         @RequestBody changeRequest: OAuth2ChangeSecretRequest
     ) = service.changeSecret(clientId, changeRequest)
 
-    @DeleteMapping(value = ["/api/clients/{clientId}"])
+    @DeleteMapping(value = ["/{clientId}"])
     @ApiOperation(value = "클라이언트 삭제", notes = "등록된 클라이언트를 삭제 합니다.")
     @ApiImplicitParam(value = "OAuth2 엑세스 토큰", name = "Authorization", required = true, paramType = "header", example = "Bearer xxxxxxxxxx")
     @ApiResponses(value = [
