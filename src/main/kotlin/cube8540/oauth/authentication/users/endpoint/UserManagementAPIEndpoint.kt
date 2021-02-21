@@ -61,7 +61,7 @@ class UserManagementAPIEndpoint @Autowired constructor(
         ApiResponse(code = 400, message = "요청하신 아이디가 중복 되었거나, 매개 변수의 형식이 옳바르지 않습니다."),
         ApiResponse(code = 500, message = "서버에서 알 수 없는 에러가 발생 했습니다.")
     ])
-    fun registerUserAccounts(@RequestBody registerRequest: UserRegisterRequest) = service.registerUser(registerRequest)
+    fun registerUserAccount(@RequestBody registerRequest: UserRegisterRequest) = service.registerUser(registerRequest)
 
     @GetMapping(value = ["/attributes/username"])
     @ApiOperation(value = "등록된 아이디 갯수 검색", notes = "매개 변수로 받은 아이디의 갯수를 검색 합니다. 주로 아이디 중복 검사에서 사용 합니다.")

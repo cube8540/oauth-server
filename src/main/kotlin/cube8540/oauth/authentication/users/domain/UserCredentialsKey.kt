@@ -11,7 +11,7 @@ data class UserCredentialsKey(var keyValue: String) {
 
     companion object {
         @JvmStatic
-        protected var clock: Clock = Clock.system(AuthenticationApplication.DEFAULT_TIME_ZONE.toZoneId())
+        internal var clock: Clock = Clock.system(AuthenticationApplication.DEFAULT_TIME_ZONE.toZoneId())
     }
 
     fun matches(key: String): UserKeyMatchedResult = when {
