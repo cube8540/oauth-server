@@ -2,7 +2,7 @@ package cube8540.oauth.authentication.resource.domain
 
 enum class ResourceMethod {
 
-    GET, POST, PUT, DELETE, ALL;
+    GET, POST, PUT, DELETE, PATCH, ALL;
 
     companion object {
         @JvmStatic
@@ -11,6 +11,7 @@ enum class ResourceMethod {
             "post" -> POST
             "put" -> PUT
             "delete" -> DELETE
+            "patch" -> PATCH
             else -> ALL
         }
     }
