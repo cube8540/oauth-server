@@ -98,11 +98,11 @@ class DefaultUserPasswordServiceTest {
 
         @Test
         fun `password credentials key is expired`() {
-            val user: User = mockk(relaxed = true)
-            val key: UserCredentialsKey = mockk()
-
-            every { key.matches("key") } returns UserKeyMatchedResult.EXPIRED
-            every { user.passwordCredentialsKey } returns key
+            val user: User = mockk(relaxed = true) {
+                every { passwordCredentialsKey } returns mockk {
+                    every { matches("key") } returns UserKeyMatchedResult.EXPIRED
+                }
+            }
             every { repository.findById(Username("username")) } returns Optional.of(user)
 
             val result = service.validateCredentialsKey("username", "key")
@@ -111,11 +111,11 @@ class DefaultUserPasswordServiceTest {
 
         @Test
         fun `password credentials key is not matches`() {
-            val user: User = mockk(relaxed = true)
-            val key: UserCredentialsKey = mockk()
-
-            every { key.matches("key") } returns UserKeyMatchedResult.NOT_MATCHED
-            every { user.passwordCredentialsKey } returns key
+            val user: User = mockk(relaxed = true) {
+                every { passwordCredentialsKey } returns mockk {
+                    every { matches("key") } returns UserKeyMatchedResult.NOT_MATCHED
+                }
+            }
             every { repository.findById(Username("username")) } returns Optional.of(user)
 
             val result = service.validateCredentialsKey("username", "key")
@@ -134,11 +134,11 @@ class DefaultUserPasswordServiceTest {
 
         @Test
         fun `password credentials key is matches`() {
-            val user: User = mockk(relaxed = true)
-            val key: UserCredentialsKey = mockk()
-
-            every { key.matches("key") } returns UserKeyMatchedResult.MATCHED
-            every { user.passwordCredentialsKey } returns key
+            val user: User = mockk(relaxed = true) {
+                every { passwordCredentialsKey } returns mockk {
+                    every { matches("key") } returns UserKeyMatchedResult.MATCHED
+                }
+            }
             every { repository.findById(Username("username")) } returns Optional.of(user)
 
             val result = service.validateCredentialsKey("username", "key")

@@ -1,30 +1,15 @@
 package cube8540.oauth.authentication.user.domain
 
-import cube8540.oauth.authentication.users.domain.ApprovalAuthority
-import cube8540.oauth.authentication.users.domain.Uid
-import cube8540.oauth.authentication.users.domain.User
-import cube8540.oauth.authentication.users.domain.UserAuthorizationException
-import cube8540.oauth.authentication.users.domain.UserCredentialsKey
-import cube8540.oauth.authentication.users.domain.UserCredentialsKeyGenerator
-import cube8540.oauth.authentication.users.domain.UserErrorCodes
-import cube8540.oauth.authentication.users.domain.UserInvalidException
-import cube8540.oauth.authentication.users.domain.UserKeyMatchedResult
-import cube8540.oauth.authentication.users.domain.UserUidGenerator
-import cube8540.oauth.authentication.users.domain.UserValidatorFactory
+import cube8540.oauth.authentication.users.domain.*
 import cube8540.validator.core.ValidationError
 import cube8540.validator.core.ValidationRule
 import cube8540.validator.core.Validator
 import io.mockk.every
 import io.mockk.mockk
-import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatCode
-import org.assertj.core.api.Assertions.catchThrowable
-import org.junit.jupiter.api.MethodOrderer
+import org.assertj.core.api.Assertions.*
 import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.TestMethodOrder
 import org.springframework.security.crypto.password.PasswordEncoder
 
 class UserTest {
@@ -43,10 +28,10 @@ class UserTest {
 
         @Test
         fun `user data is invalid`() {
-            val rule = mockk<ValidationRule<User>>()
-
-            every { rule.isValid(user) } returns false
-            every { rule.error() } returns ValidationError("username", "test")
+            val rule = mockk<ValidationRule<User>> {
+                every { isValid(user) } returns false
+                every { error() } returns ValidationError("username", "test")
+            }
             every { userValidatorFactory.createValidator(user) } returns Validator.of(user).registerRule(rule)
 
             val thrown = catchThrowable { user.validation(userValidatorFactory) }
@@ -55,9 +40,9 @@ class UserTest {
 
         @Test
         fun `user data is allowed`() {
-            val rule = mockk<ValidationRule<User>>()
-
-            every { rule.isValid(user) } returns true
+            val rule = mockk<ValidationRule<User>> {
+                every { isValid(user) } returns true
+            }
             every { userValidatorFactory.createValidator(user) } returns Validator.of(user).registerRule(rule)
 
             assertThatCode { user.validation(userValidatorFactory) }.doesNotThrowAnyException()
@@ -70,8 +55,9 @@ class UserTest {
         private val encoder = mockk<PasswordEncoder>()
 
         init {
-            val uidGenerator = mockk<UserUidGenerator>()
-            every { uidGenerator.generateUid() } returns Uid("UID")
+            val uidGenerator = mockk<UserUidGenerator> {
+                every { generateUid() } returns Uid("UID")
+            }
 
             this.user = User(uidGenerator, "username", "password")
         }
@@ -90,17 +76,18 @@ class UserTest {
         private val user: User
 
         init {
-            val uidGenerator = mockk<UserUidGenerator>()
-            every { uidGenerator.generateUid() } returns Uid("UID")
+            val uidGenerator = mockk<UserUidGenerator> {
+                every { generateUid() } returns Uid("UID")
+            }
 
             this.user = User(uidGenerator, "username", "password")
         }
 
         @Test
         fun `existing password is not equal`() {
-            val encoder = mockk<PasswordEncoder>()
-
-            every { encoder.matches("existingPassword", "password") } returns false
+            val encoder = mockk<PasswordEncoder> {
+                every { matches("existingPassword", "password") } returns false
+            }
 
             val thrown = catchThrowable { user.changePassword("existingPassword", "newPassword", encoder) }
             assertThat(thrown).isInstanceOf(UserAuthorizationException::class.java)
@@ -109,9 +96,9 @@ class UserTest {
 
         @Test
         fun `change password successful`() {
-            val encoder = mockk<PasswordEncoder>()
-
-            every { encoder.matches("existingPassword", "password") } returns true
+            val encoder = mockk<PasswordEncoder> {
+                every { matches("existingPassword", "password") } returns true
+            }
 
             user.changePassword("existingPassword", "newPassword", encoder)
             assertThat(user.password).isEqualTo("newPassword")
@@ -125,9 +112,9 @@ class UserTest {
         private val user: User
 
         init {
-            val uidGenerator = mockk<UserUidGenerator>()
-
-            every { uidGenerator.generateUid() } returns Uid("UID")
+            val uidGenerator = mockk<UserUidGenerator> {
+                every { generateUid() } returns Uid("UID")
+            }
             every { generator.generateKey() } returns credentialsKey
 
             this.user = User(uidGenerator, "username", "password")
@@ -136,6 +123,7 @@ class UserTest {
         @Test
         fun `generate credentials key for user`() {
             user.generateCredentialsKey(generator)
+
             assertThat(user.credentialsKey).isEqualTo(credentialsKey)
         }
 
@@ -164,9 +152,9 @@ class UserTest {
         private val user: User
 
         init {
-            val uidGenerator = mockk<UserUidGenerator>()
-
-            every { uidGenerator.generateUid() } returns Uid("UID")
+            val uidGenerator = mockk<UserUidGenerator> {
+                every { generateUid() } returns Uid("UID")
+            }
             every { generator.generateKey() } returns credentialsKey
 
             this.user = User(uidGenerator, "username", "password")
@@ -220,9 +208,9 @@ class UserTest {
         private val user: User
 
         init {
-            val uidGenerator = mockk<UserUidGenerator>()
-
-            every { uidGenerator.generateUid() } returns Uid("UID")
+            val uidGenerator = mockk<UserUidGenerator> {
+                every { generateUid() } returns Uid("UID")
+            }
             every { generator.generateKey() } returns credentialsKey
 
             this.user = User(uidGenerator, "username", "password")
@@ -243,9 +231,9 @@ class UserTest {
         private val user: User
 
         init {
-            val uidGenerator = mockk<UserUidGenerator>()
-
-            every { uidGenerator.generateUid() } returns Uid("UID")
+            val uidGenerator = mockk<UserUidGenerator> {
+                every { generateUid() } returns Uid("UID")
+            }
             every { generator.generateKey() } returns credentialsKey
 
             this.user = User(uidGenerator, "username", "password")
@@ -297,9 +285,9 @@ class UserTest {
         private val user: User
 
         init {
-            val uidGenerator = mockk<UserUidGenerator>()
-
-            every { uidGenerator.generateUid() } returns Uid("UID")
+            val uidGenerator = mockk<UserUidGenerator> {
+                every { generateUid() } returns Uid("UID")
+            }
 
             this.user = User(uidGenerator, "username", "password")
         }
@@ -318,9 +306,9 @@ class UserTest {
         private val user: User
 
         init {
-            val uidGenerator = mockk<UserUidGenerator>()
-
-            every { uidGenerator.generateUid() } returns Uid("UID")
+            val uidGenerator = mockk<UserUidGenerator> {
+                every { generateUid() } returns Uid("UID")
+            }
 
             this.user = User(uidGenerator, "username", "password")
         }
