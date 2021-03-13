@@ -1,5 +1,6 @@
 package cube8540.oauth.authentication.user.application
 
+import cube8540.oauth.authentication.UnitTestValidationException
 import cube8540.oauth.authentication.error.message.ErrorCodes
 import cube8540.oauth.authentication.users.application.DefaultUserManagementService
 import cube8540.oauth.authentication.users.application.UserRegisterRequest
@@ -93,12 +94,12 @@ class DefaultUserManagementServiceTest {
             every { repository.countByUsername(Username("username")) } returns 0
             every { validatorFactory.createValidator(any()) } returns mockk {
                 every { result } returns mockk {
-                    every { hasErrorThrows(any()) } throws TestUserException()
+                    every { hasErrorThrows(any()) } throws UnitTestValidationException()
                 }
             }
 
             val thrown = catchThrowable { service.registerUser(registerRequest) }
-            assertThat(thrown).isInstanceOf(TestUserException::class.java)
+            assertThat(thrown).isInstanceOf(UnitTestValidationException::class.java)
         }
 
         @Test
@@ -147,6 +148,4 @@ class DefaultUserManagementServiceTest {
             verify { repository.delete(user) }
         }
     }
-
-    inner class TestUserException: RuntimeException()
 }
