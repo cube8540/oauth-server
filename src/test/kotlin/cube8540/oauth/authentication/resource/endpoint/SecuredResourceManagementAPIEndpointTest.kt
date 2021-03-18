@@ -1,9 +1,6 @@
 package cube8540.oauth.authentication.resource.endpoint
 
-import cube8540.oauth.authentication.resource.application.SecuredResourceDetails
-import cube8540.oauth.authentication.resource.application.SecuredResourceManagementService
-import cube8540.oauth.authentication.resource.application.SecuredResourceModifyRequest
-import cube8540.oauth.authentication.resource.application.SecuredResourceRegisterRequest
+import cube8540.oauth.authentication.resource.application.*
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -29,7 +26,7 @@ class SecuredResourceManagementAPIEndpointTest {
 
     @Test
     fun `lookup secured resources`() {
-        val resources: List<SecuredResourceDetails> = mockk()
+        val resources: List<SecuredResourceEntry> = mockk()
 
         every { service.getResources() } returns resources
 
