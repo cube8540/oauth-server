@@ -2,10 +2,7 @@ package cube8540.oauth.authentication.oauth.client.endpoint
 
 import cube8540.oauth.authentication.error.ExceptionTranslator
 import cube8540.oauth.authentication.error.message.ErrorMessage
-import cube8540.oauth.authentication.oauth.client.application.OAuth2ChangeSecretRequest
-import cube8540.oauth.authentication.oauth.client.application.OAuth2ClientManagementService
-import cube8540.oauth.authentication.oauth.client.application.OAuth2ClientModifyRequest
-import cube8540.oauth.authentication.oauth.client.application.OAuth2ClientRegisterRequest
+import cube8540.oauth.authentication.oauth.client.application.*
 import cube8540.oauth.authentication.oauth.security.OAuth2ClientDetails
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiImplicitParam
@@ -66,7 +63,7 @@ class ClientManagementAPIEndpoint @Autowired constructor(
     @ApiResponses(value = [
         ApiResponse(code = 500, message = "서버에서 알 수 없는 에러가 발생 했습니다.")
     ])
-    fun clients(@ApiParam(hidden = true) @RequestParam requestParameter: Map<String, String>): Page<OAuth2ClientDetails> {
+    fun clients(@ApiParam(hidden = true) @RequestParam requestParameter: Map<String, String>): Page<OAuth2ClientEntry> {
         val page = requestParameter["page"]?.toInt() ?: 0
         val pageable = PageRequest.of(page, clientPageSize)
 
