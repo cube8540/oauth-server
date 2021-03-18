@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.stream.Collectors
 
 @Service
-class DefaultScopeDetailsService @Autowired constructor(private val repository: OAuth2ScopeRepository): OAuth2ScopeManagementService {
+class DefaultScopeManagementService @Autowired constructor(private val repository: OAuth2ScopeRepository): OAuth2ScopeManagementService {
 
     @Transactional(readOnly = true)
     override fun countByScopeId(scopeId: String): Long = repository.countByCode(AuthorityCode(scopeId))

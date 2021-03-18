@@ -44,7 +44,7 @@ class ScopeManagementAPIEndpoint @Autowired constructor(
         ApiResponse(code = 403, message = "로그인이 되어 있지 않습니다."),
         ApiResponse(code = 500, message = "서버에서 알 수 없는 에러가 발생 했습니다.")
     ])
-    fun scope(): Map<String, Collection<AuthorityDetails>> {
+    fun scopes(): Map<String, Collection<AuthorityDetails>> {
         val scopes = managementService.loadScopes()
         return Collections.singletonMap("scopes", scopes)
     }
