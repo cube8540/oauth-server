@@ -2,29 +2,15 @@ package cube8540.oauth.authentication.resource.endpoint
 
 import cube8540.oauth.authentication.error.ExceptionTranslator
 import cube8540.oauth.authentication.error.message.ErrorMessage
-import cube8540.oauth.authentication.resource.application.SecuredResourceDetails
+import cube8540.oauth.authentication.resource.application.SecuredResourceEntry
 import cube8540.oauth.authentication.resource.application.SecuredResourceManagementService
 import cube8540.oauth.authentication.resource.application.SecuredResourceModifyRequest
 import cube8540.oauth.authentication.resource.application.SecuredResourceRegisterRequest
-import io.swagger.annotations.Api
-import io.swagger.annotations.ApiImplicitParam
-import io.swagger.annotations.ApiOperation
-import io.swagger.annotations.ApiParam
-import io.swagger.annotations.ApiResponse
-import io.swagger.annotations.ApiResponses
+import io.swagger.annotations.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.ExceptionHandler
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.PutMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import java.util.*
 
 @RestController
@@ -50,7 +36,7 @@ class SecuredResourceManagementAPIEndpoint @Autowired constructor(private val se
         ApiResponse(code = 403, message = "로그인이 되어 있지 않습니다."),
         ApiResponse(code = 500, message = "서버에서 알 수 없는 에러가 발생 했습니다.")
     ])
-    fun getResources(): Map<String, List<SecuredResourceDetails>> {
+    fun getResources(): Map<String, List<SecuredResourceEntry>> {
         val resources = service.getResources()
         return Collections.singletonMap("resources", resources)
     }

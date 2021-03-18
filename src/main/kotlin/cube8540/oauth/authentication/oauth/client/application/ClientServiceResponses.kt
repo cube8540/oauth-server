@@ -4,11 +4,42 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import cube8540.oauth.authentication.security.AuthorityCode
 import cube8540.oauth.authentication.oauth.client.domain.OAuth2Client
 import cube8540.oauth.authentication.oauth.security.OAuth2ClientDetails
+import io.swagger.annotations.ApiModel
+import io.swagger.annotations.ApiModelProperty
 import org.springframework.security.core.CredentialsContainer
 import org.springframework.security.oauth2.core.AuthorizationGrantType
 import java.net.URI
 import java.time.Duration
 import java.util.*
+
+@ApiModel(value = "OAuth2 클라이언트 엔트리")
+data class OAuth2ClientEntry(
+    @get:ApiModelProperty(value = "클라이언트 아이디", required = true, example = "client-id")
+    val clientId: String,
+
+    @get:ApiModelProperty(value = "클라이언트명", required = true, example = "client name")
+    val clientName: String?,
+
+    @get:ApiModelProperty(value = "클라이언트 소유자", required = true, example = "username1234")
+    val owner: String?,
+
+    @get:ApiModelProperty(value = "클라이언트 엑세스 토큰 유효 시간", required = true, example = "600000000000")
+    val accessTokenValiditySeconds: Int?,
+
+    @get:ApiModelProperty(value = "클라이언트 리플래시 토큰 유효 시간", required = true, example = "7200000000000")
+    val refreshTokenValiditySeconds: Int?
+) {
+    companion object {
+        @JvmStatic
+        fun of(client: OAuth2Client): OAuth2ClientEntry = OAuth2ClientEntry(
+            clientId = client.clientId.value,
+            clientName = client.clientName,
+            owner = client.owner?.value,
+            accessTokenValiditySeconds =  (client.accessTokenValidity?.let(Duration::toSeconds) ?: 0L).toInt(),
+            refreshTokenValiditySeconds = (client.refreshTokenValidity?.let(Duration::toSeconds) ?: 0L).toInt()
+        )
+    }
+}
 
 data class DefaultOAuth2ClientDetails(
     override val clientId: String,
