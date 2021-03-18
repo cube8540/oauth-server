@@ -8,7 +8,6 @@ interface SecuredResourceRepository: JpaRepository<SecuredResource, SecuredResou
 
     fun countByResourceId(resourceId: SecuredResourceId): Long
 
-    @EntityGraph(attributePaths = ["authorities"], type = EntityGraph.EntityGraphType.LOAD)
     override fun findAll(): MutableList<SecuredResource>
 
     @EntityGraph(attributePaths = ["authorities"], type = EntityGraph.EntityGraphType.LOAD)

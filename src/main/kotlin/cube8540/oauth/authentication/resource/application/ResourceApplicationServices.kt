@@ -4,7 +4,7 @@ interface SecuredResourceReadService {
 
     fun count(resourceId: String): Long
 
-    fun getResources(): List<SecuredResourceDetails>
+    fun getResources(): List<SecuredResourceEntry>
 }
 
 interface SecuredResourceManagementService: SecuredResourceReadService {
