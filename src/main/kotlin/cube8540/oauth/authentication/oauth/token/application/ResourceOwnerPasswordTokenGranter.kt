@@ -51,7 +51,6 @@ class ResourceOwnerPasswordTokenGranter @Autowired constructor(
             issuedAt = LocalDateTime.now(clock)
         )
         accessToken.generateRefreshToken(refreshTokenGenerator(), extractRefreshTokenExpiration(clientDetails))
-        accessToken.generateComposeUniqueKey(composeUniqueKeyGenerator)
         return accessToken
     }
 
