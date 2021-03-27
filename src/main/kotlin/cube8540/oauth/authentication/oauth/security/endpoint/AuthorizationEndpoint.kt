@@ -48,7 +48,7 @@ class AuthorizationEndpoint @Autowired constructor(
     @Qualifier("defaultOAuth2ClientDetailsService")
     private val clientDetailsService: OAuth2ClientDetailsService,
 
-    @Qualifier("defaultScopeDetailsService")
+    @Qualifier("defaultScopeManagementService")
     private val scopeDetailsService: AuthorityDetailsService,
 
     private val responseEnhancer: AuthorizationResponseEnhancer,
