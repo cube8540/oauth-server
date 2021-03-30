@@ -49,7 +49,7 @@ class AuthorizationCodeResponseEnhancerTest {
     }
 
     @Test
-    fun `request has not state attribute`() {
+    fun `request not has state attribute`() {
         val authorizationCode: AuthorizationCode = mockk {
             every { value } returns "authorizationCode"
         }
@@ -85,7 +85,7 @@ class AuthorizationCodeResponseEnhancerTest {
     }
 
     @Test
-    fun `has not next enhancer`() {
+    fun `not has next enhancer`() {
         val authorizationCode: AuthorizationCode = mockk {
             every { value } returns "authorizationCode"
         }

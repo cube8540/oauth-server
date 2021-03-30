@@ -34,7 +34,7 @@ class AuthorizationImplicitResponseEnhancerTest {
     }
 
     @Test
-    fun `request response type is token and request has not state attribute`() {
+    fun `request response type is token and request not has state attribute`() {
         val clientCaptor = slot<OAuth2ClientDetails>()
         val clientDetails: OAuth2ClientDetails = mockk()
         val tokenRequestCaptor = slot<OAuth2TokenRequest>()
@@ -110,7 +110,7 @@ class AuthorizationImplicitResponseEnhancerTest {
     }
 
     @Test
-    fun `has not next enhancer`() {
+    fun `not has next enhancer`() {
         val clientCaptor = slot<OAuth2ClientDetails>()
         val clientDetails: OAuth2ClientDetails = mockk()
         val tokenRequestCaptor = slot<OAuth2TokenRequest>()
