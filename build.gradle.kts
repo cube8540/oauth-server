@@ -27,7 +27,7 @@ jacoco {
 }
 
 group = "cube8540.oauth"
-version = "2.8.0.HOTFIX"
+version = "2.8.1"
 
 configurations {
     compileOnly {
@@ -100,16 +100,11 @@ dependencies {
     implementation("com.navercorp.lucy:lucy-xss:1.6.3")
     implementation("com.navercorp.lucy:lucy-xss-servlet:2.0.1")
 
-    compileOnly("org.projectlombok:lombok")
-    annotationProcessor("org.projectlombok:lombok")
-    testCompileOnly("org.projectlombok:lombok")
-    testAnnotationProcessor("org.projectlombok:lombok")
-
     implementation("org.apache.commons:commons-text:1.8")
     implementation("cube8540.validator:validator-core:1.1.1")
 
-    implementation("org.mockito:mockito-inline:2.21.0")
-
+    testImplementation("io.mockk:mockk:1.10.6")
+    testImplementation("org.assertj:assertj-core:3.11.1")
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
     }

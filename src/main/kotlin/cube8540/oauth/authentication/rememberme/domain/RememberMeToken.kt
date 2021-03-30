@@ -39,7 +39,7 @@ class RememberMeToken private constructor(
     companion object {
         @JvmStatic
         @Transient
-        protected var clock: Clock = AuthenticationApplication.DEFAULT_CLOCK
+        internal var clock: Clock = AuthenticationApplication.DEFAULT_CLOCK
 
         @Transient
         const val tokenValiditySeconds = 1209600.toLong()

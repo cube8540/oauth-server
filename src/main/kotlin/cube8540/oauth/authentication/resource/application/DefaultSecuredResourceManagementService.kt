@@ -1,18 +1,12 @@
 package cube8540.oauth.authentication.resource.application
 
-import cube8540.oauth.authentication.resource.domain.ResourceMethod
+import cube8540.oauth.authentication.resource.domain.*
 import cube8540.oauth.authentication.resource.domain.ResourceNotFoundException.Companion.instance
-import cube8540.oauth.authentication.resource.domain.ResourceRegisterException
-import cube8540.oauth.authentication.resource.domain.SecuredResource
-import cube8540.oauth.authentication.resource.domain.SecuredResourceId
-import cube8540.oauth.authentication.resource.domain.SecuredResourceRepository
-import cube8540.oauth.authentication.resource.domain.SecuredResourceValidatorFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.net.URI
-import java.util.stream.Collectors
 
 @Service
 class DefaultSecuredResourceManagementService @Autowired constructor(private val repository: SecuredResourceRepository): SecuredResourceManagementService {
@@ -56,8 +50,8 @@ class DefaultSecuredResourceManagementService @Autowired constructor(private val
     override fun count(resourceId: String): Long = repository.countByResourceId(SecuredResourceId(resourceId))
 
     @Transactional(readOnly = true)
-    override fun getResources(): List<SecuredResourceDetails> =
-        repository.findAll().map(DefaultSecuredResourceDetails::of).toList()
+    override fun getResources(): List<SecuredResourceEntry> =
+        repository.findAll().map(SecuredResourceEntry::of).toList()
 
     private fun getResource(resourceId: String): SecuredResource =
         repository.findById(SecuredResourceId(resourceId))

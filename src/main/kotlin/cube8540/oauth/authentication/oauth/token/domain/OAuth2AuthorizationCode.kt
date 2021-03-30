@@ -42,7 +42,7 @@ class OAuth2AuthorizationCode(
     companion object {
         @JvmStatic
         @Transient
-        protected var clock: Clock = AuthenticationApplication.DEFAULT_CLOCK
+        internal var clock: Clock = AuthenticationApplication.DEFAULT_CLOCK
     }
 
     @Id

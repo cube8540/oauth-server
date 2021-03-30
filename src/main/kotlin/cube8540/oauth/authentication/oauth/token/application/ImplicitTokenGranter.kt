@@ -26,7 +26,7 @@ class ImplicitTokenGranter @Autowired constructor(
         if (tokenRequest.username == null) {
             throw InvalidRequestException.invalidRequest("username is required")
         }
-        val accessToken = OAuth2AuthorizedAccessToken(
+        return OAuth2AuthorizedAccessToken(
             tokenIdGenerator = tokenIdGenerator,
             username = PrincipalUsername(tokenRequest.username!!),
             client = OAuth2ClientId(clientDetails.clientId),
@@ -35,7 +35,5 @@ class ImplicitTokenGranter @Autowired constructor(
             tokenGrantType = AuthorizationGrantType.IMPLICIT,
             issuedAt = LocalDateTime.now(clock)
         )
-        accessToken.generateComposeUniqueKey(composeUniqueKeyGenerator)
-        return accessToken
     }
 }

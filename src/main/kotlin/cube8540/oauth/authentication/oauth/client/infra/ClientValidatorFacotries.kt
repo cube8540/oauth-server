@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component
 @Component
 class DefaultOAuth2ClientValidatorFactory: OAuth2ClientValidatorFactory {
 
-    @set:[Autowired Qualifier("defaultScopeDetailsService")]
+    @set:[Autowired Qualifier("defaultScopeManagementService")]
     lateinit var scopeDetailsService: OAuth2ScopeManagementService
 
     override fun createValidator(client: OAuth2Client): Validator<OAuth2Client> {

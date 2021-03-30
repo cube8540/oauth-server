@@ -8,7 +8,7 @@ interface OAuth2ClientManagementService {
 
     fun countClient(clientId: String): Long
 
-    fun loadClientDetails(owner: String, pageable: Pageable): Page<OAuth2ClientDetails>
+    fun loadClientDetails(owner: String, pageable: Pageable): Page<OAuth2ClientEntry>
 
     fun loadClientDetails(clientId: String): OAuth2ClientDetails
 

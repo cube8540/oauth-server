@@ -32,9 +32,9 @@ class DefaultOAuth2ClientManagementService(private val repository: OAuth2ClientR
     override fun countClient(clientId: String): Long = repository.countByClientId(OAuth2ClientId(clientId))
 
     @Transactional(readOnly = true)
-    override fun loadClientDetails(owner: String, pageable: Pageable): Page<OAuth2ClientDetails> = repository
+    override fun loadClientDetails(owner: String, pageable: Pageable): Page<OAuth2ClientEntry> = repository
         .findByOwner(ClientOwner(owner), pageable)
-        .map(DefaultOAuth2ClientDetails::of)
+        .map(OAuth2ClientEntry::of)
 
     @Transactional(readOnly = true)
     override fun loadClientDetails(clientId: String): OAuth2ClientDetails = DefaultOAuth2ClientDetails.of(getClient(clientId))

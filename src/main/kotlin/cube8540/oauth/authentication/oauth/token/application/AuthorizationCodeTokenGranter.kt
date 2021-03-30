@@ -48,7 +48,7 @@ class AuthorizationCodeTokenGranter @Autowired constructor(
 
         val accessToken = makeNewToken(clientDetails, authorizationCode)
         accessToken.generateRefreshToken(refreshTokenGenerator(), extractRefreshTokenExpiration(clientDetails))
-        accessToken.generateComposeUniqueKey(composeUniqueKeyGenerator)
+
         return accessToken
     }
 

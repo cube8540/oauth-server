@@ -1,26 +1,15 @@
 package cube8540.oauth.authentication.oauth.client.domain
 
-import cube8540.oauth.authentication.security.AuthorityCode
 import cube8540.oauth.authentication.oauth.converter.AuthorizationGrantTypeConverter
 import cube8540.oauth.authentication.oauth.converter.RedirectUriConverter
-import org.hibernate.annotations.Fetch
-import org.hibernate.annotations.FetchMode
+import cube8540.oauth.authentication.security.AuthorityCode
 import org.springframework.data.domain.AbstractAggregateRoot
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.oauth2.core.AuthorizationGrantType
 import java.net.URI
 import java.time.Duration
 import java.util.*
-import javax.persistence.AttributeOverride
-import javax.persistence.CollectionTable
-import javax.persistence.Column
-import javax.persistence.Convert
-import javax.persistence.ElementCollection
-import javax.persistence.Embedded
-import javax.persistence.EmbeddedId
-import javax.persistence.Entity
-import javax.persistence.JoinColumn
-import javax.persistence.Table
+import javax.persistence.*
 
 @Entity
 @Table(name = "oauth2_clients")
@@ -41,24 +30,21 @@ class OAuth2Client(
     @Column(name = "client_name", length = 32, nullable = false)
     var clientName: String? = null
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "oauth2_client_redirect_uri", joinColumns = [JoinColumn(name = "client_id", nullable = false)])
     @Column(name = "redirect_uri", length = 128, nullable = false)
     @Convert(converter = RedirectUriConverter::class)
-    @Fetch(FetchMode.JOIN)
     var redirectUris: MutableSet<URI>? = null
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "oauth2_client_grant_type", joinColumns = [JoinColumn(name = "client_id", nullable = false)])
     @Column(name = "grant_type", length = 32, nullable = false)
     @Convert(converter = AuthorizationGrantTypeConverter::class)
-    @Fetch(FetchMode.JOIN)
     var grantTypes: MutableSet<AuthorizationGrantType>? = null
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "oauth2_client_scope", joinColumns = [JoinColumn(name = "client_id", nullable = false)])
     @AttributeOverride(name = "value", column = Column(name = "scope_id", length = 32, nullable = false))
-    @Fetch(FetchMode.JOIN)
     var scopes: MutableSet<AuthorityCode>? = null
 
     @Embedded
