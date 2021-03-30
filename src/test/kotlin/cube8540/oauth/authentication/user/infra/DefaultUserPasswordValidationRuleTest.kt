@@ -59,6 +59,7 @@ class DefaultUserPasswordValidationRuleTest {
         assertThat(rule.isValid(user)).isFalse
     }
 
+    @Test
     fun `password allowed`() {
         every { user.password } returns "Password1234!@#$"
 
