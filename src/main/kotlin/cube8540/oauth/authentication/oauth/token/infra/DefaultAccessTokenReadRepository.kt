@@ -11,7 +11,7 @@ import javax.persistence.EntityManager
 class DefaultAccessTokenReadRepository @Autowired constructor(private val entityManager: EntityManager): OAuth2AccessTokenReadRepository {
 
     companion object {
-        protected const val ACCESS_TOKEN_WITH_CLIENT_BY_USERNAME_QUERY = """
+        internal const val ACCESS_TOKEN_WITH_CLIENT_BY_USERNAME_QUERY = """
                 select new cube8540.oauth.authentication.oauth.token.infra.DefaultAccessTokenDetailsWithClient(token, client)
                 from OAuth2AuthorizedAccessToken token, OAuth2Client client
                 where token.username = :username and token.client.value = client.clientId.value

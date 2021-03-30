@@ -53,9 +53,9 @@ class DefaultAuthorizationCodeGenerator(private val keyLength: Int): Authorizati
 class WithScopeComposeUniqueKeyGenerator: OAuth2ComposeUniqueKeyGenerator {
 
     companion object {
-        protected const val USERNAME_KEY = "username"
-        protected const val CLIENT_KEY = "clientId"
-        protected const val SCOPE_KEY = "scopes"
+        internal const val USERNAME_KEY = "username"
+        internal const val CLIENT_KEY = "clientId"
+        internal const val SCOPE_KEY = "scopes"
     }
 
     override fun generateKey(token: OAuth2AuthorizedAccessToken): OAuth2ComposeUniqueKey {

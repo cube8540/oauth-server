@@ -72,7 +72,7 @@ class OAuth2AuthorizedAccessToken(
     companion object {
         @JvmStatic
         @Transient
-        protected var clock: Clock = AuthenticationApplication.DEFAULT_CLOCK
+        internal var clock: Clock = AuthenticationApplication.DEFAULT_CLOCK
     }
 
     @EmbeddedId

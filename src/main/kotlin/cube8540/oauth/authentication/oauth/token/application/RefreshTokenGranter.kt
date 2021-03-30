@@ -52,7 +52,7 @@ class RefreshTokenGranter @Autowired constructor(
 
         val accessToken = makeNewToken(storedAccessToken, clientDetails, tokenRequest)
         accessToken.generateRefreshToken(refreshTokenGenerator(), extractRefreshTokenExpiration(clientDetails))
-        accessToken.generateComposeUniqueKey(composeUniqueKeyGenerator)
+
         return accessToken
     }
 

@@ -48,7 +48,7 @@ class AuthorizationEndpoint @Autowired constructor(
     @Qualifier("defaultOAuth2ClientDetailsService")
     private val clientDetailsService: OAuth2ClientDetailsService,
 
-    @Qualifier("defaultScopeDetailsService")
+    @Qualifier("defaultScopeManagementService")
     private val scopeDetailsService: AuthorityDetailsService,
 
     private val responseEnhancer: AuthorizationResponseEnhancer,
@@ -98,13 +98,12 @@ class AuthorizationEndpoint @Autowired constructor(
         }
 
         val clientDetails = clientDetailsService.loadClientDetailsByClientId(authorizationRequest.clientId)
-        val redirectUri = redirectResolver.resolveRedirectURI(parameters[AuthorizationRequestKey.REDIRECT_URI], clientDetails)
-        authorizationRequest.redirectUri = redirectUri
-
         if (!requestValidator.validateScopes(clientDetails, authorizationRequest.requestScopes)) {
             throw invalidScope("cannot grant scope")
         }
 
+        val redirectUri = redirectResolver.resolveRedirectURI(parameters[AuthorizationRequestKey.REDIRECT_URI], clientDetails)
+        authorizationRequest.redirectUri = redirectUri
         authorizationRequest.requestScopes = extractRequestScopes(clientDetails, authorizationRequest)
         val requireApprovalScopes = autoApprovalHandler.filterRequiredPermissionScopes(principal, clientDetails,
             authorizationRequest.requestScopes!!)

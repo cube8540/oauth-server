@@ -31,13 +31,13 @@ class OAuth2ClientInitializer @Autowired constructor(
 ): ApplicationInitializer, ApplicationListener<ApplicationReadyEvent> {
 
     companion object {
-        const val USERNAME_KEY = "init-user.username"
+        internal const val USERNAME_KEY = "init-user.username"
 
-        const val CLIENT_ID_KEY = "init-oauth-client.client-id"
-        const val CLIENT_SECRET_KEY = "init-oauth-client.client-secret"
-        const val CLIENT_NAME = "init-oauth-client.client-name"
-        const val CLIENT_GRANT_TYPE_KEY = "init-oauth-client.client-grant-type"
-        const val CLIENT_REDIRECT_URI = "init-oauth-client.client-redirect-uri"
+        internal const val CLIENT_ID_KEY = "init-oauth-client.client-id"
+        internal const val CLIENT_SECRET_KEY = "init-oauth-client.client-secret"
+        internal const val CLIENT_NAME = "init-oauth-client.client-name"
+        internal const val CLIENT_GRANT_TYPE_KEY = "init-oauth-client.client-grant-type"
+        internal const val CLIENT_REDIRECT_URI = "init-oauth-client.client-redirect-uri"
     }
 
     override fun onApplicationEvent(event: ApplicationReadyEvent) = initialize(event.applicationContext.environment)

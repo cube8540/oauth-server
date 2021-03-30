@@ -32,7 +32,6 @@ class ClientCredentialsTokenGranter @Autowired constructor(
         if (allowedRefreshToken) {
             accessToken.generateRefreshToken(refreshTokenGenerator(), extractRefreshTokenExpiration(clientDetails))
         }
-        accessToken.generateComposeUniqueKey(composeUniqueKeyGenerator)
         return accessToken
     }
 
