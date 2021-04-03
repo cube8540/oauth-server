@@ -3,7 +3,7 @@ package cube8540.oauth.authentication.oauth.scope.domain
 import cube8540.oauth.authentication.error.ServiceException
 import cube8540.oauth.authentication.error.ServiceInvalidException
 import cube8540.oauth.authentication.error.message.ErrorCodes
-import cube8540.validator.core.ValidationError
+import io.github.cube8540.validator.core.ValidationError
 
 class ScopeInvalidException(code: String, errors: Collection<ValidationError>): ServiceInvalidException(code, errors) {
     companion object {

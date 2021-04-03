@@ -27,7 +27,7 @@ jacoco {
 }
 
 group = "cube8540.oauth"
-version = "2.8.1"
+version = "2.8.2"
 
 configurations {
     compileOnly {
@@ -101,7 +101,7 @@ dependencies {
     implementation("com.navercorp.lucy:lucy-xss-servlet:2.0.1")
 
     implementation("org.apache.commons:commons-text:1.8")
-    implementation("cube8540.validator:validator-core:1.1.1")
+    implementation("io.github.cube8540:validator-core:1.2.0-RELEASE")
 
     testImplementation("io.mockk:mockk:1.10.6")
     testImplementation("org.assertj:assertj-core:3.11.1")

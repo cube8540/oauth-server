@@ -1,9 +1,9 @@
 package cube8540.oauth.authentication.user.domain
 
 import cube8540.oauth.authentication.users.domain.*
-import cube8540.validator.core.ValidationError
-import cube8540.validator.core.ValidationRule
-import cube8540.validator.core.Validator
+import io.github.cube8540.validator.core.ValidationError
+import io.github.cube8540.validator.core.ValidationRule
+import io.github.cube8540.validator.core.Validator
 import io.mockk.every
 import io.mockk.mockk
 import org.assertj.core.api.Assertions.*

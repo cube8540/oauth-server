@@ -3,8 +3,8 @@ package cube8540.oauth.authentication.users.infra
 import cube8540.oauth.authentication.oauth.error.OAuth2ClientRegistrationException
 import cube8540.oauth.authentication.oauth.security.OAuth2ClientDetailsService
 import cube8540.oauth.authentication.users.domain.User
-import cube8540.validator.core.ValidationError
-import cube8540.validator.core.ValidationRule
+import io.github.cube8540.validator.core.ValidationError
+import io.github.cube8540.validator.core.ValidationRule
 import java.util.regex.Pattern
 
 class DefaultUsernameValidationRule(private val property: String, private val message: String): ValidationRule<User> {

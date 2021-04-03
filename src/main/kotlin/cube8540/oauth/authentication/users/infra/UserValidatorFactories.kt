@@ -4,7 +4,7 @@ import cube8540.oauth.authentication.oauth.security.OAuth2ClientDetailsService
 import cube8540.oauth.authentication.users.application.DefaultUserApprovalAuthorityService
 import cube8540.oauth.authentication.users.domain.User
 import cube8540.oauth.authentication.users.domain.UserValidatorFactory
-import cube8540.validator.core.Validator
+import io.github.cube8540.validator.core.Validator
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component

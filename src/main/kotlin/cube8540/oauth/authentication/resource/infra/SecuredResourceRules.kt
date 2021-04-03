@@ -4,8 +4,8 @@ import cube8540.oauth.authentication.resource.domain.AccessibleAuthority
 import cube8540.oauth.authentication.security.AuthorityDetailsService
 import cube8540.oauth.authentication.resource.domain.SecuredResource
 import cube8540.oauth.authentication.security.AuthorityDetails
-import cube8540.validator.core.ValidationError
-import cube8540.validator.core.ValidationRule
+import io.github.cube8540.validator.core.ValidationError
+import io.github.cube8540.validator.core.ValidationRule
 import java.util.*
 import java.util.stream.Collectors
 
