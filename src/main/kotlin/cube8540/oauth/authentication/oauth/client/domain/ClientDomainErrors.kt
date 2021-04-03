@@ -3,7 +3,7 @@ package cube8540.oauth.authentication.oauth.client.domain
 import cube8540.oauth.authentication.error.ServiceException
 import cube8540.oauth.authentication.error.ServiceInvalidException
 import cube8540.oauth.authentication.error.message.ErrorCodes
-import cube8540.validator.core.ValidationError
+import io.github.cube8540.validator.core.ValidationError
 
 class ClientErrorCodes: ErrorCodes() {
     companion object {
