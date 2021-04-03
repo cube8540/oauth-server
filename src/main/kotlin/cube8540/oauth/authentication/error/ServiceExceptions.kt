@@ -1,7 +1,7 @@
 package cube8540.oauth.authentication.error
 
-import cube8540.validator.core.ValidationError
-import cube8540.validator.core.exception.ValidateException
+import io.github.cube8540.validator.core.ValidationError
+import io.github.cube8540.validator.core.exception.ValidateException
 
 open class ServiceException(val code: String, message: String): RuntimeException(message)
 

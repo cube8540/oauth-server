@@ -1,6 +1,6 @@
 package cube8540.oauth.authentication.users.domain
 
-import cube8540.validator.core.Validator
+import io.github.cube8540.validator.core.Validator
 
 interface UserCredentialsKeyGenerator {
     fun generateKey(): UserCredentialsKey
