@@ -1,6 +1,5 @@
 package cube8540.oauth.authentication.oauth.security.endpoint
 
-import cube8540.oauth.authentication.AuthenticationApplication
 import cube8540.oauth.authentication.oauth.AccessTokenIntrospectionKey
 import cube8540.oauth.authentication.oauth.security.OAuth2AccessTokenDetails
 import io.mockk.every
@@ -25,10 +24,8 @@ class DefaultOAuth2AccessTokenIntrospectionConverterTest {
         }
 
         val result = converter.convertAccessToken(accessToken)
-        val expectedExpiration = LocalDateTime.of(2020, 2, 1, 22, 52).
-            atZone(AuthenticationApplication.DEFAULT_TIME_ZONE.toZoneId()).toEpochSecond()
-        assertThat(result[AccessTokenIntrospectionKey.CLIENT_ID]).isEqualTo("clientId")
-        assertThat(result[AccessTokenIntrospectionKey.EXPIRATION]).isEqualTo(expectedExpiration)
+        assertThat(result[AccessTokenIntrospectionKey.CLIENT_ID]).isNull()
+        assertThat(result[AccessTokenIntrospectionKey.EXPIRATION]).isNull()
         assertThat(result[AccessTokenIntrospectionKey.SCOPE]).isEqualTo("scope-1 scope-2 scope-3")
         assertThat(result[AccessTokenIntrospectionKey.USERNAME]).isNull()
     }
@@ -45,12 +42,10 @@ class DefaultOAuth2AccessTokenIntrospectionConverterTest {
         }
 
         val result = converter.convertAccessToken(accessToken)
-        val expectedExpiration = LocalDateTime.of(2020, 2, 1, 22, 52)
-            .atZone(AuthenticationApplication.DEFAULT_TIME_ZONE.toZoneId()).toEpochSecond()
-        assertThat(result[AccessTokenIntrospectionKey.CLIENT_ID]).isEqualTo("clientId")
-        assertThat(result[AccessTokenIntrospectionKey.EXPIRATION]).isEqualTo(expectedExpiration)
+        assertThat(result[AccessTokenIntrospectionKey.CLIENT_ID]).isNull()
+        assertThat(result[AccessTokenIntrospectionKey.EXPIRATION]).isNull()
         assertThat(result[AccessTokenIntrospectionKey.SCOPE]).isEqualTo("scope-1 scope-2 scope-3")
-        assertThat(result[AccessTokenIntrospectionKey.USERNAME]).isEqualTo("username")
+        assertThat(result[AccessTokenIntrospectionKey.USERNAME]).isNull()
         assertThat(result[AccessTokenIntrospectionKey.ACTIVE].toString().toBoolean()).isFalse
     }
 }

@@ -34,7 +34,7 @@ class OAuth2ResourceEndpointSecurityConfiguration: WebSecurityConfigurerAdapter(
     @set:[Autowired]
     lateinit var securityMetadataLoadService: FilterInvocationSecurityMetadataSource
 
-    @set:[Autowired Qualifier("oAuth2ClientNotCheckedAccessTokenDetailsService")]
+    @set:[Autowired Qualifier("oAuth2ClientNotCheckingAccessTokenDetailsService")]
     lateinit var accessTokenService: OAuth2AccessTokenDetailsService
 
     @set:[Autowired Qualifier("clientCredentialsAuthenticationProvider")]
