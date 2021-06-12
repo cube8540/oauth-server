@@ -358,46 +358,6 @@
 						}
 					},
 					"response": []
-				},
-				{
-					"name": "OAuth2 User Info",
-					"request": {
-						"auth": {
-							"type": "basic",
-							"basic": [
-								{
-									"key": "password",
-									"value": "{{client_secret}}",
-									"type": "string"
-								},
-								{
-									"key": "username",
-									"value": "{{client_id}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "http://{{base_uri}}/oauth/user_info?token={{tokens}}",
-							"protocol": "http",
-							"host": [
-								"{{base_uri}}"
-							],
-							"path": [
-								"oauth",
-								"user_info"
-							],
-							"query": [
-								{
-									"key": "token",
-									"value": "{{tokens}}"
-								}
-							]
-						}
-					},
-					"response": []
 				}
 			]
 		},
