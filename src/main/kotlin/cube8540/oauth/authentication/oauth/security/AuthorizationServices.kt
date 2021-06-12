@@ -1,6 +1,5 @@
 package cube8540.oauth.authentication.oauth.security
 
-import org.springframework.security.core.userdetails.UserDetails
 import java.io.Serializable
 
 data class AuthorizationCode(val value: String): Serializable
@@ -19,8 +18,6 @@ interface OAuth2AuthorizationCodeGenerator {
 
 interface OAuth2AccessTokenDetailsService {
     fun readAccessToken(tokenValue: String): OAuth2AccessTokenDetails
-
-    fun readAccessTokenUser(tokenValue: String): UserDetails
 }
 
 interface OAuth2ClientDetailsService {

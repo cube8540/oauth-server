@@ -1,5 +1,6 @@
 package cube8540.oauth.authentication.oauth.security.endpoint
 
+import cube8540.oauth.authentication.error.ExceptionTranslator
 import cube8540.oauth.authentication.oauth.AccessTokenIntrospectionKey
 import cube8540.oauth.authentication.oauth.error.AbstractOAuth2AuthenticationException
 import cube8540.oauth.authentication.oauth.error.InvalidRequestException.Companion.invalidRequest
@@ -8,16 +9,13 @@ import cube8540.oauth.authentication.oauth.error.OAuth2ExceptionTranslator
 import cube8540.oauth.authentication.oauth.security.OAuth2AccessTokenDetailsService
 import cube8540.oauth.authentication.oauth.security.OAuth2ClientDetails
 import cube8540.oauth.authentication.oauth.security.provider.ClientCredentialsToken
-import cube8540.oauth.authentication.error.ExceptionTranslator
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.ResponseEntity
 import org.springframework.security.authentication.InsufficientAuthenticationException
-import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.oauth2.core.OAuth2Error
 import org.springframework.web.bind.annotation.ExceptionHandler
-import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
@@ -26,7 +24,7 @@ import java.util.*
 
 @RestController
 class OAuth2TokenIntrospectionEndpoint @Autowired constructor(
-    @Qualifier("defaultOAuth2AccessTokenDetailsService")
+    @Qualifier("oAuth2ClientNotCheckingAccessTokenDetailsService")
     private val service: OAuth2AccessTokenDetailsService
 ) {
 
@@ -48,19 +46,6 @@ class OAuth2TokenIntrospectionEndpoint @Autowired constructor(
 
         val accessToken = service.readAccessToken(token)
         return converter.convertAccessToken(accessToken)
-    }
-
-    @GetMapping(value = ["/oauth/user_info"])
-    fun userInfo(principal: Principal, @RequestParam(required = false) token: String?): UserDetails {
-        if (token == null) {
-            throw invalidRequest("access token is required")
-        }
-
-        if (principal !is ClientCredentialsToken) {
-            throw InsufficientAuthenticationException("this is no client authentication")
-        }
-
-        return service.readAccessTokenUser(token)
     }
 
     @ExceptionHandler(value = [OAuth2AccessTokenRegistrationException::class])
