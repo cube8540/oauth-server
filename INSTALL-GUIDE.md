@@ -1,6 +1,6 @@
 ## 환경
 Java 13 (+)  
-Gradle 6.0.1 (+)  
+Gradle 6.8.x (+)  
 Spring Boot 2.2.2  
 Spring Security 5.2.1  
 
@@ -91,5 +91,5 @@ $ gradlew bootRun --args='--spring.profiles.active=local'
 혹은 그레들의 bootJar 테스킹을 이용하여 빌드하고 서버를 시작합니다.
 ```
 $ gradle bootJar
-$ java -jar -Dspring.profiles.active=local build/libs/authentication-<version>.jar
+$ java -jar -Dspring.profiles.active=local build/libs/oauth-server-<version>.jar
 ```
