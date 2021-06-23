@@ -19,7 +19,7 @@ class DefaultSecurityMetadataLoadService(private val repository: SecuredResource
 
     @Transactional
     override fun loadSecurityMetadata(): Map<RequestMatcher, Collection<ConfigAttribute>> =
-        repository.findAll().map { requestMatcher(it) to authorityToConfigAttribute(it.authorities) }.toMap()
+        repository.findAll().associate { requestMatcher(it) to authorityToConfigAttribute(it.authorities) }
 
     private fun requestMatcher(securedResource: SecuredResource): RequestMatcher = when (securedResource.method) {
         ResourceMethod.ALL -> {
