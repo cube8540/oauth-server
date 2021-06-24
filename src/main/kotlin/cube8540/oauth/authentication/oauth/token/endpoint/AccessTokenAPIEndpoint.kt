@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import java.util.*
 
 @RestController
 @RequestMapping(value = ["/api/tokens"])
@@ -47,7 +46,7 @@ class AccessTokenAPIEndpoint @Autowired constructor(
     fun getUserAccessToken(@ApiParam(name = "username", required = true, example = "username1234") @RequestParam username: String):
             Map<String, List<AccessTokenDetailsWithClient>> {
         val tokens = service.getAuthorizeAccessTokens(username)
-        return Collections.singletonMap("tokens", tokens)
+        return mapOf("tokens" to tokens)
     }
 
     @DeleteMapping(value = ["/{accessToken}"])

@@ -6,12 +6,25 @@ import cube8540.oauth.authentication.resource.application.SecuredResourceEntry
 import cube8540.oauth.authentication.resource.application.SecuredResourceManagementService
 import cube8540.oauth.authentication.resource.application.SecuredResourceModifyRequest
 import cube8540.oauth.authentication.resource.application.SecuredResourceRegisterRequest
-import io.swagger.annotations.*
+import io.swagger.annotations.Api
+import io.swagger.annotations.ApiImplicitParam
+import io.swagger.annotations.ApiOperation
+import io.swagger.annotations.ApiParam
+import io.swagger.annotations.ApiResponse
+import io.swagger.annotations.ApiResponses
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.*
-import java.util.*
+import org.springframework.web.bind.annotation.DeleteMapping
+import org.springframework.web.bind.annotation.ExceptionHandler
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping(value = ["/api/secured-resources"])
@@ -26,7 +39,7 @@ class SecuredResourceManagementAPIEndpoint @Autowired constructor(private val se
     @ApiImplicitParam(value = "OAuth2 엑세스 토큰", name = "Authorization", required = true, paramType = "header", example = "Bearer xxxxxxxxxx")
     fun countResourceId(@ApiParam(value = "자원 아이디", required = true, example = "resource-id") @RequestParam resourceId: String): Map<String, Long> {
         val count = service.count(resourceId)
-        return Collections.singletonMap("count", count)
+        return mapOf("count" to count)
     }
 
     @GetMapping
@@ -38,7 +51,7 @@ class SecuredResourceManagementAPIEndpoint @Autowired constructor(private val se
     ])
     fun getResources(): Map<String, List<SecuredResourceEntry>> {
         val resources = service.getResources()
-        return Collections.singletonMap("resources", resources)
+        return mapOf("resources" to resources)
     }
 
     @PostMapping

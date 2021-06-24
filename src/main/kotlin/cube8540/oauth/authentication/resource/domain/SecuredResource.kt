@@ -1,8 +1,6 @@
 package cube8540.oauth.authentication.resource.domain
 
-import org.springframework.data.domain.AbstractAggregateRoot
 import java.net.URI
-import java.util.*
 import javax.persistence.AttributeOverride
 import javax.persistence.CollectionTable
 import javax.persistence.Column
@@ -14,6 +12,7 @@ import javax.persistence.EnumType
 import javax.persistence.Enumerated
 import javax.persistence.JoinColumn
 import javax.persistence.Table
+import org.springframework.data.domain.AbstractAggregateRoot
 
 @Entity
 @Table(name = "secured_resource")

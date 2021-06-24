@@ -1,8 +1,24 @@
 package cube8540.oauth.authentication.rememberme.application
 
-import cube8540.oauth.authentication.rememberme.domain.*
-import io.mockk.*
+import cube8540.oauth.authentication.rememberme.domain.RememberMePrincipal
+import cube8540.oauth.authentication.rememberme.domain.RememberMeToken
+import cube8540.oauth.authentication.rememberme.domain.RememberMeTokenGenerator
+import cube8540.oauth.authentication.rememberme.domain.RememberMeTokenRepository
+import cube8540.oauth.authentication.rememberme.domain.RememberMeTokenSeries
+import cube8540.oauth.authentication.rememberme.domain.RememberMeTokenValue
 import io.mockk.InternalPlatformDsl.toStr
+import io.mockk.Runs
+import io.mockk.every
+import io.mockk.just
+import io.mockk.mockk
+import io.mockk.slot
+import io.mockk.verify
+import io.mockk.verifyOrder
+import java.util.Base64
+import java.util.Optional
+import javax.servlet.http.Cookie
+import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpServletResponse
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.Nested
@@ -13,10 +29,6 @@ import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UserDetailsChecker
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.web.authentication.rememberme.CookieTheftException
-import java.util.*
-import javax.servlet.http.Cookie
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
 
 class TokenRepositoryBasedRememberMeServiceTest {
 

@@ -3,13 +3,22 @@ package cube8540.oauth.authentication.oauth.client.domain
 import cube8540.oauth.authentication.oauth.converter.AuthorizationGrantTypeConverter
 import cube8540.oauth.authentication.oauth.converter.RedirectUriConverter
 import cube8540.oauth.authentication.security.AuthorityCode
+import java.net.URI
+import java.time.Duration
+import javax.persistence.AttributeOverride
+import javax.persistence.CollectionTable
+import javax.persistence.Column
+import javax.persistence.Convert
+import javax.persistence.ElementCollection
+import javax.persistence.Embedded
+import javax.persistence.EmbeddedId
+import javax.persistence.Entity
+import javax.persistence.FetchType
+import javax.persistence.JoinColumn
+import javax.persistence.Table
 import org.springframework.data.domain.AbstractAggregateRoot
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.oauth2.core.AuthorizationGrantType
-import java.net.URI
-import java.time.Duration
-import java.util.*
-import javax.persistence.*
 
 @Entity
 @Table(name = "oauth2_clients")

@@ -10,12 +10,12 @@ import cube8540.oauth.authentication.oauth.token.domain.OAuth2AuthorizationCode
 import cube8540.oauth.authentication.oauth.token.domain.PrincipalUsername
 import cube8540.oauth.authentication.security.AuthorityCode
 import io.mockk.*
+import java.net.URI
+import java.util.Optional
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import java.net.URI
-import java.util.*
 
 class CompositionAuthorizationCodeServiceTest {
 
@@ -38,7 +38,7 @@ class CompositionAuthorizationCodeServiceTest {
             every { repository.findById("authorizationCode") } returns Optional.empty()
 
             val result = service.consume("authorizationCode")
-            assertThat(result.isEmpty).isTrue
+            assertThat(result).isNull()
             verify(exactly = 0) { repository.delete(any()) }
         }
 
@@ -49,8 +49,7 @@ class CompositionAuthorizationCodeServiceTest {
             every { repository.findById("authorizationCode") } returns Optional.of(authorizationCode)
 
             val result = service.consume("authorizationCode")
-            assertThat(result.isEmpty).isFalse
-            assertThat(result.get()).isEqualTo(authorizationCode)
+            assertThat(result).isEqualTo(authorizationCode)
             verify(exactly = 1) { repository.delete(authorizationCode) }
         }
     }

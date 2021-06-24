@@ -13,7 +13,6 @@ import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiParam
 import io.swagger.annotations.ApiResponse
 import io.swagger.annotations.ApiResponses
-import java.util.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.ResponseEntity
@@ -49,7 +48,7 @@ class ScopeManagementAPIEndpoint @Autowired constructor(
     ])
     fun scopes(): Map<String, Collection<AuthorityDetails>> {
         val scopes = scopeDetailsService.loadScopes()
-        return Collections.singletonMap("scopes", scopes)
+        return mapOf("scopes" to scopes)
     }
 
     @PostMapping
@@ -93,7 +92,7 @@ class ScopeManagementAPIEndpoint @Autowired constructor(
     fun countScopeId(@ApiParam(value = "스코프 아이디", required = true, example = "scope") @RequestParam id: String): Map<String, Long> {
         val count = managementService.countByScopeId(id)
 
-        return Collections.singletonMap("count", count)
+        return mapOf("count" to count)
     }
 
     @ExceptionHandler(value = [Exception::class])

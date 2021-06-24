@@ -5,7 +5,6 @@ import cube8540.oauth.authentication.resource.domain.SecuredResource
 import cube8540.oauth.authentication.security.AuthorityDetailsService
 import io.github.cube8540.validator.core.ValidationError
 import io.github.cube8540.validator.core.ValidationRule
-import java.util.*
 
 class SecuredResourceIdRule(private val property: String, private val message: String): ValidationRule<SecuredResource> {
 
@@ -54,7 +53,7 @@ class SecuredResourceAuthoritiesRule(
     constructor(scopeDetailsService: AuthorityDetailsService): this(DEFAULT_PROPERTY, DEFAULT_MESSAGE, scopeDetailsService)
 
     override fun isValid(target: SecuredResource): Boolean {
-        val targetScopes = target.authorities?.map(AccessibleAuthority::authority)?.toSet() ?: Collections.emptyList()
+        val targetScopes = target.authorities?.map(AccessibleAuthority::authority)?.toSet() ?: emptySet()
         if (targetScopes.isEmpty()) {
             return true
         }

@@ -4,7 +4,7 @@ import cube8540.oauth.authentication.rememberme.domain.RememberMeTokenGenerator
 import cube8540.oauth.authentication.rememberme.domain.RememberMeTokenSeries
 import cube8540.oauth.authentication.rememberme.domain.RememberMeTokenValue
 import java.security.SecureRandom
-import java.util.*
+import java.util.Base64
 
 class RandomRememberMeTokenGenerator(private val seriesLength: Int, private val tokenLength: Int): RememberMeTokenGenerator {
 

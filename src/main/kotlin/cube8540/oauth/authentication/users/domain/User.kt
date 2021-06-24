@@ -1,15 +1,6 @@
 package cube8540.oauth.authentication.users.domain
 
-import org.hibernate.annotations.CreationTimestamp
-import org.hibernate.annotations.DynamicInsert
-import org.hibernate.annotations.DynamicUpdate
-import org.hibernate.annotations.Fetch
-import org.hibernate.annotations.FetchMode
-import org.hibernate.annotations.UpdateTimestamp
-import org.springframework.data.domain.AbstractAggregateRoot
-import org.springframework.security.crypto.password.PasswordEncoder
 import java.time.LocalDateTime
-import java.util.*
 import javax.persistence.AttributeOverride
 import javax.persistence.AttributeOverrides
 import javax.persistence.CollectionTable
@@ -21,6 +12,14 @@ import javax.persistence.Entity
 import javax.persistence.JoinColumn
 import javax.persistence.Table
 import javax.persistence.UniqueConstraint
+import org.hibernate.annotations.CreationTimestamp
+import org.hibernate.annotations.DynamicInsert
+import org.hibernate.annotations.DynamicUpdate
+import org.hibernate.annotations.Fetch
+import org.hibernate.annotations.FetchMode
+import org.hibernate.annotations.UpdateTimestamp
+import org.springframework.data.domain.AbstractAggregateRoot
+import org.springframework.security.crypto.password.PasswordEncoder
 
 @Entity
 @Table(name = "user", uniqueConstraints = [

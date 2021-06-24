@@ -13,7 +13,6 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal
 import org.springframework.security.oauth2.server.resource.introspection.OAuth2IntrospectionClaimNames
 import org.springframework.security.oauth2.server.resource.introspection.OAuth2IntrospectionException
 import org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector
-import java.util.*
 
 class DefaultAccessTokenIntrospector(private val accessTokenService: OAuth2AccessTokenDetailsService, private val authenticationProvider: AuthenticationProvider): OpaqueTokenIntrospector {
 
@@ -59,13 +58,8 @@ class DefaultAccessTokenIntrospector(private val accessTokenService: OAuth2Acces
         return claims
     }
 
-    private fun extractAuthorities(accessToken: OAuth2AccessTokenDetails): Collection<GrantedAuthority> {
-        return if (accessToken.scopes != null && accessToken.scopes!!.isNotEmpty()) {
-            accessToken.scopes!!.map { SimpleGrantedAuthority(it) }
-        } else {
-            Collections.emptySet()
-        }
-    }
+    private fun extractAuthorities(accessToken: OAuth2AccessTokenDetails): Collection<GrantedAuthority> =
+        accessToken.scopes?.map { SimpleGrantedAuthority(it) } ?: emptySet()
 
     private fun clientAuthentication(clientId: String, clientSecret: String): Authentication {
         try {

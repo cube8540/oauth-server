@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.*
 
 @Service
 class DefaultUserApprovalAuthorityService @Autowired constructor(private val repository: UserRepository): UserApprovalAuthorityService {
@@ -20,7 +19,7 @@ class DefaultUserApprovalAuthorityService @Autowired constructor(private val rep
     @Transactional(readOnly = true)
     override fun getApprovalAuthorities(username: String): Collection<ApprovalAuthority> {
         return repository.findById(Username(username))
-            .map { it.approvalAuthorities ?: Collections.emptySet() }
+            .map { it.approvalAuthorities ?: mutableSetOf() }
             .orElseThrow { UserNotFoundException.instance("$username is not found") }
     }
 

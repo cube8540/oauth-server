@@ -5,11 +5,11 @@ import cube8540.oauth.authentication.users.domain.*
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verifyOrder
+import java.util.Optional
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import java.util.*
 
 class DefaultUserApprovalAuthorityServiceTest {
     private val repository: UserRepository = mockk()

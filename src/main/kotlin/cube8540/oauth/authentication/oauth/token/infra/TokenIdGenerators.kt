@@ -1,21 +1,20 @@
 package cube8540.oauth.authentication.oauth.token.infra
 
-import cube8540.oauth.authentication.security.AuthorityCode
 import cube8540.oauth.authentication.oauth.token.domain.AuthorizationCodeGenerator
 import cube8540.oauth.authentication.oauth.token.domain.OAuth2AuthorizedAccessToken
 import cube8540.oauth.authentication.oauth.token.domain.OAuth2ComposeUniqueKey
 import cube8540.oauth.authentication.oauth.token.domain.OAuth2ComposeUniqueKeyGenerator
 import cube8540.oauth.authentication.oauth.token.domain.OAuth2TokenId
 import cube8540.oauth.authentication.oauth.token.domain.OAuth2TokenIdGenerator
-import org.springframework.stereotype.Component
+import cube8540.oauth.authentication.security.AuthorityCode
 import java.math.BigInteger
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 import java.security.SecureRandom
-import java.util.*
-import java.util.stream.Collectors
-import kotlin.experimental.and
+import java.util.Random
+import java.util.UUID
+import org.springframework.stereotype.Component
 
 @Component
 class DefaultTokenIdGenerator: OAuth2TokenIdGenerator {

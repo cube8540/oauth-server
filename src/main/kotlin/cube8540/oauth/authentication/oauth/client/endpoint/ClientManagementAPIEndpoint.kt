@@ -2,7 +2,11 @@ package cube8540.oauth.authentication.oauth.client.endpoint
 
 import cube8540.oauth.authentication.error.ExceptionTranslator
 import cube8540.oauth.authentication.error.message.ErrorMessage
-import cube8540.oauth.authentication.oauth.client.application.*
+import cube8540.oauth.authentication.oauth.client.application.OAuth2ChangeSecretRequest
+import cube8540.oauth.authentication.oauth.client.application.OAuth2ClientEntry
+import cube8540.oauth.authentication.oauth.client.application.OAuth2ClientManagementService
+import cube8540.oauth.authentication.oauth.client.application.OAuth2ClientModifyRequest
+import cube8540.oauth.authentication.oauth.client.application.OAuth2ClientRegisterRequest
 import cube8540.oauth.authentication.oauth.security.OAuth2ClientDetails
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiImplicitParam
@@ -27,7 +31,6 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import java.util.*
 
 @RestController
 @RequestMapping(value = ["/api/clients"])
@@ -50,7 +53,7 @@ class ClientManagementAPIEndpoint @Autowired constructor(
     @ApiOperation(value = "클라이언트 아이디 갯수 검색", notes = "저장소에 저장된 클라이언트 아이디의 갯수를 검색 합니다. 주로 클라이언트 아이디 중복 검사에서 사용 합니다.")
     fun countClientId(@ApiParam(value = "클라이언트 아이디", required = true, example = "client-id") @RequestParam clientId: String): Map<String, Long> {
         val count = service.countClient(clientId)
-        return Collections.singletonMap("count", count)
+        return mapOf("count" to count)
     }
 
     @GetMapping
