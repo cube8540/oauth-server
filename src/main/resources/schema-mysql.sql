@@ -4,6 +4,7 @@ create table if not exists initialize (
 
 create table if not exists `user` (
     username varchar(32) not null primary key,
+    uid varchar(32) not null,
 	credentials_key_expiry_datetime datetime(6),
 	credentials_key varchar(32),
 	last_updated_at datetime(6) not null,
@@ -11,7 +12,9 @@ create table if not exists `user` (
 	password_credentials_key_expiry_datetime datetime(6),
 	password_credentials_key varchar(32),
 	is_credentials boolean not null default false,
-	registered_at datetime(6) not null
+	registered_at datetime(6) not null,
+
+    constraint user_uid_unique_key unique (uid)
 );
 
 create table if not exists oauth2_clients (
@@ -27,7 +30,8 @@ create table if not exists oauth2_clients (
 
 create table if not exists oauth2_scope (
 	scope_id varchar(32) not null primary key,
-	description varchar(64)
+	description varchar(64),
+    initialize boolean not null default false
 );
 
 create table if not exists oauth2_access_token (

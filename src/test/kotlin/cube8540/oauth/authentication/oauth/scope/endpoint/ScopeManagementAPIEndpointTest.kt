@@ -1,9 +1,6 @@
 package cube8540.oauth.authentication.oauth.scope.endpoint
 
-import cube8540.oauth.authentication.oauth.scope.application.OAuth2ScopeManagementService
-import cube8540.oauth.authentication.oauth.scope.application.OAuth2ScopeModifyRequest
-import cube8540.oauth.authentication.oauth.scope.application.OAuth2ScopeRegisterRequest
-import cube8540.oauth.authentication.security.AuthorityDetails
+import cube8540.oauth.authentication.oauth.scope.application.*
 import io.mockk.every
 import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat
@@ -12,15 +9,16 @@ import kotlin.random.Random
 
 class ScopeManagementAPIEndpointTest {
 
-    private val service: OAuth2ScopeManagementService = mockk()
+    private val scopeDetailsService: OAuth2ScopeDetailsService = mockk()
+    private val managementService: OAuth2ScopeManagementService = mockk()
 
-    private val endpoint = ScopeManagementAPIEndpoint(service)
+    private val endpoint = ScopeManagementAPIEndpoint(scopeDetailsService, managementService)
 
     @Test
     fun `lookup registered scopes`() {
-        val scopes: List<AuthorityDetails> = mockk()
+        val scopes: List<OAuth2ScopeDetails> = mockk()
 
-        every { service.loadScopes() } returns scopes
+        every { scopeDetailsService.loadScopes() } returns scopes
 
         val result = endpoint.scopes()
         assertThat(result["scopes"]).isEqualTo(scopes)
@@ -28,10 +26,10 @@ class ScopeManagementAPIEndpointTest {
 
     @Test
     fun `register new scope`() {
-        val details: AuthorityDetails = mockk()
+        val details: OAuth2ScopeDetails = mockk()
         val registerRequest = OAuth2ScopeRegisterRequest("scopeId", "desc")
 
-        every { service.registerNewScope(registerRequest) } returns details
+        every { managementService.registerNewScope(registerRequest) } returns details
 
         val result = endpoint.registerNewScope(registerRequest)
         assertThat(result).isEqualTo(details)
@@ -39,10 +37,10 @@ class ScopeManagementAPIEndpointTest {
 
     @Test
     fun `modify scope`() {
-        val details: AuthorityDetails = mockk()
+        val details: OAuth2ScopeDetails = mockk()
         val modifyRequest = OAuth2ScopeModifyRequest("desc")
 
-        every { service.modifyScope("scopeId", modifyRequest) } returns details
+        every { managementService.modifyScope("scopeId", modifyRequest) } returns details
 
         val result = endpoint.modifyScope("scopeId", modifyRequest)
         assertThat(result).isEqualTo(details)
@@ -50,9 +48,9 @@ class ScopeManagementAPIEndpointTest {
 
     @Test
     fun `remove scope`() {
-        val details: AuthorityDetails = mockk()
+        val details: OAuth2ScopeDetails = mockk()
 
-        every { service.removeScope("scopeId") } returns details
+        every { managementService.removeScope("scopeId") } returns details
 
         val result = endpoint.removeScope("scopeId")
         assertThat(result).isEqualTo(details)
@@ -62,7 +60,7 @@ class ScopeManagementAPIEndpointTest {
     fun `counting scope`() {
         val randomCount = Random.nextLong()
 
-        every { service.countByScopeId("scopeId") } returns randomCount
+        every { managementService.countByScopeId("scopeId") } returns randomCount
 
         val result = endpoint.countScopeId("scopeId")
         assertThat(result["count"]).isEqualTo(randomCount)

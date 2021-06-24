@@ -13,11 +13,11 @@ import org.junit.jupiter.api.Test
 import java.util.*
 import kotlin.random.Random
 
-class DefaultScopeDetailsServiceTest {
+class DefaultScopeManagementServiceTest {
 
     private val repository: OAuth2ScopeRepository = mockk(relaxed = true)
 
-    private val service = DefaultScopeManagementService(repository)
+    private val service = OAuth2ApplicationScopeService(repository)
 
     init {
         every { repository.save(any()) } returnsArgument 0
