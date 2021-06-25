@@ -1,19 +1,12 @@
 package cube8540.oauth.authentication.oauth.token.domain
 
 import cube8540.oauth.authentication.AuthenticationApplication
-import cube8540.oauth.authentication.security.AuthorityCode
 import cube8540.oauth.authentication.oauth.client.domain.OAuth2ClientId
 import cube8540.oauth.authentication.oauth.converter.AuthorizationGrantTypeConverter
-import org.hibernate.annotations.DynamicInsert
-import org.hibernate.annotations.DynamicUpdate
-import org.hibernate.annotations.Fetch
-import org.hibernate.annotations.FetchMode
-import org.springframework.data.domain.AbstractAggregateRoot
-import org.springframework.security.oauth2.core.AuthorizationGrantType
+import cube8540.oauth.authentication.security.AuthorityCode
 import java.time.Clock
 import java.time.Duration
 import java.time.LocalDateTime
-import java.util.*
 import javax.persistence.AttributeOverride
 import javax.persistence.CascadeType
 import javax.persistence.CollectionTable
@@ -31,6 +24,12 @@ import javax.persistence.OneToOne
 import javax.persistence.Table
 import javax.persistence.Transient
 import javax.persistence.UniqueConstraint
+import org.hibernate.annotations.DynamicInsert
+import org.hibernate.annotations.DynamicUpdate
+import org.hibernate.annotations.Fetch
+import org.hibernate.annotations.FetchMode
+import org.springframework.data.domain.AbstractAggregateRoot
+import org.springframework.security.oauth2.core.AuthorizationGrantType
 
 @Entity
 @Table(name = "oauth2_access_token", uniqueConstraints = [

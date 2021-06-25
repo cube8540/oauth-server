@@ -6,6 +6,9 @@ import cube8540.oauth.authentication.oauth.client.domain.*
 import cube8540.oauth.authentication.oauth.extractGrantType
 import cube8540.oauth.authentication.security.AuthorityCode
 import io.mockk.*
+import java.net.URI
+import java.time.Duration
+import java.util.Optional
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.AfterEach
@@ -13,9 +16,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.oauth2.core.AuthorizationGrantType
-import java.net.URI
-import java.time.Duration
-import java.util.*
 
 class DefaultOAuth2ClientManagementServiceTest {
 

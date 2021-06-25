@@ -5,14 +5,12 @@ import cube8540.oauth.authentication.users.domain.UserInvalidException
 import cube8540.oauth.authentication.users.domain.UserNotFoundException
 import cube8540.oauth.authentication.users.domain.UserRegisterException
 import cube8540.oauth.authentication.users.infra.UserExceptionTranslator
+import java.util.stream.Stream
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Nested
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.http.HttpStatus
-import java.util.*
-import java.util.stream.Stream
 
 class UserExceptionTranslatorTest {
 
@@ -51,7 +49,7 @@ class UserExceptionTranslatorTest {
     )
 
     fun userInvalidExceptions() = Stream.of(
-        Arguments.of(UserInvalidException.instance(Collections.emptyList()))
+        Arguments.of(UserInvalidException.instance(emptyList()))
     )
 
     fun userRegisterExceptions() = Stream.of(

@@ -6,11 +6,9 @@ import cube8540.oauth.authentication.oauth.client.domain.OAuth2Client
 import cube8540.oauth.authentication.oauth.client.domain.OAuth2ClientId
 import cube8540.oauth.authentication.oauth.client.domain.OAuth2ClientRepository
 import cube8540.oauth.authentication.security.AuthorityCode
-import cube8540.oauth.authentication.security.AuthorityDetails
 import cube8540.oauth.authentication.security.AuthorityDetailsService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.context.event.ApplicationReadyEvent
-import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 import org.springframework.context.ApplicationListener
 import org.springframework.core.annotation.Order
 import org.springframework.core.env.Environment
@@ -18,7 +16,6 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.oauth2.core.AuthorizationGrantType
 import org.springframework.stereotype.Service
 import java.net.URI
-import javax.servlet.ServletContext
 
 @Service
 @Order(2)

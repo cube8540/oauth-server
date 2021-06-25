@@ -58,6 +58,6 @@ class SecuredResourceAuthoritiesTest {
         assertThat(result).isTrue
     }
 
-    private inner class TestAuthorityDetails(override val code: String, override val description: String = "desc"): AuthorityDetails
+    private inner class TestAuthorityDetails(override val code: String): AuthorityDetails
 
 }

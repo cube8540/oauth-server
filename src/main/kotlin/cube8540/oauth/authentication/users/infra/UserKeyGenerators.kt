@@ -4,7 +4,7 @@ import cube8540.oauth.authentication.users.domain.Uid
 import cube8540.oauth.authentication.users.domain.UserCredentialsKey
 import cube8540.oauth.authentication.users.domain.UserCredentialsKeyGenerator
 import cube8540.oauth.authentication.users.domain.UserUidGenerator
-import java.util.*
+import java.util.UUID
 
 class DefaultUserCredentialsKeyGenerator: UserCredentialsKeyGenerator {
     override fun generateKey(): UserCredentialsKey {

@@ -1,16 +1,15 @@
 package cube8540.oauth.authentication.oauth.client.application
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import cube8540.oauth.authentication.security.AuthorityCode
 import cube8540.oauth.authentication.oauth.client.domain.OAuth2Client
 import cube8540.oauth.authentication.oauth.security.OAuth2ClientDetails
+import cube8540.oauth.authentication.security.AuthorityCode
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
-import org.springframework.security.core.CredentialsContainer
-import org.springframework.security.oauth2.core.AuthorizationGrantType
 import java.net.URI
 import java.time.Duration
-import java.util.*
+import org.springframework.security.core.CredentialsContainer
+import org.springframework.security.oauth2.core.AuthorizationGrantType
 
 @ApiModel(value = "OAuth2 클라이언트 엔트리")
 data class OAuth2ClientEntry(
@@ -65,7 +64,7 @@ data class DefaultOAuth2ClientDetails(
     companion object {
         @JvmStatic
         fun of(client: OAuth2Client): DefaultOAuth2ClientDetails {
-            val scopes = client.scopes?.map(AuthorityCode::value)?.toSet() ?: Collections.emptySet()
+            val scopes = client.scopes?.map(AuthorityCode::value)?.toSet() ?: emptySet()
             val tokenValidity = client.accessTokenValidity?.let(Duration::toSeconds) ?: 0L
             val refreshValidity = client.refreshTokenValidity?.let(Duration::toSeconds) ?: 0L
 

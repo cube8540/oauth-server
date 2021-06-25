@@ -5,10 +5,10 @@ import cube8540.oauth.authentication.oauth.client.domain.OAuth2ClientRepository
 import cube8540.oauth.authentication.oauth.error.OAuth2ClientRegistrationException
 import io.mockk.every
 import io.mockk.mockk
+import java.util.Optional
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.Test
-import java.util.*
 
 class DefaultOAuth2ClientDetailsServiceTest {
 

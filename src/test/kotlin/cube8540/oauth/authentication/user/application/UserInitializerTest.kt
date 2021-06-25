@@ -4,12 +4,16 @@ import cube8540.oauth.authentication.users.application.UserInitializer
 import cube8540.oauth.authentication.users.domain.User
 import cube8540.oauth.authentication.users.domain.UserRepository
 import cube8540.oauth.authentication.users.domain.Username
-import io.mockk.*
+import io.mockk.Called
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.slot
+import io.mockk.verify
+import java.util.Optional
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.core.env.Environment
 import org.springframework.security.crypto.password.PasswordEncoder
-import java.util.*
 
 class UserInitializerTest {
 

@@ -8,15 +8,22 @@ import cube8540.oauth.authentication.oauth.error.InvalidRequestException
 import cube8540.oauth.authentication.oauth.security.OAuth2ClientDetails
 import cube8540.oauth.authentication.oauth.security.OAuth2RequestValidator
 import cube8540.oauth.authentication.oauth.security.OAuth2TokenRequest
-import cube8540.oauth.authentication.oauth.token.domain.*
+import cube8540.oauth.authentication.oauth.token.domain.OAuth2AccessTokenRepository
+import cube8540.oauth.authentication.oauth.token.domain.OAuth2AuthorizationCode
+import cube8540.oauth.authentication.oauth.token.domain.OAuth2TokenId
+import cube8540.oauth.authentication.oauth.token.domain.OAuth2TokenIdGenerator
+import cube8540.oauth.authentication.oauth.token.domain.PrincipalUsername
 import cube8540.oauth.authentication.security.AuthorityCode
-import io.mockk.*
+import io.mockk.Runs
+import io.mockk.every
+import io.mockk.just
+import io.mockk.mockk
+import io.mockk.slot
+import java.net.URI
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.Test
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes
-import java.net.URI
-import java.util.*
 
 class AuthorizationCodeTokenGranterTest {
 
@@ -54,7 +61,7 @@ class AuthorizationCodeTokenGranterTest {
             every { code } returns "authorizationCode"
         }
 
-        every { consumer.consume("authorizationCode") } returns Optional.empty()
+        every { consumer.consume("authorizationCode") } returns null
 
         val thrown = catchThrowable { granter.createAccessToken(clientDetails, tokenRequest) }
         assertThat(thrown).isInstanceOf(InvalidRequestException::class.java)
@@ -74,7 +81,7 @@ class AuthorizationCodeTokenGranterTest {
             every { approvedScopes } returns setOf(AuthorityCode("code-1"), AuthorityCode("code-2"), AuthorityCode("code-3")).toMutableSet()
         }
 
-        every { consumer.consume("authorizationCode") } returns Optional.of(authorizationCode)
+        every { consumer.consume("authorizationCode") } returns authorizationCode
         every { validator.validateScopes(clientDetails, setOf("code-1", "code-2", "code-3")) } returns false
 
         val thrown = catchThrowable { granter.createAccessToken(clientDetails, tokenRequest) }
@@ -95,7 +102,7 @@ class AuthorizationCodeTokenGranterTest {
             every { approvedScopes } returns null
         }
 
-        every { consumer.consume("authorizationCode") } returns Optional.of(authorizationCode)
+        every { consumer.consume("authorizationCode") } returns authorizationCode
         every { validator.validateScopes(clientDetails, null) } returns true
 
         val thrown = catchThrowable { granter.createAccessToken(clientDetails, tokenRequest) }
@@ -116,7 +123,7 @@ class AuthorizationCodeTokenGranterTest {
             every { approvedScopes } returns emptySet<AuthorityCode>().toMutableSet()
         }
 
-        every { consumer.consume("authorizationCode") } returns Optional.of(authorizationCode)
+        every { consumer.consume("authorizationCode") } returns authorizationCode
         every { validator.validateScopes(clientDetails, emptySet()) } returns true
 
         val thrown = catchThrowable { granter.createAccessToken(clientDetails, tokenRequest) }
@@ -146,7 +153,7 @@ class AuthorizationCodeTokenGranterTest {
             every { approvedScopes } returns setOf(AuthorityCode("code-1"), AuthorityCode("code-2"), AuthorityCode("code-3")).toMutableSet()
         }
 
-        every { consumer.consume("authorizationCode") } returns Optional.of(authorizationCode)
+        every { consumer.consume("authorizationCode") } returns authorizationCode
         every { validator.validateScopes(clientDetails, setOf("code-1", "code-2", "code-3")) } returns true
         every { authorizationCode.validateWithAuthorizationRequest(capture(tokenRequestCaptor)) }
             .throws(UnitTestAuthenticationException("test error"))
@@ -185,7 +192,7 @@ class AuthorizationCodeTokenGranterTest {
         }
 
         granter.refreshTokenIdGenerator = null
-        every { consumer.consume("authorizationCode") } returns Optional.of(authorizationCode)
+        every { consumer.consume("authorizationCode") } returns authorizationCode
         every { validator.validateScopes(clientDetails, setOf("code-1", "code-2", "code-3")) } returns true
         every { authorizationCode.validateWithAuthorizationRequest(capture(tokenRequestCaptor)) } just Runs
 
@@ -227,7 +234,7 @@ class AuthorizationCodeTokenGranterTest {
         granter.refreshTokenIdGenerator = mockk {
             every { generateTokenValue() } returns OAuth2TokenId("refreshTokenId")
         }
-        every { consumer.consume("authorizationCode") } returns Optional.of(authorizationCode)
+        every { consumer.consume("authorizationCode") } returns authorizationCode
         every { validator.validateScopes(clientDetails, setOf("code-1", "code-2", "code-3")) } returns true
         every { authorizationCode.validateWithAuthorizationRequest(capture(tokenRequestCaptor)) } just Runs
 

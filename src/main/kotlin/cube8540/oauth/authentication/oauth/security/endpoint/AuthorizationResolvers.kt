@@ -6,7 +6,6 @@ import cube8540.oauth.authentication.oauth.error.UserDeniedAuthorizationExceptio
 import cube8540.oauth.authentication.oauth.security.AuthorizationRequest
 import cube8540.oauth.authentication.oauth.security.OAuth2ClientDetails
 import java.net.URI
-import java.util.*
 
 interface RedirectResolver {
     fun resolveRedirectURI(redirectURI: String?, clientDetails: OAuth2ClientDetails): URI
@@ -47,6 +46,6 @@ class DefaultScopeApprovalResolver: ScopeApprovalResolver {
         if (approvalScopes.isEmpty()) {
             throw UserDeniedAuthorizationException("User denied access")
         }
-        return Collections.unmodifiableSet(approvalScopes)
+        return approvalScopes.toSet()
     }
 }

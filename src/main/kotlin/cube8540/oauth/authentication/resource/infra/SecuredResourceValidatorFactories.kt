@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component
 @Component
 class DefaultSecuredResourceValidatorFactory: SecuredResourceValidatorFactory {
 
-    @set:[Autowired Qualifier("defaultScopeManagementService")]
+    @set:Autowired
     lateinit var scopeAuthorityDetailsService: AuthorityDetailsService
 
     override fun createValidator(resource: SecuredResource): Validator<SecuredResource> =

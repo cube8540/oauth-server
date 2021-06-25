@@ -10,7 +10,6 @@ import cube8540.oauth.authentication.oauth.token.infra.DefaultAuthorizationCodeG
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.*
 
 @Service
 class CompositionAuthorizationCodeService @Autowired constructor(
@@ -29,10 +28,10 @@ class CompositionAuthorizationCodeService @Autowired constructor(
     }
 
     @Transactional
-    override fun consume(code: String): Optional<OAuth2AuthorizationCode> {
+    override fun consume(code: String): OAuth2AuthorizationCode? {
         val authorizationCode = codeRepository.findById(code)
 
         authorizationCode.ifPresent(codeRepository::delete)
-        return authorizationCode
+        return authorizationCode.orElse(null)
     }
 }

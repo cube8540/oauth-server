@@ -1,10 +1,8 @@
 package cube8540.oauth.authentication.oauth.token.domain
 
-import com.nimbusds.jose.util.Base64URL
 import com.nimbusds.oauth2.sdk.pkce.CodeChallenge
 import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod
 import cube8540.oauth.authentication.AuthenticationApplication
-import cube8540.oauth.authentication.security.AuthorityCode
 import cube8540.oauth.authentication.oauth.client.domain.OAuth2ClientId
 import cube8540.oauth.authentication.oauth.converter.CodeChallengeConverter
 import cube8540.oauth.authentication.oauth.converter.CodeChallengeMethodConverter
@@ -14,12 +12,10 @@ import cube8540.oauth.authentication.oauth.error.InvalidGrantException.Companion
 import cube8540.oauth.authentication.oauth.error.RedirectMismatchException
 import cube8540.oauth.authentication.oauth.security.AuthorizationRequest
 import cube8540.oauth.authentication.oauth.security.OAuth2TokenRequest
-import org.springframework.data.domain.AbstractAggregateRoot
+import cube8540.oauth.authentication.security.AuthorityCode
 import java.net.URI
 import java.time.Clock
 import java.time.LocalDateTime
-import java.util.*
-import java.util.stream.Collectors
 import javax.persistence.AttributeOverride
 import javax.persistence.CollectionTable
 import javax.persistence.Column
@@ -31,6 +27,7 @@ import javax.persistence.Id
 import javax.persistence.JoinColumn
 import javax.persistence.Table
 import javax.persistence.Transient
+import org.springframework.data.domain.AbstractAggregateRoot
 
 @Entity
 @Table(name = "oauth2_authorization_code")
