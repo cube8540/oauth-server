@@ -30,9 +30,14 @@ out/
 
 ### VS Code ###
 .vscode/
+
 /gradlew
 /gradlew.bat
 /gradle/
-/src/main/resources/application-*.yml
+/src/main/resources/*
 !/src/main/resources/application-example.yml
-/logback.xml
+!/src/main/resources/static
+!/src/main/resources/templates
+!/src/main/resources/data-*.sql
+!/src/main/resources/schema-*.sql
+!/src/main/resources/lucy-xss-servlet-filter-rule.xml
