@@ -117,7 +117,7 @@ create table if not exists oauth2_token_scope (
 );
 
 create table if not exists secured_resource (
-	resource_id varchar(32) not null primary key,
+	resource_id varchar(128) not null primary key,
 	method varchar(32) not null,
 	resource varchar(128) not null
 );
