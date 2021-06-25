@@ -1,9 +1,9 @@
 package cube8540.oauth.authentication.oauth.security.provider
 
 import cube8540.oauth.authentication.oauth.security.OAuth2ClientDetails
+import java.util.Objects
 import org.springframework.security.authentication.AbstractAuthenticationToken
 import org.springframework.security.core.GrantedAuthority
-import java.util.*
 
 class ClientCredentialsToken(
     private val principal: Any?,

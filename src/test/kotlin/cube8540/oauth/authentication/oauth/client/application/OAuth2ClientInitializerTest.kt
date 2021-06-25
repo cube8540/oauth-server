@@ -15,7 +15,7 @@ import org.springframework.core.env.Environment
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.oauth2.core.AuthorizationGrantType
 import java.net.URI
-import java.util.*
+import java.util.Optional
 
 class OAuth2ClientInitializerTest {
 

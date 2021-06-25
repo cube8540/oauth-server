@@ -1,10 +1,10 @@
 package cube8540.oauth.authentication.oauth.client.domain
 
+import java.util.Optional
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.EntityGraph
 import org.springframework.data.jpa.repository.JpaRepository
-import java.util.*
 
 interface OAuth2ClientRepository: JpaRepository<OAuth2Client, OAuth2ClientId> {
 

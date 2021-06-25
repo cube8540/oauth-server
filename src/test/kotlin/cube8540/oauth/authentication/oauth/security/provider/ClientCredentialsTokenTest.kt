@@ -3,12 +3,12 @@ package cube8540.oauth.authentication.oauth.security.provider
 import cube8540.oauth.authentication.oauth.security.OAuth2ClientDetails
 import io.mockk.every
 import io.mockk.mockk
+import java.util.Collections
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.Test
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
-import java.util.*
 
 class ClientCredentialsTokenTest {
 

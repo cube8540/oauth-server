@@ -5,11 +5,11 @@ import cube8540.oauth.authentication.oauth.token.domain.OAuth2AccessTokenReposit
 import cube8540.oauth.authentication.oauth.token.domain.OAuth2TokenId
 import io.mockk.every
 import io.mockk.mockk
+import java.util.Optional
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import java.util.*
 
 class OAuth2ClientNotCheckedAccessTokenDetailsServiceTest {
 

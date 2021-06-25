@@ -9,12 +9,12 @@ import cube8540.oauth.authentication.oauth.token.domain.OAuth2TokenId
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import java.util.Optional
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.Test
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes
-import java.util.*
 
 class ClientAuthenticationBaseTokenRevokerTest {
 

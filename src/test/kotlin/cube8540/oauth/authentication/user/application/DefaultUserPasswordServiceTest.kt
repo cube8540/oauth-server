@@ -7,12 +7,12 @@ import cube8540.oauth.authentication.users.domain.*
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verifyOrder
+import java.util.Optional
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.security.crypto.password.PasswordEncoder
-import java.util.*
 
 class DefaultUserPasswordServiceTest {
 

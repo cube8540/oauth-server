@@ -1,13 +1,12 @@
 package cube8540.oauth.authentication.oauth.client.infra
 
+import cube8540.oauth.authentication.oauth.client.domain.OAuth2Client
+import cube8540.oauth.authentication.oauth.scope.application.OAuth2ScopeDetailsService
 import cube8540.oauth.authentication.security.AuthorityCode
 import cube8540.oauth.authentication.security.AuthorityDetails
-import cube8540.oauth.authentication.oauth.client.domain.OAuth2Client
-import cube8540.oauth.authentication.oauth.scope.application.OAuth2ScopeManagementService
 import io.github.cube8540.validator.core.ValidationError
 import io.github.cube8540.validator.core.ValidationRule
 import java.util.regex.Pattern
-import java.util.stream.Collectors
 
 class DefaultClientIdValidationRule(private val property: String, private val message: String): ValidationRule<OAuth2Client> {
 
@@ -74,7 +73,7 @@ class DefaultOAuth2ClientOwnerValidationRule(private val property: String, priva
 
 class ClientCanGrantedScopeValidationRule(private val property: String, private val message: String): ValidationRule<OAuth2Client> {
 
-    var scopeDetailsService: OAuth2ScopeManagementService? = null
+    lateinit var scopeDetailsService: OAuth2ScopeDetailsService
 
     companion object {
         const val DEFAULT_PROPERTY = "scope"
@@ -84,13 +83,10 @@ class ClientCanGrantedScopeValidationRule(private val property: String, private 
     constructor(): this(DEFAULT_PROPERTY, DEFAULT_MESSAGE)
 
     override fun isValid(target: OAuth2Client): Boolean {
-        if (scopeDetailsService == null) {
-            return false
-        }
         if (target.scopes == null || target.scopes!!.isEmpty()) {
             return false
         }
-        val accessibleScopes = scopeDetailsService!!.loadScopes()
+        val accessibleScopes = scopeDetailsService.loadScopes()
             .map(AuthorityDetails::code).map { AuthorityCode(it) }.toSet()
         return accessibleScopes.containsAll(target.scopes!!)
     }

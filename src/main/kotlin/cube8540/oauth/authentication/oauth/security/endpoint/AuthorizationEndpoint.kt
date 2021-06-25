@@ -1,6 +1,6 @@
 package cube8540.oauth.authentication.oauth.security.endpoint
 
-import cube8540.oauth.authentication.security.AuthorityDetailsService
+import cube8540.oauth.authentication.error.ExceptionTranslator
 import cube8540.oauth.authentication.oauth.AuthorizationRequestKey
 import cube8540.oauth.authentication.oauth.error.AbstractOAuth2AuthenticationException
 import cube8540.oauth.authentication.oauth.error.InvalidGrantException.Companion.invalidScope
@@ -9,19 +9,20 @@ import cube8540.oauth.authentication.oauth.error.OAuth2ClientRegistrationExcepti
 import cube8540.oauth.authentication.oauth.error.OAuth2ExceptionTranslator
 import cube8540.oauth.authentication.oauth.error.RedirectMismatchException
 import cube8540.oauth.authentication.oauth.security.AuthorizationRequest
+import cube8540.oauth.authentication.oauth.security.AutoApprovalScopeHandler
 import cube8540.oauth.authentication.oauth.security.DefaultAuthorizationRequest
 import cube8540.oauth.authentication.oauth.security.DefaultOAuth2RequestValidator
 import cube8540.oauth.authentication.oauth.security.OAuth2ClientDetails
 import cube8540.oauth.authentication.oauth.security.OAuth2ClientDetailsService
 import cube8540.oauth.authentication.oauth.security.OAuth2RequestValidator
+import cube8540.oauth.authentication.oauth.security.endpoint.AuthorizationEndpoint.Companion.AUTHORIZATION_AUTO_APPROVAL_SCOPES_NAME
 import cube8540.oauth.authentication.oauth.security.endpoint.AuthorizationEndpoint.Companion.AUTHORIZATION_REQUEST_ATTRIBUTE
 import cube8540.oauth.authentication.oauth.security.endpoint.AuthorizationEndpoint.Companion.ORIGINAL_AUTHORIZATION_REQUEST_ATTRIBUTE
-import cube8540.oauth.authentication.error.ExceptionTranslator
-import cube8540.oauth.authentication.oauth.security.AutoApprovalScopeHandler
-import cube8540.oauth.authentication.oauth.security.endpoint.AuthorizationEndpoint.Companion.AUTHORIZATION_AUTO_APPROVAL_SCOPES_NAME
+import cube8540.oauth.authentication.security.AuthorityDetailsService
+import java.net.URI
+import java.security.Principal
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.security.authentication.InsufficientAuthenticationException
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
@@ -38,17 +39,12 @@ import org.springframework.web.bind.support.SessionStatus
 import org.springframework.web.context.request.ServletWebRequest
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.servlet.view.RedirectView
-import java.net.URI
-import java.security.Principal
-import java.util.*
 
 @Controller
 @SessionAttributes(value = [AUTHORIZATION_REQUEST_ATTRIBUTE, ORIGINAL_AUTHORIZATION_REQUEST_ATTRIBUTE, AUTHORIZATION_AUTO_APPROVAL_SCOPES_NAME])
 class AuthorizationEndpoint @Autowired constructor(
-    @Qualifier("defaultOAuth2ClientDetailsService")
     private val clientDetailsService: OAuth2ClientDetailsService,
 
-    @Qualifier("defaultScopeManagementService")
     private val scopeDetailsService: AuthorityDetailsService,
 
     private val responseEnhancer: AuthorizationResponseEnhancer,
@@ -176,7 +172,7 @@ class AuthorizationEndpoint @Autowired constructor(
         webRequest.response!!.status = responseEntity.statusCode.value()
 
         if (e is OAuth2ClientRegistrationException || e is RedirectMismatchException) {
-            return ModelAndView(errorPage, Collections.singletonMap("error", responseEntity.body))
+            return ModelAndView(errorPage, mapOf("error" to responseEntity.body))
         }
 
         val authorizationRequest: AuthorizationRequest = getErrorAuthorizationRequest(webRequest)
@@ -187,7 +183,7 @@ class AuthorizationEndpoint @Autowired constructor(
             getUnsuccessfulRedirectView(redirectUri, responseEntity.body!!, authorizationRequest)
         } catch (exception: Exception) {
             logger.error("An exception occurred during error handling {} {}", exception.javaClass.name, exception.message)
-            ModelAndView(errorPage, Collections.singletonMap("error", responseEntity.body))
+            ModelAndView(errorPage, mapOf("error" to responseEntity.body))
         }
     }
 

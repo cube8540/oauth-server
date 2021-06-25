@@ -5,19 +5,23 @@ import cube8540.oauth.authentication.oauth.scope.domain.OAuth2ScopeRepository
 import cube8540.oauth.authentication.oauth.scope.domain.ScopeNotFoundException
 import cube8540.oauth.authentication.oauth.scope.domain.ScopeRegisterException
 import cube8540.oauth.authentication.security.AuthorityCode
-import io.mockk.*
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.slot
+import io.mockk.verify
+import io.mockk.verifyOrder
+import java.util.Optional
+import kotlin.random.Random
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import java.util.*
-import kotlin.random.Random
 
-class DefaultScopeDetailsServiceTest {
+class DefaultScopeManagementServiceTest {
 
     private val repository: OAuth2ScopeRepository = mockk(relaxed = true)
 
-    private val service = DefaultScopeManagementService(repository)
+    private val service = OAuth2ApplicationScopeService(repository)
 
     init {
         every { repository.save(any()) } returnsArgument 0

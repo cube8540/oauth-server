@@ -1,9 +1,11 @@
 package cube8540.oauth.authentication.oauth.security.provider
 
-import cube8540.oauth.authentication.oauth.security.OAuth2ClientDetailsService
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import java.util.Base64
+import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpServletResponse
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
@@ -13,11 +15,7 @@ import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.web.HttpRequestMethodNotSupportedException
-import java.util.*
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
 
 class ClientCredentialsEndpointFilterTest {
 

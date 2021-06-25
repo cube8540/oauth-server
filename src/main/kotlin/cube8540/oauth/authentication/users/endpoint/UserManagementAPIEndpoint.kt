@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import java.util.*
 
 @RestController
 @RequestMapping(value = ["/api/accounts"])
@@ -71,7 +70,7 @@ class UserManagementAPIEndpoint @Autowired constructor(
     )
     fun countAccountUsername(@ApiParam(value = "검색할 아이디", required = true, example = "username1234") @RequestParam username: String): Map<String, Long> {
         val count = service.countUser(username)
-        return Collections.singletonMap("count", count)
+        return mapOf("count" to count)
     }
 
     @ExceptionHandler(Exception::class)

@@ -17,7 +17,6 @@ import org.springframework.security.oauth2.core.AuthorizationGrantType
 import org.springframework.stereotype.Service
 import java.net.URI
 import java.time.LocalDateTime
-import java.util.*
 
 @Service
 class AuthorizationCodeTokenGranter @Autowired constructor(
@@ -31,13 +30,11 @@ class AuthorizationCodeTokenGranter @Autowired constructor(
 ): AbstractOAuth2TokenGranter(tokenIdGenerator, tokenRepository) {
 
     override fun createAccessToken(clientDetails: OAuth2ClientDetails, tokenRequest: OAuth2TokenRequest): OAuth2AuthorizedAccessToken {
-        if (tokenRequest.code == null) {
-            throw InvalidRequestException.invalidRequest("authorization code is required")
-        }
-        val authorizationCode = authorizationCodeConsumer.consume(tokenRequest.code!!)
-            .orElseThrow { InvalidRequestException.invalidRequest("authorization code not found") }
+        val requestToken = tokenRequest.code ?: throw InvalidRequestException.invalidRequest("authorization code is required")
+        val authorizationCode = authorizationCodeConsumer.consume(requestToken)
+            ?: throw InvalidRequestException.invalidRequest("authorization code not found")
 
-        val authorizationCodeScope: Set<String> = authorizationCode.approvedScopes?.map(AuthorityCode::value)?.toSet() ?: Collections.emptySet()
+        val authorizationCodeScope: Set<String> = authorizationCode.approvedScopes?.map(AuthorityCode::value)?.toSet() ?: emptySet()
         if (authorizationCodeScope.isEmpty()) {
             throw InvalidGrantException.invalidScope("cannot grant empty scope")
         }

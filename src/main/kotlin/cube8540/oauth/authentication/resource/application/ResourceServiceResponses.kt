@@ -5,7 +5,6 @@ import cube8540.oauth.authentication.resource.domain.SecuredResource
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 import java.net.URI
-import java.util.*
 
 @ApiModel(value = "보호 자원 엔트리")
 data class SecuredResourceEntry(
@@ -42,7 +41,7 @@ data class DefaultSecuredResourceDetails(
         fun of(resource: SecuredResource): DefaultSecuredResourceDetails {
             val authorities = resource.authorities
                 ?.map { AccessibleAuthorityValue(it.authority) }?.toList()
-                ?: Collections.emptyList()
+                ?: emptyList()
 
             return DefaultSecuredResourceDetails(resource.resourceId.value, resource.resource, resource.method, authorities)
         }

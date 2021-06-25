@@ -9,6 +9,7 @@ import cube8540.oauth.authentication.oauth.error.OAuth2ExceptionTranslator
 import cube8540.oauth.authentication.oauth.security.OAuth2AccessTokenDetailsService
 import cube8540.oauth.authentication.oauth.security.OAuth2ClientDetails
 import cube8540.oauth.authentication.oauth.security.provider.ClientCredentialsToken
+import java.security.Principal
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
@@ -19,8 +20,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import java.security.Principal
-import java.util.*
 
 @RestController
 class OAuth2TokenIntrospectionEndpoint @Autowired constructor(
@@ -63,6 +62,6 @@ class OAuth2TokenIntrospectionEndpoint @Autowired constructor(
     @ExceptionHandler(Exception::class)
     fun handleServerException(e: Exception): Map<String?, Boolean> {
         logger.error("Handling error {}, {}", e.javaClass, e.message)
-        return Collections.singletonMap(AccessTokenIntrospectionKey.ACTIVE, false)
+        return mapOf(AccessTokenIntrospectionKey.ACTIVE to false)
     }
 }

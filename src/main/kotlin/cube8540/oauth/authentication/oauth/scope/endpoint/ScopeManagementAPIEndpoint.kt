@@ -2,6 +2,7 @@ package cube8540.oauth.authentication.oauth.scope.endpoint
 
 import cube8540.oauth.authentication.error.ExceptionTranslator
 import cube8540.oauth.authentication.error.message.ErrorMessage
+import cube8540.oauth.authentication.oauth.scope.application.OAuth2ScopeDetailsService
 import cube8540.oauth.authentication.oauth.scope.application.OAuth2ScopeManagementService
 import cube8540.oauth.authentication.oauth.scope.application.OAuth2ScopeModifyRequest
 import cube8540.oauth.authentication.oauth.scope.application.OAuth2ScopeRegisterRequest
@@ -25,12 +26,13 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import java.util.*
 
 @RestController
 @RequestMapping(value = ["/api/scopes"])
 @Api(value = "OAuth2 스코프 관리 API 엔드 포인트")
 class ScopeManagementAPIEndpoint @Autowired constructor(
+    private val scopeDetailsService: OAuth2ScopeDetailsService,
+
     private val managementService: OAuth2ScopeManagementService
 ) {
     @set:[Autowired Qualifier("scopeAPIExceptionTranslator")]
@@ -45,8 +47,8 @@ class ScopeManagementAPIEndpoint @Autowired constructor(
         ApiResponse(code = 500, message = "서버에서 알 수 없는 에러가 발생 했습니다.")
     ])
     fun scopes(): Map<String, Collection<AuthorityDetails>> {
-        val scopes = managementService.loadScopes()
-        return Collections.singletonMap("scopes", scopes)
+        val scopes = scopeDetailsService.loadScopes()
+        return mapOf("scopes" to scopes)
     }
 
     @PostMapping
@@ -90,7 +92,7 @@ class ScopeManagementAPIEndpoint @Autowired constructor(
     fun countScopeId(@ApiParam(value = "스코프 아이디", required = true, example = "scope") @RequestParam id: String): Map<String, Long> {
         val count = managementService.countByScopeId(id)
 
-        return Collections.singletonMap("count", count)
+        return mapOf("count" to count)
     }
 
     @ExceptionHandler(value = [Exception::class])

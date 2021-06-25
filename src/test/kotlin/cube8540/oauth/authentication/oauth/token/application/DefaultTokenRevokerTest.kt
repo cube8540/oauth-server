@@ -7,10 +7,10 @@ import cube8540.oauth.authentication.oauth.token.domain.TokenNotFoundException
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import java.util.Optional
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.Test
-import java.util.*
 
 class DefaultTokenRevokerTest {
 

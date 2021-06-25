@@ -4,15 +4,29 @@ import cube8540.oauth.authentication.UnitTestValidationException
 import cube8540.oauth.authentication.error.message.ErrorCodes
 import cube8540.oauth.authentication.users.application.DefaultUserManagementService
 import cube8540.oauth.authentication.users.application.UserRegisterRequest
-import cube8540.oauth.authentication.users.domain.*
-import io.mockk.*
+import cube8540.oauth.authentication.users.domain.Uid
+import cube8540.oauth.authentication.users.domain.User
+import cube8540.oauth.authentication.users.domain.UserCredentialsKey
+import cube8540.oauth.authentication.users.domain.UserCredentialsKeyGenerator
+import cube8540.oauth.authentication.users.domain.UserNotFoundException
+import cube8540.oauth.authentication.users.domain.UserRegisterException
+import cube8540.oauth.authentication.users.domain.UserRepository
+import cube8540.oauth.authentication.users.domain.UserUidGenerator
+import cube8540.oauth.authentication.users.domain.UserValidatorFactory
+import cube8540.oauth.authentication.users.domain.Username
+import io.mockk.Runs
+import io.mockk.every
+import io.mockk.just
+import io.mockk.mockk
+import io.mockk.slot
+import io.mockk.verify
+import java.util.Optional
+import kotlin.random.Random
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.security.crypto.password.PasswordEncoder
-import java.util.*
-import kotlin.random.Random
 
 class DefaultUserManagementServiceTest {
     private val repository: UserRepository = mockk(relaxed = true)

@@ -4,12 +4,11 @@ import cube8540.oauth.authentication.oauth.security.SecurityUserDetails
 import cube8540.oauth.authentication.users.domain.User
 import org.springframework.security.core.CredentialsContainer
 import org.springframework.security.core.GrantedAuthority
-import java.util.*
 
 class SecurityUser(
     private val username: String,
     private var password: String?,
-    private val authorities: MutableCollection<out GrantedAuthority> = Collections.emptyList(),
+    private val authorities: MutableCollection<out GrantedAuthority> = mutableListOf(),
     private val accountNonExpired: Boolean = true,
     private val accountNonLocked: Boolean = true,
     private val credentialsNonExpired: Boolean = true,

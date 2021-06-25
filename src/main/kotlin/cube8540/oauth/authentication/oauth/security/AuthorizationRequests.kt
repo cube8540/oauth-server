@@ -6,11 +6,10 @@ import com.nimbusds.oauth2.sdk.pkce.CodeVerifier
 import cube8540.oauth.authentication.oauth.AuthorizationRequestKey
 import cube8540.oauth.authentication.oauth.TokenRequestKey
 import cube8540.oauth.authentication.oauth.extractScopes
-import org.springframework.security.oauth2.core.AuthorizationGrantType
-import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationResponseType
 import java.net.URI
 import java.security.Principal
-import java.util.*
+import org.springframework.security.oauth2.core.AuthorizationGrantType
+import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationResponseType
 
 interface AuthorizationRequest {
     val clientId: String?

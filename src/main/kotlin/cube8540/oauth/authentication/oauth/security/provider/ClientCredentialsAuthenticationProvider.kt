@@ -7,7 +7,6 @@ import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.authentication.InternalAuthenticationServiceException
 import org.springframework.security.core.Authentication
 import org.springframework.security.crypto.password.PasswordEncoder
-import java.util.*
 
 class ClientCredentialsAuthenticationProvider(private val service: OAuth2ClientDetailsService, private val encoder: PasswordEncoder): AuthenticationProvider {
 
@@ -24,7 +23,7 @@ class ClientCredentialsAuthenticationProvider(private val service: OAuth2ClientD
                 throw BadCredentialsException("Secret does not match stored value")
             }
 
-            return ClientCredentialsToken(client, client.clientSecret, Collections.emptyList())
+            return ClientCredentialsToken(client, client.clientSecret, emptyList())
         } catch (e: OAuth2ClientRegistrationException) {
             throw BadCredentialsException(e.message)
         } catch (e: Exception) {
