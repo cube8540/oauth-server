@@ -61,7 +61,7 @@ class AuthorizationEndpoint @Autowired constructor(
 
         const val DEFAULT_FORWARD_PREFIX = "forward:"
 
-        const val DEFAULT_ERROR_PAGE = "/oauth/error"
+        const val DEFAULT_ERROR_PAGE = "oauth/error"
         const val DEFAULT_APPROVAL_PAGE = "$DEFAULT_FORWARD_PREFIX/oauth/approval"
     }
 
