@@ -9,7 +9,6 @@ import org.hibernate.exception.LockAcquisitionException
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.retry.annotation.Retryable
 import org.springframework.security.oauth2.core.AuthorizationGrantType
-import org.springframework.transaction.annotation.Isolation
 import org.springframework.transaction.annotation.Transactional
 
 open class CompositeOAuth2AccessTokenGranter: OAuth2AccessTokenGranter {
@@ -17,7 +16,7 @@ open class CompositeOAuth2AccessTokenGranter: OAuth2AccessTokenGranter {
     private val tokenGranterMap: MutableMap<AuthorizationGrantType, OAuth2AccessTokenGranter> = HashMap()
 
     @Retryable(value = [LockAcquisitionException::class, DuplicateKeyException::class])
-    @Transactional(isolation = Isolation.SERIALIZABLE, noRollbackFor = [InvalidGrantException::class])
+    @Transactional(noRollbackFor = [InvalidGrantException::class])
     override fun grant(clientDetails: OAuth2ClientDetails, tokenRequest: OAuth2TokenRequest): OAuth2AccessTokenDetails {
         val granter = tokenGranterMap[tokenRequest.grantType] ?: throw InvalidGrantException.unsupportedGrantType("unsupported grant type")
         return granter.grant(clientDetails, tokenRequest)
