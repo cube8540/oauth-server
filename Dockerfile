@@ -28,7 +28,7 @@ ENV AUTH_VERSION=${V_VERSION}
 ENV AUTH_PROFILE=${V_PROFILE}
 ENV AUTH_LOG_VOLUME=${V_AUTH_LOG_VOLUME}
 
-ADD oauth-server-$AUTH_VERSION.jar /lib/oauth-server/oauth-server.jar
+ADD ./build/libs/oauth-server-$AUTH_VERSION.jar /lib/oauth-server/oauth-server.jar
 
 VOLUME ["$AUTH_LOG_VOLUME"]
 ENTRYPOINT java -jar -Dspring.profiles.active=$AUTH_PROFILE /lib/oauth-server/oauth-server.jar
