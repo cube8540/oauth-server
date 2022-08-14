@@ -109,3 +109,9 @@ dependencies {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
     }
 }
+
+task("printVersion") {
+    doLast {
+        print(project.version)
+    }
+}
