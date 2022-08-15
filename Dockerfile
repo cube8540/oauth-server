@@ -13,9 +13,6 @@ RUN unzip gradle-7.1-bin.zip -d /lib
 ENV JAVA_HOME /lib/jdk-16.0.1
 ENV GRADLE_HOME /lib/gradle-7.1
 
-ENV AGENT_VERSION '2.4.1'
-
-ENV AGENT_PATH /lib/pinpoint-agent-2.4.1
 ENV PATH $JAVA_HOME/bin:$PATH
 ENV PATH $GRADLE_HOME/bin:$PATH
 
