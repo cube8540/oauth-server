@@ -24,6 +24,8 @@ RUN mkdir /var/log/oauth
 RUN mkdir /var/log/oauth/auth
 RUN mkdir /var/log/oauth/auth/root
 RUN mkdir /var/log/oauth/auth/error
+RUN mv /var/lib/pinpoint-agent-2.4.1 /var/lib/pinpoint-agent
+RUN mv /var/lib/pinpoint-agent-2.4.1/pinpoint-bootstrap-2.4.1.jar /var/lib/pinpoint-agent/pinpoint-bootstrap.jar
 
 ARG V_VERSION
 ARG V_PROFILE
