@@ -16,6 +16,9 @@ ENV GRADLE_HOME /lib/gradle-7.1
 ENV PATH $JAVA_HOME/bin:$PATH
 ENV PATH $GRADLE_HOME/bin:$PATH
 
+RUN mv /lib/pinpoint-agent-2.4.1 /lib/pinpoint-agent
+RUN mv /lib/pinpoint-agent/pinpoint-bootstrap-2.4.1.jar /lib/pinpoint-agent/pinpoint-bootstrap.jar
+
 RUN mkdir /lib/oauth-server
 RUN mkdir /var/log/oauth
 RUN mkdir /var/log/oauth/auth
