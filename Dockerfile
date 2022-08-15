@@ -26,12 +26,9 @@ RUN mkdir /var/log/oauth/auth/root
 RUN mkdir /var/log/oauth/auth/error
 
 ARG V_VERSION
-ARG V_PROFILE
-
 ARG V_AUTH_LOG_VOLUME=/var/log/oauth/auth
 
 ENV AUTH_VERSION=${V_VERSION}
-ENV AUTH_PROFILE=${V_PROFILE}
 ENV AUTH_LOG_VOLUME=${V_AUTH_LOG_VOLUME}
 
 ADD ./build/libs/oauth-server-$AUTH_VERSION.jar /lib/oauth-server/oauth-server.jar

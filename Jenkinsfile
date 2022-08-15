@@ -3,8 +3,8 @@ pipeline {
     stages {
         stage('Setup profile') {
             steps {
-                sh 'cp ${CONFIG_LOCATION}/application-${ACTIVE_PROFILE}.yml ./src/main/resources/application.yml'
-                sh 'cp ${CONFIG_LOCATION}/logback-${ACTIVE_PROFILE}.xml ./src/main/resources/logback.xml'
+                sh 'cp ${CONFIG_LOCATION}/application-*.yml ./src/main/resources'
+                sh 'cp ${CONFIG_LOCATION}/logback-*.xml ./src/main/resources'
             }
         }
         stage('Gradle build') {
@@ -19,7 +19,7 @@ pipeline {
             steps {
                 script {
                     echo "buildVersion=${buildVersion}"
-                    app = docker.build("oauth-server:${buildVersion}", "-t oauth-server:latest --build-arg V_VERSION=${buildVersion} --build-arg V_PROFILE=$ACTIVE_PROFILE .")
+                    app = docker.build("oauth-server:${buildVersion}", "-t oauth-server:latest --build-arg V_VERSION=${buildVersion} .")
                 }
             }
         }
