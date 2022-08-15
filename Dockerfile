@@ -19,13 +19,14 @@ ENV AGENT_PATH /lib/pinpoint-agent-2.4.1
 ENV PATH $JAVA_HOME/bin:$PATH
 ENV PATH $GRADLE_HOME/bin:$PATH
 
+RUN mv /lib/pinpoint-agent-2.4.1 /var/lib/pinpoint-agent
+RUN mv /lib/pinpoint-agent-2.4.1/pinpoint-bootstrap-2.4.1.jar /var/lib/pinpoint-agent/pinpoint-bootstrap.jar
+
 RUN mkdir /lib/oauth-server
 RUN mkdir /var/log/oauth
 RUN mkdir /var/log/oauth/auth
 RUN mkdir /var/log/oauth/auth/root
 RUN mkdir /var/log/oauth/auth/error
-RUN mv /var/lib/pinpoint-agent-2.4.1 /var/lib/pinpoint-agent
-RUN mv /var/lib/pinpoint-agent-2.4.1/pinpoint-bootstrap-2.4.1.jar /var/lib/pinpoint-agent/pinpoint-bootstrap.jar
 
 ARG V_VERSION
 ARG V_PROFILE
