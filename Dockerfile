@@ -15,7 +15,7 @@ ENV GRADLE_HOME /lib/gradle-7.1
 
 ENV AGENT_VERSION '2.4.1'
 
-ENV AGENT_PATH /lib/pinpoint-agent-2.4.1/bin
+ENV AGENT_PATH /lib/pinpoint-agent-2.4.1
 ENV PATH $JAVA_HOME/bin:$PATH
 ENV PATH $GRADLE_HOME/bin:$PATH
 
